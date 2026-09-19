@@ -1,30 +1,48 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:pico/main.dart';
+import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('PicoApp smoke test - boots and displays bottom nav shell',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const ProviderScope(child: PicoApp()));
+    await tester.pumpAndSettle();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Verify bottom nav bar is present with its 4 tabs
+    final navBar = find.byType(PicoBottomNavBar);
+    expect(navBar, findsOneWidget);
+    expect(find.descendant(of: navBar, matching: find.text('Home')), findsOneWidget);
+    expect(find.descendant(of: navBar, matching: find.text('Matches')), findsOneWidget);
+    expect(find.descendant(of: navBar, matching: find.text('Tournaments')), findsOneWidget);
+    expect(find.descendant(of: navBar, matching: find.text('Profile')), findsOneWidget);
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  testWidgets('PicoApp tab navigation - switches branches via bottom nav bar',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const ProviderScope(child: PicoApp()));
+    await tester.pumpAndSettle();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    final navBar = find.byType(PicoBottomNavBar);
+
+    // Tap Matches tab
+    await tester.tap(find.descendant(of: navBar, matching: find.text('Matches')));
+    await tester.pumpAndSettle();
+    expect(find.text('Round 32 Predictions · Sunday'), findsOneWidget);
+
+    // Tap Tournaments tab
+    await tester.tap(find.descendant(of: navBar, matching: find.text('Tournaments')));
+    await tester.pumpAndSettle();
+    expect(find.text('Champions League Masters'), findsOneWidget);
+
+    // Tap Profile tab
+    await tester.tap(find.descendant(of: navBar, matching: find.text('Profile')));
+    await tester.pumpAndSettle();
+    expect(find.text('Alex Pereira'), findsOneWidget);
+
+    // Tap Home tab back
+    await tester.tap(find.descendant(of: navBar, matching: find.text('Home')));
+    await tester.pumpAndSettle();
+    expect(find.text('La Liga Season Hub'), findsOneWidget);
   });
 }

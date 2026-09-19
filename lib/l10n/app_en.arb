@@ -1,0 +1,37 @@
+{
+  "@@locale": "en",
+  "appTitle": "Pico",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "predictButton": "Predict",
+  "@predictButton": {
+    "description": "Label for the predict CTA button"
+  },
+  "navHome": "Home",
+  "@navHome": {
+    "description": "Bottom navigation Home tab label"
+  },
+  "navMatches": "Matches",
+  "@navMatches": {
+    "description": "Bottom navigation Matches tab label"
+  },
+  "navTournaments": "Tournaments",
+  "@navTournaments": {
+    "description": "Bottom navigation Tournaments tab label"
+  },
+  "navProfile": "Profile",
+  "@navProfile": {
+    "description": "Bottom navigation Profile tab label"
+  },
+  "predictBy": "Predict by {time}",
+  "@predictBy": {
+    "description": "Kickoff deadline hint",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "19:50"
+      }
+    }
+  }
+}

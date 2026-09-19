@@ -1,0 +1,10 @@
+{
+  "@@locale": "es",
+  "appTitle": "Pico",
+  "predictButton": "Predecir",
+  "navHome": "Inicio",
+  "navMatches": "Partidos",
+  "navTournaments": "Torneos",
+  "navProfile": "Perfil",
+  "predictBy": "Predecir antes de {time}"
+}

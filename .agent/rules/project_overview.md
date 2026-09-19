@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # PICO V1 - FUNCTIONAL SPECIFICATION
 
 **Version:** 0.1 - Build Blueprint
@@ -8,9 +12,7 @@
 **Football data:** BeSoccer API
 **Monetization:** RevenueCat + In app ads
 **Primary objective:** Ship a real, playable football prediction game and generate measurable social/referral growth within the 14-day Shipaton window.
-
 ---
-
 ## 1. PRODUCT NORTH STAR
 
 ### Core promise
@@ -28,7 +30,6 @@ Predict real football matches, compete in tournaments, and beat your friends wit
 `RETURN FOR NEXT MATCH`
 
 Everything in V1 should support this loop.
-
 ---
 
 ## 2. APP INFORMATION ARCHITECTURE
