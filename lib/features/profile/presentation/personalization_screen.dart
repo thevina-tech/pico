@@ -180,7 +180,7 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                           const SizedBox(height: 16.0),
 
                           // Profile Info Note
-                          _buildInfoNote(),
+                          _buildInfoNote(l10n),
                           const SizedBox(height: 32.0),
                         ],
                       ),
@@ -449,18 +449,22 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              l10n?.topLeaguesTitle.toUpperCase() ?? 'TOP LEAGUES & CUPS',
-              style: const TextStyle(
-                fontFamily: 'Space Grotesk',
-                fontSize: 11.0,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFFFFDFA0),
-                letterSpacing: 0.6,
+            Expanded(
+              child: Text(
+                l10n?.topLeaguesTitle.toUpperCase() ?? 'TOP LEAGUES & CUPS',
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: 'Space Grotesk',
+                  fontSize: 11.0,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFFFFDFA0),
+                  letterSpacing: 0.6,
+                ),
               ),
             ),
+            const SizedBox(width: 8.0),
             Text(
-              '${state.selectedLeagueIds.length} selected',
+              '${state.selectedLeagueIds.length}/2 selected',
               style: const TextStyle(
                 fontFamily: 'Space Grotesk',
                 fontSize: 11.0,
@@ -477,11 +481,13 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
           runSpacing: 8.0,
           children: _availableLeagues.map((league) {
             final isSelected = state.selectedLeagueIds.contains(league['id']);
+            final isCapped = !isSelected && state.selectedLeagueIds.length >= 2;
             return _buildLeagueChip(
               id: league['id']!,
               name: league['name']!,
               flag: league['flag']!,
               isSelected: isSelected,
+              isCapped: isCapped,
               onTap: () {
                 ref
                     .read(personalizationControllerProvider.notifier)
@@ -499,54 +505,58 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
     required String name,
     required String flag,
     required bool isSelected,
+    required bool isCapped,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 7.0),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFFAF9F4) : const Color(0xCC132C20),
-          borderRadius: BorderRadius.circular(999.0),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF00E297) : const Color(0xFF234D38),
-            width: isSelected ? 2.0 : 1.0,
+    return Opacity(
+      opacity: isCapped ? 0.45 : 1.0,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 7.0),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFFFAF9F4) : const Color(0xCC132C20),
+            borderRadius: BorderRadius.circular(999.0),
+            border: Border.all(
+              color: isSelected ? const Color(0xFF00E297) : const Color(0xFF234D38),
+              width: isSelected ? 2.0 : 1.0,
+            ),
+            boxShadow: isSelected
+                ? const [
+                    BoxShadow(
+                      color: Color(0xFF054028),
+                      offset: Offset(0, 3),
+                    ),
+                  ]
+                : null,
           ),
-          boxShadow: isSelected
-              ? const [
-                  BoxShadow(
-                    color: Color(0xFF054028),
-                    offset: Offset(0, 3),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(flag, style: const TextStyle(fontSize: 14.0)),
-            const SizedBox(width: 6.0),
-            Text(
-              name,
-              style: TextStyle(
-                fontFamily: 'Plus Jakarta Sans',
-                fontSize: 13.0,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected
-                    ? const Color(0xFF1B1C19)
-                    : const Color(0xFFC7D9CE),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(flag, style: const TextStyle(fontSize: 14.0)),
+              const SizedBox(width: 6.0),
+              Text(
+                name,
+                style: TextStyle(
+                  fontFamily: 'Plus Jakarta Sans',
+                  fontSize: 13.0,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected
+                      ? const Color(0xFF1B1C19)
+                      : const Color(0xFFC7D9CE),
+                ),
               ),
-            ),
-            const SizedBox(width: 6.0),
-            Icon(
-              isSelected ? Icons.check_circle : Icons.add_circle_outline,
-              size: 16.0,
-              color: isSelected
-                  ? const Color(0xFF006A3A)
-                  : const Color(0xFF4D7360),
-            ),
-          ],
+              const SizedBox(width: 6.0),
+              Icon(
+                isSelected ? Icons.check_circle : Icons.add_circle_outline,
+                size: 16.0,
+                color: isSelected
+                    ? const Color(0xFF006A3A)
+                    : const Color(0xFF4D7360),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -560,18 +570,22 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              l10n?.clubsFollowTitle.toUpperCase() ?? 'CLUBS YOU FOLLOW',
-              style: const TextStyle(
-                fontFamily: 'Space Grotesk',
-                fontSize: 11.0,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFFFFDFA0),
-                letterSpacing: 0.6,
+            Expanded(
+              child: Text(
+                l10n?.clubsFollowTitle.toUpperCase() ?? 'CLUBS YOU FOLLOW',
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: 'Space Grotesk',
+                  fontSize: 11.0,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFFFFDFA0),
+                  letterSpacing: 0.6,
+                ),
               ),
             ),
+            const SizedBox(width: 8.0),
             Text(
-              '${state.selectedTeamIds.length} selected',
+              '${state.selectedTeamIds.length}/1 selected',
               style: const TextStyle(
                 fontFamily: 'Space Grotesk',
                 fontSize: 11.0,
@@ -733,18 +747,21 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
     );
   }
 
-  Widget _buildInfoNote() {
-    return const Row(
+  Widget _buildInfoNote(AppLocalizations? l10n) {
+    return Row(
       children: [
-        Icon(Icons.info_outline, size: 16.0, color: Color(0xFFFFDFA0)),
-        SizedBox(width: 8.0),
+        const Icon(Icons.info_outline, size: 16.0, color: Color(0xFFFFDFA0)),
+        const SizedBox(width: 8.0),
         Expanded(
           child: Text(
-            'You can change or add more clubs anytime in your profile.',
-            style: TextStyle(
+            l10n?.personalizationHelperNote ??
+                'You can change your favorite team and join more tournaments anytime.',
+            style: const TextStyle(
               fontFamily: 'Plus Jakarta Sans',
               fontSize: 12.0,
+              fontWeight: FontWeight.w500,
               color: Color(0xFF8BA699),
+              height: 1.3,
             ),
           ),
         ),

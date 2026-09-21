@@ -107,6 +107,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clubsFollowTitle => 'Clubs You Follow';
 
   @override
+  String get personalizationHelperNote =>
+      'You can change your favorite team and join more tournaments anytime.';
+
+  @override
   String get continueButton => 'Continue';
 
   @override

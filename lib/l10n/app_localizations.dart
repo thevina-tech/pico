@@ -278,6 +278,12 @@ abstract class AppLocalizations {
   /// **'Clubs You Follow'**
   String get clubsFollowTitle;
 
+  /// Informational helper text below selectors in personalization screen
+  ///
+  /// In en, this message translates to:
+  /// **'You can change your favorite team and join more tournaments anytime.'**
+  String get personalizationHelperNote;
+
   /// Primary continue action button label
   ///
   /// In en, this message translates to:

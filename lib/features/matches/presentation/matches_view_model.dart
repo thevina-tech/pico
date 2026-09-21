@@ -5,6 +5,8 @@ import 'package:pico/features/matches/data/match_repository.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
 
 
+import 'package:pico/features/tournaments/domain/tournament.dart';
+
 /// Presentation model representing a filter chip in the Matches screen.
 @immutable
 class MatchFilterChipData {
@@ -12,6 +14,8 @@ class MatchFilterChipData {
     required this.label,
     required this.competitionName,
     required this.count,
+    this.tournament,
+    this.competitionId,
     this.dotColor,
     this.isStar = false,
   });
@@ -19,6 +23,8 @@ class MatchFilterChipData {
   final String label;
   final String competitionName;
   final int count;
+  final Tournament? tournament;
+  final String? competitionId;
   final Color? dotColor;
   final bool isStar;
 }

@@ -130,6 +130,10 @@
   "@clubsFollowTitle": {
     "description": "Section header for clubs selection"
   },
+  "personalizationHelperNote": "You can change your favorite team and join more tournaments anytime.",
+  "@personalizationHelperNote": {
+    "description": "Informational helper text below selectors in personalization screen"
+  },
   "continueButton": "Continue",
   "@continueButton": {
     "description": "Primary continue action button label"

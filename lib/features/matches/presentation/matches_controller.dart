@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:pico/core/theme/pico_colors.dart';
-import 'package:pico/features/matches/data/match_repository.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
+import 'package:pico/features/tournaments/data/tournament_repository.dart';
+import 'package:pico/features/tournaments/domain/tournament.dart';
+import 'matches_feed_provider.dart';
 import 'matches_view_model.dart';
 
 part 'matches_controller.g.dart';
@@ -27,12 +29,31 @@ class MatchesState {
       return allMatches;
     }
     final selected = filters[selectedFilterIndex];
-    if (selected.competitionName == 'All') {
+    if (selected.competitionName == 'All' && selected.tournament == null) {
       return allMatches;
     }
-    return allMatches
-        .where((m) => m.competitionName == selected.competitionName)
-        .toList();
+    if (selected.tournament != null) {
+      return allMatches
+          .where((m) => matchBelongsToTournament(m, selected.tournament!))
+          .toList();
+    }
+    return allMatches.where((m) {
+      if (selected.competitionId != null && selected.competitionId!.isNotEmpty) {
+        if (m.competitionId == selected.competitionId) return true;
+        if (isSameCompetition(m.competitionId ?? '', selected.competitionId!)) {
+          return true;
+        }
+      }
+      if (m.competitionName == selected.competitionName) return true;
+      if (m.competitionId == selected.competitionName) return true;
+      final matchLower = m.competitionName.toLowerCase().trim();
+      final selLower = selected.competitionName.toLowerCase().trim();
+      if (matchLower.contains(selLower) || selLower.contains(matchLower)) {
+        return true;
+      }
+      return isSameCompetition(m.competitionId ?? '', selected.competitionName) ||
+          isSameCompetitionName(m.competitionName, selected.competitionName);
+    }).toList();
   }
 
   PicoMatch? get heroMatch {
@@ -66,14 +87,14 @@ class MatchesState {
 }
 
 /// Production-grade Riverpod controller managing match state and predictions.
+/// Dynamically updates sorting pills and matches based on the user's enrolled tournaments.
 @riverpod
 class MatchesController extends _$MatchesController {
   @override
   FutureOr<MatchesState> build() async {
-    final repository = ref.watch(matchRepositoryProvider);
-    final matches = await repository.getAllMatches();
-    final competitions = await repository.getCompetitions();
-    final filters = _buildFilters(competitions, matches);
+    final matches = await ref.watch(matchesFeedProvider.future);
+    final enrolled = await ref.watch(enrolledTournamentsProvider.future);
+    final filters = _buildFilters(enrolled, matches);
 
     return MatchesState(
       allMatches: matches,
@@ -100,7 +121,7 @@ class MatchesController extends _$MatchesController {
   }
 
   static List<MatchFilterChipData> _buildFilters(
-    List<String> competitions,
+    List<Tournament> enrolledTournaments,
     List<PicoMatch> matches,
   ) {
     final list = <MatchFilterChipData>[
@@ -111,14 +132,18 @@ class MatchesController extends _$MatchesController {
       ),
     ];
 
-    for (final comp in competitions) {
-      final count = matches.where((m) => m.competitionName == comp).length;
+    for (final tournament in enrolledTournaments) {
+      final count = matches
+          .where((m) => matchBelongsToTournament(m, tournament))
+          .length;
       list.add(
         MatchFilterChipData(
-          label: '$comp ($count)',
-          competitionName: comp,
+          label: '${tournament.name} ($count)',
+          competitionName: tournament.name,
           count: count,
-          dotColor: _resolveCompetitionColor(comp),
+          tournament: tournament,
+          competitionId: tournament.competitionId,
+          dotColor: _resolveCompetitionColor(tournament.name),
         ),
       );
     }
@@ -129,10 +154,11 @@ class MatchesController extends _$MatchesController {
     final lower = comp.toLowerCase();
     if (lower.contains('champions')) return const Color(0xFF818CF8);
     if (lower.contains('championship')) return const Color(0xFF38BDF8);
-    if (lower.contains('argentina')) return const Color(0xFF38BDF8);
-    if (lower.contains('chile')) return const Color(0xFFF87171);
-    if (lower.contains('colombia')) return const Color(0xFFFBBF24);
-    if (lower.contains('amistoso')) return const Color(0xFF34D399);
+    if (lower.contains('premier')) return const Color(0xFF38BDF8);
+    if (lower.contains('liga')) return const Color(0xFFFFD54F);
+    if (lower.contains('serie a')) return const Color(0xFF34D399);
+    if (lower.contains('bundesliga')) return const Color(0xFFF87171);
+    if (lower.contains('ligue 1')) return const Color(0xFF60A5FA);
     return PicoColors.primaryFixed;
   }
 }

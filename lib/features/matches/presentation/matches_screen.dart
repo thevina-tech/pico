@@ -241,7 +241,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 440.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // 1. Page Header (Always visible)
                   Padding(
@@ -418,9 +418,11 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
     if (filters.isEmpty) return const SizedBox.shrink();
 
     return SizedBox(
+      width: double.infinity,
       height: 38.0,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.hardEdge,
         itemCount: filters.length,
         separatorBuilder: (_, _) => const SizedBox(width: 8.0),
         itemBuilder: (context, index) {

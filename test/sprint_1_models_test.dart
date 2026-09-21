@@ -7,6 +7,8 @@ import 'package:pico/features/matches/domain/team.dart';
 import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
 import 'package:pico/features/predictions/domain/prediction.dart';
 import 'package:pico/features/profile/domain/user_profile.dart';
+import 'package:pico/features/tournaments/data/tournament_repository.dart';
+import 'package:pico/features/tournaments/domain/tournament.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -207,25 +209,47 @@ void main() {
 
   group('Sprint 1 - Riverpod Repository & MatchesFeed Provider', () {
     test(
-      'matchesFeedProvider returns list of matches asynchronously',
+      'matchesFeedProvider returns empty when not enrolled and filters by joined tournaments',
       () async {
-        final container = ProviderContainer(
+        // 1. Container without enrolled tournaments returns empty list
+        final emptyContainer = ProviderContainer(
           overrides: [
-            // Using MockMatchRepository as fallback implementation for tests
             matchRepositoryProvider.overrideWithValue(MockMatchRepository()),
+            enrolledTournamentsProvider.overrideWith((ref) async => const []),
           ],
         );
-        addTearDown(container.dispose);
+        addTearDown(emptyContainer.dispose);
 
-        // Initial read triggers build
-        final initial = container.read(matchesFeedProvider);
-        expect(initial, isA<AsyncValue<List<PicoMatch>>>());
+        final emptyMatches = await emptyContainer.read(matchesFeedProvider.future);
+        expect(emptyMatches, isEmpty);
 
-        // Wait for provider to resolve
-        final matches = await container.read(matchesFeedProvider.future);
+        // 2. Container with enrolled tournament returns ONLY matches for that tournament's competition
+        final enrolledContainer = ProviderContainer(
+          overrides: [
+            matchRepositoryProvider.overrideWithValue(MockMatchRepository()),
+            enrolledTournamentsProvider.overrideWith(
+              (ref) async => const [
+                Tournament(
+                  id: 'tourn_champions',
+                  name: 'Champions League',
+                  competitionId: '70393',
+                ),
+              ],
+            ),
+          ],
+        );
+        addTearDown(enrolledContainer.dispose);
+
+        final matches = await enrolledContainer.read(matchesFeedProvider.future);
         expect(matches, isNotEmpty);
-        expect(matches.length, greaterThanOrEqualTo(5));
-        expect(matches.first.homeTeamName, isNotEmpty);
+        expect(
+          matches.every(
+            (m) =>
+                m.competitionName.contains('Champions') ||
+                m.competitionId == '70393',
+          ),
+          isTrue,
+        );
       },
     );
 

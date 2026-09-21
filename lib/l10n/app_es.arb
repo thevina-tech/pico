@@ -30,6 +30,7 @@
   "usernameErrorTooShort": "El nombre debe tener al menos 3 caracteres",
   "topLeaguesTitle": "Ligas y Copas Principales",
   "clubsFollowTitle": "Clubes que Sigues",
+  "personalizationHelperNote": "Puedes cambiar tu equipo favorito y unirte a más torneos en cualquier momento.",
   "continueButton": "Continuar",
   "skipButton": "Omitir",
   "preferencesSyncHint": "Tus preferencias se sincronizan al instante en la Liga Pico",

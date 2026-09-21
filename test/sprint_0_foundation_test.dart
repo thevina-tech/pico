@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pico/features/matches/data/match_repository.dart';
 import 'package:pico/features/matches/presentation/matches_controller.dart';
+import 'package:pico/features/tournaments/data/tournament_repository.dart';
+import 'package:pico/features/tournaments/domain/tournament.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
 void main() {
@@ -76,7 +78,24 @@ void main() {
   group('Sprint 0 - Riverpod MatchesController', () {
     test('matchesControllerProvider loads matches and updates predictions',
         () async {
-      final container = ProviderContainer();
+      final container = ProviderContainer(
+        overrides: [
+          enrolledTournamentsProvider.overrideWith(
+            (ref) async => const [
+              Tournament(
+                id: 'tourn_championship',
+                name: 'Championship',
+                competitionId: '67799',
+              ),
+              Tournament(
+                id: 'tourn_champions',
+                name: 'Champions League',
+                competitionId: '70393',
+              ),
+            ],
+          ),
+        ],
+      );
       addTearDown(container.dispose);
 
       // Verify repository provider

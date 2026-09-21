@@ -112,6 +112,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get clubsFollowTitle => 'Clubes que Sigues';
 
   @override
+  String get personalizationHelperNote =>
+      'Puedes cambiar tu equipo favorito y unirte a más torneos en cualquier momento.';
+
+  @override
   String get continueButton => 'Continuar';
 
   @override

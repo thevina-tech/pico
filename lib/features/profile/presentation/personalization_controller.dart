@@ -4,8 +4,11 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 import 'package:pico/core/logging/app_logger.dart';
 import 'package:pico/features/auth/domain/auth_state.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
+import 'package:pico/features/matches/presentation/matches_controller.dart';
+import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
 import 'package:pico/features/profile/data/profile_repository.dart';
 import 'package:pico/features/profile/presentation/user_profile_provider.dart';
+import 'package:pico/features/tournaments/data/tournament_repository.dart';
 
 part 'personalization_controller.g.dart';
 
@@ -54,8 +57,6 @@ class PersonalizationController extends _$PersonalizationController {
       selectedLeagueIds: {
         'premier_league',
         'la_liga',
-        'champions_league',
-        'ligue_1',
       },
       selectedTeamIds: {'arsenal'},
     );
@@ -70,19 +71,17 @@ class PersonalizationController extends _$PersonalizationController {
     if (updated.contains(leagueId)) {
       updated.remove(leagueId);
     } else {
-      updated.add(leagueId);
+      // Limit selection to a maximum of 2 leagues
+      if (updated.length < 2) {
+        updated.add(leagueId);
+      }
     }
     state = state.copyWith(selectedLeagueIds: updated);
   }
 
   void toggleTeam(String teamId) {
-    final updated = Set<String>.from(state.selectedTeamIds);
-    if (updated.contains(teamId)) {
-      updated.remove(teamId);
-    } else {
-      updated.add(teamId);
-    }
-    state = state.copyWith(selectedTeamIds: updated, errorMessage: null);
+    // Exactly 1 team (single-select constraint)
+    state = state.copyWith(selectedTeamIds: {teamId}, errorMessage: null);
   }
 
   void selectTeam(String teamId) => toggleTeam(teamId);
@@ -120,9 +119,19 @@ class PersonalizationController extends _$PersonalizationController {
         favoriteLeagueIds: state.selectedLeagueIds.toList(),
       );
 
+      // Auto-enroll user into official public tournaments corresponding to their selected leagues
+      final tournamentRepo = ref.read(tournamentRepositoryProvider);
+      await tournamentRepo.enrollInDefaultTournaments(
+        userId: authState.user!.id,
+        leagueIds: state.selectedLeagueIds.toList(),
+      );
+
       ref.read(authProvider.notifier).markPersonalized();
       ref.invalidate(currentUserProfileProvider);
-      AppLogger.info('Personalization saved for ${authState.user?.id}');
+      ref.invalidate(enrolledTournamentsProvider);
+      ref.invalidate(matchesFeedProvider);
+      ref.invalidate(matchesControllerProvider);
+      AppLogger.info('Personalization and tournament auto-enrollment completed for ${authState.user?.id}');
       return true;
     } on supa.PostgrestException catch (e, st) {
       AppLogger.error('Database error updating profile', e, st);

@@ -9,6 +9,7 @@ import 'package:pico/features/profile/data/profile_repository.dart';
 import 'package:pico/features/profile/domain/user_profile.dart';
 import 'package:pico/features/profile/presentation/personalization_controller.dart';
 import 'package:pico/features/profile/presentation/personalization_screen.dart';
+import 'package:pico/features/tournaments/data/tournament_repository.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
@@ -196,23 +197,41 @@ void main() {
 
       // Default leagues & club
       expect(state.selectedLeagueIds, contains('premier_league'));
+      expect(state.selectedLeagueIds, contains('la_liga'));
+      expect(state.selectedLeagueIds.length, 2);
       expect(state.selectedTeamId, 'arsenal');
+      expect(state.selectedTeamIds.length, 1);
 
-      // Toggle leagues
+      // Max-2 league selection cap: trying to add a 3rd league is capped/ignored
+      controller.toggleLeague('bundesliga');
+      state = container.read(personalizationControllerProvider);
+      expect(state.selectedLeagueIds.contains('bundesliga'), isFalse);
+      expect(state.selectedLeagueIds.length, 2);
+
+      // Toggle leagues: removing a league works
       controller.toggleLeague('premier_league');
       state = container.read(personalizationControllerProvider);
       expect(state.selectedLeagueIds.contains('premier_league'), isFalse);
+      expect(state.selectedLeagueIds.length, 1);
 
+      // Adding up to 2 leagues works
       controller.toggleLeague('serie_a');
       state = container.read(personalizationControllerProvider);
       expect(state.selectedLeagueIds.contains('serie_a'), isTrue);
+      expect(state.selectedLeagueIds.length, 2);
 
-      // Multi-select teams: toggle team adds rather than replaces
+      // Single-team constraint: selecting a team replaces the previous selection (exactly 1 team)
       controller.toggleTeam('real_madrid');
       state = container.read(personalizationControllerProvider);
-      expect(state.selectedTeamIds, contains('arsenal'));
-      expect(state.selectedTeamIds, contains('real_madrid'));
-      expect(state.selectedTeamIds.length, 2);
+      expect(state.selectedTeamIds, equals({'real_madrid'}));
+      expect(state.selectedTeamId, 'real_madrid');
+      expect(state.selectedTeamIds.length, 1);
+
+      controller.toggleTeam('barcelona');
+      state = container.read(personalizationControllerProvider);
+      expect(state.selectedTeamIds, equals({'barcelona'}));
+      expect(state.selectedTeamId, 'barcelona');
+      expect(state.selectedTeamIds.length, 1);
 
       // Validate empty username
       controller.setUsername('');
@@ -241,6 +260,18 @@ void main() {
       // Auth notifier should now be marked personalized
       final authState = container.read(authProvider) as PicoAuthAuthenticated;
       expect(authState.isPersonalized, isTrue);
+
+      // Verify tournament_participants row creation for selected leagues (la_liga & serie_a)
+      final tournamentRepo = container.read(tournamentRepositoryProvider);
+      final enrolled = await tournamentRepo.getEnrolledTournaments(authState.user!.id);
+      expect(enrolled.length, 2);
+      final enrolledCompIds = enrolled.map((t) => t.competitionId).toSet();
+      expect(enrolledCompIds.contains('la_liga'), isTrue);
+      expect(enrolledCompIds.contains('serie_a'), isTrue);
+
+      final participants = await tournamentRepo.getParticipantsForUser(authState.user!.id);
+      expect(participants.length, 2);
+      expect(participants.every((p) => p.userId == authState.user!.id), isTrue);
     });
   });
 
@@ -383,11 +414,20 @@ void main() {
       expect(find.text('Barcelona'), findsOneWidget);
       expect(find.text('Man City'), findsOneWidget);
 
-      // Multi-club selection: scroll to and tap Barcelona to select multiple clubs
+      // Single-club selection: scroll to and tap Barcelona to select it
       await tester.ensureVisible(find.text('Barcelona'));
       await tester.tap(find.text('Barcelona'));
       await tester.pumpAndSettle();
-      expect(find.text('2 selected'), findsOneWidget);
+      expect(find.text('1/1 selected'), findsOneWidget);
+
+      // Verify localized helper microcopy below selectors
+      expect(
+        find.text('You can change your favorite team and join more tournaments anytime.'),
+        findsOneWidget,
+      );
+
+      // Verify max-2 leagues cap indicator
+      expect(find.text('2/2 selected'), findsOneWidget);
 
       // Test skip without username triggers friendly error
       await tester.tap(find.text('Skip'));
