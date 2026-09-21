@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/core/theme/pico_typography.dart';
+import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
-import 'package:pico/features/matches/presentation/matches_controller.dart';
+import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
+import 'package:pico/features/profile/domain/user_profile.dart';
+import 'package:pico/features/profile/presentation/user_profile_provider.dart';
+import 'package:pico/l10n/app_localizations.dart';
+import 'package:pico/shared/components/game_exit_dialog.dart';
 import 'package:pico/shared/components/match_card.dart';
+import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
 import 'package:pico/shared/components/pico_companion.dart';
-import 'package:pico/shared/components/pico_header.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 
-/// The official Pico Home screen based on Stitch "Direction D: Friendly Premium Football World".
+/// The official Pico Home screen based on Stitch "Direction A: Clash Royale Resource Bar & Subheader".
+///
+/// Features:
+/// 1. Reusable global top bar ([PicoAppBar]) displaying Level/XP, Coins, and Streak.
+/// 2. Subheader row immediately below the app bar with user's custom username and tactile menu icon.
+/// 3. Lazy loaded upcoming matches list consuming [matchesFeedProvider].
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({
     super.key,
@@ -23,6 +34,7 @@ class HomeScreen extends ConsumerStatefulWidget {
     this.onNavigateProfile,
     this.onMakePrediction,
     this.onViewLeaderboard,
+    this.onMenuTap,
   });
 
   final PicoMatch? heroMatch;
@@ -34,6 +46,7 @@ class HomeScreen extends ConsumerStatefulWidget {
   final VoidCallback? onNavigateProfile;
   final VoidCallback? onMakePrediction;
   final VoidCallback? onViewLeaderboard;
+  final VoidCallback? onMenuTap;
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -56,94 +69,108 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
+  void _navigateToMatches() {
+    if (widget.onNavigateMatches != null) {
+      widget.onNavigateMatches!();
+    } else {
+      context.go('/matches');
+    }
+  }
+
+  void _navigateToTournaments() {
+    if (widget.onNavigateTournaments != null) {
+      widget.onNavigateTournaments!();
+    } else {
+      context.go('/tournaments');
+    }
+  }
+
+  void _navigateToProfile() {
+    if (widget.onNavigateProfile != null) {
+      widget.onNavigateProfile!();
+    } else {
+      context.go('/profile');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    PicoMatch? effectiveHero = widget.heroMatch;
-    if (effectiveHero == null) {
-      try {
-        effectiveHero = ref.watch(matchesControllerProvider).value?.heroMatch;
-      } catch (_) {
-        // Fallback for tests when matchesControllerProvider is not present in scope
-      }
-    }
+    final profileAsync = ref.watch(currentUserProfileProvider);
+    final profile = profileAsync.value ??
+        const UserProfile(
+          id: 'guest',
+          username: 'Alex',
+          level: 7,
+          xp: 720,
+          streak: 4,
+          coins: 1450,
+        );
 
-    return Scaffold(
-      backgroundColor: PicoColors.pitchBackground,
-      bottomNavigationBar: widget.showBottomNavBar
-          ? Center(
-              heightFactor: 1.0,
+    final matchesAsync = ref.watch(matchesFeedProvider);
+
+    return PicoGameExitScope(
+      child: Scaffold(
+        backgroundColor: PicoColors.pitchBackground,
+        appBar: PicoAppBar(
+          onProfileTap: _navigateToProfile,
+        ),
+        bottomNavigationBar: widget.showBottomNavBar
+            ? Center(
+                heightFactor: 1.0,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 440.0),
+                  child: PicoBottomNavBar(
+                    currentIndex: _currentNavIndex,
+                    onTap: (idx) {
+                      setState(() => _currentNavIndex = idx);
+                      widget.onNavTap?.call(idx);
+                      switch (idx) {
+                        case 0:
+                          break;
+                        case 1:
+                          _navigateToMatches();
+                          break;
+                        case 2:
+                          _navigateToTournaments();
+                          break;
+                        case 3:
+                          _navigateToProfile();
+                          break;
+                      }
+                    },
+                  ),
+                ),
+              )
+            : null,
+        body: PicoPitchBackground(
+          child: SafeArea(
+            top: false,
+            bottom: false,
+            child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 440.0),
-          child: PicoBottomNavBar(
-            currentIndex: _currentNavIndex,
-            onTap: (idx) {
-              setState(() => _currentNavIndex = idx);
-              widget.onNavTap?.call(idx);
-              switch (idx) {
-                case 0:
-                  break;
-                case 1:
-                  widget.onNavigateMatches?.call();
-                  break;
-                case 2:
-                  widget.onNavigateTournaments?.call();
-                  break;
-                case 3:
-                  widget.onNavigateProfile?.call();
-                  break;
-              }
-            },
-          ),
-        ),
-      )
-    : null,
-      body: PicoPitchBackground(
-        child: SafeArea(
-          bottom: false,
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 440.0),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 24.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // 1. Top App Bar (Alex, Lvl 7, 720/1k XP, 4 Streak)
-                    PicoTopAppBar(
-                      playerName: 'Alex',
-                      level: 7,
-                      xpProgress: 0.72,
-                      streakCount: 4,
-                      onProfileTap: widget.onNavigateProfile,
-                    ),
-                    const SizedBox(height: 16.0),
+                    // 1. Home-Specific Subheader Row (Username on left, Menu on right)
+                    _buildSubHeaderRow(context, profile),
 
-                    // 2. Mascot Greeting Row
-                    _buildMascotGreetingRow(),
-                    const SizedBox(height: 18.0),
-
-                    // 3. Featured Hero Match Card (Dynamic from MockMatchRepository)
-                    if (effectiveHero != null)
-                      MatchCard.fromMatch(
-                        match: effectiveHero,
-                        onPredictPressed: () => widget.onMakePrediction?.call(),
-                      )
-                    else
-                      MatchCard.unpredicted(
-                        competition: 'MATCH OF THE DAY',
-                        kickoffTime: '20:45',
-                        homeTeamName: 'Man. City',
-                        homeTeamCode: 'MAC',
-                        awayTeamName: 'RB Leipzig',
-                        awayTeamCode: 'RBL',
-                        closesAtTime: '20:35',
-                        onPredictPressed: () => widget.onMakePrediction?.call(),
+                    // 2. Main Content & Matches Feed
+                    Expanded(
+                      child: RefreshIndicator(
+                        color: PicoColors.primary,
+                        backgroundColor: PicoColors.pitchSurfaceElevated,
+                        onRefresh: () async {
+                          await ref.read(matchesFeedProvider.notifier).refresh();
+                          await ref.read(currentUserProfileProvider.notifier).refresh();
+                        },
+                        child: matchesAsync.when(
+                          data: (matches) => _buildMatchesList(context, profile, matches),
+                          loading: () => _buildLoadingList(context, profile),
+                          error: (err, _) => _buildErrorList(context, profile, err),
+                        ),
                       ),
-                    const SizedBox(height: 18.0),
-
-                    // 4. Active Tournament Hub Card (La Liga Season Hub)
-                    _buildActiveTournamentCard(),
-                    const SizedBox(height: 16.0),
+                    ),
                   ],
                 ),
               ),
@@ -154,8 +181,437 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// Mascot Daily Greeting ("Big match tonight, Alex! ⚽")
-  Widget _buildMascotGreetingRow() {
+  /// 1. Sub-Header Bar (Direction A: Calm, Functional, Tactile)
+  /// User's custom username pill on far left, tactile menu icon on far right.
+  Widget _buildSubHeaderRow(BuildContext context, UserProfile profile) {
+    final username = profile.username != null && profile.username!.isNotEmpty
+        ? profile.username!
+        : 'Alex';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Left: Boxed Username Badge (Clean, tactile, generous padding, no green dot)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.5),
+            decoration: BoxDecoration(
+              color: const Color(0xFF102318),
+              borderRadius: BorderRadius.circular(8.0),
+              border: Border.all(color: const Color(0xFF1E432F), width: 1.5),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0xFF06110A),
+                  offset: Offset(0, 2.5),
+                  blurRadius: 0,
+                ),
+              ],
+            ),
+            child: Text(
+              username,
+              style: const TextStyle(
+                fontFamily: 'Rubik',
+                color: Color(0xFFFAF9F4),
+                fontSize: 14.5,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.1,
+                height: 1.0,
+              ),
+            ),
+          ),
+
+          // Right: Tactile Menu Button
+          GestureDetector(
+            key: const Key('home_screen_menu_button'),
+            onTap: () {
+              if (widget.onMenuTap != null) {
+                widget.onMenuTap!();
+              } else {
+                _showHomeMenuBottomSheet(context, profile);
+              }
+            },
+            child: Container(
+              width: 36.0,
+              height: 36.0,
+              decoration: BoxDecoration(
+                color: const Color(0xFF102318),
+                borderRadius: BorderRadius.circular(10.0),
+                border: Border.all(color: const Color(0xFF1E432F), width: 2.0),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0xFF06110A),
+                    offset: Offset(0, 2.5),
+                    blurRadius: 0,
+                  ),
+                ],
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.menu_rounded,
+                  size: 20.0,
+                  color: Color(0xFFFAF9F4),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds the scrollable feed containing the mascot greeting, active tournament,
+  /// and exactly one featured match ("Match of the Day") on the Home screen.
+  Widget _buildMatchesList(
+    BuildContext context,
+    UserProfile profile,
+    List<PicoMatch> matches,
+  ) {
+    // If heroMatch was explicitly passed, prepend or use it
+    final allMatches = <PicoMatch>[...matches];
+    if (widget.heroMatch != null &&
+        !allMatches.any((m) => m.id == widget.heroMatch!.id)) {
+      allMatches.insert(0, widget.heroMatch!);
+    }
+
+    final hasMatches = allMatches.isNotEmpty;
+    final hasMultipleMatches = allMatches.length > 1;
+    final totalCount = hasMatches ? (hasMultipleMatches ? 5 : 4) : 4;
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 24.0),
+      itemCount: totalCount,
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: _buildMascotGreetingRow(profile.username ?? 'Alex'),
+          );
+        }
+        if (index == 1) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: _buildActiveTournamentCard(),
+          );
+        }
+        if (index == 2) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: _buildSectionHeader(allMatches.length),
+          );
+        }
+
+        if (!hasMatches) {
+          return _buildEmptyMatchesState();
+        }
+
+        // index 3: The single featured match on the Home screen
+        if (index == 3) {
+          final featuredMatch = allMatches.first;
+          return Padding(
+            padding: EdgeInsets.only(bottom: hasMultipleMatches ? 10.0 : 14.0),
+            child: MatchCard.fromMatch(
+              match: featuredMatch,
+              onPredictPressed: () => widget.onMakePrediction?.call(),
+            ),
+          );
+        }
+
+        // index 4: Tactile banner navigating to the Matches screen if more matches exist
+        final remaining = allMatches.length - 1;
+        final l10n = AppLocalizations.of(context);
+        final moreText = l10n?.moreMatchesAvailable(remaining) ??
+            '+$remaining more fixtures in Matches';
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 14.0),
+          child: GestureDetector(
+            key: const Key('home_screen_explore_matches_banner'),
+            onTap: _navigateToMatches,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 16.0),
+              decoration: BoxDecoration(
+                color: PicoColors.pitchSurfaceElevated,
+                borderRadius: BorderRadius.circular(16.0),
+                border: Border.all(
+                  color: PicoColors.cardBorder.withValues(alpha: 0.15),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.sports_soccer_rounded,
+                    size: 16.0,
+                    color: PicoColors.primaryFixed,
+                  ),
+                  const SizedBox(width: 8.0),
+                  Text(
+                    moreText,
+                    style: PicoTypography.labelPillSm.copyWith(
+                      color: PicoColors.textWhite,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                  const SizedBox(width: 6.0),
+                  const Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 15.0,
+                    color: PicoColors.primaryFixed,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// Loading state with placeholder skeleton items.
+  Widget _buildLoadingList(BuildContext context, UserProfile profile) {
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 24.0),
+      itemCount: 4,
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: _buildMascotGreetingRow(profile.username ?? 'Alex'),
+          );
+        }
+        if (index == 1) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: _buildActiveTournamentCard(),
+          );
+        }
+        if (index == 2) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: _buildSectionHeader(1),
+          );
+        }
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 14.0),
+          child: _buildSkeletonMatchCard(),
+        );
+      },
+    );
+  }
+
+  /// Tactile skeleton placeholder match card during data loading.
+  Widget _buildSkeletonMatchCard() {
+    return Container(
+      height: 110.0,
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: PicoColors.pitchSurfaceElevated,
+        borderRadius: BorderRadius.circular(20.0),
+        border: Border.all(
+          color: PicoColors.cardBorder.withValues(alpha: 0.12),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44.0,
+                height: 44.0,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF13281C),
+                  borderRadius: BorderRadius.circular(14.0),
+                ),
+              ),
+              const SizedBox(width: 12.0),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 90.0,
+                    height: 12.0,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E432F),
+                      borderRadius: BorderRadius.circular(4.0),
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  Container(
+                    width: 60.0,
+                    height: 10.0,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF13281C),
+                      borderRadius: BorderRadius.circular(4.0),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Container(
+            width: 70.0,
+            height: 34.0,
+            decoration: BoxDecoration(
+              color: const Color(0xFF13281C),
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Error state with retry action.
+  Widget _buildErrorList(BuildContext context, UserProfile profile, Object error) {
+    final l10n = AppLocalizations.of(context);
+    final retryText = l10n?.retryButton ?? 'Retry';
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 24.0),
+      children: [
+        _buildMascotGreetingRow(profile.username ?? 'Alex'),
+        const SizedBox(height: 16.0),
+        _buildActiveTournamentCard(),
+        const SizedBox(height: 20.0),
+        Container(
+          padding: const EdgeInsets.all(20.0),
+          decoration: BoxDecoration(
+            color: PicoColors.pitchSurfaceElevated,
+            borderRadius: BorderRadius.circular(16.0),
+            border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
+          ),
+          child: Column(
+            children: [
+              const Icon(Icons.cloud_off_rounded, color: Colors.redAccent, size: 36.0),
+              const SizedBox(height: 8.0),
+              Text(
+                'Could not load upcoming matches.',
+                style: PicoTypography.bodyMdBold.copyWith(color: PicoColors.textWhite),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 14.0),
+              ElevatedButton.icon(
+                onPressed: () {
+                  ref.read(matchesFeedProvider.notifier).refresh();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: PicoColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                ),
+                icon: const Icon(Icons.refresh_rounded, size: 18.0),
+                label: Text(retryText),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Empty matches state.
+  Widget _buildEmptyMatchesState() {
+    final l10n = AppLocalizations.of(context);
+    final emptyText =
+        l10n?.noUpcomingMatches ?? 'No upcoming matches right now. Check back soon!';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 32.0),
+      decoration: BoxDecoration(
+        color: PicoColors.pitchSurfaceElevated,
+        borderRadius: BorderRadius.circular(20.0),
+        border: Border.all(color: PicoColors.cardBorder.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        children: [
+          const Icon(
+            Icons.sports_soccer_rounded,
+            color: PicoColors.primaryFixedDim,
+            size: 40.0,
+          ),
+          const SizedBox(height: 12.0),
+          Text(
+            emptyText,
+            style: PicoTypography.bodyMd.copyWith(
+              color: PicoColors.textWhiteMuted,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Section Header ("MATCH OF THE DAY") with optional "VIEW ALL" button
+  Widget _buildSectionHeader(int count) {
+    final l10n = AppLocalizations.of(context);
+    final title = l10n?.matchOfTheDayTitle.toUpperCase() ?? 'MATCH OF THE DAY';
+    final viewAllText = l10n?.viewAllMatches.toUpperCase() ?? 'VIEW ALL';
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 4.0,
+              height: 14.0,
+              decoration: BoxDecoration(
+                color: PicoColors.electricMint,
+                borderRadius: BorderRadius.circular(2.0),
+              ),
+            ),
+            const SizedBox(width: 8.0),
+            Text(
+              title,
+              style: PicoTypography.labelPillSm.copyWith(
+                color: PicoColors.electricMint,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.8,
+              ),
+            ),
+          ],
+        ),
+        if (count > 1)
+          GestureDetector(
+            key: const Key('home_screen_view_all_matches_button'),
+            onTap: _navigateToMatches,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  viewAllText,
+                  style: PicoTypography.labelPillSm.copyWith(
+                    color: PicoColors.primaryFixed,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 11.0,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(width: 4.0),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 11.0,
+                  color: PicoColors.primaryFixed,
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Mascot Daily Greeting ("Big match tonight, {username}! ⚽")
+  Widget _buildMascotGreetingRow(String username) {
+    final l10n = AppLocalizations.of(context);
+    final greeting = l10n?.mascotGreeting(username) ?? 'Big match tonight, $username! ⚽';
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -198,9 +654,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ],
         ),
-        const SizedBox(width: 8.0),
+        const SizedBox(width: 10.0),
 
-        // Speech Bubble (Content-hugging rounded bubble with tactile bevel)
+        // Speech Bubble
         Flexible(
           child: Container(
             padding: const EdgeInsets.symmetric(
@@ -229,7 +685,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
             ),
             child: Text(
-              'Big match tonight, Alex! ⚽',
+              greeting,
               style: PicoTypography.bodyMdBold.copyWith(
                 color: PicoColors.textPitchInk,
                 fontSize: 14.0,
@@ -426,6 +882,141 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  /// Settings and options bottom sheet triggered by the hamburger icon.
+  void _showHomeMenuBottomSheet(BuildContext context, UserProfile profile) {
+    final l10n = AppLocalizations.of(context);
+    final menuTitle = l10n?.homeMenuTitle ?? 'Settings & Menu';
+    final signOutText = l10n?.signOutButton ?? 'Sign Out';
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return Container(
+          padding: const EdgeInsets.fromLTRB(20.0, 14.0, 20.0, 28.0),
+          decoration: const BoxDecoration(
+            color: Color(0xFF0F2417),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+            border: Border(
+              top: BorderSide(color: Color(0xFF1E432F), width: 2.0),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black54,
+                offset: Offset(0, -4),
+                blurRadius: 16,
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36.0,
+                    height: 4.0,
+                    decoration: BoxDecoration(
+                      color: PicoColors.textWhiteMuted.withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(2.0),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18.0),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.tune_rounded,
+                      color: PicoColors.electricMint,
+                      size: 22.0,
+                    ),
+                    const SizedBox(width: 8.0),
+                    Text(
+                      menuTitle,
+                      style: PicoTypography.headlineMd.copyWith(
+                        color: PicoColors.textWhite,
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16.0),
+                Container(
+                  padding: const EdgeInsets.all(12.0),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF13281C),
+                    borderRadius: BorderRadius.circular(12.0),
+                    border: Border.all(color: const Color(0xFF224B33), width: 1.0),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 38.0,
+                        height: 38.0,
+                        decoration: BoxDecoration(
+                          color: PicoColors.primary,
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: const Center(
+                          child: Icon(Icons.person_rounded, color: Colors.white, size: 22.0),
+                        ),
+                      ),
+                      const SizedBox(width: 12.0),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              profile.username ?? 'Alex',
+                              style: PicoTypography.headlineMd.copyWith(
+                                color: PicoColors.textWhite,
+                                fontSize: 15.0,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Text(
+                              'LVL ${profile.level} · ${profile.formattedCoins} Coins · ${profile.streak} Streak',
+                              style: PicoTypography.labelPillSm.copyWith(
+                                color: PicoColors.primaryFixed,
+                                fontSize: 11.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14.0),
+                Material(
+                  color: Colors.transparent,
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+                    title: Text(
+                      signOutText,
+                      style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    onTap: () async {
+                      Navigator.of(ctx).pop();
+                      await ref.read(authProvider.notifier).signOut();
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

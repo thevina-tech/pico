@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/core/theme/pico_typography.dart';
+import 'package:pico/shared/components/game_exit_dialog.dart';
+import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/shared/components/tournament_card.dart';
 
@@ -22,16 +24,19 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: PicoColors.pitchBackground,
+    return PicoGameExitScope(
+      child: Scaffold(
+        backgroundColor: PicoColors.pitchBackground,
+        appBar: const PicoAppBar(),
       body: PicoPitchBackground(
         child: SafeArea(
+          top: false,
           bottom: false,
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 440.0),
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 24.0),
+                padding: const EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 24.0),
                 children: [
                   // Page Header
                   _buildHeader(),
@@ -84,8 +89,9 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildHeader() {
     return Row(

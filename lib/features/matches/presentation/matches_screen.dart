@@ -5,7 +5,9 @@ import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
 import 'package:pico/features/matches/presentation/matches_controller.dart';
 import 'package:pico/features/matches/presentation/matches_view_model.dart';
+import 'package:pico/shared/components/game_exit_dialog.dart';
 import 'package:pico/shared/components/match_card.dart';
+import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
 import 'package:pico/shared/components/pico_button.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
@@ -212,8 +214,10 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
   Widget build(BuildContext context) {
     final matchesAsync = ref.watch(matchesControllerProvider);
 
-    return Scaffold(
-      backgroundColor: PicoColors.pitchBackground,
+    return PicoGameExitScope(
+      child: Scaffold(
+        backgroundColor: PicoColors.pitchBackground,
+        appBar: const PicoAppBar(),
       bottomNavigationBar: widget.showBottomNavBar
           ? Center(
               heightFactor: 1.0,
@@ -231,6 +235,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
           : null,
       body: PicoPitchBackground(
         child: SafeArea(
+          top: false,
           bottom: false,
           child: Center(
             child: ConstrainedBox(
@@ -240,7 +245,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
                 children: [
                   // 1. Page Header (Always visible)
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
+                    padding: const EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 0),
                     child: _buildHeader(),
                   ),
                   const SizedBox(height: 14.0),
@@ -334,8 +339,9 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   /// Header with title, round subtitle, and calendar date capsule
   Widget _buildHeader() {

@@ -47,15 +47,17 @@ Future<void> main() async {
   );
 }
 
-class PicoApp extends StatelessWidget {
+class PicoApp extends ConsumerWidget {
   const PicoApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(goRouterProvider);
+
     return MaterialApp.router(
       title: 'Pico',
       debugShowCheckedModeBanner: false,
-      routerConfig: AppRouter.router,
+      routerConfig: router,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(

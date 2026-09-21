@@ -1,12 +1,51 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pico/features/auth/domain/auth_state.dart';
+import 'package:pico/features/auth/presentation/auth_provider.dart';
+import 'package:pico/features/auth/presentation/onboarding_screen.dart';
+import 'package:pico/features/profile/presentation/profile_screen.dart';
 import 'package:pico/main.dart';
 import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supa;
+
+class _FakeAuthenticatedNotifier extends AuthNotifier {
+  @override
+  PicoAuthState build() {
+    return const PicoAuthAuthenticated(
+      user: supa.User(
+        id: 'test_user_id',
+        appMetadata: {},
+        userMetadata: {},
+        aud: 'authenticated',
+        createdAt: '2026-01-01',
+      ),
+      isPersonalized: true,
+    );
+  }
+}
 
 void main() {
-  testWidgets('PicoApp smoke test - boots and displays bottom nav shell',
+  testWidgets('PicoApp unauthenticated - boots and redirects to OnboardingScreen',
       (WidgetTester tester) async {
     await tester.pumpWidget(const ProviderScope(child: PicoApp()));
+    await tester.pumpAndSettle();
+
+    // Verify OnboardingScreen is rendered
+    expect(find.byType(OnboardingScreen), findsOneWidget);
+    expect(find.textContaining('Pico'), findsWidgets);
+    expect(find.text('Get Started'), findsOneWidget);
+  });
+
+  testWidgets('PicoApp authenticated - boots and displays bottom nav shell',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authProvider.overrideWith(() => _FakeAuthenticatedNotifier()),
+        ],
+        child: const PicoApp(),
+      ),
+    );
     await tester.pumpAndSettle();
 
     // Verify bottom nav bar is present with its 4 tabs
@@ -20,7 +59,14 @@ void main() {
 
   testWidgets('PicoApp tab navigation - switches branches via bottom nav bar',
       (WidgetTester tester) async {
-    await tester.pumpWidget(const ProviderScope(child: PicoApp()));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authProvider.overrideWith(() => _FakeAuthenticatedNotifier()),
+        ],
+        child: const PicoApp(),
+      ),
+    );
     await tester.pumpAndSettle();
 
     final navBar = find.byType(PicoBottomNavBar);
@@ -38,7 +84,7 @@ void main() {
     // Tap Profile tab
     await tester.tap(find.descendant(of: navBar, matching: find.text('Profile')));
     await tester.pumpAndSettle();
-    expect(find.text('Alex Pereira'), findsOneWidget);
+    expect(find.byType(ProfileScreen), findsOneWidget);
 
     // Tap Home tab back
     await tester.tap(find.descendant(of: navBar, matching: find.text('Home')));

@@ -33,5 +33,378 @@
         "example": "19:50"
       }
     }
+  },
+  "onboardingWelcomeTitle": "Predict Football.\nCompete with Friends.",
+  "@onboardingWelcomeTitle": {
+    "description": "Headline for the onboarding welcome screen"
+  },
+  "onboardingWelcomeSubtitle": "Call match scores, bank Pico Points, and battle your friends on private & global leaderboards.",
+  "@onboardingWelcomeSubtitle": {
+    "description": "Subtitle describing the value proposition"
+  },
+  "getStartedButton": "Get Started",
+  "@getStartedButton": {
+    "description": "CTA button label to start guest mode"
+  },
+  "setupSpeedHint": "Takes less than 1 minute to set up.",
+  "@setupSpeedHint": {
+    "description": "Hint reassuring the user about setup speed"
+  },
+  "howPicoWorksTitle": "How Pico Works",
+  "@howPicoWorksTitle": {
+    "description": "Title for Onboarding Screen 2 explaining How Pico Works"
+  },
+  "howPicoWorksSubtitle": "Simple, fast, and built for matchdays.",
+  "@howPicoWorksSubtitle": {
+    "description": "Subtitle for How Pico Works explainer screen"
+  },
+  "step1Title": "Predict the score",
+  "@step1Title": {
+    "description": "Title for concept 1 in How Pico Works"
+  },
+  "step1Description": "Quick picks before kickoff",
+  "@step1Description": {
+    "description": "Description for concept 1 in How Pico Works"
+  },
+  "step2Title": "Earn points & climb",
+  "@step2Title": {
+    "description": "Title for concept 2 in How Pico Works"
+  },
+  "step2Description": "Score accurate calls each week",
+  "@step2Description": {
+    "description": "Description for concept 2 in How Pico Works"
+  },
+  "step3Title": "Win tournament trophies",
+  "@step3Title": {
+    "description": "Title for concept 3 in How Pico Works"
+  },
+  "step3Description": "Top friends and global ranks",
+  "@step3Description": {
+    "description": "Description for concept 3 in How Pico Works"
+  },
+  "nextStepHint": "Next: Pick your favorite starting team (15 sec)",
+  "@nextStepHint": {
+    "description": "Hint beneath CTA button indicating next step"
+  },
+  "stepIndicator": "STEP {current}/{total}",
+  "@stepIndicator": {
+    "description": "Segmented step counter in onboarding",
+    "placeholders": {
+      "current": { "type": "int", "example": "1" },
+      "total": { "type": "int", "example": "5" }
+    }
+  },
+  "personalizationTitle": "Pick Your Favorites",
+  "@personalizationTitle": {
+    "description": "Title of the personalization screen"
+  },
+  "personalizationSubtitle": "Choose your username and follow your favorite clubs & leagues.",
+  "@personalizationSubtitle": {
+    "description": "Subtitle of the personalization screen"
+  },
+  "customizeFeedKicker": "CUSTOMIZE YOUR FEED",
+  "@customizeFeedKicker": {
+    "description": "Small uppercase kicker above personalization title"
+  },
+  "usernameLabel": "Choose a Username",
+  "@usernameLabel": {
+    "description": "Label for the username text input"
+  },
+  "usernamePlaceholder": "e.g. joao_striker",
+  "@usernamePlaceholder": {
+    "description": "Placeholder hint for username text input"
+  },
+  "usernameErrorEmpty": "Please introduce a username to continue.",
+  "@usernameErrorEmpty": {
+    "description": "Error when username is blank"
+  },
+  "usernameErrorTooShort": "Username must be at least 3 characters",
+  "@usernameErrorTooShort": {
+    "description": "Error when username is fewer than 3 chars"
+  },
+  "topLeaguesTitle": "Top Leagues & Cups",
+  "@topLeaguesTitle": {
+    "description": "Section header for leagues selection"
+  },
+  "clubsFollowTitle": "Clubs You Follow",
+  "@clubsFollowTitle": {
+    "description": "Section header for clubs selection"
+  },
+  "continueButton": "Continue",
+  "@continueButton": {
+    "description": "Primary continue action button label"
+  },
+  "skipButton": "Skip",
+  "@skipButton": {
+    "description": "Action label to skip step"
+  },
+  "preferencesSyncHint": "Preferences sync instantly across Pico League",
+  "@preferencesSyncHint": {
+    "description": "Small footer note under continue button"
+  },
+  "savingPreferences": "Saving your profile...",
+  "@savingPreferences": {
+    "description": "Loading indicator text when saving profile"
+  },
+  "mascotGreeting": "Big match tonight, {username}! ⚽",
+  "@mascotGreeting": {
+    "description": "Daily greeting from the Pico mascot",
+    "placeholders": {
+      "username": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
+  "upcomingMatchesTitle": "Upcoming Matches",
+  "@upcomingMatchesTitle": {
+    "description": "Header title for the upcoming matches list"
+  },
+  "noUpcomingMatches": "No upcoming matches right now. Check back soon!",
+  "@noUpcomingMatches": {
+    "description": "Empty state text for matches feed"
+  },
+  "retryButton": "Retry",
+  "@retryButton": {
+    "description": "Action label to retry a failed network request"
+  },
+  "homeMenuTitle": "Settings & Menu",
+  "@homeMenuTitle": {
+    "description": "Title of the home hamburger menu"
+  },
+  "signOutButton": "Sign Out",
+  "@signOutButton": {
+    "description": "Action label to sign out"
+  },
+  "exitDialogTitle": "Leaving the Pitch?",
+  "@exitDialogTitle": {
+    "description": "Title of the exit confirmation dialog"
+  },
+  "exitDialogMessage": "Are you sure you want to quit Pico? Upcoming matches and predictions are waiting for you!",
+  "@exitDialogMessage": {
+    "description": "Message explaining consequences of quitting Pico"
+  },
+  "exitDialogStayButton": "STAY & PREDICT",
+  "@exitDialogStayButton": {
+    "description": "Primary action to stay in the game and keep predicting"
+  },
+  "exitDialogLeaveButton": "Leave Game",
+  "@exitDialogLeaveButton": {
+    "description": "Secondary action to exit/quit the game"
+  },
+  "matchOfTheDayTitle": "Match of the Day",
+  "@matchOfTheDayTitle": {
+    "description": "Section header for the single featured match on Home"
+  },
+  "viewAllMatches": "View All",
+  "@viewAllMatches": {
+    "description": "Action label to view all matches on the Matches screen"
+  },
+  "moreMatchesAvailable": "+{count} more fixtures in Matches",
+  "@moreMatchesAvailable": {
+    "description": "Banner text indicating remaining fixtures in the Matches screen",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "profileTitleKicker": "Matchday Prophet",
+  "@profileTitleKicker": {
+    "description": "Tactical rank title under username in profile trading card"
+  },
+  "hitRateLabel": "Hit Rate",
+  "@hitRateLabel": {
+    "description": "Label for accuracy stat in profile"
+  },
+  "matchesLabel": "Matches",
+  "@matchesLabel": {
+    "description": "Label for total matches stat in profile"
+  },
+  "podiumsLabel": "Podiums",
+  "@podiumsLabel": {
+    "description": "Label for podium finishes stat in profile"
+  },
+  "clubRankLabel": "Club Rank",
+  "@clubRankLabel": {
+    "description": "Label for club leaderboard rank in profile"
+  },
+  "xpProgressToLevel": "XP Progress to LVL {level}",
+  "@xpProgressToLevel": {
+    "description": "XP progress title showing next level",
+    "placeholders": {
+      "level": {
+        "type": "int",
+        "example": "8"
+      }
+    }
+  },
+  "tournamentsAccordionTitle": "Tournaments",
+  "@tournamentsAccordionTitle": {
+    "description": "Title of the Tournaments accordion section"
+  },
+  "tournamentsAccordionSubtitle": "Active cups & weekly leagues",
+  "@tournamentsAccordionSubtitle": {
+    "description": "Subtitle of the Tournaments accordion section"
+  },
+  "tournamentsActiveCount": "{count} Active",
+  "@tournamentsActiveCount": {
+    "description": "Badge showing active tournaments count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "followingAccordionTitle": "Following",
+  "@followingAccordionTitle": {
+    "description": "Title of the Following accordion section"
+  },
+  "followingAccordionSubtitle": "Clubs, leagues & priority alerts",
+  "@followingAccordionSubtitle": {
+    "description": "Subtitle of the Following accordion section"
+  },
+  "followingPinnedCount": "{count} Pinned",
+  "@followingPinnedCount": {
+    "description": "Badge showing pinned items count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "historyAccordionTitle": "History",
+  "@historyAccordionTitle": {
+    "description": "Title of the History accordion section"
+  },
+  "historyAccordionSubtitle": "Predictions slip archive & past trophies",
+  "@historyAccordionSubtitle": {
+    "description": "Subtitle of the History accordion section"
+  },
+  "historySummary": "{count} Matches · {rate}%",
+  "@historySummary": {
+    "description": "Badge in history accordion header",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "84"
+      },
+      "rate": {
+        "type": "int",
+        "example": "70"
+      }
+    }
+  },
+  "recentFormTitle": "Recent Form (Last 10 Matches)",
+  "@recentFormTitle": {
+    "description": "Header for recent prediction form strip"
+  },
+  "recentFormSummary": "{wins} Wins · {exact} Exact",
+  "@recentFormSummary": {
+    "description": "Sub-header summary for recent form",
+    "placeholders": {
+      "wins": {
+        "type": "int",
+        "example": "7"
+      },
+      "exact": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "settingsAccordionTitle": "Settings",
+  "@settingsAccordionTitle": {
+    "description": "Title of Settings accordion section"
+  },
+  "settingsAccordionSubtitle": "Preferences, sound & notifications",
+  "@settingsAccordionSubtitle": {
+    "description": "Subtitle of Settings accordion section"
+  },
+  "pushNotificationsTitle": "Push Notifications",
+  "@pushNotificationsTitle": {
+    "description": "Title of push notification setting"
+  },
+  "matchdayHapticsTitle": "Matchday Haptics",
+  "@matchdayHapticsTitle": {
+    "description": "Title of matchday haptics setting"
+  },
+  "enabledPill": "Enabled",
+  "@enabledPill": {
+    "description": "Enabled status pill"
+  },
+  "onPill": "On",
+  "@onPill": {
+    "description": "On status pill"
+  },
+  "shareMatchdayCard": "Share Matchday Card",
+  "@shareMatchdayCard": {
+    "description": "CTA button label to share profile card"
+  },
+  "shareCardModalTitle": "Matchday Trading Card",
+  "@shareCardModalTitle": {
+    "description": "Title of the share trading card bottom sheet"
+  },
+  "shareCardPrompt": "Share your Pico profile card and stats with friends!",
+  "@shareCardPrompt": {
+    "description": "Prompt text in the share card sheet"
+  },
+  "copyProfileSummary": "Copy Card Summary",
+  "@copyProfileSummary": {
+    "description": "Button to copy trading card summary"
+  },
+  "profileSummaryCopied": "Profile summary copied to clipboard!",
+  "@profileSummaryCopied": {
+    "description": "Snackbar feedback after copying summary"
+  },
+  "standingsButton": "Standings",
+  "@standingsButton": {
+    "description": "Standings link button label"
+  },
+  "pointsEarnedBadge": "+{points} Pts",
+  "@pointsEarnedBadge": {
+    "description": "Points earned badge",
+    "placeholders": {
+      "points": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "streakPill": "{count} Streak",
+  "@streakPill": {
+    "description": "Streak indicator pill",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "coinsPill": "{count} Coins",
+  "@coinsPill": {
+    "description": "Coins indicator pill",
+    "placeholders": {
+      "count": {
+        "type": "String",
+        "example": "1,450"
+      }
+    }
+  },
+  "levelPill": "LVL {level}",
+  "@levelPill": {
+    "description": "Level badge text",
+    "placeholders": {
+      "level": {
+        "type": "int",
+        "example": "7"
+      }
+    }
   }
 }
+
+
+

@@ -8,17 +8,21 @@ part of 'supabase_client_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Provides the singleton [SupabaseClient] instance across the app.
+/// Provides the singleton [SupabaseClient] instance across the app,
+/// or null if Supabase has not yet been initialized (e.g. in hermetic unit tests).
 
 @ProviderFor(supabaseClient)
 final supabaseClientProvider = SupabaseClientProvider._();
 
-/// Provides the singleton [SupabaseClient] instance across the app.
+/// Provides the singleton [SupabaseClient] instance across the app,
+/// or null if Supabase has not yet been initialized (e.g. in hermetic unit tests).
 
 final class SupabaseClientProvider
-    extends $FunctionalProvider<SupabaseClient, SupabaseClient, SupabaseClient>
-    with $Provider<SupabaseClient> {
-  /// Provides the singleton [SupabaseClient] instance across the app.
+    extends
+        $FunctionalProvider<SupabaseClient?, SupabaseClient?, SupabaseClient?>
+    with $Provider<SupabaseClient?> {
+  /// Provides the singleton [SupabaseClient] instance across the app,
+  /// or null if Supabase has not yet been initialized (e.g. in hermetic unit tests).
   SupabaseClientProvider._()
     : super(
         from: null,
@@ -35,21 +39,21 @@ final class SupabaseClientProvider
 
   @$internal
   @override
-  $ProviderElement<SupabaseClient> $createElement($ProviderPointer pointer) =>
+  $ProviderElement<SupabaseClient?> $createElement($ProviderPointer pointer) =>
       $ProviderElement(pointer);
 
   @override
-  SupabaseClient create(Ref ref) {
+  SupabaseClient? create(Ref ref) {
     return supabaseClient(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(SupabaseClient value) {
+  Override overrideWithValue(SupabaseClient? value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<SupabaseClient>(value),
+      providerOverride: $SyncValueProvider<SupabaseClient?>(value),
     );
   }
 }
 
-String _$supabaseClientHash() => r'2df5a38617329a3bb0a7e149189bea875722d7b8';
+String _$supabaseClientHash() => r'2e94b3f1ba9a755e514a1d766c5e1830993f497b';

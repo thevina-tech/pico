@@ -1,49 +1,63 @@
-import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'competition.dart';
+import 'team.dart';
 
-enum MatchStatus { upcoming, locked, live, finished }
+part 'pico_match.freezed.dart';
 
-@immutable
-class PicoMatch {
-  final String id;
-  final String competitionName;
-  final String competitionBadgeUrl;
-  final String homeTeamName;
-  final String homeTeamCode;
-  final String homeTeamBadgeUrl;
-  final String awayTeamName;
-  final String awayTeamCode;
-  final String awayTeamBadgeUrl;
-  final DateTime kickoffAt;
-  final DateTime lockAt;
-  final MatchStatus status;
-  final int? homeScore;
-  final int? awayScore;
-  final String? round;
-  final String? leagueId;
-  final String? rawResult;
+/// Match lifecycle status corresponding to `match_status` Postgres ENUM.
+enum MatchStatus {
+  @JsonValue('upcoming')
+  upcoming,
+  @JsonValue('live')
+  live,
+  @JsonValue('finished')
+  finished,
+  @JsonValue('postponed')
+  postponed,
+  @JsonValue('cancelled')
+  cancelled,
+  @JsonValue('locked')
+  locked,
+}
 
-  PicoMatch({
-    required this.id,
-    required this.competitionName,
-    required this.competitionBadgeUrl,
-    required this.homeTeamName,
-    required this.homeTeamCode,
-    required this.homeTeamBadgeUrl,
-    required this.awayTeamName,
-    required this.awayTeamCode,
-    required this.awayTeamBadgeUrl,
-    required this.kickoffAt,
+/// Normalized domain model for the `matches` table in Supabase.
+@freezed
+abstract class PicoMatch with _$PicoMatch {
+  const PicoMatch._();
+
+  const factory PicoMatch({
+    required String id,
+    @JsonKey(name: 'provider_match_id') String? providerMatchId,
+    @JsonKey(name: 'competition_id') String? competitionId,
+    @JsonKey(name: 'home_team_id') String? homeTeamId,
+    @JsonKey(name: 'away_team_id') String? awayTeamId,
+    @JsonKey(name: 'kickoff_at') required DateTime kickoffAt,
+    @Default(MatchStatus.upcoming) MatchStatus status,
+    @JsonKey(name: 'home_score') int? homeScore,
+    @JsonKey(name: 'away_score') int? awayScore,
+    @Default(false) bool settled,
     DateTime? lockAt,
-    required this.status,
-    this.homeScore,
-    this.awayScore,
-    this.round,
-    this.leagueId,
-    this.rawResult,
-  }) : lockAt = lockAt ?? kickoffAt.subtract(const Duration(minutes: 10));
+    @Default('') String competitionName,
+    @Default('') String competitionBadgeUrl,
+    @Default('') String homeTeamName,
+    @Default('') String homeTeamCode,
+    @Default('') String homeTeamBadgeUrl,
+    @Default('') String awayTeamName,
+    @Default('') String awayTeamCode,
+    @Default('') String awayTeamBadgeUrl,
+    String? round,
+    String? leagueId,
+    String? rawResult,
+    Competition? competition,
+    Team? homeTeam,
+    Team? awayTeam,
+  }) = _PicoMatch;
+
+  DateTime get effectiveLockAt =>
+      lockAt ?? kickoffAt.subtract(const Duration(minutes: 10));
 
   bool get isLocked =>
-      DateTime.now().isAfter(lockAt) ||
+      DateTime.now().isAfter(effectiveLockAt) ||
       status == MatchStatus.locked ||
       status == MatchStatus.live ||
       status == MatchStatus.finished;
@@ -52,19 +66,12 @@ class PicoMatch {
       '${kickoffAt.hour.toString().padLeft(2, '0')}:${kickoffAt.minute.toString().padLeft(2, '0')}';
 
   String get closesAtTimeFormatted =>
-      '${lockAt.hour.toString().padLeft(2, '0')}:${lockAt.minute.toString().padLeft(2, '0')}';
+      '${effectiveLockAt.hour.toString().padLeft(2, '0')}:${effectiveLockAt.minute.toString().padLeft(2, '0')}';
 
   factory PicoMatch.fromJson(Map<String, dynamic> json) {
-    final dateStr = (json['date'] as String? ?? '2025-01-01').replaceAll('/', '-');
-    final hour = int.parse(json['hour']?.toString() ?? '0');
-    final minute = int.parse(json['minute']?.toString() ?? '0');
-    final kickoff = DateTime.tryParse(dateStr)?.add(Duration(hours: hour, minutes: minute)) ??
-        DateTime.now().add(const Duration(hours: 2));
-
-    // Strip BeSoccer query parameters (like &v=) before caching/passing
     String cleanUrl(String? url) {
       if (url == null || url.isEmpty) return '';
-      return url.split('&v=').first;
+      return url.replaceAll(RegExp(r'[?&]v=[^&#]*'), '');
     }
 
     String extractCode(String? abbr, String? name, String fallback) {
@@ -77,18 +84,91 @@ class PicoMatch {
       return fallback;
     }
 
-    // Status: 1 = finished, 0 = live, -1 = upcoming
+    // 1. Check if this is Supabase normalized structure (contains 'kickoff_at' or joined tables)
+    if (json.containsKey('kickoff_at')) {
+      final id = json['id']?.toString() ?? '';
+      final providerId = json['provider_match_id']?.toString();
+      final compId = json['competition_id']?.toString();
+      final hId = json['home_team_id']?.toString();
+      final aId = json['away_team_id']?.toString();
+      final kickoff = DateTime.tryParse(json['kickoff_at']?.toString() ?? '') ??
+          DateTime.now().add(const Duration(hours: 2));
+
+      // Joined relations
+      Competition? comp;
+      if (json['competition'] is Map<String, dynamic>) {
+        comp = Competition.fromJson(json['competition'] as Map<String, dynamic>);
+      }
+
+      Team? hTeam;
+      if (json['home_team'] is Map<String, dynamic>) {
+        hTeam = Team.fromJson(json['home_team'] as Map<String, dynamic>);
+      }
+
+      Team? aTeam;
+      if (json['away_team'] is Map<String, dynamic>) {
+        aTeam = Team.fromJson(json['away_team'] as Map<String, dynamic>);
+      }
+
+      final rawStatus = json['status']?.toString();
+      MatchStatus status = MatchStatus.upcoming;
+      if (rawStatus == 'finished') {
+        status = MatchStatus.finished;
+      } else if (rawStatus == 'live') {
+        status = MatchStatus.live;
+      } else if (rawStatus == 'postponed') {
+        status = MatchStatus.postponed;
+      } else if (rawStatus == 'cancelled') {
+        status = MatchStatus.cancelled;
+      } else if (rawStatus == 'locked') {
+        status = MatchStatus.locked;
+      }
+
+      final homeName = hTeam?.name ?? json['home_team_name']?.toString() ?? '';
+      final awayName = aTeam?.name ?? json['away_team_name']?.toString() ?? '';
+
+      return PicoMatch(
+        id: id,
+        providerMatchId: providerId,
+        competitionId: compId,
+        homeTeamId: hId,
+        awayTeamId: aId,
+        kickoffAt: kickoff,
+        status: status,
+        homeScore: json['home_score'] as int?,
+        awayScore: json['away_score'] as int?,
+        settled: json['settled'] as bool? ?? false,
+        competitionName: comp?.name ?? json['competition_name']?.toString() ?? '',
+        competitionBadgeUrl: cleanUrl(comp?.emblemUrl ?? json['competition_badge_url']?.toString()),
+        homeTeamName: homeName,
+        homeTeamCode: hTeam?.shortName ?? extractCode(null, homeName, 'HOM'),
+        homeTeamBadgeUrl: cleanUrl(hTeam?.crestUrl ?? json['home_team_badge_url']?.toString()),
+        awayTeamName: awayName,
+        awayTeamCode: aTeam?.shortName ?? extractCode(null, awayName, 'AWY'),
+        awayTeamBadgeUrl: cleanUrl(aTeam?.crestUrl ?? json['away_team_badge_url']?.toString()),
+        competition: comp,
+        homeTeam: hTeam,
+        awayTeam: aTeam,
+      );
+    }
+
+    // 2. BeSoccer / Mock JSON format
+    final dateStr = (json['date'] as String? ?? '2025-01-01').replaceAll('/', '-');
+    final hour = int.tryParse(json['hour']?.toString() ?? '0') ?? 0;
+    final minute = int.tryParse(json['minute']?.toString() ?? '0') ?? 0;
+    final kickoff = DateTime.tryParse(dateStr)?.add(Duration(hours: hour, minutes: minute)) ??
+        DateTime.now().add(const Duration(hours: 2));
+
     final rawStatus = json['status'];
-    final MatchStatus matchStatus;
-    if (rawStatus == 1) {
+    MatchStatus matchStatus;
+    if (rawStatus == 1 || rawStatus == '1') {
       matchStatus = MatchStatus.finished;
-    } else if (rawStatus == 0) {
+    } else if (rawStatus == 0 || rawStatus == '0') {
       matchStatus = MatchStatus.live;
     } else {
       matchStatus = MatchStatus.upcoming;
     }
 
-    // Parse score from result (e.g. "2-1", "0-0", or "x-x")
     int? parsedHomeScore;
     int? parsedAwayScore;
     final resultStr = json['result']?.toString();
@@ -104,15 +184,17 @@ class PicoMatch {
     final visitorName = (json['visitor'] as String?) ?? '';
 
     return PicoMatch(
-      id: json['id'].toString(),
-      competitionName: json['competition_name'] ?? '',
-      competitionBadgeUrl: cleanUrl(json['logo']),
+      id: json['id']?.toString() ?? '',
+      providerMatchId: json['id']?.toString(),
+      competitionId: json['league_id']?.toString(),
+      competitionName: json['competition_name']?.toString() ?? '',
+      competitionBadgeUrl: cleanUrl(json['logo']?.toString()),
       homeTeamName: localName,
-      homeTeamCode: extractCode(json['local_abbr'], localName, 'HOM'),
-      homeTeamBadgeUrl: cleanUrl(json['local_shield']),
+      homeTeamCode: extractCode(json['local_abbr']?.toString(), localName, 'HOM'),
+      homeTeamBadgeUrl: cleanUrl(json['local_shield']?.toString()),
       awayTeamName: visitorName,
-      awayTeamCode: extractCode(json['visitor_abbr'], visitorName, 'AWY'),
-      awayTeamBadgeUrl: cleanUrl(json['visitor_shield']),
+      awayTeamCode: extractCode(json['visitor_abbr']?.toString(), visitorName, 'AWY'),
+      awayTeamBadgeUrl: cleanUrl(json['visitor_shield']?.toString()),
       kickoffAt: kickoff,
       status: matchStatus,
       homeScore: parsedHomeScore,
@@ -122,54 +204,4 @@ class PicoMatch {
       rawResult: resultStr,
     );
   }
-
-  PicoMatch copyWith({
-    String? id,
-    String? competitionName,
-    String? competitionBadgeUrl,
-    String? homeTeamName,
-    String? homeTeamCode,
-    String? homeTeamBadgeUrl,
-    String? awayTeamName,
-    String? awayTeamCode,
-    String? awayTeamBadgeUrl,
-    DateTime? kickoffAt,
-    DateTime? lockAt,
-    MatchStatus? status,
-    int? homeScore,
-    int? awayScore,
-    String? round,
-    String? leagueId,
-    String? rawResult,
-  }) {
-    return PicoMatch(
-      id: id ?? this.id,
-      competitionName: competitionName ?? this.competitionName,
-      competitionBadgeUrl: competitionBadgeUrl ?? this.competitionBadgeUrl,
-      homeTeamName: homeTeamName ?? this.homeTeamName,
-      homeTeamCode: homeTeamCode ?? this.homeTeamCode,
-      homeTeamBadgeUrl: homeTeamBadgeUrl ?? this.homeTeamBadgeUrl,
-      awayTeamName: awayTeamName ?? this.awayTeamName,
-      awayTeamCode: awayTeamCode ?? this.awayTeamCode,
-      awayTeamBadgeUrl: awayTeamBadgeUrl ?? this.awayTeamBadgeUrl,
-      kickoffAt: kickoffAt ?? this.kickoffAt,
-      lockAt: lockAt ?? this.lockAt,
-      status: status ?? this.status,
-      homeScore: homeScore ?? this.homeScore,
-      awayScore: awayScore ?? this.awayScore,
-      round: round ?? this.round,
-      leagueId: leagueId ?? this.leagueId,
-      rawResult: rawResult ?? this.rawResult,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is PicoMatch &&
-          runtimeType == other.runtimeType &&
-          id == other.id;
-
-  @override
-  int get hashCode => id.hashCode;
 }

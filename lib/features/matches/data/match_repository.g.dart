@@ -8,14 +8,18 @@ part of 'match_repository.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Riverpod provider exposing the active [MatchRepository].
 
 @ProviderFor(matchRepository)
 final matchRepositoryProvider = MatchRepositoryProvider._();
+
+/// Riverpod provider exposing the active [MatchRepository].
 
 final class MatchRepositoryProvider
     extends
         $FunctionalProvider<MatchRepository, MatchRepository, MatchRepository>
     with $Provider<MatchRepository> {
+  /// Riverpod provider exposing the active [MatchRepository].
   MatchRepositoryProvider._()
     : super(
         from: null,
@@ -49,4 +53,4 @@ final class MatchRepositoryProvider
   }
 }
 
-String _$matchRepositoryHash() => r'd1db834c67e89cad16935f5917f333d16fb33ae1';
+String _$matchRepositoryHash() => r'f978575a4dc436ce6dcec726e35f1858cef114d0';
