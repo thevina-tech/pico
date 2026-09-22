@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,25 +6,31 @@ import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/features/auth/domain/auth_state.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
+import 'package:pico/features/matches/domain/competition.dart';
+import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
+import 'package:pico/features/profile/data/profile_repository.dart';
+import 'package:pico/features/profile/presentation/personalization_controller.dart';
+import 'package:pico/features/profile/presentation/user_profile_provider.dart';
+import 'package:pico/features/tournaments/data/tournament_repository.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
 /// The official Pico Onboarding Funnel screen.
 ///
-/// Houses a smooth two-step onboarding sequence matching Stitch:
-/// - Step 1/5: "Pico — Onboarding Welcome" (`a710be47910c41288300983d419aac7a`)
-/// - Step 2/5: "Pico — How Pico Works" (`135649edac1d43758bf6b8fd802338ae`)
-///
-/// Tapping "Continue" on Step 2 completes anonymous authentication and
-/// proceeds to Step 3/5: Personalization (`/personalization`).
+/// Houses a smooth five-step linear onboarding sequence:
+/// - Step 1/5: Welcome Screen
+/// - Step 2/5: How Pico Works
+/// - Step 3/5: Authentication & Username
+/// - Step 4/5: Choose Favorite Team (Database Driven)
+/// - Step 5/5: Choose 2 Leagues (Database Driven)
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({
     super.key,
     this.initialPage = 0,
   });
 
-  /// The starting step page index: 0 for Welcome (1/5), 1 for How Pico Works (2/5).
+  /// The starting step page index (0 to 4).
   final int initialPage;
 
   @override
@@ -33,12 +40,33 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   late final PageController _pageController;
   late int _currentPage;
-  bool _isLoading = false;
+  String _username = '';
+  String? _selectedTeamId;
+  final Set<String> _selectedLeagueIds = {};
+  String? _step3ErrorMessage;
 
   @override
   void initState() {
     super.initState();
-    _currentPage = widget.initialPage.clamp(0, 1);
+    final authState = ref.read(authProvider);
+    if (widget.initialPage == 0 &&
+        authState is PicoAuthAuthenticated &&
+        !authState.isPersonalized) {
+      // If user is already authenticated (e.g. from anonymous login) but not personalized,
+      // resume at Step 3 (or Step 4 if username is already chosen) instead of replaying Welcome.
+      final profile = ref.read(currentUserProfileProvider).value;
+      if (profile != null &&
+          profile.username != null &&
+          profile.username!.isNotEmpty &&
+          !profile.username!.startsWith('Guest_')) {
+        _username = profile.username!;
+        _currentPage = 3; // Step 4: Team Selection
+      } else {
+        _currentPage = 2; // Step 3: Username
+      }
+    } else {
+      _currentPage = widget.initialPage.clamp(0, 4);
+    }
     _pageController = PageController(initialPage: _currentPage);
   }
 
@@ -48,33 +76,21 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     super.dispose();
   }
 
-  void _goToHowItWorks() {
+  void _goToPage(int page) {
     if (_pageController.hasClients) {
       _pageController.animateToPage(
-        1,
+        page,
         duration: const Duration(milliseconds: 350),
         curve: Curves.easeOutCubic,
       );
     } else {
-      setState(() => _currentPage = 1);
-    }
-  }
-
-  void _goToWelcome() {
-    if (_pageController.hasClients) {
-      _pageController.animateToPage(
-        0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-      );
-    } else {
-      setState(() => _currentPage = 0);
+      setState(() => _currentPage = page);
     }
   }
 
   void _handleBack() {
-    if (_pageController.hasClients && _currentPage > 0) {
-      _goToWelcome();
+    if (_currentPage > 0) {
+      _goToPage(_currentPage - 1);
       return;
     }
     try {
@@ -85,47 +101,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     } catch (_) {}
   }
 
-  Future<void> _handleContinueToPersonalization() async {
-    if (_isLoading) return;
-    setState(() => _isLoading = true);
-
-    try {
-      await ref.read(authProvider.notifier).signInAnonymously();
-      if (mounted) {
-        context.go('/personalization');
-      }
-    } catch (e) {
-      if (mounted) {
-        final message =
-            e is supa.AuthApiException ? e.message : 'Failed to sign in: $e';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: PicoColors.error,
-            duration: const Duration(seconds: 6),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final authState = ref.watch(authProvider);
-    final isAuthenticating = _isLoading || authState is PicoAuthAuthenticating;
 
     return PopScope(
       canPop: _currentPage == 0,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
-        if (_currentPage > 0) {
-          _goToWelcome();
-        }
+        _handleBack();
       },
       child: Scaffold(
         backgroundColor: const Color(0xFF0B1B13),
@@ -142,16 +126,64 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     // Step 1/5: Welcome
                     _OnboardingWelcomeStep(
                       l10n: l10n,
-                      onGetStarted: _goToHowItWorks,
+                      onGetStarted: () => _goToPage(1),
                     ),
 
                     // Step 2/5: How Pico Works
                     _OnboardingHowItWorksStep(
                       l10n: l10n,
-                      isAuthenticating: isAuthenticating,
-                      onBack: _handleBack,
-                      onSkip: _handleContinueToPersonalization,
-                      onContinue: _handleContinueToPersonalization,
+                      isAuthenticating: false,
+                      onBack: () => _goToPage(0),
+                      onSkip: () => _goToPage(2),
+                      onContinue: () => _goToPage(2),
+                    ),
+
+                    // Step 3/5: Authentication & Username
+                    _OnboardingAuthStep(
+                      l10n: l10n,
+                      username: _username,
+                      errorMessage: _step3ErrorMessage,
+                      onBack: () => _goToPage(1),
+                      onUsernameConfirmed: (username) {
+                        setState(() {
+                          _username = username;
+                          _step3ErrorMessage = null;
+                        });
+                        _goToPage(3);
+                      },
+                    ),
+
+                    // Step 4/5: Choose Favorite Team (Database Driven)
+                    _OnboardingTeamSelectionStep(
+                      l10n: l10n,
+                      selectedTeamId: _selectedTeamId,
+                      onBack: () => _goToPage(2),
+                      onContinue: (teamId) {
+                        setState(() => _selectedTeamId = teamId);
+                        _goToPage(4);
+                      },
+                    ),
+
+                    // Step 5/5: Choose 1 or 2 Leagues (Database Driven)
+                    _OnboardingLeaguesSelectionStep(
+                      l10n: l10n,
+                      username: _username,
+                      selectedTeamId: _selectedTeamId,
+                      selectedLeagueIds: _selectedLeagueIds,
+                      onBack: () => _goToPage(3),
+                      onLeaguesChanged: (leagues) {
+                        setState(() {
+                          _selectedLeagueIds.clear();
+                          _selectedLeagueIds.addAll(leagues);
+                        });
+                      },
+                      onUsernameConflict: (error) {
+                        setState(() {
+                          _step3ErrorMessage = error;
+                        });
+                        _goToPage(2);
+                      },
+                      onFinished: () => context.go('/home'),
                     ),
                   ],
                 ),
@@ -577,132 +609,11 @@ class _OnboardingHowItWorksStep extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Back Action Button
-          GestureDetector(
-            onTap: isAuthenticating ? null : onBack,
-            child: Container(
-              width: 40.0,
-              height: 40.0,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(12.0),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.15),
-                ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.arrow_back,
-                color: Colors.white,
-                size: 20.0,
-              ),
-            ),
-          ),
-
-          // 5-Step Segmented Pill (Step 2/5 Active Glowing Gold)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6.0),
-            decoration: BoxDecoration(
-              color: const Color(0x4D000000),
-              borderRadius: BorderRadius.circular(999.0),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.15),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Dot 1 (Completed / Visited)
-                Container(
-                  width: 12.0,
-                  height: 6.0,
-                  decoration: BoxDecoration(
-                    color: const Color(0x8099F6B6),
-                    borderRadius: BorderRadius.circular(999.0),
-                  ),
-                ),
-                const SizedBox(width: 6.0),
-
-                // Dot 2 (Active Pill Glowing Gold)
-                Container(
-                  width: 24.0,
-                  height: 6.0,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFDFA0),
-                    borderRadius: BorderRadius.circular(999.0),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x99FFDFA0),
-                        blurRadius: 8.0,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 6.0),
-
-                // Dot 3
-                _buildDot(),
-                const SizedBox(width: 6.0),
-
-                // Dot 4
-                _buildDot(),
-                const SizedBox(width: 6.0),
-
-                // Dot 5
-                _buildDot(),
-                const SizedBox(width: 8.0),
-
-                // Step Counter Text
-                const Text(
-                  '2/5',
-                  style: TextStyle(
-                    fontFamily: 'Space Grotesk',
-                    fontSize: 11.0,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xE6FFFFFF),
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Skip Action
-          TextButton(
-            onPressed: isAuthenticating ? null : onSkip,
-            child: Text(
-              l10n?.skipButton ?? 'Skip',
-              style: TextStyle(
-                fontFamily: 'Space Grotesk',
-                fontSize: 12.0,
-                fontWeight: FontWeight.w700,
-                color: Colors.white.withValues(alpha: 0.70),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDot() {
-    return Container(
-      width: 6.0,
-      height: 6.0,
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.20),
-        shape: BoxShape.circle,
-      ),
+    return _OnboardingStepHeader(
+      currentStep: 2,
+      onBack: onBack,
+      onSkip: onSkip,
+      isBackEnabled: !isAuthenticating,
     );
   }
 
@@ -1088,3 +999,1258 @@ class _TactileGoldButtonState extends State<_TactileGoldButton> {
     );
   }
 }
+
+String? _cleanUrl(String? url) {
+  if (url == null || url.isEmpty) return null;
+  return url.split('?').first;
+}
+
+/// Reusable top step header with back action, 5-dot segmented progress capsule, and step counter.
+class _OnboardingStepHeader extends StatelessWidget {
+  const _OnboardingStepHeader({
+    required this.currentStep,
+    required this.onBack,
+    this.onSkip,
+    this.isBackEnabled = true,
+  });
+
+  final int currentStep;
+  final VoidCallback onBack;
+  final VoidCallback? onSkip;
+  final bool isBackEnabled;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Back Action Button
+          GestureDetector(
+            onTap: isBackEnabled ? onBack : null,
+            child: Container(
+              width: 40.0,
+              height: 40.0,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.15),
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    offset: Offset(0, 2),
+                    blurRadius: 4.0,
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 20.0,
+              ),
+            ),
+          ),
+
+          // 5-Step Segmented Capsule
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6.0),
+            decoration: BoxDecoration(
+              color: const Color(0x4D000000),
+              borderRadius: BorderRadius.circular(999.0),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.15),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (int i = 1; i <= 5; i++) ...[
+                  if (i == currentStep)
+                    Container(
+                      width: 24.0,
+                      height: 6.0,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFDFA0),
+                        borderRadius: BorderRadius.circular(999.0),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x99FFDFA0),
+                            blurRadius: 8.0,
+                          ),
+                        ],
+                      ),
+                    )
+                  else if (i < currentStep)
+                    Container(
+                      width: 12.0,
+                      height: 6.0,
+                      decoration: BoxDecoration(
+                        color: const Color(0x8099F6B6),
+                        borderRadius: BorderRadius.circular(999.0),
+                      ),
+                    )
+                  else
+                    Container(
+                      width: 6.0,
+                      height: 6.0,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.25),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  if (i < 5) const SizedBox(width: 6.0),
+                ],
+                const SizedBox(width: 8.0),
+                Text(
+                  '$currentStep/5',
+                  style: const TextStyle(
+                    fontFamily: 'Space Grotesk',
+                    fontSize: 11.0,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xE6FFFFFF),
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Right side: Skip button or empty balancing box
+          if (onSkip != null)
+            TextButton(
+              onPressed: isBackEnabled ? onSkip : null,
+              child: Text(
+                'Skip',
+                style: TextStyle(
+                  fontFamily: 'Space Grotesk',
+                  fontSize: 12.0,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white.withValues(alpha: 0.70),
+                ),
+              ),
+            )
+          else
+            const SizedBox(width: 40.0),
+        ],
+      ),
+    );
+  }
+}
+
+/// Step 3/5: Authentication & Username Step.
+class _OnboardingAuthStep extends ConsumerStatefulWidget {
+  const _OnboardingAuthStep({
+    required this.l10n,
+    required this.username,
+    required this.errorMessage,
+    required this.onBack,
+    required this.onUsernameConfirmed,
+  });
+
+  final AppLocalizations? l10n;
+  final String username;
+  final String? errorMessage;
+  final VoidCallback onBack;
+  final ValueChanged<String> onUsernameConfirmed;
+
+  @override
+  ConsumerState<_OnboardingAuthStep> createState() => _OnboardingAuthStepState();
+}
+
+class _OnboardingAuthStepState extends ConsumerState<_OnboardingAuthStep> {
+  late final TextEditingController _usernameController;
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _usernameController = TextEditingController(text: widget.username);
+    _errorMessage = widget.errorMessage;
+  }
+
+  @override
+  void didUpdateWidget(covariant _OnboardingAuthStep oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.username != oldWidget.username &&
+        widget.username != _usernameController.text) {
+      _usernameController.text = widget.username;
+    }
+    if (widget.errorMessage != oldWidget.errorMessage &&
+        widget.errorMessage != null) {
+      setState(() => _errorMessage = widget.errorMessage);
+    }
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleContinue() async {
+    final l10n = widget.l10n;
+    final username = _usernameController.text.trim();
+
+    if (username.isEmpty) {
+      setState(() {
+        _errorMessage =
+            l10n?.usernameErrorEmpty ?? 'Please introduce a username to continue.';
+      });
+      return;
+    }
+
+    if (username.length < 3) {
+      setState(() {
+        _errorMessage =
+            l10n?.usernameErrorTooShort ?? 'Username must be at least 3 characters';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final repo = ref.read(profileRepositoryProvider);
+      final authState = ref.read(authProvider);
+      String? currentUserId;
+      if (authState is PicoAuthAuthenticated && authState.user != null) {
+        currentUserId = authState.user!.id;
+      }
+
+      // Pre-check if username is already taken by another user before advancing
+      final isAvailable = await repo.isUsernameAvailable(
+        username,
+        excludeUserId: currentUserId,
+      );
+      if (!isAvailable) {
+        if (mounted) {
+          setState(() {
+            _errorMessage = l10n?.usernameTakenError ??
+                'This username is already taken. Please choose another one.';
+            _isLoading = false;
+          });
+        }
+        return;
+      }
+
+      // Update personalization controller in-memory
+      ref.read(personalizationControllerProvider.notifier).setUsername(username);
+
+      if (mounted) {
+        widget.onUsernameConfirmed(username);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Error: $e';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = widget.l10n;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Header
+                      _OnboardingStepHeader(
+                        currentStep: 3,
+                        onBack: widget.onBack,
+                        isBackEnabled: !_isLoading,
+                      ),
+                      const SizedBox(height: 28.0),
+
+                      // Shield / Identity Emblem
+                      Container(
+                        width: 72.0,
+                        height: 72.0,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFF142B20),
+                          border: Border.all(
+                            color: const Color(0xFFFFDFA0).withValues(alpha: 0.3),
+                            width: 1.5,
+                          ),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x3300E297),
+                              blurRadius: 18.0,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.person_pin_rounded,
+                            size: 38.0,
+                            color: Color(0xFFFFDFA0),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20.0),
+
+                      // Title
+                      Text(
+                        l10n?.step3AuthTitle ?? 'What Should We Call You?',
+                        textAlign: TextAlign.center,
+                        style: PicoTypography.headlineLgMobile.copyWith(
+                          color: PicoColors.textWhite,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 24.0,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
+
+                      // Subtitle
+                      Text(
+                        l10n?.step3AuthSubtitle ??
+                            'Pick a username for leaderboards and friend leagues.',
+                        textAlign: TextAlign.center,
+                        style: PicoTypography.bodyMd.copyWith(
+                          color: const Color(0xFFBECABE),
+                          fontSize: 14.0,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 32.0),
+
+                      // Username Input Well
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 6.0),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF07140D),
+                          borderRadius: BorderRadius.circular(16.0),
+                          border: Border.all(
+                            color: _errorMessage != null
+                                ? PicoColors.error
+                                : const Color(0xFF1E382B),
+                            width: 1.5,
+                          ),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x4D000000),
+                              offset: Offset(0, 2),
+                              blurRadius: 6.0,
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            const Text(
+                              '@',
+                              style: TextStyle(
+                                color: Color(0xFFFFDFA0),
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(width: 10.0),
+                            Expanded(
+                              child: TextField(
+                                controller: _usernameController,
+                                enabled: !_isLoading,
+                                style: const TextStyle(
+                                  fontFamily: 'Rubik',
+                                  fontSize: 17.0,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                                decoration: InputDecoration(
+                                  hintText:
+                                      l10n?.usernamePlaceholder ?? 'e.g. striker99',
+                                  hintStyle: TextStyle(
+                                    fontFamily: 'Rubik',
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.white.withValues(alpha: 0.35),
+                                  ),
+                                  border: InputBorder.none,
+                                  isDense: true,
+                                ),
+                                textInputAction: TextInputAction.done,
+                                onSubmitted: (_) => _handleContinue(),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      if (_errorMessage != null) ...[
+                        const SizedBox(height: 8.0),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            _errorMessage!,
+                            style: const TextStyle(
+                              color: PicoColors.error,
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+
+                  // Bottom Docked CTA Area
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0, top: 24.0),
+                    child: _TactileGoldButton(
+                      text: l10n?.continueButton ?? 'Continue',
+                      isLoading: _isLoading,
+                      onPressed: _isLoading ? null : _handleContinue,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Step 4/5: Choose Favorite Team (Database Driven from public.teams).
+class _OnboardingTeamSelectionStep extends ConsumerStatefulWidget {
+  const _OnboardingTeamSelectionStep({
+    required this.l10n,
+    required this.selectedTeamId,
+    required this.onBack,
+    required this.onContinue,
+  });
+
+  final AppLocalizations? l10n;
+  final String? selectedTeamId;
+  final VoidCallback onBack;
+  final ValueChanged<String> onContinue;
+
+  @override
+  ConsumerState<_OnboardingTeamSelectionStep> createState() =>
+      _OnboardingTeamSelectionStepState();
+}
+
+class _OnboardingTeamSelectionStepState
+    extends ConsumerState<_OnboardingTeamSelectionStep> {
+  String? _selectedTeamId;
+  String _searchQuery = '';
+  late final TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTeamId = widget.selectedTeamId;
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void didUpdateWidget(covariant _OnboardingTeamSelectionStep oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectedTeamId != oldWidget.selectedTeamId) {
+      setState(() => _selectedTeamId = widget.selectedTeamId);
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _handleContinue() {
+    if (_selectedTeamId != null) {
+      ref
+          .read(personalizationControllerProvider.notifier)
+          .selectTeam(_selectedTeamId!);
+      widget.onContinue(_selectedTeamId!);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = widget.l10n;
+    final teamsAsync = ref.watch(availableTeamsProvider);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          _OnboardingStepHeader(
+            currentStep: 4,
+            onBack: widget.onBack,
+          ),
+          const SizedBox(height: 16.0),
+
+          // Title
+          Text(
+            l10n?.chooseFavoriteTeamTitle ?? 'Choose Favorite Team',
+            style: PicoTypography.headlineLgMobile.copyWith(
+              color: PicoColors.textWhite,
+              fontWeight: FontWeight.w800,
+              fontSize: 22.0,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 4.0),
+
+          // Subtitle
+          Text(
+            l10n?.chooseFavoriteTeamSubtitle ??
+                'Select your club to personalize your feed and upcoming matches.',
+            style: PicoTypography.bodySm.copyWith(
+              color: const Color(0xFFBECABE),
+              fontSize: 13.0,
+            ),
+          ),
+          const SizedBox(height: 14.0),
+
+          // Search Bar
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14.0),
+            decoration: BoxDecoration(
+              color: const Color(0xFF07140D),
+              borderRadius: BorderRadius.circular(12.0),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.search_rounded,
+                  size: 20.0,
+                  color: Color(0xFF8AA695),
+                ),
+                const SizedBox(width: 8.0),
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    decoration: InputDecoration(
+                      hintText:
+                          l10n?.searchTeamsPlaceholder ?? 'Search clubs...',
+                      hintStyle: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.35),
+                        fontSize: 13.5,
+                      ),
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding:
+                          const EdgeInsets.symmetric(vertical: 10.0),
+                    ),
+                    onChanged: (val) {
+                      setState(() => _searchQuery = val.trim().toLowerCase());
+                    },
+                  ),
+                ),
+                if (_searchQuery.isNotEmpty)
+                  GestureDetector(
+                    onTap: () {
+                      _searchController.clear();
+                      setState(() => _searchQuery = '');
+                    },
+                    child: const Icon(
+                      Icons.close_rounded,
+                      size: 18.0,
+                      color: Colors.white60,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12.0),
+
+          // Expanded Grid of Teams (Internally scrollable, keeping Continue button sticky!)
+          Expanded(
+            child: teamsAsync.when(
+              loading: () => const Center(
+                child: CircularProgressIndicator(color: PicoColors.gold),
+              ),
+              error: (err, _) => Center(
+                child: Text(
+                  'Failed to load teams: $err',
+                  style: const TextStyle(color: PicoColors.error),
+                ),
+              ),
+              data: (allTeams) {
+                final filtered = _searchQuery.isEmpty
+                    ? allTeams
+                    : allTeams.where((t) {
+                        final name = t.name.toLowerCase();
+                        final code = (t.shortName ?? '').toLowerCase();
+                        return name.contains(_searchQuery) ||
+                            code.contains(_searchQuery);
+                      }).toList();
+
+                if (filtered.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 30.0),
+                      child: Text(
+                        'No clubs found matching "$_searchQuery"',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 13.5,
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                return GridView.builder(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  itemCount: filtered.length,
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10.0,
+                    mainAxisSpacing: 10.0,
+                    childAspectRatio: 1.25,
+                  ),
+                  itemBuilder: (context, index) {
+                    final team = filtered[index];
+                    final isSelected = _selectedTeamId == team.id;
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() => _selectedTeamId = team.id);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(10.0),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? const Color(0xFF142B20)
+                              : const Color(0xFF0F2218),
+                          borderRadius: BorderRadius.circular(14.0),
+                          border: Border.all(
+                            color: isSelected
+                                ? PicoColors.gold
+                                : Colors.white.withValues(alpha: 0.08),
+                            width: isSelected ? 2.0 : 1.0,
+                          ),
+                          boxShadow: isSelected
+                              ? const [
+                                  BoxShadow(
+                                    color: Color(0x33FFDFA0),
+                                    blurRadius: 10.0,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: Stack(
+                          children: [
+                            Align(
+                              alignment: Alignment.center,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CachedNetworkImage(
+                                    imageUrl:
+                                        _cleanUrl(team.crestUrl) ?? '',
+                                    width: 44.0,
+                                    height: 44.0,
+                                    fit: BoxFit.contain,
+                                    placeholder: (context, url) => Container(
+                                      width: 44.0,
+                                      height: 44.0,
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFF152A1E),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.shield_outlined,
+                                        size: 24.0,
+                                        color: Color(0xFF4C7B5D),
+                                      ),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        Container(
+                                      width: 44.0,
+                                      height: 44.0,
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFF152A1E),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.shield_outlined,
+                                        size: 24.0,
+                                        color: Color(0xFF4C7B5D),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8.0),
+                                  Text(
+                                    team.name,
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontFamily: 'Rubik',
+                                      fontSize: 12.5,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w800
+                                          : FontWeight.w600,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : const Color(0xFFE0E0DC),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (isSelected)
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: Container(
+                                  width: 20.0,
+                                  height: 20.0,
+                                  decoration: const BoxDecoration(
+                                    color: PicoColors.gold,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.check,
+                                    size: 13.0,
+                                    color: Color(0xFF0B1B13),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+
+          // Bottom Docked Sticky CTA Area (Visible at all times!)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0, top: 10.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10.0, vertical: 4.0),
+                      decoration: BoxDecoration(
+                        color: _selectedTeamId != null
+                            ? const Color(0x33FFDFA0)
+                            : Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(999.0),
+                      ),
+                      child: Text(
+                        _selectedTeamId != null
+                            ? (l10n?.selectedTeamBadge ?? '1/1 Selected')
+                            : '0/1 Selected',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                          color: _selectedTeamId != null
+                              ? const Color(0xFFFFDFA0)
+                              : Colors.white.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8.0),
+                _TactileGoldButton(
+                  text: l10n?.continueButton ?? 'Continue',
+                  isLoading: false,
+                  onPressed: _selectedTeamId == null ? null : _handleContinue,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Step 5/5: Choose 1 or 2 Leagues (Database Driven from public.competitions).
+class _OnboardingLeaguesSelectionStep extends ConsumerStatefulWidget {
+  const _OnboardingLeaguesSelectionStep({
+    required this.l10n,
+    required this.username,
+    required this.selectedTeamId,
+    required this.selectedLeagueIds,
+    required this.onBack,
+    required this.onLeaguesChanged,
+    required this.onUsernameConflict,
+    required this.onFinished,
+  });
+
+  final AppLocalizations? l10n;
+  final String username;
+  final String? selectedTeamId;
+  final Set<String> selectedLeagueIds;
+  final VoidCallback onBack;
+  final ValueChanged<Set<String>> onLeaguesChanged;
+  final ValueChanged<String> onUsernameConflict;
+  final VoidCallback onFinished;
+
+  @override
+  ConsumerState<_OnboardingLeaguesSelectionStep> createState() =>
+      _OnboardingLeaguesSelectionStepState();
+}
+
+class _OnboardingLeaguesSelectionStepState
+    extends ConsumerState<_OnboardingLeaguesSelectionStep> {
+  final Set<String> _selectedLeagueIds = {};
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedLeagueIds.addAll(widget.selectedLeagueIds);
+  }
+
+  @override
+  void didUpdateWidget(covariant _OnboardingLeaguesSelectionStep oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectedLeagueIds != oldWidget.selectedLeagueIds) {
+      _selectedLeagueIds.clear();
+      _selectedLeagueIds.addAll(widget.selectedLeagueIds);
+    }
+  }
+
+  Future<void> _handleFinish() async {
+    final l10n = widget.l10n;
+
+    // Validate 1 or 2 leagues
+    if (_selectedLeagueIds.isEmpty ||
+        _selectedLeagueIds.length > 2 ||
+        _isSubmitting) {
+      if (_selectedLeagueIds.isEmpty && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n?.twoLeaguesRequired ??
+                  'Please select 1 or 2 leagues to continue.',
+            ),
+            backgroundColor: PicoColors.error,
+          ),
+        );
+      }
+      return;
+    }
+
+    // Validate username is present
+    final trimmedUsername = widget.username.trim();
+    if (trimmedUsername.length < 3) {
+      widget.onUsernameConflict(
+        l10n?.usernameErrorTooShort ?? 'Username must be at least 3 characters',
+      );
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+    try {
+      final repo = ref.read(profileRepositoryProvider);
+
+      // 1. Verify username availability before creating/saving account
+      final isAvailable = await repo.isUsernameAvailable(trimmedUsername);
+      if (!isAvailable) {
+        if (mounted) {
+          setState(() => _isSubmitting = false);
+          widget.onUsernameConflict(
+            l10n?.usernameTakenError ??
+                'This username is already taken. Please choose another one.',
+          );
+        }
+        return;
+      }
+
+      // 2. Perform Supabase Anonymous Sign-In if not already authenticated
+      final currentAuth = ref.read(authProvider);
+      String? userId;
+      if (currentAuth is PicoAuthAuthenticated && currentAuth.user != null) {
+        userId = currentAuth.user!.id;
+      } else {
+        await ref.read(authProvider.notifier).signInAnonymously();
+        final updatedAuth = ref.read(authProvider);
+        if (updatedAuth is PicoAuthAuthenticated && updatedAuth.user != null) {
+          userId = updatedAuth.user!.id;
+        }
+      }
+
+      if (userId == null) {
+        throw Exception('Failed to create account session.');
+      }
+
+      // 3. Atomically update user personalization with all gathered onboarding data
+      await repo.updatePersonalization(
+        userId: userId,
+        username: trimmedUsername,
+        favoriteTeamId: widget.selectedTeamId,
+        favoriteTeamIds:
+            widget.selectedTeamId != null ? [widget.selectedTeamId!] : null,
+        favoriteLeagueIds: _selectedLeagueIds.toList(),
+      );
+
+      // 4. Auto-enroll user into default tournaments for their selected leagues
+      final tournamentRepo = ref.read(tournamentRepositoryProvider);
+      await tournamentRepo.enrollInDefaultTournaments(
+        userId: userId,
+        leagueIds: _selectedLeagueIds.toList(),
+      );
+
+      // 5. Mark as personalized in Auth state & invalidate relevant caches
+      ref.read(authProvider.notifier).markPersonalized();
+      ref.invalidate(currentUserProfileProvider);
+      ref.invalidate(enrolledTournamentsProvider);
+      ref.invalidate(matchesFeedProvider);
+
+      if (mounted) {
+        widget.onFinished();
+      }
+    } on supa.PostgrestException catch (e) {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+        if (e.code == '23505' ||
+            e.message.contains('profiles_username_key') ||
+            e.message.contains('unique constraint')) {
+          widget.onUsernameConflict(
+            l10n?.usernameTakenError ??
+                'This username is already taken. Please choose another one.',
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Database error: ${e.message}'),
+              backgroundColor: PicoColors.error,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to complete onboarding: $e'),
+            backgroundColor: PicoColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = widget.l10n;
+    final compsAsync = ref.watch(supportedCompetitionsProvider);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          _OnboardingStepHeader(
+            currentStep: 5,
+            onBack: widget.onBack,
+            isBackEnabled: !_isSubmitting,
+          ),
+          const SizedBox(height: 16.0),
+
+          // Title
+          Text(
+            l10n?.chooseLeaguesTitle ?? 'Choose Leagues',
+            style: PicoTypography.headlineLgMobile.copyWith(
+              color: PicoColors.textWhite,
+              fontWeight: FontWeight.w800,
+              fontSize: 22.0,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 4.0),
+
+          // Subtitle
+          Text(
+            l10n?.chooseLeaguesSubtitle ??
+                'Select 1 or 2 competitions to follow and compete in.',
+            style: PicoTypography.bodySm.copyWith(
+              color: const Color(0xFFBECABE),
+              fontSize: 13.0,
+            ),
+          ),
+          const SizedBox(height: 16.0),
+
+          // Expanded Grid of Competitions (Cards styled identically to team cards)
+          Expanded(
+            child: compsAsync.when(
+              loading: () => const Center(
+                child: CircularProgressIndicator(color: PicoColors.gold),
+              ),
+              error: (err, _) => Center(
+                child: Text(
+                  'Failed to load competitions: $err',
+                  style: const TextStyle(color: PicoColors.error),
+                ),
+              ),
+              data: (competitions) {
+                return GridView.builder(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  itemCount: competitions.length,
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10.0,
+                    mainAxisSpacing: 10.0,
+                    childAspectRatio: 1.25,
+                  ),
+                  itemBuilder: (context, index) {
+                    final comp = competitions[index];
+                    final isSelected =
+                        _selectedLeagueIds.contains(comp.id);
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          if (isSelected) {
+                            _selectedLeagueIds.remove(comp.id);
+                          } else {
+                            if (_selectedLeagueIds.length < 2) {
+                              _selectedLeagueIds.add(comp.id);
+                            } else {
+                              ScaffoldMessenger.of(context).clearSnackBars();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    l10n?.maxLeaguesReached ??
+                                        'You can select up to 2 leagues.',
+                                  ),
+                                  backgroundColor: PicoColors.error,
+                                  duration: const Duration(seconds: 2),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            }
+                          }
+                        });
+                        widget.onLeaguesChanged(_selectedLeagueIds);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(10.0),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? const Color(0xFF142B20)
+                              : const Color(0xFF0F2218),
+                          borderRadius: BorderRadius.circular(14.0),
+                          border: Border.all(
+                            color: isSelected
+                                ? PicoColors.gold
+                                : Colors.white.withValues(alpha: 0.08),
+                            width: isSelected ? 2.0 : 1.0,
+                          ),
+                          boxShadow: isSelected
+                              ? const [
+                                  BoxShadow(
+                                    color: Color(0x33FFDFA0),
+                                    blurRadius: 10.0,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: Stack(
+                          children: [
+                            Align(
+                              alignment: Alignment.center,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Emblem or Flag matching team card 44x44
+                                  if (comp.emblemUrl != null &&
+                                      comp.emblemUrl!.isNotEmpty)
+                                    CachedNetworkImage(
+                                      imageUrl:
+                                          _cleanUrl(comp.emblemUrl) ?? '',
+                                      width: 44.0,
+                                      height: 44.0,
+                                      fit: BoxFit.contain,
+                                      placeholder: (context, url) => Container(
+                                        width: 44.0,
+                                        height: 44.0,
+                                        alignment: Alignment.center,
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFF152A1E),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Text(
+                                          comp.displayFlag,
+                                          style: const TextStyle(fontSize: 26.0),
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          Container(
+                                        width: 44.0,
+                                        height: 44.0,
+                                        alignment: Alignment.center,
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFF152A1E),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Text(
+                                          comp.displayFlag,
+                                          style: const TextStyle(fontSize: 26.0),
+                                        ),
+                                      ),
+                                    )
+                                  else
+                                    Container(
+                                      width: 44.0,
+                                      height: 44.0,
+                                      alignment: Alignment.center,
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFF152A1E),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Text(
+                                        comp.displayFlag,
+                                        style: const TextStyle(fontSize: 26.0),
+                                      ),
+                                    ),
+                                  const SizedBox(height: 8.0),
+                                  Text(
+                                    comp.displayName,
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontFamily: 'Rubik',
+                                      fontSize: 12.5,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w800
+                                          : FontWeight.w600,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : const Color(0xFFE0E0DC),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (isSelected)
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: Container(
+                                  width: 20.0,
+                                  height: 20.0,
+                                  decoration: const BoxDecoration(
+                                    color: PicoColors.gold,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.check,
+                                    size: 13.0,
+                                    color: Color(0xFF0B1B13),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+
+          // Bottom Docked Sticky CTA Area (Visible at all times!)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0, top: 10.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 4.0),
+                      decoration: BoxDecoration(
+                        color: (_selectedLeagueIds.isNotEmpty &&
+                                _selectedLeagueIds.length <= 2)
+                            ? const Color(0x33FFDFA0)
+                            : Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(999.0),
+                      ),
+                      child: Text(
+                        l10n?.leaguesSelectedBadge(_selectedLeagueIds.length) ??
+                            '${_selectedLeagueIds.length}/2 Selected',
+                        style: TextStyle(
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.w700,
+                          color: (_selectedLeagueIds.isNotEmpty &&
+                                  _selectedLeagueIds.length <= 2)
+                              ? const Color(0xFFFFDFA0)
+                              : Colors.white.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8.0),
+                _TactileGoldButton(
+                  text: l10n?.finishButton ?? 'Finish',
+                  isLoading: _isSubmitting,
+                  onPressed: (_selectedLeagueIds.isNotEmpty &&
+                          _selectedLeagueIds.length <= 2 &&
+                          !_isSubmitting)
+                      ? _handleFinish
+                      : null,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+

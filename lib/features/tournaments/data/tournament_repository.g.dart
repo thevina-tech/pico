@@ -699,7 +699,7 @@ final class CompetitionMatchesProvider
 }
 
 String _$competitionMatchesHash() =>
-    r'0e43b60b98a3c44e4aa6f727b5d135bad1c67522';
+    r'89f9ab328abdc3460fad9f24c075036713d5f6c0';
 
 /// Provider for matches filtered by competition ID.
 

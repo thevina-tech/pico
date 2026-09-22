@@ -302,8 +302,8 @@ void main() {
         isPersonalized: false,
       );
 
-      expect(AppRouter.resolveRedirect(auth, '/home'), '/personalization');
-      expect(AppRouter.resolveRedirect(auth, '/onboarding'), '/personalization');
+      expect(AppRouter.resolveRedirect(auth, '/home'), '/onboarding');
+      expect(AppRouter.resolveRedirect(auth, '/onboarding'), isNull);
       expect(AppRouter.resolveRedirect(auth, '/personalization'), isNull);
     });
 
@@ -443,6 +443,250 @@ void main() {
 
       // Verify action button
       expect(find.text('Continue'), findsOneWidget);
+    });
+
+    testWidgets(
+        'OnboardingScreen Step 3/5: Authentication & Username renders and validates username input',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: OnboardingScreen(initialPage: 2),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify Step 3 UI
+      expect(find.text('What Should We Call You?'), findsOneWidget);
+      expect(find.text('Pick a username for leaderboards and friend leagues.'), findsOneWidget);
+      expect(find.text('@'), findsOneWidget);
+      expect(find.text('Continue'), findsOneWidget);
+      expect(find.text('3/5'), findsOneWidget);
+
+      // Tap Continue with empty field -> validates error
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+      expect(find.text('Please introduce a username to continue.'), findsOneWidget);
+
+      // Enter short username
+      await tester.enterText(find.byType(TextField), 'ab');
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+      expect(find.text('Username must be at least 3 characters'), findsOneWidget);
+
+      // Back button takes user back to Step 2
+      await tester.tap(find.byIcon(Icons.arrow_back));
+      await tester.pumpAndSettle();
+      expect(find.text('How Pico Works'), findsOneWidget);
+    });
+
+    testWidgets(
+        'OnboardingScreen Step 3/5: duplicate username prompts user without resetting to Step 1',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: OnboardingScreen(initialPage: 2),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('What Should We Call You?'), findsOneWidget);
+      expect(find.text('3/5'), findsOneWidget);
+
+      // Pre-populate mock cache with existing user 'taken_user'
+      final repo = ProviderScope.containerOf(tester.element(find.byType(OnboardingScreen)))
+          .read(profileRepositoryProvider);
+      await repo.updatePersonalization(
+        userId: 'existing_user_id',
+        username: 'taken_user',
+      );
+
+      // Enter 'taken_user' in TextField
+      await tester.enterText(find.byType(TextField), 'taken_user');
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+
+      // Verify the friendly duplicate username prompt is displayed
+      expect(
+        find.text('This username is already taken. Please choose another one.'),
+        findsOneWidget,
+      );
+
+      // Crucially verify we are STILL on Step 3 and did NOT go back to Step 1 (Welcome)
+      expect(find.text('What Should We Call You?'), findsOneWidget);
+      expect(find.text('3/5'), findsOneWidget);
+      expect(find.text('Predict Football.\nCompete with Friends.'), findsNothing);
+      expect(find.text('Get Started'), findsNothing);
+    });
+
+    testWidgets(
+        'OnboardingScreen Step 4/5: Team Selection renders search and enforces single club selection',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: OnboardingScreen(initialPage: 3),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify Step 4 Header & Copy
+      expect(find.text('Choose Favorite Team'), findsOneWidget);
+      expect(find.text('Select your club to personalize your feed and upcoming matches.'), findsOneWidget);
+      expect(find.text('4/5'), findsOneWidget);
+      expect(find.text('0/1 Selected'), findsOneWidget);
+
+      // Clubs should be loaded from fallback/provider
+      expect(find.text('Real Madrid'), findsOneWidget);
+      expect(find.text('FC Barcelona'), findsOneWidget);
+
+      // Select Real Madrid
+      await tester.tap(find.text('Real Madrid'));
+      await tester.pumpAndSettle();
+      expect(find.text('1/1 Selected'), findsOneWidget);
+
+      // Switch selection to FC Barcelona (single-select only)
+      await tester.tap(find.text('FC Barcelona'));
+      await tester.pumpAndSettle();
+      expect(find.text('1/1 Selected'), findsOneWidget);
+
+      // Search filtering
+      await tester.enterText(find.byType(TextField), 'Aston');
+      await tester.pumpAndSettle();
+      expect(find.text('Aston Villa'), findsOneWidget);
+      expect(find.text('Real Madrid'), findsNothing);
+
+      // Clear search
+      await tester.tap(find.byIcon(Icons.close_rounded));
+      await tester.pumpAndSettle();
+      expect(find.text('Real Madrid'), findsOneWidget);
+
+      // Back button takes user back to Step 3
+      await tester.tap(find.byIcon(Icons.arrow_back));
+      await tester.pumpAndSettle();
+      expect(find.text('What Should We Call You?'), findsOneWidget);
+    });
+
+    testWidgets(
+        'OnboardingScreen Step 5/5: Choose Leagues allows 1 or 2 competitions and enables Finish',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: OnboardingScreen(initialPage: 4),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify Step 5 Header & Copy
+      expect(find.text('Choose Leagues'), findsOneWidget);
+      expect(find.text('Select 1 or 2 competitions to follow and compete in.'), findsOneWidget);
+      expect(find.text('5/5'), findsOneWidget);
+      expect(find.text('0/2 Selected'), findsOneWidget);
+      expect(find.text('Finish'), findsOneWidget);
+
+      // Select 1 league (e.g. La Liga) -> allows Finish (1 or 2 is accepted)
+      await tester.tap(find.text('La Liga'));
+      await tester.pumpAndSettle();
+      expect(find.text('1/2 Selected'), findsOneWidget);
+
+      // Select 2nd league (Premier League)
+      await tester.tap(find.text('Premier League'));
+      await tester.pumpAndSettle();
+      expect(find.text('2/2 Selected'), findsOneWidget);
+
+      // Attempting to select a 3rd (e.g., Serie A) is prevented
+      await tester.tap(find.text('Serie A'));
+      await tester.pumpAndSettle();
+      expect(find.text('2/2 Selected'), findsOneWidget);
+      expect(find.text('You can select up to 2 leagues.'), findsOneWidget);
+
+      // Deselect La Liga -> now 1/2 Selected, Finish is still valid
+      await tester.tap(find.text('La Liga'));
+      await tester.pumpAndSettle();
+      expect(find.text('1/2 Selected'), findsOneWidget);
+
+      // Back button takes user back to Step 4
+      await tester.tap(find.byIcon(Icons.arrow_back));
+      await tester.pumpAndSettle();
+      expect(find.text('Choose Favorite Team'), findsOneWidget);
+    });
+
+    testWidgets(
+        'OnboardingScreen: selections and username are maintained across back/forth navigation until finish',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: OnboardingScreen(initialPage: 2),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Step 3: Enter initial username
+      expect(find.text('What Should We Call You?'), findsOneWidget);
+      await tester.enterText(find.byType(TextField), 'goalscorer99');
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+
+      // Step 4: Choose Team
+      expect(find.text('Choose Favorite Team'), findsOneWidget);
+      await tester.tap(find.text('Real Madrid'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+
+      // Step 5: Choose Leagues
+      expect(find.text('Choose Leagues'), findsOneWidget);
+      await tester.tap(find.text('La Liga'));
+      await tester.pumpAndSettle();
+      expect(find.text('1/2 Selected'), findsOneWidget);
+
+      // Navigate back to Step 4
+      await tester.tap(find.byIcon(Icons.arrow_back));
+      await tester.pumpAndSettle();
+      expect(find.text('Choose Favorite Team'), findsOneWidget);
+      expect(find.text('1/1 Selected'), findsOneWidget); // Team selection preserved!
+
+      // Navigate back to Step 3
+      await tester.tap(find.byIcon(Icons.arrow_back));
+      await tester.pumpAndSettle();
+      expect(find.text('What Should We Call You?'), findsOneWidget);
+
+      // Verify username is preserved in text field and user can edit it
+      final textField = tester.widget<TextField>(find.byType(TextField));
+      expect(textField.controller?.text, 'goalscorer99');
+
+      // Change username
+      await tester.enterText(find.byType(TextField), 'super_striker');
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+
+      // Verify we are back on Step 4 and team is still selected
+      expect(find.text('Choose Favorite Team'), findsOneWidget);
+      expect(find.text('1/1 Selected'), findsOneWidget);
+
+      // Move forward to Step 5
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+      expect(find.text('Choose Leagues'), findsOneWidget);
+      expect(find.text('1/2 Selected'), findsOneWidget); // League selection preserved!
     });
   });
 }

@@ -302,6 +302,96 @@ abstract class AppLocalizations {
   /// **'Preferences sync instantly across Pico League'**
   String get preferencesSyncHint;
 
+  /// Button label to perform authentication and proceed
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to Continue'**
+  String get signInToContinue;
+
+  /// Headline for username and auth step
+  ///
+  /// In en, this message translates to:
+  /// **'What Should We Call You?'**
+  String get step3AuthTitle;
+
+  /// Subtitle for username and auth step
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a username for leaderboards and friend leagues.'**
+  String get step3AuthSubtitle;
+
+  /// Headline for team selection step
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Favorite Team'**
+  String get chooseFavoriteTeamTitle;
+
+  /// Subtitle for team selection step
+  ///
+  /// In en, this message translates to:
+  /// **'Select your club to personalize your feed and upcoming matches.'**
+  String get chooseFavoriteTeamSubtitle;
+
+  /// Placeholder for team search field
+  ///
+  /// In en, this message translates to:
+  /// **'Search clubs...'**
+  String get searchTeamsPlaceholder;
+
+  /// Headline for league selection step
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Leagues'**
+  String get chooseLeaguesTitle;
+
+  /// Subtitle for league selection step
+  ///
+  /// In en, this message translates to:
+  /// **'Select 1 or 2 competitions to follow and compete in.'**
+  String get chooseLeaguesSubtitle;
+
+  /// Action button to finish onboarding
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get finishButton;
+
+  /// Validation message when no team is selected
+  ///
+  /// In en, this message translates to:
+  /// **'Please select 1 team to continue.'**
+  String get oneTeamRequired;
+
+  /// Validation message when no leagues are selected
+  ///
+  /// In en, this message translates to:
+  /// **'Please select 1 or 2 leagues to continue.'**
+  String get twoLeaguesRequired;
+
+  /// Validation toast when attempting to select a 3rd league
+  ///
+  /// In en, this message translates to:
+  /// **'You can select up to 2 leagues.'**
+  String get maxLeaguesReached;
+
+  /// Error message when username already exists in database
+  ///
+  /// In en, this message translates to:
+  /// **'This username is already taken. Please choose another one.'**
+  String get usernameTakenError;
+
+  /// Badge showing 1 team selected
+  ///
+  /// In en, this message translates to:
+  /// **'1/1 Selected'**
+  String get selectedTeamBadge;
+
+  /// Badge showing selected leagues count
+  ///
+  /// In en, this message translates to:
+  /// **'{count}/2 Selected'**
+  String leaguesSelectedBadge(int count);
+
   /// Loading indicator text when saving profile
   ///
   /// In en, this message translates to:

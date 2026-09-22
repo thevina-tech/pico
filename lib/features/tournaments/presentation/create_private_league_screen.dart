@@ -83,145 +83,189 @@ class _CreatePrivateLeagueScreenState
     final compsMap = ref.read(competitionsMapProvider).value ?? {};
     final comp = compsMap[league.competitionId];
 
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isDismissible: false,
-      enableDrag: false,
-      backgroundColor: Colors.transparent,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withValues(alpha: 0.75),
       builder: (ctx) {
-        return Container(
-          padding: const EdgeInsets.fromLTRB(20.0, 24.0, 20.0, 32.0),
-          decoration: const BoxDecoration(
-            color: PicoColors.darkTray,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
-            border: Border(
-              top: BorderSide(color: Color(0x33FFFFFF), width: 1.5),
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Trophy token
-              Container(
-                width: 60.0,
-                height: 60.0,
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400.0),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(22.0, 26.0, 22.0, 26.0),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF143322),
-                  borderRadius: BorderRadius.circular(18.0),
-                  border: Border.all(color: PicoColors.gold, width: 2.0),
-                  boxShadow: const [
+                  color: PicoColors.darkTray,
+                  borderRadius: BorderRadius.circular(24.0),
+                  border: Border.all(
+                    color: PicoColors.gold.withValues(alpha: 0.35),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x33000000),
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
+                      color: Colors.black.withValues(alpha: 0.65),
+                      blurRadius: 32.0,
+                      offset: const Offset(0, 10),
+                    ),
+                    const BoxShadow(
+                      color: Color(0x3300E297),
+                      blurRadius: 24.0,
+                      offset: Offset(0, 2),
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.emoji_events_rounded,
-                  color: PicoColors.gold,
-                  size: 32.0,
-                ),
-              ),
-              const SizedBox(height: 14.0),
-              Text(
-                l10n.leagueCreatedSuccessTitle,
-                style: PicoTypography.headlineLgMobile.copyWith(
-                  color: PicoColors.textWhite,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 22.0,
-                ),
-              ),
-              const SizedBox(height: 4.0),
-              Text(
-                league.name,
-                style: PicoTypography.headlineMd.copyWith(
-                  color: PicoColors.gold,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16.0,
-                ),
-              ),
-              if (comp != null) ...[
-                const SizedBox(height: 4.0),
-                Text(
-                  comp.name,
-                  style: PicoTypography.bodySm.copyWith(
-                    color: PicoColors.textWhiteMuted,
-                  ),
-                ),
-              ],
-              const SizedBox(height: 20.0),
-
-              // 6-character segmented display
-              Text(
-                l10n.inviteCodeLabel,
-                style: PicoTypography.labelPillSm.copyWith(
-                  color: PicoColors.textWhiteMuted,
-                  letterSpacing: 1.2,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 8.0),
-              _buildSegmentedCode(league.inviteCode),
-              const SizedBox(height: 24.0),
-
-              // Actions
-              Row(
-                children: [
-                  // Copy Code Button
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Clipboard.setData(ClipboardData(text: league.inviteCode));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(l10n.codeCopiedToast),
-                            backgroundColor: PicoColors.primary,
-                            behavior: SnackBarBehavior.floating,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Trophy token with golden glow
+                    Container(
+                      width: 64.0,
+                      height: 64.0,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF143322),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: PicoColors.gold, width: 2.0),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x4DFFDFA0),
+                            blurRadius: 16.0,
+                            offset: Offset(0, 4),
                           ),
-                        );
-                      },
-                      icon: const Icon(Icons.copy_rounded, size: 18.0),
-                      label: Text(l10n.copyCodeButton),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: PicoColors.textWhite,
-                        side: const BorderSide(color: Color(0x33FFFFFF)),
-                        padding: const EdgeInsets.symmetric(vertical: 14.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14.0),
-                        ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.emoji_events_rounded,
+                        color: PicoColors.gold,
+                        size: 34.0,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12.0),
-                  // Done Button
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(ctx).pop();
-                        context.pop();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: PicoColors.gold,
-                        foregroundColor: const Color(0xFF261A00),
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 14.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14.0),
-                        ),
-                      ),
-                      child: Text(
-                        l10n.doneButton,
-                        style: PicoTypography.titleCard.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFF261A00),
-                        ),
+                    const SizedBox(height: 16.0),
+
+                    // Success Title
+                    Text(
+                      l10n.leagueCreatedSuccessTitle,
+                      textAlign: TextAlign.center,
+                      style: PicoTypography.headlineLgMobile.copyWith(
+                        color: PicoColors.textWhite,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 22.0,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 6.0),
+
+                    // League Name
+                    Text(
+                      league.name,
+                      textAlign: TextAlign.center,
+                      style: PicoTypography.headlineMd.copyWith(
+                        color: PicoColors.gold,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 17.0,
+                      ),
+                    ),
+
+                    // Competition Badge
+                    if (comp != null) ...[
+                      const SizedBox(height: 6.0),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10.0,
+                          vertical: 4.0,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(999.0),
+                        ),
+                        child: Text(
+                          comp.name,
+                          textAlign: TextAlign.center,
+                          style: PicoTypography.bodySm.copyWith(
+                            color: PicoColors.textWhiteMuted,
+                            fontSize: 12.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 20.0),
+
+                    // 6-character segmented display
+                    Text(
+                      l10n.inviteCodeLabel,
+                      style: PicoTypography.labelPillSm.copyWith(
+                        color: PicoColors.textWhiteMuted,
+                        letterSpacing: 1.2,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 10.0),
+                    _buildSegmentedCode(league.inviteCode),
+                    const SizedBox(height: 24.0),
+
+                    // Actions
+                    Row(
+                      children: [
+                        // Copy Code Button
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              Clipboard.setData(ClipboardData(text: league.inviteCode));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(l10n.codeCopiedToast),
+                                  backgroundColor: PicoColors.primary,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.copy_rounded, size: 18.0),
+                            label: Text(l10n.copyCodeButton),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: PicoColors.textWhite,
+                              side: const BorderSide(color: Color(0x33FFFFFF)),
+                              padding: const EdgeInsets.symmetric(vertical: 14.0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14.0),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12.0),
+                        // Done Button
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(ctx).pop();
+                              if (Navigator.of(context).canPop()) {
+                                Navigator.of(context).pop();
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: PicoColors.gold,
+                              foregroundColor: const Color(0xFF261A00),
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 14.0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14.0),
+                              ),
+                            ),
+                            child: Text(
+                              l10n.doneButton,
+                              style: PicoTypography.titleCard.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFF261A00),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
         );
       },
@@ -230,36 +274,48 @@ class _CreatePrivateLeagueScreenState
 
   Widget _buildSegmentedCode(String code) {
     final chars = code.padRight(6).split('');
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: chars.map((ch) {
-        return Container(
-          width: 44.0,
-          height: 52.0,
-          margin: const EdgeInsets.symmetric(horizontal: 3.5),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0F1E16),
-            borderRadius: BorderRadius.circular(10.0),
-            border: Border.all(color: PicoColors.primary, width: 1.5),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0xFF00522C),
-                offset: Offset(0, 2),
-                blurRadius: 0,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth;
+        final itemWidth =
+            ((availableWidth - (5 * 7.0)) / 6.0).clamp(32.0, 46.0);
+        final itemHeight = (itemWidth * 1.18).clamp(38.0, 54.0);
+        final fontSize = (itemWidth * 0.50).clamp(16.0, 22.0);
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            for (int i = 0; i < chars.length; i++) ...[
+              if (i > 0) const SizedBox(width: 7.0),
+              Container(
+                width: itemWidth,
+                height: itemHeight,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0F1E16),
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(color: PicoColors.primary, width: 1.5),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0xFF00522C),
+                      offset: Offset(0, 2),
+                      blurRadius: 0,
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  chars[i],
+                  style: PicoTypography.headlineLgMobile.copyWith(
+                    color: PicoColors.textWhite,
+                    fontWeight: FontWeight.w800,
+                    fontSize: fontSize,
+                  ),
+                ),
               ),
             ],
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            ch,
-            style: PicoTypography.headlineLgMobile.copyWith(
-              color: PicoColors.textWhite,
-              fontWeight: FontWeight.w800,
-              fontSize: 22.0,
-            ),
-          ),
+          ],
         );
-      }).toList(),
+      },
     );
   }
 

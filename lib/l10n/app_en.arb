@@ -146,6 +146,72 @@
   "@preferencesSyncHint": {
     "description": "Small footer note under continue button"
   },
+  "signInToContinue": "Sign in to Continue",
+  "@signInToContinue": {
+    "description": "Button label to perform authentication and proceed"
+  },
+  "step3AuthTitle": "What Should We Call You?",
+  "@step3AuthTitle": {
+    "description": "Headline for username and auth step"
+  },
+  "step3AuthSubtitle": "Pick a username for leaderboards and friend leagues.",
+  "@step3AuthSubtitle": {
+    "description": "Subtitle for username and auth step"
+  },
+  "chooseFavoriteTeamTitle": "Choose Favorite Team",
+  "@chooseFavoriteTeamTitle": {
+    "description": "Headline for team selection step"
+  },
+  "chooseFavoriteTeamSubtitle": "Select your club to personalize your feed and upcoming matches.",
+  "@chooseFavoriteTeamSubtitle": {
+    "description": "Subtitle for team selection step"
+  },
+  "searchTeamsPlaceholder": "Search clubs...",
+  "@searchTeamsPlaceholder": {
+    "description": "Placeholder for team search field"
+  },
+  "chooseLeaguesTitle": "Choose Leagues",
+  "@chooseLeaguesTitle": {
+    "description": "Headline for league selection step"
+  },
+  "chooseLeaguesSubtitle": "Select 1 or 2 competitions to follow and compete in.",
+  "@chooseLeaguesSubtitle": {
+    "description": "Subtitle for league selection step"
+  },
+  "finishButton": "Finish",
+  "@finishButton": {
+    "description": "Action button to finish onboarding"
+  },
+  "oneTeamRequired": "Please select 1 team to continue.",
+  "@oneTeamRequired": {
+    "description": "Validation message when no team is selected"
+  },
+  "twoLeaguesRequired": "Please select 1 or 2 leagues to continue.",
+  "@twoLeaguesRequired": {
+    "description": "Validation message when no leagues are selected"
+  },
+  "maxLeaguesReached": "You can select up to 2 leagues.",
+  "@maxLeaguesReached": {
+    "description": "Validation toast when attempting to select a 3rd league"
+  },
+  "usernameTakenError": "This username is already taken. Please choose another one.",
+  "@usernameTakenError": {
+    "description": "Error message when username already exists in database"
+  },
+  "selectedTeamBadge": "1/1 Selected",
+  "@selectedTeamBadge": {
+    "description": "Badge showing 1 team selected"
+  },
+  "leaguesSelectedBadge": "{count}/2 Selected",
+  "@leaguesSelectedBadge": {
+    "description": "Badge showing selected leagues count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
   "savingPreferences": "Saving your profile...",
   "@savingPreferences": {
     "description": "Loading indicator text when saving profile"

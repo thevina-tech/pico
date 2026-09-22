@@ -578,6 +578,47 @@ void main() {
       expect(find.text('Conference League'), findsOneWidget);
     });
 
+    testWidgets('CreatePrivateLeagueScreen creates league and displays centered notification dialog modal (not bottom sheet)', (tester) async {
+      final repo = _FakeTournamentRepository();
+      await tester.pumpWidget(
+        buildHarness(child: const CreatePrivateLeagueScreen(), repo: repo),
+      );
+      await tester.pumpAndSettle();
+
+      // Enter league name
+      await tester.enterText(find.byType(TextField), 'Champions League of Friends');
+      await tester.pumpAndSettle();
+
+      // Drag ListView down to reveal the submit button
+      await tester.drag(find.byType(ListView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+
+      // Tap Create League button
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+
+      // Crucially verify it is a centered Dialog container and NOT a BottomSheet
+      expect(find.byType(Dialog), findsOneWidget);
+      expect(find.byType(BottomSheet), findsNothing);
+
+      // Verify the dialog contents
+      expect(find.descendant(of: find.byType(Dialog), matching: find.text('League Created! 🎉')), findsOneWidget);
+      expect(find.descendant(of: find.byType(Dialog), matching: find.text('Champions League of Friends')), findsOneWidget);
+      expect(find.descendant(of: find.byType(Dialog), matching: find.text('INVITE CODE')), findsOneWidget);
+      expect(find.descendant(of: find.byType(Dialog), matching: find.text('P')), findsOneWidget);
+      expect(find.descendant(of: find.byType(Dialog), matching: find.text('I')), findsOneWidget);
+      expect(find.descendant(of: find.byType(Dialog), matching: find.text('C')), findsOneWidget);
+      expect(find.descendant(of: find.byType(Dialog), matching: find.text('O')), findsOneWidget);
+      expect(find.descendant(of: find.byType(Dialog), matching: find.text('9')), findsNWidgets(2)); // PICO99
+      expect(find.descendant(of: find.byType(Dialog), matching: find.text('Copy Code')), findsOneWidget);
+      expect(find.descendant(of: find.byType(Dialog), matching: find.text('Done')), findsOneWidget);
+
+      // Tap Done dismisses the modal dialog
+      await tester.tap(find.text('Done'));
+      await tester.pumpAndSettle();
+      expect(find.byType(Dialog), findsNothing);
+    });
+
     testWidgets('CreatePrivateLeagueScreen security note does not overflow on narrow screen with Spanish locale', (tester) async {
       tester.view.physicalSize = const Size(360 * 3, 700 * 3);
       tester.view.devicePixelRatio = 3.0;

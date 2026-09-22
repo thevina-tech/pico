@@ -126,6 +126,58 @@ class AppLocalizationsEs extends AppLocalizations {
       'Tus preferencias se sincronizan al instante en la Liga Pico';
 
   @override
+  String get signInToContinue => 'Iniciar sesión para continuar';
+
+  @override
+  String get step3AuthTitle => '¿Cómo deberíamos llamarte?';
+
+  @override
+  String get step3AuthSubtitle =>
+      'Elige un nombre de usuario para las tablas y ligas de amigos.';
+
+  @override
+  String get chooseFavoriteTeamTitle => 'Elige tu Equipo Favorito';
+
+  @override
+  String get chooseFavoriteTeamSubtitle =>
+      'Elige tu club para personalizar tu feed y próximos partidos.';
+
+  @override
+  String get searchTeamsPlaceholder => 'Buscar clubes...';
+
+  @override
+  String get chooseLeaguesTitle => 'Elige Ligas';
+
+  @override
+  String get chooseLeaguesSubtitle =>
+      'Selecciona 1 o 2 competiciones para seguir y competir.';
+
+  @override
+  String get finishButton => 'Finalizar';
+
+  @override
+  String get oneTeamRequired => 'Por favor selecciona 1 equipo para continuar.';
+
+  @override
+  String get twoLeaguesRequired =>
+      'Por favor selecciona 1 o 2 ligas para continuar.';
+
+  @override
+  String get maxLeaguesReached => 'Puedes seleccionar un máximo de 2 ligas.';
+
+  @override
+  String get usernameTakenError =>
+      'Este nombre de usuario ya está en uso. Por favor elige otro.';
+
+  @override
+  String get selectedTeamBadge => '1/1 Seleccionado';
+
+  @override
+  String leaguesSelectedBadge(int count) {
+    return '$count/2 Seleccionadas';
+  }
+
+  @override
   String get savingPreferences => 'Guardando tu perfil...';
 
   @override

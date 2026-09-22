@@ -24,10 +24,23 @@ import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
 part 'app_router.g.dart';
 
 /// Riverpod provider for application routing with auth state guards.
-@riverpod
+@Riverpod(keepAlive: true)
 GoRouter goRouter(Ref ref) {
-  final authState = ref.watch(authProvider);
-  return AppRouter.createRouter(authState);
+  final authNotifier = ValueNotifier<PicoAuthState>(ref.read(authProvider));
+
+  ref.listen<PicoAuthState>(authProvider, (_, next) {
+    authNotifier.value = next;
+  });
+
+  ref.onDispose(() {
+    authNotifier.dispose();
+  });
+
+  return AppRouter.createRouter(
+    ref.read(authProvider),
+    refreshListenable: authNotifier,
+    currentAuthState: () => authNotifier.value,
+  );
 }
 
 /// Application router using [GoRouter] with [StatefulShellRoute]
@@ -64,7 +77,10 @@ class AppRouter {
     // 3. Authenticated
     if (authState is PicoAuthAuthenticated) {
       if (!authState.isPersonalized) {
-        return isGoingToPersonalization ? null : '/personalization';
+        if (isGoingToOnboarding || isGoingToPersonalization) {
+          return null;
+        }
+        return '/onboarding';
       }
 
       // If personalized, do not linger in onboarding or personalization
@@ -77,12 +93,19 @@ class AppRouter {
   }
 
   /// Factory creating a configured [GoRouter] with auth guard redirects.
-  static GoRouter createRouter(PicoAuthState authState) {
+  static GoRouter createRouter(
+    PicoAuthState authState, {
+    Listenable? refreshListenable,
+    PicoAuthState Function()? currentAuthState,
+  }) {
     return GoRouter(
       navigatorKey: rootNavigatorKey,
       initialLocation: '/home',
-      redirect: (context, state) =>
-          resolveRedirect(authState, state.matchedLocation),
+      refreshListenable: refreshListenable,
+      redirect: (context, state) {
+        final current = currentAuthState != null ? currentAuthState() : authState;
+        return resolveRedirect(current, state.matchedLocation);
+      },
       routes: [
         GoRoute(
           path: '/onboarding',

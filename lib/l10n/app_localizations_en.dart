@@ -121,6 +121,57 @@ class AppLocalizationsEn extends AppLocalizations {
       'Preferences sync instantly across Pico League';
 
   @override
+  String get signInToContinue => 'Sign in to Continue';
+
+  @override
+  String get step3AuthTitle => 'What Should We Call You?';
+
+  @override
+  String get step3AuthSubtitle =>
+      'Pick a username for leaderboards and friend leagues.';
+
+  @override
+  String get chooseFavoriteTeamTitle => 'Choose Favorite Team';
+
+  @override
+  String get chooseFavoriteTeamSubtitle =>
+      'Select your club to personalize your feed and upcoming matches.';
+
+  @override
+  String get searchTeamsPlaceholder => 'Search clubs...';
+
+  @override
+  String get chooseLeaguesTitle => 'Choose Leagues';
+
+  @override
+  String get chooseLeaguesSubtitle =>
+      'Select 1 or 2 competitions to follow and compete in.';
+
+  @override
+  String get finishButton => 'Finish';
+
+  @override
+  String get oneTeamRequired => 'Please select 1 team to continue.';
+
+  @override
+  String get twoLeaguesRequired => 'Please select 1 or 2 leagues to continue.';
+
+  @override
+  String get maxLeaguesReached => 'You can select up to 2 leagues.';
+
+  @override
+  String get usernameTakenError =>
+      'This username is already taken. Please choose another one.';
+
+  @override
+  String get selectedTeamBadge => '1/1 Selected';
+
+  @override
+  String leaguesSelectedBadge(int count) {
+    return '$count/2 Selected';
+  }
+
+  @override
   String get savingPreferences => 'Saving your profile...';
 
   @override

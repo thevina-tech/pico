@@ -59,3 +59,46 @@ final class ProfileRepositoryProvider
 }
 
 String _$profileRepositoryHash() => r'95910c65ad027951420df8bcd5e8a163762185e9';
+
+/// Provider exposing the list of teams from public.teams.
+
+@ProviderFor(availableTeams)
+final availableTeamsProvider = AvailableTeamsProvider._();
+
+/// Provider exposing the list of teams from public.teams.
+
+final class AvailableTeamsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Team>>,
+          List<Team>,
+          FutureOr<List<Team>>
+        >
+    with $FutureModifier<List<Team>>, $FutureProvider<List<Team>> {
+  /// Provider exposing the list of teams from public.teams.
+  AvailableTeamsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'availableTeamsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$availableTeamsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<Team>> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Team>> create(Ref ref) {
+    return availableTeams(ref);
+  }
+}
+
+String _$availableTeamsHash() => r'07b0f09ef3caaa91fb80168f75c60146eed14b0f';

@@ -6,6 +6,7 @@ import 'package:pico/features/auth/domain/auth_state.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/home/presentation/home_screen.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
+import 'package:pico/features/matches/domain/team.dart';
 import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
 import 'package:pico/features/matches/presentation/matches_screen.dart';
 import 'package:pico/features/profile/data/profile_repository.dart';
@@ -28,9 +29,15 @@ class _FakeProfileRepository implements ProfileRepository {
   Future<UserProfile?> getProfile(String userId) async => profile;
 
   @override
+  Future<List<Team>> getTeams() async => [];
+
+  @override
+  Future<bool> isUsernameAvailable(String username, {String? excludeUserId}) async => true;
+
+  @override
   Future<void> updatePersonalization({
     required String userId,
-    required String username,
+    String? username,
     String? favoriteTeamId,
     List<String>? favoriteTeamIds,
     List<String>? favoriteLeagueIds,
