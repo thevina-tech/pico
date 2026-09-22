@@ -10,10 +10,13 @@ import 'package:pico/features/auth/domain/auth_state.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/matches/domain/competition.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
+import 'package:pico/features/predictions/presentation/prediction_controller.dart';
 import 'package:pico/features/tournaments/data/tournament_repository.dart';
 import 'package:pico/features/tournaments/domain/private_league.dart';
 import 'package:pico/features/tournaments/domain/private_league_member.dart';
 import 'package:pico/features/tournaments/presentation/private_league_controller.dart';
+import 'package:pico/shared/components/match_card.dart';
+import 'package:pico/shared/components/prediction_bottom_sheet.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
 /// Detail screen for Private Leagues.
@@ -37,6 +40,7 @@ class PrivateTournamentScreen extends ConsumerStatefulWidget {
 class _PrivateTournamentScreenState
     extends ConsumerState<PrivateTournamentScreen> {
   int _selectedTabIndex = 0; // 0: Standings, 1: Matches
+  int _selectedMatchCategoryIndex = 0; // 0: Upcoming, 1: Live, 2: Finished
   bool _isProcessing = false;
 
   @override
@@ -126,7 +130,7 @@ class _PrivateTournamentScreenState
                       Expanded(
                         child: _selectedTabIndex == 0
                             ? _buildLeaderboardView(currentLeague, isOwner, currentUserId, l10n)
-                            : _buildMatchesView(currentLeague.competitionId ?? '1', l10n),
+                            : _buildMatchesView(currentLeague.competitionId ?? '', l10n),
                       ),
                     ],
                   ),
@@ -716,6 +720,7 @@ class _PrivateTournamentScreenState
 
   Widget _buildMatchesView(String competitionId, AppLocalizations l10n) {
     final matchesAsync = ref.watch(competitionMatchesProvider(competitionId));
+    final predictionsAsync = ref.watch(predictionControllerProvider);
 
     return matchesAsync.when(
       loading: () => const Center(
@@ -727,8 +732,8 @@ class _PrivateTournamentScreenState
           style: const TextStyle(color: PicoColors.accentCoral),
         ),
       ),
-      data: (matches) {
-        if (matches.isEmpty) {
+      data: (allMatches) {
+        if (allMatches.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -744,188 +749,287 @@ class _PrivateTournamentScreenState
           );
         }
 
-        return ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 24.0),
-          itemCount: matches.length,
-          itemBuilder: (context, index) {
-            final match = matches[index];
-            final isFinished = match.status == MatchStatus.finished;
+        final matches = allMatches.whereType<PicoMatch>().toList();
+        final liveMatches = matches.where((m) => m.status == MatchStatus.live).toList();
+        final upcomingMatches = matches.where((m) => m.status == MatchStatus.upcoming).toList()
+          ..sort((a, b) => a.kickoffAt.compareTo(b.kickoffAt));
+        final finishedMatches = matches.where((m) => m.status == MatchStatus.finished).toList()
+          ..sort((a, b) => b.kickoffAt.compareTo(a.kickoffAt));
 
-            return Container(
-              margin: const EdgeInsets.only(bottom: 10.0),
-              padding: const EdgeInsets.all(14.0),
-              decoration: BoxDecoration(
-                color: PicoColors.darkTray,
-                borderRadius: BorderRadius.circular(16.0),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        final List<PicoMatch> currentCategoryMatches;
+        if (_selectedMatchCategoryIndex == 0) {
+          currentCategoryMatches = upcomingMatches;
+        } else if (_selectedMatchCategoryIndex == 1) {
+          currentCategoryMatches = liveMatches;
+        } else {
+          currentCategoryMatches = finishedMatches;
+        }
+
+        return Column(
+          children: [
+            // Match Status Tabs (Upcoming, Live, Finished)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: _buildMatchStatusTabs(
+                upcomingCount: upcomingMatches.length,
+                liveCount: liveMatches.length,
+                finishedCount: finishedMatches.length,
+                l10n: l10n,
               ),
-              child: Column(
-                children: [
-                  // Kickoff / Status
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        match.kickoffTimeFormatted.toUpperCase(),
-                        style: PicoTypography.labelPillSm.copyWith(
-                          color: PicoColors.textWhiteMuted,
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
-                        decoration: BoxDecoration(
-                          color: isFinished
-                              ? const Color(0xFF334155)
-                              : PicoColors.primary.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(4.0),
-                        ),
-                        child: Text(
-                          isFinished ? 'FINAL' : match.kickoffTimeFormatted,
-                          style: TextStyle(
-                            color: isFinished ? Colors.white70 : PicoColors.primary,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 10.0,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10.0),
+            ),
+            const SizedBox(height: 12.0),
 
-                  // Teams and Score
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Row(
-                          children: [
-                            _buildTeamBadge(match.homeTeamBadgeUrl, match.homeTeamName),
-                            const SizedBox(width: 8.0),
-                            Expanded(
-                              child: Text(
-                                match.homeTeamName,
-                                style: PicoTypography.titleCard.copyWith(
-                                  color: PicoColors.textWhite,
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: isFinished
-                            ? Text(
-                                '${match.homeScore ?? 0} - ${match.awayScore ?? 0}',
-                                style: PicoTypography.headlineMd.copyWith(
-                                  color: PicoColors.gold,
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 16.0,
-                                ),
-                              )
-                            : Text(
-                                'VS',
-                                style: PicoTypography.labelPillSm.copyWith(
-                                  color: PicoColors.textWhiteMuted,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                      ),
-                      Expanded(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                match.awayTeamName,
-                                textAlign: TextAlign.end,
-                                style: PicoTypography.titleCard.copyWith(
-                                  color: PicoColors.textWhite,
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            const SizedBox(width: 8.0),
-                            _buildTeamBadge(match.awayTeamBadgeUrl, match.awayTeamName),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+            // Matches List or Empty State
+            Expanded(
+              child: currentCategoryMatches.isEmpty
+                  ? _buildCategoryEmptyState(_selectedMatchCategoryIndex, l10n)
+                  : ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 24.0),
+                      itemCount: currentCategoryMatches.length,
+                      itemBuilder: (context, index) {
+                        final match = currentCategoryMatches[index];
+                        final userPred = predictionsAsync.value?[match.id];
+                        final predictedHomeScore = userPred?.homeScore;
+                        final predictedAwayScore = userPred?.awayScore;
+                        final points = match.calculateSettlementPoints(
+                          predictedHomeScore,
+                          predictedAwayScore,
+                        );
 
-                  // Predict Button if upcoming
-                  if (!isFinished) ...[
-                    const SizedBox(height: 12.0),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          context.push('/prediction/${match.id}', extra: match);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: PicoColors.primary,
-                          foregroundColor: PicoColors.pitchBackground,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
+                        String? outcomeLabel;
+                        if (match.status == MatchStatus.finished) {
+                          if (userPred != null) {
+                            if (points != null && points == 5) {
+                              outcomeLabel = l10n.pointsOutcomeExact;
+                            } else if (points != null && points == 3) {
+                              outcomeLabel = l10n.pointsOutcomeWinner;
+                            } else {
+                              outcomeLabel = l10n.pointsOutcomeIncorrect;
+                            }
+                          } else {
+                            outcomeLabel = l10n.pointsOutcomeNone;
+                          }
+                        }
+
+                        String? teaserLabel;
+                        if (match.isTeaser) {
+                          final countdown = match.teaserCountdown;
+                          if (countdown.inDays >= 1) {
+                            teaserLabel = l10n.teaserOpensInDays(countdown.inDays);
+                          } else if (countdown.inHours >= 1) {
+                            teaserLabel = l10n.teaserOpensInHours(countdown.inHours);
+                          } else {
+                            teaserLabel = l10n.teaserOpensInMinutes(countdown.inMinutes.clamp(1, 60));
+                          }
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: MatchCard.fromMatch(
+                            match: match,
+                            predictedHomeScore: predictedHomeScore,
+                            predictedAwayScore: predictedAwayScore,
+                            awardedPoints: points,
+                            settlementOutcomeLabel: outcomeLabel,
+                            teaserCountdownLabel: teaserLabel,
+                            teaserSubtext: l10n.teaserCountdownSubtext,
+                            onCardTap: match.isTeaser
+                                ? null
+                                : () {
+                                    if (match.status == MatchStatus.finished || match.isLocked) {
+                                      context.push('/prediction/${match.id}', extra: match);
+                                    } else {
+                                      showPicoPredictionBottomSheet(
+                                        context: context,
+                                        ref: ref,
+                                        match: match,
+                                      );
+                                    }
+                                  },
+                            onPredictPressed: match.isTeaser
+                                ? null
+                                : () => showPicoPredictionBottomSheet(
+                                      context: context,
+                                      ref: ref,
+                                      match: match,
+                                    ),
+                            onModifyPressed: () => showPicoPredictionBottomSheet(
+                              context: context,
+                              ref: ref,
+                              match: match,
+                            ),
+                            onViewPredictionPressed: () =>
+                                context.push('/prediction/${match.id}', extra: match),
+                            onTapResult: () =>
+                                context.push('/prediction/${match.id}', extra: match),
                           ),
-                        ),
-                        child: Text(
-                          l10n.predictAction,
-                          style: PicoTypography.labelPillSm.copyWith(
-                            fontWeight: FontWeight.w900,
-                            fontSize: 11.5,
-                            letterSpacing: 1.0,
-                            color: PicoColors.pitchBackground,
-                          ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
-                  ],
-                ],
-              ),
-            );
-          },
+            ),
+          ],
         );
       },
     );
   }
 
-  Widget _buildTeamBadge(String badgeUrl, String teamName) {
+  Widget _buildMatchStatusTabs({
+    required int upcomingCount,
+    required int liveCount,
+    required int finishedCount,
+    required AppLocalizations l10n,
+  }) {
     return Container(
-      width: 26.0,
-      height: 26.0,
+      padding: const EdgeInsets.all(3.0),
       decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(color: const Color(0xFFE2E8F0), width: 0.5),
+        color: const Color(0xFF0D2117),
+        borderRadius: BorderRadius.circular(14.0),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
-      padding: const EdgeInsets.all(2.0),
-      alignment: Alignment.center,
-      child: badgeUrl.isNotEmpty
-          ? ClipOval(
-              child: CachedNetworkImage(
-                imageUrl: badgeUrl,
-                width: 22.0,
-                height: 22.0,
-                fit: BoxFit.contain,
-                errorWidget: (ctx, url, err) => Text(
-                  teamName.characters.first,
-                  style: const TextStyle(fontSize: 10.0, fontWeight: FontWeight.w700),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildSubTabItem(
+              title: l10n.feedTabUpcoming,
+              count: upcomingCount,
+              isSelected: _selectedMatchCategoryIndex == 0,
+              onTap: () => setState(() => _selectedMatchCategoryIndex = 0),
+            ),
+          ),
+          const SizedBox(width: 4.0),
+          Expanded(
+            child: _buildSubTabItem(
+              title: l10n.feedTabLive,
+              count: liveCount,
+              isSelected: _selectedMatchCategoryIndex == 1,
+              isLive: true,
+              onTap: () => setState(() => _selectedMatchCategoryIndex = 1),
+            ),
+          ),
+          const SizedBox(width: 4.0),
+          Expanded(
+            child: _buildSubTabItem(
+              title: l10n.feedTabFinished,
+              count: finishedCount,
+              isSelected: _selectedMatchCategoryIndex == 2,
+              onTap: () => setState(() => _selectedMatchCategoryIndex = 2),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubTabItem({
+    required String title,
+    required int count,
+    required bool isSelected,
+    required VoidCallback onTap,
+    bool isLive = false,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(11.0),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 7.0),
+        decoration: BoxDecoration(
+          color: isSelected ? PicoColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(11.0),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (isLive && count > 0) ...[
+              Container(
+                width: 6.0,
+                height: 6.0,
+                margin: const EdgeInsets.only(right: 5.0),
+                decoration: const BoxDecoration(
+                  color: PicoColors.accentCoral,
+                  shape: BoxShape.circle,
                 ),
               ),
-            )
-          : Text(
-              teamName.characters.first,
-              style: const TextStyle(fontSize: 10.0, fontWeight: FontWeight.w700),
+            ],
+            Text(
+              title,
+              style: PicoTypography.labelPillSm.copyWith(
+                color: isSelected ? PicoColors.textWhite : PicoColors.textWhiteMuted,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                fontSize: 11.5,
+              ),
             ),
+            const SizedBox(width: 4.0),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 1.0),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Colors.white.withValues(alpha: 0.25)
+                    : Colors.white.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(999.0),
+              ),
+              child: Text(
+                '$count',
+                style: TextStyle(
+                  color: isSelected ? Colors.white : PicoColors.textWhiteMuted,
+                  fontSize: 10.0,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryEmptyState(int categoryIndex, AppLocalizations l10n) {
+    final String title;
+    final String subtitle;
+    final IconData icon;
+
+    if (categoryIndex == 1) {
+      title = l10n.noLiveMatches;
+      subtitle = l10n.noLiveMatchesSub;
+      icon = Icons.sensors_off_rounded;
+    } else if (categoryIndex == 0) {
+      title = l10n.feedNoUpcomingMatches;
+      subtitle = l10n.noUpcomingMatchesSub;
+      icon = Icons.event_busy_rounded;
+    } else {
+      title = l10n.noFinishedMatches;
+      subtitle = l10n.noFinishedMatchesSub;
+      icon = Icons.history_toggle_off_rounded;
+    }
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 44.0, color: PicoColors.textWhiteMuted.withValues(alpha: 0.6)),
+            const SizedBox(height: 12.0),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: PicoTypography.headlineMd.copyWith(
+                color: PicoColors.textWhite,
+                fontSize: 16.0,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 6.0),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: PicoTypography.bodySm.copyWith(
+                color: PicoColors.textWhiteMuted,
+                fontSize: 12.5,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

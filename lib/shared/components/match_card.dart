@@ -1022,7 +1022,7 @@ class MatchCard extends StatelessWidget {
                 ? (awardedPoints! > 0 ? '+$awardedPoints PTS' : '0 PTS')
                 : '+3 PTS');
         return GestureDetector(
-          onTap: onTapResult,
+          onTap: onTapResult ?? onCardTap,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             decoration: BoxDecoration(
@@ -1089,7 +1089,7 @@ class MatchCard extends StatelessWidget {
     switch (state) {
       case MatchCardState.unpredicted:
         text = isTeaser
-            ? (teaserSubtext ?? 'Prediction window opens 7 days before kickoff')
+            ? (teaserSubtext ?? 'Prediction window opens 3 days before kickoff')
             : (closesAtTime != null
                 ? 'Not predicted yet · Closes at $closesAtTime'
                 : (statusSubtext ?? 'Not predicted yet · Closes before kickoff'));

@@ -92,7 +92,7 @@ void main() {
     awayScore: 0,
   );
 
-  // 2. Upcoming match within 7 days (prediction window open)
+  // 2. Upcoming match within 3 days (prediction window open)
   final openUpcomingMatch = PicoMatch(
     id: 'match_upcoming_open',
     competitionId: 'premier_league',
@@ -101,11 +101,11 @@ void main() {
     homeTeamCode: 'LIV',
     awayTeamName: 'Manchester United',
     awayTeamCode: 'MUN',
-    kickoffAt: now.add(const Duration(days: 3)),
+    kickoffAt: now.add(const Duration(days: 2)),
     status: MatchStatus.upcoming,
   );
 
-  // 3. Upcoming match in teaser window (9 days away -> opens in 2 days)
+  // 3. Upcoming match in teaser window (5 days away -> opens in 2 days with 3-day window)
   final teaserMatch = PicoMatch(
     id: 'match_upcoming_teaser',
     competitionId: 'la_liga',
@@ -114,7 +114,7 @@ void main() {
     homeTeamCode: 'RMA',
     awayTeamName: 'Barcelona',
     awayTeamCode: 'BAR',
-    kickoffAt: now.add(const Duration(days: 9, hours: 2)),
+    kickoffAt: now.add(const Duration(days: 5, hours: 2)),
     status: MatchStatus.upcoming,
   );
 
@@ -292,7 +292,7 @@ void main() {
       expect(find.text('Liverpool'), findsNothing);
     });
 
-    testWidgets('Teaser Mechanic: Match <= 7 days has enabled Predict button; match > 7 days has disabled countdown',
+    testWidgets('Teaser Mechanic: Match <= 3 days has enabled Predict button; match > 3 days has disabled countdown',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(430, 932);
       tester.view.devicePixelRatio = 1.0;
@@ -317,10 +317,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Match <= 7 days (Liverpool vs MUN): Enabled Predict button
+      // Match <= 3 days (Liverpool vs MUN): Enabled Predict button
       expect(find.text('Make Prediction →'), findsOneWidget);
 
-      // Match > 7 days (Real Madrid vs Barcelona): Disabled countdown button (Opens in 2d)
+      // Match > 3 days (Real Madrid vs Barcelona): Disabled countdown button (Opens in 2d)
       expect(find.text('Opens in 2d'), findsOneWidget);
       expect(find.text('OPENS SOON'), findsOneWidget);
 

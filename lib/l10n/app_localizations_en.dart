@@ -300,6 +300,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pickWinner => 'Pick Winner';
 
   @override
+  String get pickTheWinner => 'Pick the Winner';
+
+  @override
   String get whoWins => 'Who wins?';
 
   @override
@@ -612,7 +615,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get teaserCountdownSubtext =>
-      'Prediction window opens 7 days before kickoff';
+      'Prediction window opens 3 days before kickoff';
 
   @override
   String get pointsOutcomeExact => '+5 Points';
@@ -681,4 +684,29 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get signInToJoinTournament =>
       'Sign in to join tournaments and submit predictions.';
+
+  @override
+  String get viewFullPredictionPage => 'View Full Prediction Page →';
+
+  @override
+  String get scoringRuleBanner =>
+      'Exact score = +5 Pico Points · Correct winner = +3 Pico Points';
+
+  @override
+  String get predictionLockedSuccessToast => 'Prediction locked in! (+10 XP) ⚽';
+
+  @override
+  String get predictionSaveFailed =>
+      'Failed to save prediction. Please try again.';
+
+  @override
+  String get matchFinishedLabel => 'Match Finished';
+
+  @override
+  String get feedTabAll => 'All';
+
+  @override
+  String matchLocksAt(String time) {
+    return 'Locks $time';
+  }
 }

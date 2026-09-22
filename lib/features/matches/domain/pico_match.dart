@@ -101,26 +101,33 @@ abstract class PicoMatch with _$PicoMatch {
   String get closesAtTimeOnly =>
       '${effectiveLockAt.hour.toString().padLeft(2, '0')}:${effectiveLockAt.minute.toString().padLeft(2, '0')}';
 
-  /// Whether this match is in the rolling teaser window (between 7 and 14 days out).
+  /// Whether this match is in the rolling teaser window (more than 3 days out).
   bool get isTeaser {
     if (status != MatchStatus.upcoming) return false;
     final now = DateTime.now();
-    final sevenDays = now.add(const Duration(days: 7));
-    final fourteenDays = now.add(const Duration(days: 14));
-    return kickoffAt.isAfter(sevenDays) && kickoffAt.isBefore(fourteenDays);
+    final threeDays = now.add(const Duration(days: 3));
+    return kickoffAt.isAfter(threeDays);
   }
 
-  /// Whether the rolling prediction window is currently open (upcoming and <= 7 days before kickoff).
+  /// The actual winner outcome for finished matches ('home', 'away', or 'draw').
+  String? get actualWinner {
+    if (homeScore == null || awayScore == null) return null;
+    if (homeScore! > awayScore!) return 'home';
+    if (awayScore! > homeScore!) return 'away';
+    return 'draw';
+  }
+
+  /// Whether the rolling prediction window is currently open (upcoming and <= 3 days before kickoff).
   bool get isPredictionWindowOpen {
     if (status != MatchStatus.upcoming) return false;
     final now = DateTime.now();
-    final sevenDays = now.add(const Duration(days: 7));
-    return !kickoffAt.isAfter(sevenDays) && !isLocked;
+    final threeDays = now.add(const Duration(days: 3));
+    return !kickoffAt.isAfter(threeDays) && !isLocked;
   }
 
-  /// The time remaining until the 7-day prediction window opens.
+  /// The time remaining until the 3-day prediction window opens.
   Duration get teaserCountdown {
-    final opensAt = kickoffAt.subtract(const Duration(days: 7));
+    final opensAt = kickoffAt.subtract(const Duration(days: 3));
     final diff = opensAt.difference(DateTime.now());
     return diff.isNegative ? Duration.zero : diff;
   }
@@ -128,8 +135,9 @@ abstract class PicoMatch with _$PicoMatch {
   /// Formatted teaser countdown (e.g., "2d", "14h", "45m").
   String get teaserCountdownShort {
     final diff = teaserCountdown;
-    if (diff.inDays >= 1) {
-      return '${diff.inDays}d';
+    if (diff.inSeconds >= 86400) {
+      final days = (diff.inSeconds / 86400).round();
+      return '${days}d';
     } else if (diff.inHours >= 1) {
       return '${diff.inHours}h';
     } else {

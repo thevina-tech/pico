@@ -608,6 +608,12 @@ abstract class AppLocalizations {
   /// **'Pick Winner'**
   String get pickWinner;
 
+  /// Label for step 1 header in prediction bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the Winner'**
+  String get pickTheWinner;
+
   /// Question asking which team wins
   ///
   /// In en, this message translates to:
@@ -1163,7 +1169,7 @@ abstract class AppLocalizations {
   /// Subtext explaining when prediction window opens for teaser cards
   ///
   /// In en, this message translates to:
-  /// **'Prediction window opens 7 days before kickoff'**
+  /// **'Prediction window opens 3 days before kickoff'**
   String get teaserCountdownSubtext;
 
   /// Pico Points badge for exact score settlement
@@ -1285,6 +1291,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in to join tournaments and submit predictions.'**
   String get signInToJoinTournament;
+
+  /// Secondary button label in prediction sheet to view full match page
+  ///
+  /// In en, this message translates to:
+  /// **'View Full Prediction Page →'**
+  String get viewFullPredictionPage;
+
+  /// Banner explaining scoring rule in prediction sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Exact score = +5 Pico Points · Correct winner = +3 Pico Points'**
+  String get scoringRuleBanner;
+
+  /// Toast message after saving prediction from bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Prediction locked in! (+10 XP) ⚽'**
+  String get predictionLockedSuccessToast;
+
+  /// Error toast when saving prediction fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save prediction. Please try again.'**
+  String get predictionSaveFailed;
+
+  /// Label for disabled button on finished matches
+  ///
+  /// In en, this message translates to:
+  /// **'Match Finished'**
+  String get matchFinishedLabel;
+
+  /// Tab or filter chip for all matches
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get feedTabAll;
+
+  /// Text indicating kickoff lock time
+  ///
+  /// In en, this message translates to:
+  /// **'Locks {time}'**
+  String matchLocksAt(String time);
 }
 
 class _AppLocalizationsDelegate

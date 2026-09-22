@@ -39,24 +39,33 @@ class MatchesState {
   List<PicoMatch> get liveMatches =>
       allMatches.where((m) => m.status == MatchStatus.live).toList();
 
-  /// Upcoming matches within the rolling window.
+  /// Upcoming matches within the rolling window (14 days, with per-competition 30-day fallback for fixture gaps).
   List<PicoMatch> get upcomingMatches {
     final now = DateTime.now();
     final maxDate14 = now.add(const Duration(days: 14));
-    final within14 = allMatches
-        .where((m) => m.status == MatchStatus.upcoming && m.kickoffAt.isBefore(maxDate14))
-        .toList();
-    if (within14.isNotEmpty) {
-      return within14;
-    }
-    // Fallback: If no fixtures are within 14 days (e.g. international break / fixture gap),
-    // show next upcoming matchday fixtures (up to 30 days) as teasers so the feed is never empty.
     final maxDate30 = now.add(const Duration(days: 30));
-    final list = allMatches
-        .where((m) => m.status == MatchStatus.upcoming && m.kickoffAt.isBefore(maxDate30))
-        .toList();
-    list.sort((a, b) => a.kickoffAt.compareTo(b.kickoffAt));
-    return list;
+
+    final upcoming = allMatches.where((m) => m.status == MatchStatus.upcoming).toList();
+    final Map<String, List<PicoMatch>> byComp = {};
+    for (final m in upcoming) {
+      final key = m.competitionId ?? m.competitionName;
+      byComp.putIfAbsent(key, () => []).add(m);
+    }
+
+    final List<PicoMatch> result = [];
+    for (final compMatches in byComp.values) {
+      final within14 = compMatches.where((m) => m.kickoffAt.isBefore(maxDate14)).toList();
+      if (within14.isNotEmpty) {
+        result.addAll(within14);
+      } else {
+        // Fallback for this competition: show next upcoming fixtures up to 30 days
+        final within30 = compMatches.where((m) => m.kickoffAt.isBefore(maxDate30)).toList();
+        result.addAll(within30);
+      }
+    }
+
+    result.sort((a, b) => a.kickoffAt.compareTo(b.kickoffAt));
+    return result;
   }
 
   /// Finished matches within the settlement window.

@@ -7,6 +7,7 @@ import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/matches/domain/competition.dart';
 import 'package:pico/features/matches/data/match_repository.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
+import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
 import '../domain/private_league.dart';
 import '../domain/private_league_exceptions.dart';
 import '../domain/private_league_member.dart';
@@ -107,7 +108,11 @@ Future<List<PicoMatch>> competitionMatches(
 ) async {
   final matchRepo = ref.watch(matchRepositoryProvider);
   final all = await matchRepo.getAllMatches();
-  return all.where((m) => m.competitionId == competitionId).toList();
+  if (competitionId.isEmpty) return all;
+  return all.where((m) {
+    if (m.competitionId == competitionId) return true;
+    return isSameCompetition(m.competitionId ?? '', competitionId);
+  }).toList();
 }
 
 /// Abstract contract for tournament & private league operations.

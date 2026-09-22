@@ -14,6 +14,7 @@ import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/match_card.dart';
 import 'package:pico/shared/components/prediction_controls.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
+import 'package:pico/shared/components/pico_button.dart';
 import 'package:pico/features/matches/presentation/matches_screen.dart';
 import 'package:pico/features/matches/presentation/matches_controller.dart';
 import 'package:pico/features/matches/presentation/matches_view_model.dart';
@@ -632,8 +633,8 @@ void main() {
       expect(find.textContaining('Exact score = +5 Pico Points'), findsOneWidget);
     });
 
-    test('Future match scheduled weeks ahead is not locked', () {
-      // Oct 9 match in future
+    test('Future match scheduled weeks ahead is not locked, but is teaser with window closed', () {
+      // Oct 9 match in future (18 days out)
       final futureMatch = PicoMatch(
         id: 'future_oct_9',
         competitionName: 'Primera División',
@@ -645,6 +646,51 @@ void main() {
       );
 
       expect(futureMatch.isLocked, isFalse);
+      expect(futureMatch.isTeaser, isTrue);
+      expect(futureMatch.isPredictionWindowOpen, isFalse);
+      expect(futureMatch.teaserCountdownShort, '15d');
+    });
+
+    testWidgets(
+        'PredictionScreen for finished match without user prediction shows match details, winning team selected, score in step 2, and blocked controls',
+        (tester) async {
+      final finishedMatch = PicoMatch(
+        id: 'finished_101',
+        competitionName: 'Primera División',
+        homeTeamName: 'Real Madrid',
+        homeTeamCode: 'RMA',
+        awayTeamName: 'Barcelona',
+        awayTeamCode: 'BAR',
+        kickoffAt: DateTime.now().subtract(const Duration(hours: 3)),
+        status: MatchStatus.finished,
+        homeScore: 3,
+        awayScore: 1,
+      );
+
+      await tester.pumpWidget(
+        createTestApp(
+          PredictionScreen(match: finishedMatch),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Step 1: Winner selected should be RMA (Home)
+      expect(find.text('Winning Team'), findsOneWidget);
+      expect(find.text('FINAL RESULT'), findsOneWidget);
+
+      // Step 2: Score in steppers should be 3 - 1
+      expect(find.text('Final Match Score'), findsOneWidget);
+      expect(find.text('3'), findsWidgets);
+      expect(find.text('1'), findsWidgets);
+
+      // Step 3: CTA button shows Match Finished and is disabled
+      final matchFinishedBtn = find.widgetWithText(PicoButton, 'Match Finished');
+      expect(matchFinishedBtn, findsOneWidget);
+      final btnWidget = tester.widget<PicoButton>(matchFinishedBtn);
+      expect(btnWidget.onPressed, isNull);
+
+      // Result banner indicates not predicted
+      expect(find.textContaining('You did not predict this match'), findsOneWidget);
     });
   });
 }

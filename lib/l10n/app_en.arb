@@ -424,6 +424,10 @@
   "@pickWinner": {
     "description": "Label for choosing match winner"
   },
+  "pickTheWinner": "Pick the Winner",
+  "@pickTheWinner": {
+    "description": "Label for step 1 header in prediction bottom sheet"
+  },
   "whoWins": "Who wins?",
   "@whoWins": {
     "description": "Question asking which team wins"
@@ -848,7 +852,7 @@
       }
     }
   },
-  "teaserCountdownSubtext": "Prediction window opens 7 days before kickoff",
+  "teaserCountdownSubtext": "Prediction window opens 3 days before kickoff",
   "@teaserCountdownSubtext": {
     "description": "Subtext explaining when prediction window opens for teaser cards"
   },
@@ -941,6 +945,40 @@
   "signInToJoinTournament": "Sign in to join tournaments and submit predictions.",
   "@signInToJoinTournament": {
     "description": "Prompt when unauthenticated user tries to join tournament"
+  },
+  "viewFullPredictionPage": "View Full Prediction Page →",
+  "@viewFullPredictionPage": {
+    "description": "Secondary button label in prediction sheet to view full match page"
+  },
+  "scoringRuleBanner": "Exact score = +5 Pico Points · Correct winner = +3 Pico Points",
+  "@scoringRuleBanner": {
+    "description": "Banner explaining scoring rule in prediction sheet"
+  },
+  "predictionLockedSuccessToast": "Prediction locked in! (+10 XP) ⚽",
+  "@predictionLockedSuccessToast": {
+    "description": "Toast message after saving prediction from bottom sheet"
+  },
+  "predictionSaveFailed": "Failed to save prediction. Please try again.",
+  "@predictionSaveFailed": {
+    "description": "Error toast when saving prediction fails"
+  },
+  "matchFinishedLabel": "Match Finished",
+  "@matchFinishedLabel": {
+    "description": "Label for disabled button on finished matches"
+  },
+  "feedTabAll": "All",
+  "@feedTabAll": {
+    "description": "Tab or filter chip for all matches"
+  },
+  "matchLocksAt": "Locks {time}",
+  "@matchLocksAt": {
+    "description": "Text indicating kickoff lock time",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "19:50"
+      }
+    }
   }
 }
 

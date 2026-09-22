@@ -14,6 +14,7 @@ import 'package:pico/shared/components/pico_button.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/shared/components/prediction_controls.dart';
 import 'package:pico/features/predictions/presentation/prediction_controller.dart';
+import 'package:pico/shared/components/prediction_bottom_sheet.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
 /// The official "Pico — Matches" screen.
@@ -65,361 +66,15 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
     }
   }
 
-  MatchOutcome _calculateWinner(int home, int away) {
-    if (home > away) return MatchOutcome.home;
-    if (away > home) return MatchOutcome.away;
-    return MatchOutcome.draw;
-  }
-
   void _showPredictionModal(BuildContext context, PicoMatch match) {
-    final matchesState = ref.read(matchesControllerProvider).value;
-    final currentPrediction = matchesState?.getPrediction(match.id);
-    final existingPredictions = ref.read(predictionControllerProvider).value;
-    final existing = existingPredictions?[match.id];
-
-    int homeScore = currentPrediction?.homeScore ?? existing?.homeScore ?? 2;
-    int awayScore = currentPrediction?.awayScore ?? existing?.awayScore ?? 1;
-    MatchOutcome selectedWinner = _calculateWinner(homeScore, awayScore);
-    if (existing != null) {
-      final w = existing.predictedWinner.toLowerCase();
-      if (w == 'home') {
-        selectedWinner = MatchOutcome.home;
-      } else if (w == 'away') {
-        selectedWinner = MatchOutcome.away;
-      } else if (w == 'draw') {
-        selectedWinner = MatchOutcome.draw;
-      }
-    }
-
-    void onSelectWinner(MatchOutcome outcome, void Function(void Function()) setModalState) {
-      setModalState(() {
-        selectedWinner = outcome;
-        if (outcome == MatchOutcome.home && homeScore <= awayScore) {
-          homeScore = awayScore + 1;
-        } else if (outcome == MatchOutcome.away && awayScore <= homeScore) {
-          awayScore = homeScore + 1;
-        } else if (outcome == MatchOutcome.draw && homeScore != awayScore) {
-          awayScore = homeScore;
-        }
-      });
-    }
-
-    void onUpdateHomeScore(int newScore, void Function(void Function()) setModalState) {
-      if (newScore < 0) return;
-      setModalState(() {
-        homeScore = newScore;
-        if (homeScore > awayScore) {
-          selectedWinner = MatchOutcome.home;
-        } else if (awayScore > homeScore) {
-          selectedWinner = MatchOutcome.away;
-        } else {
-          selectedWinner = MatchOutcome.draw;
-        }
-      });
-    }
-
-    void onUpdateAwayScore(int newScore, void Function(void Function()) setModalState) {
-      if (newScore < 0) return;
-      setModalState(() {
-        awayScore = newScore;
-        if (homeScore > awayScore) {
-          selectedWinner = MatchOutcome.home;
-        } else if (awayScore > homeScore) {
-          selectedWinner = MatchOutcome.away;
-        } else {
-          selectedWinner = MatchOutcome.draw;
-        }
-      });
-    }
-
-    showModalBottomSheet<void>(
+    showPicoPredictionBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (bottomSheetContext) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Container(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.90,
-              ),
-              padding: EdgeInsets.fromLTRB(
-                20.0,
-                16.0,
-                20.0,
-                MediaQuery.of(context).viewInsets.bottom + 24.0,
-              ),
-              decoration: const BoxDecoration(
-                color: PicoColors.cardFace,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(28.0)),
-                border: Border(
-                  top: BorderSide(color: Color(0xFFECE7DC), width: 2.0),
-                  left: BorderSide(color: Color(0xFFECE7DC), width: 1.0),
-                  right: BorderSide(color: Color(0xFFECE7DC), width: 1.0),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0xFFEDE8DD),
-                    offset: Offset(0, -6),
-                    blurRadius: 0,
-                  ),
-                  BoxShadow(
-                    color: Color(0x3D0A1811),
-                    offset: Offset(0, -12),
-                    blurRadius: 32,
-                  ),
-                ],
-              ),
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Pull pill
-                    Center(
-                      child: Container(
-                        width: 38.0,
-                        height: 4.0,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFD2CCC0),
-                          borderRadius: BorderRadius.circular(999.0),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14.0),
-
-                    // Header: Competition & Closes At
-                    Center(
-                      child: Text(
-                        '${match.competitionName.toUpperCase()} · LOCKS ${match.closesAtTimeFormatted.toUpperCase()}',
-                        style: PicoTypography.labelPillSm.copyWith(
-                          color: PicoColors.textTactileMuted,
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.8,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(height: 4.0),
-
-                    // Match Title
-                    Center(
-                      child: Text(
-                        '${match.homeTeamName} vs ${match.awayTeamName}',
-                        style: PicoTypography.headlineMd.copyWith(
-                          color: PicoColors.textPitchInk,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 18.0,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(height: 14.0),
-
-                    const Divider(color: Color(0xFFE7E2D6), height: 1.0, thickness: 1.0),
-                    const SizedBox(height: 14.0),
-
-                    // STEP 1: Pick the Winner
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 20.0,
-                              height: 20.0,
-                              decoration: const BoxDecoration(
-                                color: PicoColors.primary,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Center(
-                                child: Text(
-                                  '1',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 11.0,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8.0),
-                            Text(
-                              'Pick the Winner',
-                              style: PicoTypography.titleCard.copyWith(
-                                color: PicoColors.textPitchInk,
-                                fontSize: 14.5,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Text(
-                          'WHO WINS?',
-                          style: PicoTypography.labelPillSm.copyWith(
-                            color: PicoColors.textTactileMuted,
-                            fontSize: 10.0,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.6,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10.0),
-                    WinnerSelector(
-                      selectedOutcome: selectedWinner,
-                      homeCode: match.homeTeamCode,
-                      drawCode: 'X',
-                      awayCode: match.awayTeamCode,
-                      isDark: false,
-                      onSelected: (outcome) => onSelectWinner(outcome, setModalState),
-                    ),
-                    const SizedBox(height: 16.0),
-
-                    const Divider(color: Color(0xFFE7E2D6), height: 1.0, thickness: 1.0),
-                    const SizedBox(height: 14.0),
-
-                    // STEP 2: Exact Score Prediction
-                    Row(
-                      children: [
-                        Container(
-                          width: 20.0,
-                          height: 20.0,
-                          decoration: const BoxDecoration(
-                            color: PicoColors.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Center(
-                            child: Text(
-                              '2',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 11.0,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8.0),
-                        Text(
-                          'Exact Score Prediction',
-                          style: PicoTypography.titleCard.copyWith(
-                            color: PicoColors.textPitchInk,
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10.0),
-                    ScoreStepperArena(
-                      homeScore: homeScore,
-                      awayScore: awayScore,
-                      homeTeamCode: match.homeTeamCode,
-                      awayTeamCode: match.awayTeamCode,
-                      onHomeScoreChanged: (val) => onUpdateHomeScore(val, setModalState),
-                      onAwayScoreChanged: (val) => onUpdateAwayScore(val, setModalState),
-                      isDark: false,
-                    ),
-                    const SizedBox(height: 16.0),
-
-                    // Scoring Potential Banner
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEDF7EE),
-                        borderRadius: BorderRadius.circular(12.0),
-                        border: Border.all(color: const Color(0xFFC8E6C9), width: 1.0),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.stars_rounded, color: PicoColors.primary, size: 18.0),
-                          const SizedBox(width: 8.0),
-                          Expanded(
-                            child: Text(
-                              'Exact score = +5 Pico Points · Correct winner = +3 Pico Points',
-                              style: PicoTypography.bodySm.copyWith(
-                                color: const Color(0xFF1B5E3A),
-                                fontWeight: FontWeight.w700,
-                                fontSize: 11.0,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 18.0),
-
-                    // Primary CTA: Save Prediction (+10 XP)
-                    PicoButton.primary(
-                      text: 'Save Prediction (+10 XP)',
-                      onPressed: () async {
-                        final winnerString = selectedWinner == MatchOutcome.home
-                            ? 'home'
-                            : selectedWinner == MatchOutcome.away
-                                ? 'away'
-                                : 'draw';
-
-                        Navigator.of(bottomSheetContext).pop();
-
-                        final success = await ref
-                            .read(predictionControllerProvider.notifier)
-                            .submitPrediction(
-                              match: match,
-                              homeScore: homeScore,
-                              awayScore: awayScore,
-                              predictedWinner: winnerString,
-                            );
-
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).clearSnackBars();
-                          if (success) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Prediction locked in! (+10 XP) ⚽'),
-                                backgroundColor: PicoColors.primary,
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(match.isLocked
-                                    ? 'Predictions are closed for this match'
-                                    : 'Failed to save prediction. Please try again.'),
-                                backgroundColor: Colors.redAccent,
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                          }
-                        }
-
-                        widget.onPredictMatch?.call(match.id);
-                      },
-                    ),
-                    const SizedBox(height: 10.0),
-
-                    // Secondary CTA: Detailed Prediction Screen
-                    PicoButton.secondary(
-                      text: 'View Full Prediction Page →',
-                      onPressed: () {
-                        Navigator.of(bottomSheetContext).pop();
-                        context.push('/prediction/${match.id}', extra: match);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
+      ref: ref,
+      match: match,
+      onPredictionSaved: () => widget.onPredictMatch?.call(match.id),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -568,7 +223,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
                                 settlementOutcomeLabel: outcomeLabel,
                                 teaserCountdownLabel: teaserLabel,
                                 teaserSubtext: l10n?.teaserCountdownSubtext ??
-                                    'Prediction window opens 7 days before kickoff',
+                                    'Prediction window opens 3 days before kickoff',
                                 onCardTap: match.isTeaser
                                     ? null
                                     : () => context.push(
@@ -580,11 +235,26 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
                                     : () => _showPredictionModal(context, match),
                                 onModifyPressed: () =>
                                     _showPredictionModal(context, match),
-                                onViewPredictionPressed: () => widget
-                                    .onViewLockedMatch
-                                    ?.call(match.id),
-                                onTapResult: () =>
-                                    widget.onViewResult?.call(match.id),
+                                 onViewPredictionPressed: () {
+                                   if (widget.onViewLockedMatch != null) {
+                                     widget.onViewLockedMatch!(match.id);
+                                   } else {
+                                     context.push(
+                                       '/prediction/${match.id}',
+                                       extra: match,
+                                     );
+                                   }
+                                 },
+                                 onTapResult: () {
+                                   if (widget.onViewResult != null) {
+                                     widget.onViewResult!(match.id);
+                                   } else {
+                                     context.push(
+                                       '/prediction/${match.id}',
+                                       extra: match,
+                                     );
+                                   }
+                                 },
                               ),
                             );
                           },

@@ -85,6 +85,7 @@
   "exactScore": "Marcador exacto",
   "exactScoreTitle": "Pronóstico de Marcador Exacto",
   "pickWinner": "Elige Ganador",
+  "pickTheWinner": "Elige el Ganador",
   "whoWins": "¿Quién gana?",
   "homeOutcome": "Local",
   "drawOutcome": "Empate",
@@ -178,7 +179,7 @@
   "teaserOpensInDays": "Abre en {days}d",
   "teaserOpensInHours": "Abre en {hours}h",
   "teaserOpensInMinutes": "Abre en {minutes}m",
-  "teaserCountdownSubtext": "La ventana de predicción abre 7 días antes del inicio",
+  "teaserCountdownSubtext": "La ventana de predicción abre 3 días antes del inicio",
   "pointsOutcomeExact": "+5 Puntos",
   "pointsOutcomeWinner": "+3 Puntos",
   "pointsOutcomeIncorrect": "0 Puntos",
@@ -199,7 +200,14 @@
   "joinAction": "Unirse",
   "previewModeBanner": "Modo Vista Previa · Únete a este torneo para desbloquear predicciones",
   "joinAndPredictAction": "Únete para Predecir",
-  "signInToJoinTournament": "Inicia sesión para unirte a torneos y hacer predicciones."
+  "signInToJoinTournament": "Inicia sesión para unirte a torneos y hacer predicciones.",
+  "viewFullPredictionPage": "Ver página de predicción completa →",
+  "scoringRuleBanner": "Marcador exacto = +5 Puntos Pico · Ganador correcto = +3 Puntos Pico",
+  "predictionLockedSuccessToast": "¡Predicción guardada! (+10 XP) ⚽",
+  "predictionSaveFailed": "Error al guardar la predicción. Por favor inténtalo de nuevo.",
+  "matchFinishedLabel": "Partido finalizado",
+  "feedTabAll": "Todos",
+  "matchLocksAt": "Cierra a las {time}"
 }
 
 

@@ -306,6 +306,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get pickWinner => 'Elige Ganador';
 
   @override
+  String get pickTheWinner => 'Elige el Ganador';
+
+  @override
   String get whoWins => '¿Quién gana?';
 
   @override
@@ -619,7 +622,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get teaserCountdownSubtext =>
-      'La ventana de predicción abre 7 días antes del inicio';
+      'La ventana de predicción abre 3 días antes del inicio';
 
   @override
   String get pointsOutcomeExact => '+5 Puntos';
@@ -690,4 +693,29 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get signInToJoinTournament =>
       'Inicia sesión para unirte a torneos y hacer predicciones.';
+
+  @override
+  String get viewFullPredictionPage => 'Ver página de predicción completa →';
+
+  @override
+  String get scoringRuleBanner =>
+      'Marcador exacto = +5 Puntos Pico · Ganador correcto = +3 Puntos Pico';
+
+  @override
+  String get predictionLockedSuccessToast => '¡Predicción guardada! (+10 XP) ⚽';
+
+  @override
+  String get predictionSaveFailed =>
+      'Error al guardar la predicción. Por favor inténtalo de nuevo.';
+
+  @override
+  String get matchFinishedLabel => 'Partido finalizado';
+
+  @override
+  String get feedTabAll => 'Todos';
+
+  @override
+  String matchLocksAt(String time) {
+    return 'Cierra a las $time';
+  }
 }
