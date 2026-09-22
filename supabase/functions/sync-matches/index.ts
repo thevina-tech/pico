@@ -374,11 +374,22 @@ serve(async (req: Request) => {
   const headers = {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-pico-cron-secret",
   };
 
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers });
+  }
+
+  // 1. Enforce secret key check before executing any logic
+  const cronSecretHeader = req.headers.get("x-pico-cron-secret");
+  const expectedCronSecret = Deno.env.get("CRON_SECRET");
+
+  if (!cronSecretHeader || !expectedCronSecret || cronSecretHeader !== expectedCronSecret) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers,
+    });
   }
 
   try {
@@ -395,7 +406,19 @@ serve(async (req: Request) => {
         break;
       }
       case "sync-teams": {
-        results.teamsSynced = await syncTeams(league);
+        if (league === "all") {
+          let total = 0;
+          for (const compId of ALLOWED_COMPETITION_IDS) {
+            try {
+              total += await syncTeams(compId);
+            } catch (e: any) {
+              console.warn(`Sync teams error for comp ${compId}:`, e.message);
+            }
+          }
+          results.teamsSynced = total;
+        } else {
+          results.teamsSynced = await syncTeams(league);
+        }
         break;
       }
       case "sync-matches": {
@@ -412,6 +435,31 @@ serve(async (req: Request) => {
         } else {
           results.matchesSynced = await syncMatches(league);
         }
+        break;
+      }
+      case "sync-upcoming": {
+        let total = 0;
+        for (const compId of ALLOWED_COMPETITION_IDS) {
+          try {
+            total += await syncMatches(compId);
+          } catch (e: any) {
+            console.warn(`Sync upcoming matches error for comp ${compId}:`, e.message);
+          }
+        }
+        results.matchesSynced = total;
+        break;
+      }
+      case "sync-metadata": {
+        results.competitionsSynced = await syncCompetitions();
+        let totalTeams = 0;
+        for (const compId of ALLOWED_COMPETITION_IDS) {
+          try {
+            totalTeams += await syncTeams(compId);
+          } catch (e: any) {
+            console.warn(`Sync metadata teams error for comp ${compId}:`, e.message);
+          }
+        }
+        results.teamsSynced = totalTeams;
         break;
       }
       case "sync-live":
