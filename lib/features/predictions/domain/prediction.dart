@@ -34,4 +34,12 @@ extension PredictionSettlement on Prediction {
     if (actualHome == actualAway && predictedWinner == 'draw') return true;
     return false;
   }
+
+  /// Calculates Pico Points outcome for this prediction against actual score.
+  /// Rule 13: Exact score = 5 total, Correct winner = 3 total, Wrong = 0.
+  int calculatePoints(int actualHome, int actualAway) {
+    if (isExactScore(actualHome, actualAway)) return 5;
+    if (isCorrectWinner(actualHome, actualAway)) return 3;
+    return 0;
+  }
 }

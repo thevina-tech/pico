@@ -18,8 +18,15 @@ MatchRepository matchRepository(Ref ref) {
 /// Abstract contract for match retrieval.
 abstract class MatchRepository {
   Future<List<PicoMatch>> getAllMatches();
-  Future<List<PicoMatch>> getUpcomingMatches();
-  Future<List<PicoMatch>> getFinishedMatches();
+  Future<List<PicoMatch>> getLiveMatches({String? competitionId});
+  Future<List<PicoMatch>> getUpcomingMatches({
+    String? competitionId,
+    Duration window = const Duration(days: 14),
+  });
+  Future<List<PicoMatch>> getFinishedMatches({
+    String? competitionId,
+    Duration window = const Duration(days: 7),
+  });
   Future<PicoMatch?> getHeroMatch();
   Future<List<String>> getCompetitions();
   Future<PicoMatch?> getMatchById(String id);
@@ -72,15 +79,131 @@ class SupabaseMatchRepository implements MatchRepository {
   }
 
   @override
-  Future<List<PicoMatch>> getUpcomingMatches() async {
-    final all = await getAllMatches();
-    return all.where((m) => m.status == MatchStatus.upcoming).toList();
+  Future<List<PicoMatch>> getLiveMatches({String? competitionId}) async {
+    if (_supabase == null) {
+      return await _mockFallback.getLiveMatches(competitionId: competitionId);
+    }
+    try {
+      var query = _supabase.from('matches').select('''
+        id,
+        provider_match_id,
+        competition_id,
+        home_team_id,
+        away_team_id,
+        kickoff_at,
+        status,
+        home_score,
+        away_score,
+        settled,
+        competition:competitions(id, name, emblem_url),
+        home_team:teams!matches_home_team_id_fkey(id, name, short_name, crest_url),
+        away_team:teams!matches_away_team_id_fkey(id, name, short_name, crest_url)
+      ''').eq('status', 'live');
+
+      if (competitionId != null && competitionId.isNotEmpty) {
+        query = query.eq('competition_id', competitionId);
+      }
+
+      final response = await query.order('kickoff_at', ascending: true);
+      return (response as List<dynamic>)
+          .map((row) => PicoMatch.fromJson(row as Map<String, dynamic>))
+          .toList();
+    } catch (e, st) {
+      AppLogger.error('Failed to query live matches from Supabase; using fallback', e, st);
+      return await _mockFallback.getLiveMatches(competitionId: competitionId);
+    }
   }
 
   @override
-  Future<List<PicoMatch>> getFinishedMatches() async {
-    final all = await getAllMatches();
-    return all.where((m) => m.status == MatchStatus.finished).toList();
+  Future<List<PicoMatch>> getUpcomingMatches({
+    String? competitionId,
+    Duration window = const Duration(days: 14),
+  }) async {
+    if (_supabase == null) {
+      return await _mockFallback.getUpcomingMatches(
+        competitionId: competitionId,
+        window: window,
+      );
+    }
+    try {
+      final maxKickoff = DateTime.now().toUtc().add(window).toIso8601String();
+      var query = _supabase.from('matches').select('''
+        id,
+        provider_match_id,
+        competition_id,
+        home_team_id,
+        away_team_id,
+        kickoff_at,
+        status,
+        home_score,
+        away_score,
+        settled,
+        competition:competitions(id, name, emblem_url),
+        home_team:teams!matches_home_team_id_fkey(id, name, short_name, crest_url),
+        away_team:teams!matches_away_team_id_fkey(id, name, short_name, crest_url)
+      ''').eq('status', 'upcoming').lt('kickoff_at', maxKickoff);
+
+      if (competitionId != null && competitionId.isNotEmpty) {
+        query = query.eq('competition_id', competitionId);
+      }
+
+      final response = await query.order('kickoff_at', ascending: true);
+      return (response as List<dynamic>)
+          .map((row) => PicoMatch.fromJson(row as Map<String, dynamic>))
+          .toList();
+    } catch (e, st) {
+      AppLogger.error('Failed to query upcoming matches from Supabase; using fallback', e, st);
+      return await _mockFallback.getUpcomingMatches(
+        competitionId: competitionId,
+        window: window,
+      );
+    }
+  }
+
+  @override
+  Future<List<PicoMatch>> getFinishedMatches({
+    String? competitionId,
+    Duration window = const Duration(days: 7),
+  }) async {
+    if (_supabase == null) {
+      return await _mockFallback.getFinishedMatches(
+        competitionId: competitionId,
+        window: window,
+      );
+    }
+    try {
+      final minKickoff = DateTime.now().toUtc().subtract(window).toIso8601String();
+      var query = _supabase.from('matches').select('''
+        id,
+        provider_match_id,
+        competition_id,
+        home_team_id,
+        away_team_id,
+        kickoff_at,
+        status,
+        home_score,
+        away_score,
+        settled,
+        competition:competitions(id, name, emblem_url),
+        home_team:teams!matches_home_team_id_fkey(id, name, short_name, crest_url),
+        away_team:teams!matches_away_team_id_fkey(id, name, short_name, crest_url)
+      ''').eq('status', 'finished').gt('kickoff_at', minKickoff);
+
+      if (competitionId != null && competitionId.isNotEmpty) {
+        query = query.eq('competition_id', competitionId);
+      }
+
+      final response = await query.order('kickoff_at', ascending: false);
+      return (response as List<dynamic>)
+          .map((row) => PicoMatch.fromJson(row as Map<String, dynamic>))
+          .toList();
+    } catch (e, st) {
+      AppLogger.error('Failed to query finished matches from Supabase; using fallback', e, st);
+      return await _mockFallback.getFinishedMatches(
+        competitionId: competitionId,
+        window: window,
+      );
+    }
   }
 
   @override
@@ -154,15 +277,41 @@ class MockMatchRepository implements MatchRepository {
   }
 
   @override
-  Future<List<PicoMatch>> getUpcomingMatches() async {
+  Future<List<PicoMatch>> getLiveMatches({String? competitionId}) async {
     final all = await getAllMatches();
-    return all.where((m) => m.status == MatchStatus.upcoming).toList();
+    return all.where((m) {
+      if (m.status != MatchStatus.live) return false;
+      if (competitionId != null && m.competitionId != competitionId) return false;
+      return true;
+    }).toList();
   }
 
   @override
-  Future<List<PicoMatch>> getFinishedMatches() async {
+  Future<List<PicoMatch>> getUpcomingMatches({
+    String? competitionId,
+    Duration window = const Duration(days: 14),
+  }) async {
     final all = await getAllMatches();
-    return all.where((m) => m.status == MatchStatus.finished).toList();
+    final maxKickoff = DateTime.now().add(window);
+    return all.where((m) {
+      if (m.status != MatchStatus.upcoming) return false;
+      if (competitionId != null && m.competitionId != competitionId) return false;
+      return m.kickoffAt.isBefore(maxKickoff);
+    }).toList();
+  }
+
+  @override
+  Future<List<PicoMatch>> getFinishedMatches({
+    String? competitionId,
+    Duration window = const Duration(days: 7),
+  }) async {
+    final all = await getAllMatches();
+    final minKickoff = DateTime.now().subtract(window);
+    return all.where((m) {
+      if (m.status != MatchStatus.finished) return false;
+      if (competitionId != null && m.competitionId != competitionId) return false;
+      return m.kickoffAt.isAfter(minKickoff);
+    }).toList();
   }
 
   @override

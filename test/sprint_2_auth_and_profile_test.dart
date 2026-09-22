@@ -266,8 +266,8 @@ void main() {
       final enrolled = await tournamentRepo.getEnrolledTournaments(authState.user!.id);
       expect(enrolled.length, 2);
       final enrolledCompIds = enrolled.map((t) => t.competitionId).toSet();
-      expect(enrolledCompIds.contains('la_liga'), isTrue);
-      expect(enrolledCompIds.contains('serie_a'), isTrue);
+      expect(enrolledCompIds.contains('1'), isTrue);
+      expect(enrolledCompIds.contains('7'), isTrue);
 
       final participants = await tournamentRepo.getParticipantsForUser(authState.user!.id);
       expect(participants.length, 2);

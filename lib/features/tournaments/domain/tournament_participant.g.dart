@@ -15,6 +15,8 @@ _TournamentParticipant _$TournamentParticipantFromJson(
   joinedAt: json['joined_at'] == null
       ? null
       : DateTime.parse(json['joined_at'] as String),
+  username: json['username'] as String?,
+  avatarUrl: json['avatar_url'] as String?,
   tournament: json['tournament'] == null
       ? null
       : Tournament.fromJson(json['tournament'] as Map<String, dynamic>),
@@ -27,5 +29,7 @@ Map<String, dynamic> _$TournamentParticipantToJson(
   'user_id': instance.userId,
   'pico_points': instance.picoPoints,
   'joined_at': instance.joinedAt?.toIso8601String(),
+  'username': instance.username,
+  'avatar_url': instance.avatarUrl,
   'tournament': instance.tournament,
 };

@@ -4,6 +4,7 @@ import 'package:pico/features/auth/domain/auth_state.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/auth/presentation/onboarding_screen.dart';
 import 'package:pico/features/profile/presentation/profile_screen.dart';
+import 'package:pico/features/tournaments/presentation/tournaments_screen.dart';
 import 'package:pico/main.dart';
 import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
@@ -79,7 +80,7 @@ void main() {
     // Tap Tournaments tab
     await tester.tap(find.descendant(of: navBar, matching: find.text('Tournaments')));
     await tester.pumpAndSettle();
-    expect(find.text('Champions League Masters'), findsOneWidget);
+    expect(find.byType(TournamentsScreen), findsOneWidget);
 
     // Tap Profile tab
     await tester.tap(find.descendant(of: navBar, matching: find.text('Profile')));

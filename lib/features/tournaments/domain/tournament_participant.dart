@@ -12,6 +12,8 @@ abstract class TournamentParticipant with _$TournamentParticipant {
     @JsonKey(name: 'user_id') required String userId,
     @JsonKey(name: 'pico_points') @Default(0) int picoPoints,
     @JsonKey(name: 'joined_at') DateTime? joinedAt,
+    String? username,
+    @JsonKey(name: 'avatar_url') String? avatarUrl,
     Tournament? tournament,
   }) = _TournamentParticipant;
 

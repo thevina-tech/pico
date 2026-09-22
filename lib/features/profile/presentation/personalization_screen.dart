@@ -29,10 +29,12 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
   static const _availableLeagues = [
     {'id': 'la_liga', 'name': 'La Liga', 'flag': '🇪🇸'},
     {'id': 'premier_league', 'name': 'Premier League', 'flag': '🏴󠁧󠁢󠁥󠁮󠁧󠁿'},
-    {'id': 'champions_league', 'name': 'Champions League', 'flag': '⭐'},
     {'id': 'serie_a', 'name': 'Serie A', 'flag': '🇮🇹'},
     {'id': 'bundesliga', 'name': 'Bundesliga', 'flag': '🇩🇪'},
     {'id': 'ligue_1', 'name': 'Ligue 1', 'flag': '🇫🇷'},
+    {'id': 'champions_league', 'name': 'Champions League', 'flag': '⭐'},
+    {'id': 'europa_league', 'name': 'Europa League', 'flag': '🟠'},
+    {'id': 'conference_league', 'name': 'Conference League', 'flag': '🟢'},
   ];
 
   static const _availableClubs = [

@@ -131,7 +131,7 @@ CREATE TABLE public.predictions (
   UNIQUE(user_id, match_id)
 );
 
--- Trigger: Enforce Zero-Client Trust Prediction Window (3 Days to 10 Mins)[cite: 5]
+-- Trigger: Enforce Zero-Client Trust Prediction Window (Locks 10 Mins Before Kickoff)[cite: 5]
 CREATE OR REPLACE FUNCTION public.check_prediction_window()
 RETURNS trigger AS $$
 DECLARE
@@ -141,10 +141,6 @@ BEGIN
   
   IF v_kickoff IS NULL THEN
     RAISE EXCEPTION 'Target match does not exist.';
-  END IF;
-
-  IF now() < (v_kickoff - interval '3 days') THEN
-    RAISE EXCEPTION 'Predictions are not open yet. Check back 3 days before kickoff.';
   END IF;
 
   IF now() >= (v_kickoff - interval '10 minutes') THEN

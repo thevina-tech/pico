@@ -407,6 +407,494 @@
         "example": "7"
       }
     }
+  },
+  "predictAction": "Predict",
+  "@predictAction": {
+    "description": "Action button text to make a prediction"
+  },
+  "exactScore": "Exact score",
+  "@exactScore": {
+    "description": "Label for exact score prediction"
+  },
+  "exactScoreTitle": "Exact Score Prediction",
+  "@exactScoreTitle": {
+    "description": "Headline for exact score prediction"
+  },
+  "pickWinner": "Pick Winner",
+  "@pickWinner": {
+    "description": "Label for choosing match winner"
+  },
+  "whoWins": "Who wins?",
+  "@whoWins": {
+    "description": "Question asking which team wins"
+  },
+  "homeOutcome": "Home",
+  "@homeOutcome": {
+    "description": "Home team outcome label"
+  },
+  "drawOutcome": "Draw",
+  "@drawOutcome": {
+    "description": "Draw outcome label"
+  },
+  "awayOutcome": "Away",
+  "@awayOutcome": {
+    "description": "Away team outcome label"
+  },
+  "savePredictionCta": "Save Prediction (+10 XP)",
+  "@savePredictionCta": {
+    "description": "Primary button to submit prediction"
+  },
+  "modifyPrediction": "Modify Prediction",
+  "@modifyPrediction": {
+    "description": "Button to edit an existing prediction"
+  },
+  "predictionLockedTitle": "Prediction Locked! ⚽",
+  "@predictionLockedTitle": {
+    "description": "Title when a prediction is confirmed or locked"
+  },
+  "predictionLockedBanner": "Prediction locked · Kickoff at {time}",
+  "@predictionLockedBanner": {
+    "description": "Status text when match prediction is locked",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "19:50"
+      }
+    }
+  },
+  "predictionWindowClosed": "Predictions are closed for this match",
+  "@predictionWindowClosed": {
+    "description": "Error message when prediction window has closed"
+  },
+  "predictionLockNote": "Predictions lock exactly 10 minutes before kickoff.",
+  "@predictionLockNote": {
+    "description": "Helper text explaining 10-minute lock rule"
+  },
+  "potentialPointsHeader": "Potential Pico Points",
+  "@potentialPointsHeader": {
+    "description": "Header for points explanation"
+  },
+  "potentialPointsBreakdown": "+5 for exact score · +3 for correct winner",
+  "@potentialPointsBreakdown": {
+    "description": "Breakdown of potential Pico Points"
+  },
+  "quickPredict": "Quick Predict",
+  "@quickPredict": {
+    "description": "Inline prediction label"
+  },
+  "predictionSavedToast": "Prediction locked in! Good luck.",
+  "@predictionSavedToast": {
+    "description": "Confirmation toast after submitting prediction"
+  },
+  "tournamentsTitle": "Tournaments",
+  "@tournamentsTitle": {
+    "description": "Title for tournaments screen"
+  },
+  "tournamentsSubtitle": "Compete with friends · No real money",
+  "@tournamentsSubtitle": {
+    "description": "Subtitle for tournaments screen"
+  },
+  "myLeaguesTab": "My Leagues",
+  "@myLeaguesTab": {
+    "description": "Tab label for user's joined and owned leagues"
+  },
+  "discoverTab": "Discover",
+  "@discoverTab": {
+    "description": "Tab label for discovering official tournaments"
+  },
+  "createOrJoinAction": "+ Create / Join",
+  "@createOrJoinAction": {
+    "description": "Action button in tournaments header"
+  },
+  "createPrivateLeagueTitle": "Create Private League",
+  "@createPrivateLeagueTitle": {
+    "description": "Title for Create Private League screen"
+  },
+  "createPrivateLeagueSubtitle": "Compete against friends, banter, and crown your group champion.",
+  "@createPrivateLeagueSubtitle": {
+    "description": "Subtitle for Create Private League screen"
+  },
+  "joinPrivateLeagueTitle": "Join Private League",
+  "@joinPrivateLeagueTitle": {
+    "description": "Title for Join Private League screen"
+  },
+  "joinPrivateLeagueSubtitle": "Enter the 6-character code shared by your friend.",
+  "@joinPrivateLeagueSubtitle": {
+    "description": "Subtitle for Join Private League screen"
+  },
+  "leagueNameLabel": "LEAGUE NAME",
+  "@leagueNameLabel": {
+    "description": "Label for league name input"
+  },
+  "leagueNamePlaceholder": "e.g., Friday Football Kings",
+  "@leagueNamePlaceholder": {
+    "description": "Placeholder for league name input"
+  },
+  "baseTournamentLabel": "BASE TOURNAMENT / COMPETITION",
+  "@baseTournamentLabel": {
+    "description": "Label for base competition dropdown selector"
+  },
+  "baseTournamentHelper": "Matches and standings are linked to this competition.",
+  "@baseTournamentHelper": {
+    "description": "Helper note explaining base competition linkage"
+  },
+  "freeSetupBadge": "Free Instant Setup",
+  "@freeSetupBadge": {
+    "description": "Badge in create league screen"
+  },
+  "createLeagueButton": "Create Private League",
+  "@createLeagueButton": {
+    "description": "CTA button to create private league"
+  },
+  "joinLeagueButton": "Join Private League",
+  "@joinLeagueButton": {
+    "description": "CTA button to join private league"
+  },
+  "enterLeagueCodeLabel": "ENTER 6-CHARACTER CODE",
+  "@enterLeagueCodeLabel": {
+    "description": "Label for invite code input"
+  },
+  "pasteCode": "Paste",
+  "@pasteCode": {
+    "description": "Button to paste from clipboard"
+  },
+  "codeCopiedToast": "Invite code copied to clipboard!",
+  "@codeCopiedToast": {
+    "description": "Toast confirming code copied"
+  },
+  "shareInviteMessage": "Join my private league on Pico! Use code: {code}",
+  "@shareInviteMessage": {
+    "description": "Message template to share invite code",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "K9X2P1"
+      }
+    }
+  },
+  "inviteCodeLabel": "INVITE CODE",
+  "@inviteCodeLabel": {
+    "description": "Label for invite code badge"
+  },
+  "copyCodeButton": "Copy Code",
+  "@copyCodeButton": {
+    "description": "Button to copy code"
+  },
+  "shareCodeButton": "Share Invite",
+  "@shareCodeButton": {
+    "description": "Button to share code"
+  },
+  "emptyPrivateLeaguesTitle": "No Private Leagues Yet",
+  "@emptyPrivateLeaguesTitle": {
+    "description": "Empty state title when user has no private leagues"
+  },
+  "emptyPrivateLeaguesSubtitle": "Create a league for your friends or join one with an invite code.",
+  "@emptyPrivateLeaguesSubtitle": {
+    "description": "Empty state subtitle for private leagues"
+  },
+  "officialTournamentBadge": "OFFICIAL TOURNAMENT",
+  "@officialTournamentBadge": {
+    "description": "Badge for official public tournaments"
+  },
+  "leagueCreatedSuccessTitle": "League Created! 🎉",
+  "@leagueCreatedSuccessTitle": {
+    "description": "Success modal title after creating private league"
+  },
+  "leagueJoinedSuccessTitle": "You're In! ⚽",
+  "@leagueJoinedSuccessTitle": {
+    "description": "Success modal title after joining private league"
+  },
+  "leagueJoinedSuccessSubtitle": "You have joined {leagueName}",
+  "@leagueJoinedSuccessSubtitle": {
+    "description": "Success modal subtitle after joining private league",
+    "placeholders": {
+      "leagueName": {
+        "type": "String",
+        "example": "Champions Cup"
+      }
+    }
+  },
+  "invalidLeagueCodeError": "Invalid invite code. Please check the code and try again.",
+  "@invalidLeagueCodeError": {
+    "description": "Error displayed when invite code is not found"
+  },
+  "alreadyMemberOfLeagueError": "You are already a member of this league.",
+  "@alreadyMemberOfLeagueError": {
+    "description": "Error displayed when user is already in the league"
+  },
+  "creatorCannotRejoinError": "You created this league and are already its owner.",
+  "@creatorCannotRejoinError": {
+    "description": "Error displayed when creator tries to rejoin own league"
+  },
+  "leagueCodeFormatError": "Code must be exactly 6 characters (e.g., K9X2P1)",
+  "@leagueCodeFormatError": {
+    "description": "Validation error when invite code length is not 6"
+  },
+  "doneButton": "Done",
+  "@doneButton": {
+    "description": "Done action button"
+  },
+  "privateLeagueSecurityNote": "Only players with your invite code can join",
+  "@privateLeagueSecurityNote": {
+    "description": "Security note on private league creation"
+  },
+  "officialBaseTournamentNote": "Official Base Tournament",
+  "@officialBaseTournamentNote": {
+    "description": "Note under selected base competition"
+  },
+  "competitionsAvailableCount": "{count} available",
+  "@competitionsAvailableCount": {
+    "description": "Count of available competitions",
+    "placeholders": {
+      "count": { "type": "int", "example": "8" }
+    }
+  },
+  "friendsAndColleaguesBadge": "FRIENDS & COLLEAGUES",
+  "@friendsAndColleaguesBadge": {
+    "description": "Badge in join league screen"
+  },
+  "privateCommunitySubtitle": "Private Community",
+  "@privateCommunitySubtitle": {
+    "description": "Subtitle in join league screen"
+  },
+  "selectBaseTournamentSheetTitle": "Select Base Tournament ({count} Available)",
+  "@selectBaseTournamentSheetTitle": {
+    "description": "Title of the base tournament selection bottom sheet",
+    "placeholders": {
+      "count": { "type": "int", "example": "8" }
+    }
+  },
+  "tournamentDetailsTitle": "Tournament Details",
+  "@tournamentDetailsTitle": {
+    "description": "App bar title for public tournament screen"
+  },
+  "privateLeagueDetailsTitle": "Private League",
+  "@privateLeagueDetailsTitle": {
+    "description": "App bar title for private tournament screen"
+  },
+  "inviteCodeBannerTitle": "LEAGUE INVITE CODE",
+  "@inviteCodeBannerTitle": {
+    "description": "Header for the invite code banner"
+  },
+  "inviteCodeBannerSubtitle": "Share with friends to compete together",
+  "@inviteCodeBannerSubtitle": {
+    "description": "Subtitle encouraging sharing the league code"
+  },
+  "shareInviteCodeMessage": "Join my private football prediction league \"{leagueName}\" on Pico! Use invite code: {code}",
+  "@shareInviteCodeMessage": {
+    "description": "Share message for native share sheet",
+    "placeholders": {
+      "leagueName": { "type": "String", "example": "Champions League" },
+      "code": { "type": "String", "example": "K9X2P1" }
+    }
+  },
+  "adminControlsTitle": "ADMIN CONTROLS",
+  "@adminControlsTitle": {
+    "description": "Section header for owner admin controls"
+  },
+  "deleteLeagueButton": "Delete League",
+  "@deleteLeagueButton": {
+    "description": "Button to delete a private league"
+  },
+  "deleteLeagueConfirmTitle": "Delete Private League?",
+  "@deleteLeagueConfirmTitle": {
+    "description": "Title of delete confirmation dialog"
+  },
+  "deleteLeagueConfirmBody": "This action is permanent. All members will be removed and standings will be erased.",
+  "@deleteLeagueConfirmBody": {
+    "description": "Body of delete confirmation dialog"
+  },
+  "deleteLeagueAction": "Delete",
+  "@deleteLeagueAction": {
+    "description": "Confirm button text for deleting league"
+  },
+  "removeMemberButton": "Remove",
+  "@removeMemberButton": {
+    "description": "Button to remove a member"
+  },
+  "removeMemberConfirmTitle": "Remove Member?",
+  "@removeMemberConfirmTitle": {
+    "description": "Title of member removal dialog"
+  },
+  "removeMemberConfirmBody": "Are you sure you want to remove {username} from this league?",
+  "@removeMemberConfirmBody": {
+    "description": "Body of member removal dialog",
+    "placeholders": {
+      "username": { "type": "String", "example": "Player 1" }
+    }
+  },
+  "leaveLeagueButton": "Leave League",
+  "@leaveLeagueButton": {
+    "description": "Button to leave a private league"
+  },
+  "leaveLeagueConfirmTitle": "Leave League?",
+  "@leaveLeagueConfirmTitle": {
+    "description": "Title of leave confirmation dialog"
+  },
+  "leaveLeagueConfirmBody": "Are you sure you want to leave {leagueName}? You will need the invite code to rejoin.",
+  "@leaveLeagueConfirmBody": {
+    "description": "Body of leave confirmation dialog",
+    "placeholders": {
+      "leagueName": { "type": "String", "example": "My League" }
+    }
+  },
+  "leaveLeagueAction": "Leave",
+  "@leaveLeagueAction": {
+    "description": "Confirm button text for leaving league"
+  },
+  "leaderboardTab": "Standings",
+  "@leaderboardTab": {
+    "description": "Tab for standings / leaderboard"
+  },
+  "matchesTab": "Matches",
+  "@matchesTab": {
+    "description": "Tab for tournament matches"
+  },
+  "upcomingMatchesSection": "Upcoming Matches",
+  "@upcomingMatchesSection": {
+    "description": "Section header for upcoming matches"
+  },
+  "finishedMatchesSection": "Completed Matches",
+  "@finishedMatchesSection": {
+    "description": "Section header for finished matches"
+  },
+  "noParticipantsYet": "No participants yet",
+  "@noParticipantsYet": {
+    "description": "Placeholder when leaderboard is empty"
+  },
+  "noMatchesForCompetition": "No matches found for this competition",
+  "@noMatchesForCompetition": {
+    "description": "Placeholder when competition has no matches"
+  },
+  "leagueDeletedToast": "League deleted successfully",
+  "@leagueDeletedToast": {
+    "description": "Toast when league is deleted"
+  },
+  "memberRemovedToast": "Member removed",
+  "@memberRemovedToast": {
+    "description": "Toast when member is removed"
+  },
+  "leftLeagueToast": "You left the league",
+  "@leftLeagueToast": {
+    "description": "Toast when user leaves league"
+  },
+  "creatorBadge": "CREATOR",
+  "@creatorBadge": {
+    "description": "Badge for league creator"
+  },
+  "memberBadge": "MEMBER",
+  "@memberBadge": {
+    "description": "Badge for league member"
+  },
+  "cancelButton": "Cancel",
+  "@cancelButton": {
+    "description": "General cancel button"
+  },
+  "pointsAbbreviation": "PTS",
+  "@pointsAbbreviation": {
+    "description": "Points abbreviation in leaderboard"
+  },
+  "rankHeader": "RANK",
+  "@rankHeader": {
+    "description": "Header for rank column"
+  },
+  "playerHeader": "PLAYER",
+  "@playerHeader": {
+    "description": "Header for player column"
+  },
+  "predictAction": "PREDICT",
+  "@predictAction": {
+    "description": "Predict match CTA button"
+  },
+  "feedTabLive": "Live",
+  "@feedTabLive": {
+    "description": "Tab for matches currently in progress"
+  },
+  "feedTabUpcoming": "Upcoming",
+  "@feedTabUpcoming": {
+    "description": "Tab for upcoming matches within 14 days"
+  },
+  "feedTabFinished": "Finished",
+  "@feedTabFinished": {
+    "description": "Tab for finished matches within last 7 days"
+  },
+  "teaserOpensInDays": "Opens in {days}d",
+  "@teaserOpensInDays": {
+    "description": "Teaser countdown button label in days",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "teaserOpensInHours": "Opens in {hours}h",
+  "@teaserOpensInHours": {
+    "description": "Teaser countdown button label in hours",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "14"
+      }
+    }
+  },
+  "teaserOpensInMinutes": "Opens in {minutes}m",
+  "@teaserOpensInMinutes": {
+    "description": "Teaser countdown button label in minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "45"
+      }
+    }
+  },
+  "teaserCountdownSubtext": "Prediction window opens 7 days before kickoff",
+  "@teaserCountdownSubtext": {
+    "description": "Subtext explaining when prediction window opens for teaser cards"
+  },
+  "pointsOutcomeExact": "+5 Points",
+  "@pointsOutcomeExact": {
+    "description": "Pico Points badge for exact score settlement"
+  },
+  "pointsOutcomeWinner": "+3 Points",
+  "@pointsOutcomeWinner": {
+    "description": "Pico Points badge for correct winner settlement"
+  },
+  "pointsOutcomeIncorrect": "0 Points",
+  "@pointsOutcomeIncorrect": {
+    "description": "Pico Points badge for incorrect prediction settlement"
+  },
+  "pointsOutcomeNone": "No Prediction",
+  "@pointsOutcomeNone": {
+    "description": "Badge when match finished without user prediction"
+  },
+  "noLiveMatches": "No live matches right now",
+  "@noLiveMatches": {
+    "description": "Empty state title for live matches tab"
+  },
+  "noLiveMatchesSub": "Check back during matchdays for real-time fixtures.",
+  "@noLiveMatchesSub": {
+    "description": "Empty state subtitle for live matches tab"
+  },
+  "noUpcomingMatches": "No upcoming matches right now. Check back soon!",
+  "@noUpcomingMatches": {
+    "description": "Empty state title for upcoming matches"
+  },
+  "feedNoUpcomingMatches": "No upcoming matches in the next 14 days",
+  "@feedNoUpcomingMatches": {
+    "description": "Empty state title for upcoming matches tab"
+  },
+  "noUpcomingMatchesSub": "Upcoming fixtures will appear here once scheduled.",
+  "@noUpcomingMatchesSub": {
+    "description": "Empty state subtitle for upcoming matches tab"
+  },
+  "noFinishedMatches": "No finished matches in the last 7 days",
+  "@noFinishedMatches": {
+    "description": "Empty state title for finished matches tab"
+  },
+  "noFinishedMatchesSub": "Recently concluded matches and points will be shown here.",
+  "@noFinishedMatchesSub": {
+    "description": "Empty state subtitle for finished matches tab"
   }
 }
 

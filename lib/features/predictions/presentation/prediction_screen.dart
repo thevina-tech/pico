@@ -1,0 +1,1064 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:pico/core/theme/pico_colors.dart';
+import 'package:pico/core/theme/pico_typography.dart';
+import 'package:pico/features/matches/domain/pico_match.dart';
+import 'package:pico/features/predictions/presentation/prediction_controller.dart';
+import 'package:pico/l10n/app_localizations.dart';
+import 'package:pico/shared/components/pico_button.dart';
+import 'package:pico/shared/components/pico_pitch_background.dart';
+import 'package:pico/shared/components/prediction_controls.dart';
+
+/// Screen: Tactile Match Prediction Board
+///
+/// Features:
+/// 1. Dynamic [PicoMatch] binding with live kickoff and closing times.
+/// 2. Pick the Winner selector and vertical Exact Score steppers.
+/// 3. Zero-client trust enforcement (locks 10 minutes before kickoff).
+/// 4. Direct Riverpod integration saving prediction + awarding +10 XP ledger.
+class PredictionScreen extends ConsumerStatefulWidget {
+  const PredictionScreen({
+    super.key,
+    required this.match,
+    this.initialHomeScore,
+    this.initialAwayScore,
+    this.onBack,
+    this.onPredictionLocked,
+  });
+
+  final PicoMatch match;
+  final int? initialHomeScore;
+  final int? initialAwayScore;
+  final VoidCallback? onBack;
+  final void Function(int homeScore, int awayScore, MatchOutcome winner)?
+      onPredictionLocked;
+
+  @override
+  ConsumerState<PredictionScreen> createState() => _PredictionScreenState();
+}
+
+class _PredictionScreenState extends ConsumerState<PredictionScreen> {
+  late int _homeScore;
+  late int _awayScore;
+  late MatchOutcome _selectedWinner;
+  bool _isLocked = false;
+  bool _isSubmitting = false;
+  bool _hasUserModified = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isLocked = widget.match.isLocked || widget.match.status != MatchStatus.upcoming;
+
+    final predictions = ref.read(predictionControllerProvider);
+    final existing = predictions.value?[widget.match.id];
+
+    if (existing != null) {
+      _homeScore = existing.homeScore;
+      _awayScore = existing.awayScore;
+      _selectedWinner = _parseWinner(existing.predictedWinner);
+    } else {
+      _homeScore = widget.initialHomeScore ?? 2;
+      _awayScore = widget.initialAwayScore ?? 1;
+      _autoSyncWinnerFromScore();
+    }
+  }
+
+  MatchOutcome _parseWinner(String winner) {
+    switch (winner.toLowerCase()) {
+      case 'home':
+        return MatchOutcome.home;
+      case 'away':
+        return MatchOutcome.away;
+      case 'draw':
+      default:
+        return MatchOutcome.draw;
+    }
+  }
+
+  void _updateHomeScore(int newScore) {
+    if (_isLocked || newScore < 0) return;
+    setState(() {
+      _hasUserModified = true;
+      _homeScore = newScore;
+      _autoSyncWinnerFromScore();
+    });
+  }
+
+  void _updateAwayScore(int newScore) {
+    if (_isLocked || newScore < 0) return;
+    setState(() {
+      _hasUserModified = true;
+      _awayScore = newScore;
+      _autoSyncWinnerFromScore();
+    });
+  }
+
+  void _selectWinner(MatchOutcome outcome) {
+    if (_isLocked) return;
+    setState(() {
+      _hasUserModified = true;
+      _selectedWinner = outcome;
+      if (outcome == MatchOutcome.home && _homeScore <= _awayScore) {
+        _homeScore = _awayScore + 1;
+      } else if (outcome == MatchOutcome.away && _awayScore <= _homeScore) {
+        _awayScore = _homeScore + 1;
+      } else if (outcome == MatchOutcome.draw && _homeScore != _awayScore) {
+        _awayScore = _homeScore;
+      }
+    });
+  }
+
+  void _autoSyncWinnerFromScore() {
+    if (_homeScore > _awayScore) {
+      _selectedWinner = MatchOutcome.home;
+    } else if (_awayScore > _homeScore) {
+      _selectedWinner = MatchOutcome.away;
+    } else {
+      _selectedWinner = MatchOutcome.draw;
+    }
+  }
+
+  String _cleanImageUrl(String url) {
+    if (url.contains('?')) {
+      return url.split('?').first;
+    }
+    return url;
+  }
+
+  Future<void> _submitPrediction() async {
+    if (_isLocked || _isSubmitting) return;
+
+    if (widget.match.isLocked) {
+      setState(() => _isLocked = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)?.predictionWindowClosed ??
+                'Predictions lock exactly 10 minutes before kickoff.',
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      final winnerString = _selectedWinner == MatchOutcome.home
+          ? 'home'
+          : _selectedWinner == MatchOutcome.away
+              ? 'away'
+              : 'draw';
+
+      final success = await ref
+          .read(predictionControllerProvider.notifier)
+          .submitPrediction(
+            match: widget.match,
+            homeScore: _homeScore,
+            awayScore: _awayScore,
+            predictedWinner: winnerString,
+          );
+
+      if (!mounted) return;
+
+      if (success) {
+        widget.onPredictionLocked?.call(_homeScore, _awayScore, _selectedWinner);
+        final l10n = AppLocalizations.of(context);
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+            content: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+              decoration: BoxDecoration(
+                color: PicoColors.primary,
+                borderRadius: BorderRadius.circular(16.0),
+                border: Border.all(color: PicoColors.primaryFixed, width: 2.0),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x66000000),
+                    offset: Offset(0, 6),
+                    blurRadius: 16,
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 36.0,
+                    height: 36.0,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check_circle_rounded,
+                      color: Colors.white,
+                      size: 22.0,
+                    ),
+                  ),
+                  const SizedBox(width: 12.0),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n?.predictionLockedTitle ?? 'Prediction Locked! ⚽',
+                          style: PicoTypography.titleCard.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15.0,
+                          ),
+                        ),
+                        const SizedBox(height: 2.0),
+                        Text(
+                          '${widget.match.homeTeamName} $_homeScore - $_awayScore ${widget.match.awayTeamName}',
+                          style: PicoTypography.bodySm.copyWith(
+                            color: PicoColors.primaryFixed,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      } else {
+        if (widget.match.isLocked) {
+          setState(() => _isLocked = true);
+        }
+        final l10n = AppLocalizations.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              widget.match.isLocked
+                  ? (l10n?.predictionWindowClosed ?? 'Predictions are closed for this match')
+                  : 'Failed to save prediction. Please try again.',
+            ),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen(predictionControllerProvider, (prev, next) {
+      final existing = next.value?[widget.match.id];
+      if (existing != null && !_hasUserModified && mounted) {
+        setState(() {
+          _homeScore = existing.homeScore;
+          _awayScore = existing.awayScore;
+          _selectedWinner = _parseWinner(existing.predictedWinner);
+        });
+      }
+    });
+
+    return Scaffold(
+      backgroundColor: PicoColors.pitchBackground,
+      body: PicoPitchBackground(
+        showContours: true,
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440.0),
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // 1. Header Bar: Back Button, Match Info, Streak
+                    _buildHeaderBar(),
+                    const SizedBox(height: 14.0),
+
+                    // 2. Teams Faceoff Presentation
+                    _buildTeamsFaceoff(),
+                    const SizedBox(height: 16.0),
+
+                    // 3. Main Interactive Tactile Prediction Board
+                    _buildPredictionBoard(),
+                    const SizedBox(height: 24.0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Top navigation & match status header
+  Widget _buildHeaderBar() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Back Button
+        GestureDetector(
+          onTap: widget.onBack ?? () => Navigator.of(context).maybePop(),
+          child: Container(
+            width: 40.0,
+            height: 40.0,
+            decoration: BoxDecoration(
+              color: const Color(0xFF122B1F),
+              borderRadius: BorderRadius.circular(12.0),
+              border: Border.all(color: const Color(0x9923533C), width: 1.0),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0xFF0A1811),
+                  offset: Offset(0, 3),
+                  blurRadius: 0,
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.arrow_back_rounded,
+              color: Color(0xFFF2F1EC),
+              size: 20.0,
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 8.0),
+
+        // Centered Match Context Info
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                widget.match.competitionName.toUpperCase(),
+                textAlign: TextAlign.center,
+                style: PicoTypography.labelPillSm.copyWith(
+                  color: PicoColors.primaryFixedDim,
+                  fontSize: 10.0,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.0,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 3.0),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 6.0,
+                    height: 6.0,
+                    decoration: BoxDecoration(
+                      color: _isLocked ? PicoColors.textTactileMuted : const Color(0xFF00E297),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6.0),
+                  Flexible(
+                    child: Text(
+                      'Kickoff ${widget.match.kickoffTimeFormatted} · Locks ${widget.match.closesAtTimeFormatted}',
+                      textAlign: TextAlign.center,
+                      style: PicoTypography.bodySm.copyWith(
+                        color: const Color(0xFFF5F4EF),
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(width: 8.0),
+
+        // Symmetrical spacer to center the league info against the 40px back button
+        const SizedBox(width: 40.0),
+      ],
+    );
+  }
+
+  /// Visual presentation of the two clubs facing off
+  Widget _buildTeamsFaceoff() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Home Team
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildTeamBadge(
+                widget.match.homeTeamName,
+                widget.match.homeTeamBadgeUrl,
+                widget.match.homeTeamCode,
+              ),
+              const SizedBox(height: 6.0),
+              Text(
+                widget.match.homeTeamName,
+                style: PicoTypography.titleCard.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14.0,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 3.0),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF102A1E),
+                  borderRadius: BorderRadius.circular(999.0),
+                ),
+                child: Text(
+                  AppLocalizations.of(context)?.homeOutcome ?? 'Home',
+                  style: PicoTypography.labelPillSm.copyWith(
+                    color: PicoColors.primaryFixedDim,
+                    fontSize: 10.0,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // VS Circular Center Pill
+          Container(
+            width: 36.0,
+            height: 36.0,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1B432F),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFF2F7552), width: 1.0),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x22000000),
+                  offset: Offset(0, 2),
+                  blurRadius: 4,
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'VS',
+                style: PicoTypography.labelPillSm.copyWith(
+                  color: const Color(0xFFF5F4EF),
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12.5,
+                ),
+              ),
+            ),
+          ),
+
+          // Away Team
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildTeamBadge(
+                widget.match.awayTeamName,
+                widget.match.awayTeamBadgeUrl,
+                widget.match.awayTeamCode,
+              ),
+              const SizedBox(height: 6.0),
+              Text(
+                widget.match.awayTeamName,
+                style: PicoTypography.titleCard.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14.0,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 3.0),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF261A00),
+                  borderRadius: BorderRadius.circular(999.0),
+                ),
+                child: Text(
+                  AppLocalizations.of(context)?.awayOutcome ?? 'Away',
+                  style: PicoTypography.labelPillSm.copyWith(
+                    color: PicoColors.gold,
+                    fontSize: 10.0,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTeamBadge(String name, String? badgeUrl, String code) {
+    final cleanUrl = badgeUrl != null && badgeUrl.isNotEmpty ? _cleanImageUrl(badgeUrl) : null;
+    return Container(
+      width: 56.0,
+      height: 56.0,
+      decoration: BoxDecoration(
+        color: const Color(0xFF193D2B),
+        borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: const Color(0xFF337754), width: 2.0),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x33000000),
+            offset: Offset(0, 4),
+            blurRadius: 8,
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: cleanUrl != null
+          ? CachedNetworkImage(
+              imageUrl: cleanUrl,
+              fit: BoxFit.contain,
+              placeholder: (context, url) => Center(
+                child: Text(
+                  code,
+                  style: PicoTypography.headlineMd.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16.0,
+                  ),
+                ),
+              ),
+              errorWidget: (context, url, error) => Center(
+                child: Text(
+                  code,
+                  style: PicoTypography.headlineMd.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16.0,
+                  ),
+                ),
+              ),
+            )
+          : Center(
+              child: Text(
+                code,
+                style: PicoTypography.headlineMd.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 16.0,
+                ),
+              ),
+            ),
+    );
+  }
+
+  /// The tactile physical prediction card containing Step 1, Step 2, and Lock CTA
+  Widget _buildPredictionBoard() {
+    return Container(
+      padding: const EdgeInsets.all(20.0),
+      decoration: BoxDecoration(
+        color: PicoColors.cardFace,
+        borderRadius: BorderRadius.circular(24.0),
+        border: Border.all(color: const Color(0xFFECE7DC), width: 2.0),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0xFFEDE8DD),
+            offset: Offset(0, 8),
+            blurRadius: 0,
+          ),
+          BoxShadow(
+            color: Color(0x3D0A1811),
+            offset: Offset(0, 16),
+            blurRadius: 32,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // STEP 1: Pick the Winner
+          _buildStep1Winner(),
+          const SizedBox(height: 18.0),
+
+          // Divider
+          const Divider(color: Color(0xFFE7E2D6), height: 1.0, thickness: 1.0),
+          const SizedBox(height: 18.0),
+
+          // STEP 2: Predict Exact Score (Vertical Stepper Arena)
+          _buildStep2ScoreStepper(),
+          const SizedBox(height: 18.0),
+
+          // Scoring Potential Banner
+          _buildScoringPotentialBanner(),
+          const SizedBox(height: 18.0),
+
+          // Primary CTA: Lock Prediction Button
+          _buildLockPredictionButton(),
+        ],
+      ),
+    );
+  }
+
+  /// Step 1: Winner Picker with 3 tactile tiles
+  Widget _buildStep1Winner() {
+    final l10n = AppLocalizations.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Row(
+                children: [
+                  Container(
+                    width: 20.0,
+                    height: 20.0,
+                    decoration: const BoxDecoration(
+                      color: PicoColors.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Center(
+                      child: Text(
+                        '1',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11.0,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8.0),
+                  Flexible(
+                    child: Text(
+                      l10n?.pickWinner ?? 'Pick the Winner',
+                      style: PicoTypography.titleCard.copyWith(
+                        color: PicoColors.textPitchInk,
+                        fontSize: 15.0,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8.0),
+            Text(
+              l10n?.whoWins.toUpperCase() ?? 'WHO WINS?',
+              style: PicoTypography.labelPillSm.copyWith(
+                color: PicoColors.textTactileMuted,
+                fontSize: 10.0,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.6,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12.0),
+
+        // 3 Tactile Choice Tiles
+        Row(
+          children: [
+            Expanded(
+              child: _buildChoiceTile(
+                title: widget.match.homeTeamCode,
+                sublabel: l10n?.homeOutcome ?? 'Home',
+                isSelected: _selectedWinner == MatchOutcome.home,
+                enabled: !_isLocked,
+                onTap: () => _selectWinner(MatchOutcome.home),
+              ),
+            ),
+            const SizedBox(width: 8.0),
+            Expanded(
+              child: _buildChoiceTile(
+                title: l10n?.drawOutcome ?? 'Draw',
+                sublabel: 'TIE',
+                isSelected: _selectedWinner == MatchOutcome.draw,
+                enabled: !_isLocked,
+                onTap: () => _selectWinner(MatchOutcome.draw),
+              ),
+            ),
+            const SizedBox(width: 8.0),
+            Expanded(
+              child: _buildChoiceTile(
+                title: widget.match.awayTeamCode,
+                sublabel: l10n?.awayOutcome ?? 'Away',
+                isSelected: _selectedWinner == MatchOutcome.away,
+                enabled: !_isLocked,
+                onTap: () => _selectWinner(MatchOutcome.away),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChoiceTile({
+    required String title,
+    required String sublabel,
+    required bool isSelected,
+    required bool enabled,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: Opacity(
+        opacity: enabled ? 1.0 : 0.6,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 100),
+              padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 4.0),
+              decoration: BoxDecoration(
+                color: isSelected ? Colors.white : const Color(0xFFF5F4EF),
+                borderRadius: BorderRadius.circular(16.0),
+                border: Border.all(
+                  color: isSelected ? PicoColors.primary : const Color(0xFFD9D4C7),
+                  width: isSelected ? 2.0 : 1.0,
+                ),
+                boxShadow: isSelected
+                    ? const [
+                        BoxShadow(
+                          color: Color(0xFF1B5E3A),
+                          offset: Offset(0, 4),
+                          blurRadius: 0,
+                        ),
+                        BoxShadow(
+                          color: Color(0x26006A3A),
+                          offset: Offset(0, 6),
+                          blurRadius: 12,
+                        ),
+                      ]
+                    : const [
+                        BoxShadow(
+                          color: Color(0xFFEDE8DD),
+                          offset: Offset(0, 4),
+                          blurRadius: 0,
+                        ),
+                      ],
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      style: PicoTypography.titleCard.copyWith(
+                        color: isSelected ? PicoColors.primary : PicoColors.textPitchInk,
+                        fontSize: 13.0,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2.0),
+                    Text(
+                      sublabel,
+                      style: PicoTypography.labelPillSm.copyWith(
+                        color: isSelected ? PicoColors.primary : PicoColors.textTactileMuted,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (isSelected)
+              Positioned(
+                top: -4.0,
+                right: 6.0,
+                child: Container(
+                  width: 16.0,
+                  height: 16.0,
+                  decoration: const BoxDecoration(
+                    color: PicoColors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check,
+                    color: Colors.white,
+                    size: 11.0,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Step 2: Predict Exact Score (Vertical Stepper Arena)
+  Widget _buildStep2ScoreStepper() {
+    final l10n = AppLocalizations.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Row(
+                children: [
+                  Container(
+                    width: 20.0,
+                    height: 20.0,
+                    decoration: const BoxDecoration(
+                      color: PicoColors.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Center(
+                      child: Text(
+                        '2',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11.0,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8.0),
+                  Flexible(
+                    child: Text(
+                      l10n?.exactScoreTitle ?? 'Exact Score Prediction',
+                      style: PicoTypography.titleCard.copyWith(
+                        color: PicoColors.textPitchInk,
+                        fontSize: 15.0,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12.0),
+
+        // Stepper Arena
+        ScoreStepperArena(
+          homeScore: _homeScore,
+          awayScore: _awayScore,
+          homeTeamCode: widget.match.homeTeamCode,
+          awayTeamCode: widget.match.awayTeamCode,
+          onHomeScoreChanged: _updateHomeScore,
+          onAwayScoreChanged: _updateAwayScore,
+          enabled: !_isLocked,
+        ),
+      ],
+    );
+  }
+
+  /// Scoring Potential calculation rules banner
+  Widget _buildScoringPotentialBanner() {
+    final l10n = AppLocalizations.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFAF8F2),
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(color: const Color(0xFFE5DFD0), width: 1.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  l10n?.potentialPointsHeader.toUpperCase() ?? 'POTENTIAL PICO POINTS',
+                  style: PicoTypography.labelPillSm.copyWith(
+                    color: const Color(0xFF5C6B64),
+                    fontSize: 10.0,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8.0),
+              Text(
+                '+5 Pts Max',
+                style: PicoTypography.labelPillSm.copyWith(
+                  color: PicoColors.primaryDark,
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8.0),
+          Row(
+            children: [
+              Expanded(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('🎯', style: TextStyle(fontSize: 13.0)),
+                    const SizedBox(width: 4.0),
+                    Flexible(
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: '${l10n?.pickWinner ?? 'Winner Pick'}: ',
+                              style: PicoTypography.bodySm.copyWith(
+                                color: const Color(0xFF5C6B64),
+                                fontSize: 11.0,
+                              ),
+                            ),
+                            TextSpan(
+                              text: '+3 pts',
+                              style: PicoTypography.bodySm.copyWith(
+                                color: PicoColors.textPitchInk,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 11.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8.0),
+              Expanded(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('⭐', style: TextStyle(fontSize: 13.0)),
+                    const SizedBox(width: 4.0),
+                    Flexible(
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: '${l10n?.exactScore ?? 'Exact Score'}: ',
+                              style: PicoTypography.bodySm.copyWith(
+                                color: const Color(0xFF5C6B64),
+                                fontSize: 11.0,
+                              ),
+                            ),
+                            TextSpan(
+                              text: '+5 pts',
+                              style: PicoTypography.bodySm.copyWith(
+                                color: PicoColors.textPitchInk,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 11.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6.0),
+          Text(
+            l10n?.potentialPointsBreakdown ?? 'Wrong picks earn 0 pts · Exact score = 5 pts total',
+            textAlign: TextAlign.center,
+            style: PicoTypography.labelPillSm.copyWith(
+              color: const Color(0xFF6F7A70),
+              fontSize: 10.0,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Primary 3D tactile gold call-to-action button
+  Widget _buildLockPredictionButton() {
+    final l10n = AppLocalizations.of(context);
+    final predictions = ref.watch(predictionControllerProvider);
+    final bool hasExistingPrediction = predictions.value?.containsKey(widget.match.id) ?? false;
+
+    final String ctaText = _isLocked
+        ? (l10n?.predictionLockedTitle.replaceAll('! ⚽', '') ?? 'Prediction Locked')
+        : (hasExistingPrediction
+            ? (l10n?.modifyPrediction ?? 'Modify Prediction')
+            : (l10n?.savePredictionCta ?? 'Save Prediction (+10 XP)'));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        PicoButton.gold(
+          text: _isSubmitting ? '...' : ctaText,
+          icon: Icon(
+            _isLocked ? Icons.lock_rounded : Icons.arrow_forward_rounded,
+            color: PicoColors.textPitchInk,
+            size: 19.0,
+          ),
+          height: 52.0,
+          borderRadius: 16.0,
+          onPressed: _isLocked || _isSubmitting ? null : _submitPrediction,
+        ),
+        const SizedBox(height: 8.0),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.lock_clock_outlined,
+              size: 13.0,
+              color: Color(0xFF6F7A70),
+            ),
+            const SizedBox(width: 4.0),
+            Flexible(
+              child: Text(
+                l10n?.predictionLockNote ?? 'Predictions lock exactly 10 minutes before kickoff.',
+                style: PicoTypography.bodySm.copyWith(
+                  color: const Color(0xFF6F7A70),
+                  fontSize: 11.0,
+                  fontWeight: FontWeight.w500,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}

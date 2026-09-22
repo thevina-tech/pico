@@ -62,11 +62,105 @@ abstract class PicoMatch with _$PicoMatch {
       status == MatchStatus.live ||
       status == MatchStatus.finished;
 
-  String get kickoffTimeFormatted =>
+  static String formatDateTimeWithContext(DateTime dateTime) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final targetDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
+    final differenceInDays = targetDate.difference(today).inDays;
+
+    final timeString =
+        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+
+    if (differenceInDays == 0) {
+      return 'Today $timeString';
+    } else if (differenceInDays == 1) {
+      return 'Tomorrow $timeString';
+    } else if (differenceInDays == -1) {
+      return 'Yesterday $timeString';
+    } else if (differenceInDays > 1 && differenceInDays < 7) {
+      const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      final weekday = weekdays[dateTime.weekday - 1];
+      return '$weekday $timeString';
+    } else {
+      const months = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      ];
+      final month = months[dateTime.month - 1];
+      return '$month ${dateTime.day}, $timeString';
+    }
+  }
+
+  String get kickoffTimeFormatted => formatDateTimeWithContext(kickoffAt);
+
+  String get closesAtTimeFormatted => formatDateTimeWithContext(effectiveLockAt);
+
+  String get kickoffTimeOnly =>
       '${kickoffAt.hour.toString().padLeft(2, '0')}:${kickoffAt.minute.toString().padLeft(2, '0')}';
 
-  String get closesAtTimeFormatted =>
+  String get closesAtTimeOnly =>
       '${effectiveLockAt.hour.toString().padLeft(2, '0')}:${effectiveLockAt.minute.toString().padLeft(2, '0')}';
+
+  /// Whether this match is in the rolling teaser window (between 7 and 14 days out).
+  bool get isTeaser {
+    if (status != MatchStatus.upcoming) return false;
+    final now = DateTime.now();
+    final sevenDays = now.add(const Duration(days: 7));
+    final fourteenDays = now.add(const Duration(days: 14));
+    return kickoffAt.isAfter(sevenDays) && kickoffAt.isBefore(fourteenDays);
+  }
+
+  /// Whether the rolling prediction window is currently open (upcoming and <= 7 days before kickoff).
+  bool get isPredictionWindowOpen {
+    if (status != MatchStatus.upcoming) return false;
+    final now = DateTime.now();
+    final sevenDays = now.add(const Duration(days: 7));
+    return !kickoffAt.isAfter(sevenDays) && !isLocked;
+  }
+
+  /// The time remaining until the 7-day prediction window opens.
+  Duration get teaserCountdown {
+    final opensAt = kickoffAt.subtract(const Duration(days: 7));
+    final diff = opensAt.difference(DateTime.now());
+    return diff.isNegative ? Duration.zero : diff;
+  }
+
+  /// Formatted teaser countdown (e.g., "2d", "14h", "45m").
+  String get teaserCountdownShort {
+    final diff = teaserCountdown;
+    if (diff.inDays >= 1) {
+      return '${diff.inDays}d';
+    } else if (diff.inHours >= 1) {
+      return '${diff.inHours}h';
+    } else {
+      final mins = diff.inMinutes.clamp(1, 60);
+      return '${mins}m';
+    }
+  }
+
+  /// Calculates Pico Points outcome for this match given predicted scores.
+  /// Rule 13: Exact score = 5 total, Correct winner = 3 total, Wrong = 0.
+  int? calculateSettlementPoints(int? predHome, int? predAway) {
+    if (status != MatchStatus.finished || homeScore == null || awayScore == null) {
+      return null;
+    }
+    if (predHome == null || predAway == null) {
+      return null;
+    }
+    if (predHome == homeScore && predAway == awayScore) {
+      return 5;
+    }
+    final actualWinner = homeScore! > awayScore!
+        ? 'home'
+        : (awayScore! > homeScore! ? 'away' : 'draw');
+    final predWinner = predHome > predAway
+        ? 'home'
+        : (predAway > predHome ? 'away' : 'draw');
+    if (actualWinner == predWinner) {
+      return 3;
+    }
+    return 0;
+  }
 
   factory PicoMatch.fromJson(Map<String, dynamic> json) {
     String cleanUrl(String? url) {

@@ -30,7 +30,7 @@ final class ProfileRepositoryProvider
         argument: null,
         retry: null,
         name: r'profileRepositoryProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -58,4 +58,4 @@ final class ProfileRepositoryProvider
   }
 }
 
-String _$profileRepositoryHash() => r'50b9dccde59839d5a8fab213bce0597122540a9d';
+String _$profileRepositoryHash() => r'95910c65ad027951420df8bcd5e8a163762185e9';

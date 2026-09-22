@@ -125,4 +125,7 @@ abstract final class PicoColors {
 
   /// Error container (#FFDAD6).
   static const Color errorContainer = Color(0xFFFFDAD6);
+
+  /// Vibrant coral red for destructive actions & admin danger badges (#EF4444).
+  static const Color accentCoral = Color(0xFFEF4444);
 }

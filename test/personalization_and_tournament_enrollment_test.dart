@@ -21,11 +21,21 @@ class _FakeMatchRepository implements MatchRepository {
   Future<List<PicoMatch>> getAllMatches() async => matches;
 
   @override
-  Future<List<PicoMatch>> getUpcomingMatches() async =>
+  Future<List<PicoMatch>> getLiveMatches({String? competitionId}) async =>
+      matches.where((m) => m.status == MatchStatus.live).toList();
+
+  @override
+  Future<List<PicoMatch>> getUpcomingMatches({
+    String? competitionId,
+    Duration window = const Duration(days: 14),
+  }) async =>
       matches.where((m) => m.status == MatchStatus.upcoming).toList();
 
   @override
-  Future<List<PicoMatch>> getFinishedMatches() async =>
+  Future<List<PicoMatch>> getFinishedMatches({
+    String? competitionId,
+    Duration window = const Duration(days: 7),
+  }) async =>
       matches.where((m) => m.status == MatchStatus.finished).toList();
 
   @override
@@ -183,8 +193,8 @@ void main() {
       expect(enrolled.length, 2);
 
       final enrolledCompIds = enrolled.map((t) => t.competitionId).toSet();
-      expect(enrolledCompIds, contains('premier_league'));
-      expect(enrolledCompIds, contains('la_liga'));
+      expect(enrolledCompIds, contains('10'));
+      expect(enrolledCompIds, contains('1'));
 
       final participants = await tournamentRepo.getParticipantsForUser(auth.user!.id);
       expect(participants.length, 2);

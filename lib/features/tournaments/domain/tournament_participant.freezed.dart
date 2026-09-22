@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$TournamentParticipant {
 
-@JsonKey(name: 'tournament_id') String get tournamentId;@JsonKey(name: 'user_id') String get userId;@JsonKey(name: 'pico_points') int get picoPoints;@JsonKey(name: 'joined_at') DateTime? get joinedAt; Tournament? get tournament;
+@JsonKey(name: 'tournament_id') String get tournamentId;@JsonKey(name: 'user_id') String get userId;@JsonKey(name: 'pico_points') int get picoPoints;@JsonKey(name: 'joined_at') DateTime? get joinedAt; String? get username;@JsonKey(name: 'avatar_url') String? get avatarUrl; Tournament? get tournament;
 /// Create a copy of TournamentParticipant
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $TournamentParticipantCopyWith<TournamentParticipant> get copyWith => _$Tourname
 @override
 bool operator ==(Object other) {
   final _this = this as TournamentParticipant;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TournamentParticipant&&(identical(other.tournamentId, _this.tournamentId) || other.tournamentId == _this.tournamentId)&&(identical(other.userId, _this.userId) || other.userId == _this.userId)&&(identical(other.picoPoints, _this.picoPoints) || other.picoPoints == _this.picoPoints)&&(identical(other.joinedAt, _this.joinedAt) || other.joinedAt == _this.joinedAt)&&(identical(other.tournament, _this.tournament) || other.tournament == _this.tournament));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TournamentParticipant&&(identical(other.tournamentId, _this.tournamentId) || other.tournamentId == _this.tournamentId)&&(identical(other.userId, _this.userId) || other.userId == _this.userId)&&(identical(other.picoPoints, _this.picoPoints) || other.picoPoints == _this.picoPoints)&&(identical(other.joinedAt, _this.joinedAt) || other.joinedAt == _this.joinedAt)&&(identical(other.username, _this.username) || other.username == _this.username)&&(identical(other.avatarUrl, _this.avatarUrl) || other.avatarUrl == _this.avatarUrl)&&(identical(other.tournament, _this.tournament) || other.tournament == _this.tournament));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as TournamentParticipant;
-  return Object.hash(runtimeType,_this.tournamentId,_this.userId,_this.picoPoints,_this.joinedAt,_this.tournament);
+  return Object.hash(runtimeType,_this.tournamentId,_this.userId,_this.picoPoints,_this.joinedAt,_this.username,_this.avatarUrl,_this.tournament);
 }
 
 @override
 String toString() {
   final _this = this as TournamentParticipant;
-  return 'TournamentParticipant(tournamentId: ${_this.tournamentId}, userId: ${_this.userId}, picoPoints: ${_this.picoPoints}, joinedAt: ${_this.joinedAt}, tournament: ${_this.tournament})';
+  return 'TournamentParticipant(tournamentId: ${_this.tournamentId}, userId: ${_this.userId}, picoPoints: ${_this.picoPoints}, joinedAt: ${_this.joinedAt}, username: ${_this.username}, avatarUrl: ${_this.avatarUrl}, tournament: ${_this.tournament})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $TournamentParticipantCopyWith<$Res>  {
   factory $TournamentParticipantCopyWith(TournamentParticipant value, $Res Function(TournamentParticipant) _then) = _$TournamentParticipantCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'tournament_id') String tournamentId,@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'pico_points') int picoPoints,@JsonKey(name: 'joined_at') DateTime? joinedAt, Tournament? tournament
+@JsonKey(name: 'tournament_id') String tournamentId,@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'pico_points') int picoPoints,@JsonKey(name: 'joined_at') DateTime? joinedAt, String? username,@JsonKey(name: 'avatar_url') String? avatarUrl, Tournament? tournament
 });
 
 
@@ -71,13 +71,15 @@ class _$TournamentParticipantCopyWithImpl<$Res>
 
 /// Create a copy of TournamentParticipant
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? tournamentId = null,Object? userId = null,Object? picoPoints = null,Object? joinedAt = freezed,Object? tournament = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? tournamentId = null,Object? userId = null,Object? picoPoints = null,Object? joinedAt = freezed,Object? username = freezed,Object? avatarUrl = freezed,Object? tournament = freezed,}) {
   return _then(TournamentParticipant(
 tournamentId: null == tournamentId ? _self.tournamentId : tournamentId // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,picoPoints: null == picoPoints ? _self.picoPoints : picoPoints // ignore: cast_nullable_to_non_nullable
 as int,joinedAt: freezed == joinedAt ? _self.joinedAt : joinedAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,tournament: freezed == tournament ? _self.tournament : tournament // ignore: cast_nullable_to_non_nullable
+as DateTime?,username: freezed == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
+as String?,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
+as String?,tournament: freezed == tournament ? _self.tournament : tournament // ignore: cast_nullable_to_non_nullable
 as Tournament?,
   ));
 }
@@ -175,10 +177,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'tournament_id')  String tournamentId, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'pico_points')  int picoPoints, @JsonKey(name: 'joined_at')  DateTime? joinedAt,  Tournament? tournament)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'tournament_id')  String tournamentId, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'pico_points')  int picoPoints, @JsonKey(name: 'joined_at')  DateTime? joinedAt,  String? username, @JsonKey(name: 'avatar_url')  String? avatarUrl,  Tournament? tournament)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TournamentParticipant() when $default != null:
-return $default(_that.tournamentId,_that.userId,_that.picoPoints,_that.joinedAt,_that.tournament);case _:
+return $default(_that.tournamentId,_that.userId,_that.picoPoints,_that.joinedAt,_that.username,_that.avatarUrl,_that.tournament);case _:
   return orElse();
 
 }
@@ -196,10 +198,10 @@ return $default(_that.tournamentId,_that.userId,_that.picoPoints,_that.joinedAt,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'tournament_id')  String tournamentId, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'pico_points')  int picoPoints, @JsonKey(name: 'joined_at')  DateTime? joinedAt,  Tournament? tournament)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'tournament_id')  String tournamentId, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'pico_points')  int picoPoints, @JsonKey(name: 'joined_at')  DateTime? joinedAt,  String? username, @JsonKey(name: 'avatar_url')  String? avatarUrl,  Tournament? tournament)  $default,) {final _that = this;
 switch (_that) {
 case _TournamentParticipant():
-return $default(_that.tournamentId,_that.userId,_that.picoPoints,_that.joinedAt,_that.tournament);case _:
+return $default(_that.tournamentId,_that.userId,_that.picoPoints,_that.joinedAt,_that.username,_that.avatarUrl,_that.tournament);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -216,10 +218,10 @@ return $default(_that.tournamentId,_that.userId,_that.picoPoints,_that.joinedAt,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'tournament_id')  String tournamentId, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'pico_points')  int picoPoints, @JsonKey(name: 'joined_at')  DateTime? joinedAt,  Tournament? tournament)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'tournament_id')  String tournamentId, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'pico_points')  int picoPoints, @JsonKey(name: 'joined_at')  DateTime? joinedAt,  String? username, @JsonKey(name: 'avatar_url')  String? avatarUrl,  Tournament? tournament)?  $default,) {final _that = this;
 switch (_that) {
 case _TournamentParticipant() when $default != null:
-return $default(_that.tournamentId,_that.userId,_that.picoPoints,_that.joinedAt,_that.tournament);case _:
+return $default(_that.tournamentId,_that.userId,_that.picoPoints,_that.joinedAt,_that.username,_that.avatarUrl,_that.tournament);case _:
   return null;
 
 }
@@ -231,13 +233,15 @@ return $default(_that.tournamentId,_that.userId,_that.picoPoints,_that.joinedAt,
 @JsonSerializable()
 
 class _TournamentParticipant implements TournamentParticipant {
-  const _TournamentParticipant({@JsonKey(name: 'tournament_id') required this.tournamentId, @JsonKey(name: 'user_id') required this.userId, @JsonKey(name: 'pico_points') this.picoPoints = 0, @JsonKey(name: 'joined_at') this.joinedAt, this.tournament});
+  const _TournamentParticipant({@JsonKey(name: 'tournament_id') required this.tournamentId, @JsonKey(name: 'user_id') required this.userId, @JsonKey(name: 'pico_points') this.picoPoints = 0, @JsonKey(name: 'joined_at') this.joinedAt, this.username, @JsonKey(name: 'avatar_url') this.avatarUrl, this.tournament});
   factory _TournamentParticipant.fromJson(Map<String, dynamic> json) => _$TournamentParticipantFromJson(json);
 
 @override@JsonKey(name: 'tournament_id') final  String tournamentId;
 @override@JsonKey(name: 'user_id') final  String userId;
 @override@JsonKey(name: 'pico_points') final  int picoPoints;
 @override@JsonKey(name: 'joined_at') final  DateTime? joinedAt;
+@override final  String? username;
+@override@JsonKey(name: 'avatar_url') final  String? avatarUrl;
 @override final  Tournament? tournament;
 
 /// Create a copy of TournamentParticipant
@@ -253,18 +257,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TournamentParticipant&&(identical(other.tournamentId, tournamentId) || other.tournamentId == tournamentId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.picoPoints, picoPoints) || other.picoPoints == picoPoints)&&(identical(other.joinedAt, joinedAt) || other.joinedAt == joinedAt)&&(identical(other.tournament, tournament) || other.tournament == tournament));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TournamentParticipant&&(identical(other.tournamentId, tournamentId) || other.tournamentId == tournamentId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.picoPoints, picoPoints) || other.picoPoints == picoPoints)&&(identical(other.joinedAt, joinedAt) || other.joinedAt == joinedAt)&&(identical(other.username, username) || other.username == username)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.tournament, tournament) || other.tournament == tournament));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,tournamentId,userId,picoPoints,joinedAt,tournament);
+    return Object.hash(runtimeType,tournamentId,userId,picoPoints,joinedAt,username,avatarUrl,tournament);
 }
 
 @override
 String toString() {
-    return 'TournamentParticipant(tournamentId: $tournamentId, userId: $userId, picoPoints: $picoPoints, joinedAt: $joinedAt, tournament: $tournament)';
+    return 'TournamentParticipant(tournamentId: $tournamentId, userId: $userId, picoPoints: $picoPoints, joinedAt: $joinedAt, username: $username, avatarUrl: $avatarUrl, tournament: $tournament)';
 }
 
 
@@ -275,7 +279,7 @@ abstract mixin class _$TournamentParticipantCopyWith<$Res> implements $Tournamen
   factory _$TournamentParticipantCopyWith(_TournamentParticipant value, $Res Function(_TournamentParticipant) _then) = __$TournamentParticipantCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'tournament_id') String tournamentId,@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'pico_points') int picoPoints,@JsonKey(name: 'joined_at') DateTime? joinedAt, Tournament? tournament
+@JsonKey(name: 'tournament_id') String tournamentId,@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'pico_points') int picoPoints,@JsonKey(name: 'joined_at') DateTime? joinedAt, String? username,@JsonKey(name: 'avatar_url') String? avatarUrl, Tournament? tournament
 });
 
 
@@ -292,13 +296,15 @@ class __$TournamentParticipantCopyWithImpl<$Res>
 
 /// Create a copy of TournamentParticipant
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? tournamentId = null,Object? userId = null,Object? picoPoints = null,Object? joinedAt = freezed,Object? tournament = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? tournamentId = null,Object? userId = null,Object? picoPoints = null,Object? joinedAt = freezed,Object? username = freezed,Object? avatarUrl = freezed,Object? tournament = freezed,}) {
   return _then(_TournamentParticipant(
 tournamentId: null == tournamentId ? _self.tournamentId : tournamentId // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,picoPoints: null == picoPoints ? _self.picoPoints : picoPoints // ignore: cast_nullable_to_non_nullable
 as int,joinedAt: freezed == joinedAt ? _self.joinedAt : joinedAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,tournament: freezed == tournament ? _self.tournament : tournament // ignore: cast_nullable_to_non_nullable
+as DateTime?,username: freezed == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
+as String?,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
+as String?,tournament: freezed == tournament ? _self.tournament : tournament // ignore: cast_nullable_to_non_nullable
 as Tournament?,
   ));
 }

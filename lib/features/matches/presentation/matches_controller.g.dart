@@ -9,14 +9,17 @@ part of 'matches_controller.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// Production-grade Riverpod controller managing match state and predictions.
+/// Dynamically updates sorting pills and matches based on the user's enrolled tournaments.
 
 @ProviderFor(MatchesController)
 final matchesControllerProvider = MatchesControllerProvider._();
 
 /// Production-grade Riverpod controller managing match state and predictions.
+/// Dynamically updates sorting pills and matches based on the user's enrolled tournaments.
 final class MatchesControllerProvider
     extends $AsyncNotifierProvider<MatchesController, MatchesState> {
   /// Production-grade Riverpod controller managing match state and predictions.
+  /// Dynamically updates sorting pills and matches based on the user's enrolled tournaments.
   MatchesControllerProvider._()
     : super(
         from: null,
@@ -36,9 +39,10 @@ final class MatchesControllerProvider
   MatchesController create() => MatchesController();
 }
 
-String _$matchesControllerHash() => r'bd70c6e769ea6bec673487dd2ebf5bc0e3f8f0c0';
+String _$matchesControllerHash() => r'087c327e1e8df0eb261a686b87646f8d5575657a';
 
 /// Production-grade Riverpod controller managing match state and predictions.
+/// Dynamically updates sorting pills and matches based on the user's enrolled tournaments.
 
 abstract class _$MatchesController extends $AsyncNotifier<MatchesState> {
   FutureOr<MatchesState> build();

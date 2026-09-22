@@ -18,6 +18,13 @@ class AppLogger {
   static void debug(String message) => instance.debug(message);
   static void warning(String message) => instance.warning(message);
   static void error(String message, [Object? exception, StackTrace? stackTrace]) {
-    instance.error(message, exception, stackTrace);
+    StackTrace? filteredTrace = stackTrace;
+    if (stackTrace != null) {
+      final lines = stackTrace.toString().split('\n');
+      if (lines.length > 15) {
+        filteredTrace = StackTrace.fromString(lines.take(15).join('\n'));
+      }
+    }
+    instance.error(message, exception, filteredTrace);
   }
 }

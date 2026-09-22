@@ -320,7 +320,7 @@ abstract class AppLocalizations {
   /// **'Upcoming Matches'**
   String get upcomingMatchesTitle;
 
-  /// Empty state text for matches feed
+  /// Empty state title for upcoming matches
   ///
   /// In en, this message translates to:
   /// **'No upcoming matches right now. Check back soon!'**
@@ -583,6 +583,648 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'LVL {level}'**
   String levelPill(int level);
+
+  /// Predict match CTA button
+  ///
+  /// In en, this message translates to:
+  /// **'PREDICT'**
+  String get predictAction;
+
+  /// Label for exact score prediction
+  ///
+  /// In en, this message translates to:
+  /// **'Exact score'**
+  String get exactScore;
+
+  /// Headline for exact score prediction
+  ///
+  /// In en, this message translates to:
+  /// **'Exact Score Prediction'**
+  String get exactScoreTitle;
+
+  /// Label for choosing match winner
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Winner'**
+  String get pickWinner;
+
+  /// Question asking which team wins
+  ///
+  /// In en, this message translates to:
+  /// **'Who wins?'**
+  String get whoWins;
+
+  /// Home team outcome label
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get homeOutcome;
+
+  /// Draw outcome label
+  ///
+  /// In en, this message translates to:
+  /// **'Draw'**
+  String get drawOutcome;
+
+  /// Away team outcome label
+  ///
+  /// In en, this message translates to:
+  /// **'Away'**
+  String get awayOutcome;
+
+  /// Primary button to submit prediction
+  ///
+  /// In en, this message translates to:
+  /// **'Save Prediction (+10 XP)'**
+  String get savePredictionCta;
+
+  /// Button to edit an existing prediction
+  ///
+  /// In en, this message translates to:
+  /// **'Modify Prediction'**
+  String get modifyPrediction;
+
+  /// Title when a prediction is confirmed or locked
+  ///
+  /// In en, this message translates to:
+  /// **'Prediction Locked! ⚽'**
+  String get predictionLockedTitle;
+
+  /// Status text when match prediction is locked
+  ///
+  /// In en, this message translates to:
+  /// **'Prediction locked · Kickoff at {time}'**
+  String predictionLockedBanner(String time);
+
+  /// Error message when prediction window has closed
+  ///
+  /// In en, this message translates to:
+  /// **'Predictions are closed for this match'**
+  String get predictionWindowClosed;
+
+  /// Helper text explaining 10-minute lock rule
+  ///
+  /// In en, this message translates to:
+  /// **'Predictions lock exactly 10 minutes before kickoff.'**
+  String get predictionLockNote;
+
+  /// Header for points explanation
+  ///
+  /// In en, this message translates to:
+  /// **'Potential Pico Points'**
+  String get potentialPointsHeader;
+
+  /// Breakdown of potential Pico Points
+  ///
+  /// In en, this message translates to:
+  /// **'+5 for exact score · +3 for correct winner'**
+  String get potentialPointsBreakdown;
+
+  /// Inline prediction label
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Predict'**
+  String get quickPredict;
+
+  /// Confirmation toast after submitting prediction
+  ///
+  /// In en, this message translates to:
+  /// **'Prediction locked in! Good luck.'**
+  String get predictionSavedToast;
+
+  /// Title for tournaments screen
+  ///
+  /// In en, this message translates to:
+  /// **'Tournaments'**
+  String get tournamentsTitle;
+
+  /// Subtitle for tournaments screen
+  ///
+  /// In en, this message translates to:
+  /// **'Compete with friends · No real money'**
+  String get tournamentsSubtitle;
+
+  /// Tab label for user's joined and owned leagues
+  ///
+  /// In en, this message translates to:
+  /// **'My Leagues'**
+  String get myLeaguesTab;
+
+  /// Tab label for discovering official tournaments
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get discoverTab;
+
+  /// Action button in tournaments header
+  ///
+  /// In en, this message translates to:
+  /// **'+ Create / Join'**
+  String get createOrJoinAction;
+
+  /// Title for Create Private League screen
+  ///
+  /// In en, this message translates to:
+  /// **'Create Private League'**
+  String get createPrivateLeagueTitle;
+
+  /// Subtitle for Create Private League screen
+  ///
+  /// In en, this message translates to:
+  /// **'Compete against friends, banter, and crown your group champion.'**
+  String get createPrivateLeagueSubtitle;
+
+  /// Title for Join Private League screen
+  ///
+  /// In en, this message translates to:
+  /// **'Join Private League'**
+  String get joinPrivateLeagueTitle;
+
+  /// Subtitle for Join Private League screen
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-character code shared by your friend.'**
+  String get joinPrivateLeagueSubtitle;
+
+  /// Label for league name input
+  ///
+  /// In en, this message translates to:
+  /// **'LEAGUE NAME'**
+  String get leagueNameLabel;
+
+  /// Placeholder for league name input
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Friday Football Kings'**
+  String get leagueNamePlaceholder;
+
+  /// Label for base competition dropdown selector
+  ///
+  /// In en, this message translates to:
+  /// **'BASE TOURNAMENT / COMPETITION'**
+  String get baseTournamentLabel;
+
+  /// Helper note explaining base competition linkage
+  ///
+  /// In en, this message translates to:
+  /// **'Matches and standings are linked to this competition.'**
+  String get baseTournamentHelper;
+
+  /// Badge in create league screen
+  ///
+  /// In en, this message translates to:
+  /// **'Free Instant Setup'**
+  String get freeSetupBadge;
+
+  /// CTA button to create private league
+  ///
+  /// In en, this message translates to:
+  /// **'Create Private League'**
+  String get createLeagueButton;
+
+  /// CTA button to join private league
+  ///
+  /// In en, this message translates to:
+  /// **'Join Private League'**
+  String get joinLeagueButton;
+
+  /// Label for invite code input
+  ///
+  /// In en, this message translates to:
+  /// **'ENTER 6-CHARACTER CODE'**
+  String get enterLeagueCodeLabel;
+
+  /// Button to paste from clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'Paste'**
+  String get pasteCode;
+
+  /// Toast confirming code copied
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code copied to clipboard!'**
+  String get codeCopiedToast;
+
+  /// Message template to share invite code
+  ///
+  /// In en, this message translates to:
+  /// **'Join my private league on Pico! Use code: {code}'**
+  String shareInviteMessage(String code);
+
+  /// Label for invite code badge
+  ///
+  /// In en, this message translates to:
+  /// **'INVITE CODE'**
+  String get inviteCodeLabel;
+
+  /// Button to copy code
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Code'**
+  String get copyCodeButton;
+
+  /// Button to share code
+  ///
+  /// In en, this message translates to:
+  /// **'Share Invite'**
+  String get shareCodeButton;
+
+  /// Empty state title when user has no private leagues
+  ///
+  /// In en, this message translates to:
+  /// **'No Private Leagues Yet'**
+  String get emptyPrivateLeaguesTitle;
+
+  /// Empty state subtitle for private leagues
+  ///
+  /// In en, this message translates to:
+  /// **'Create a league for your friends or join one with an invite code.'**
+  String get emptyPrivateLeaguesSubtitle;
+
+  /// Badge for official public tournaments
+  ///
+  /// In en, this message translates to:
+  /// **'OFFICIAL TOURNAMENT'**
+  String get officialTournamentBadge;
+
+  /// Success modal title after creating private league
+  ///
+  /// In en, this message translates to:
+  /// **'League Created! 🎉'**
+  String get leagueCreatedSuccessTitle;
+
+  /// Success modal title after joining private league
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re In! ⚽'**
+  String get leagueJoinedSuccessTitle;
+
+  /// Success modal subtitle after joining private league
+  ///
+  /// In en, this message translates to:
+  /// **'You have joined {leagueName}'**
+  String leagueJoinedSuccessSubtitle(String leagueName);
+
+  /// Error displayed when invite code is not found
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid invite code. Please check the code and try again.'**
+  String get invalidLeagueCodeError;
+
+  /// Error displayed when user is already in the league
+  ///
+  /// In en, this message translates to:
+  /// **'You are already a member of this league.'**
+  String get alreadyMemberOfLeagueError;
+
+  /// Error displayed when creator tries to rejoin own league
+  ///
+  /// In en, this message translates to:
+  /// **'You created this league and are already its owner.'**
+  String get creatorCannotRejoinError;
+
+  /// Validation error when invite code length is not 6
+  ///
+  /// In en, this message translates to:
+  /// **'Code must be exactly 6 characters (e.g., K9X2P1)'**
+  String get leagueCodeFormatError;
+
+  /// Done action button
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get doneButton;
+
+  /// Security note on private league creation
+  ///
+  /// In en, this message translates to:
+  /// **'Only players with your invite code can join'**
+  String get privateLeagueSecurityNote;
+
+  /// Note under selected base competition
+  ///
+  /// In en, this message translates to:
+  /// **'Official Base Tournament'**
+  String get officialBaseTournamentNote;
+
+  /// Count of available competitions
+  ///
+  /// In en, this message translates to:
+  /// **'{count} available'**
+  String competitionsAvailableCount(int count);
+
+  /// Badge in join league screen
+  ///
+  /// In en, this message translates to:
+  /// **'FRIENDS & COLLEAGUES'**
+  String get friendsAndColleaguesBadge;
+
+  /// Subtitle in join league screen
+  ///
+  /// In en, this message translates to:
+  /// **'Private Community'**
+  String get privateCommunitySubtitle;
+
+  /// Title of the base tournament selection bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Select Base Tournament ({count} Available)'**
+  String selectBaseTournamentSheetTitle(int count);
+
+  /// App bar title for public tournament screen
+  ///
+  /// In en, this message translates to:
+  /// **'Tournament Details'**
+  String get tournamentDetailsTitle;
+
+  /// App bar title for private tournament screen
+  ///
+  /// In en, this message translates to:
+  /// **'Private League'**
+  String get privateLeagueDetailsTitle;
+
+  /// Header for the invite code banner
+  ///
+  /// In en, this message translates to:
+  /// **'LEAGUE INVITE CODE'**
+  String get inviteCodeBannerTitle;
+
+  /// Subtitle encouraging sharing the league code
+  ///
+  /// In en, this message translates to:
+  /// **'Share with friends to compete together'**
+  String get inviteCodeBannerSubtitle;
+
+  /// Share message for native share sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Join my private football prediction league \"{leagueName}\" on Pico! Use invite code: {code}'**
+  String shareInviteCodeMessage(String leagueName, String code);
+
+  /// Section header for owner admin controls
+  ///
+  /// In en, this message translates to:
+  /// **'ADMIN CONTROLS'**
+  String get adminControlsTitle;
+
+  /// Button to delete a private league
+  ///
+  /// In en, this message translates to:
+  /// **'Delete League'**
+  String get deleteLeagueButton;
+
+  /// Title of delete confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Private League?'**
+  String get deleteLeagueConfirmTitle;
+
+  /// Body of delete confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'This action is permanent. All members will be removed and standings will be erased.'**
+  String get deleteLeagueConfirmBody;
+
+  /// Confirm button text for deleting league
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteLeagueAction;
+
+  /// Button to remove a member
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removeMemberButton;
+
+  /// Title of member removal dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Member?'**
+  String get removeMemberConfirmTitle;
+
+  /// Body of member removal dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove {username} from this league?'**
+  String removeMemberConfirmBody(String username);
+
+  /// Button to leave a private league
+  ///
+  /// In en, this message translates to:
+  /// **'Leave League'**
+  String get leaveLeagueButton;
+
+  /// Title of leave confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Leave League?'**
+  String get leaveLeagueConfirmTitle;
+
+  /// Body of leave confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to leave {leagueName}? You will need the invite code to rejoin.'**
+  String leaveLeagueConfirmBody(String leagueName);
+
+  /// Confirm button text for leaving league
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get leaveLeagueAction;
+
+  /// Tab for standings / leaderboard
+  ///
+  /// In en, this message translates to:
+  /// **'Standings'**
+  String get leaderboardTab;
+
+  /// Tab for tournament matches
+  ///
+  /// In en, this message translates to:
+  /// **'Matches'**
+  String get matchesTab;
+
+  /// Section header for upcoming matches
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming Matches'**
+  String get upcomingMatchesSection;
+
+  /// Section header for finished matches
+  ///
+  /// In en, this message translates to:
+  /// **'Completed Matches'**
+  String get finishedMatchesSection;
+
+  /// Placeholder when leaderboard is empty
+  ///
+  /// In en, this message translates to:
+  /// **'No participants yet'**
+  String get noParticipantsYet;
+
+  /// Placeholder when competition has no matches
+  ///
+  /// In en, this message translates to:
+  /// **'No matches found for this competition'**
+  String get noMatchesForCompetition;
+
+  /// Toast when league is deleted
+  ///
+  /// In en, this message translates to:
+  /// **'League deleted successfully'**
+  String get leagueDeletedToast;
+
+  /// Toast when member is removed
+  ///
+  /// In en, this message translates to:
+  /// **'Member removed'**
+  String get memberRemovedToast;
+
+  /// Toast when user leaves league
+  ///
+  /// In en, this message translates to:
+  /// **'You left the league'**
+  String get leftLeagueToast;
+
+  /// Badge for league creator
+  ///
+  /// In en, this message translates to:
+  /// **'CREATOR'**
+  String get creatorBadge;
+
+  /// Badge for league member
+  ///
+  /// In en, this message translates to:
+  /// **'MEMBER'**
+  String get memberBadge;
+
+  /// General cancel button
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelButton;
+
+  /// Points abbreviation in leaderboard
+  ///
+  /// In en, this message translates to:
+  /// **'PTS'**
+  String get pointsAbbreviation;
+
+  /// Header for rank column
+  ///
+  /// In en, this message translates to:
+  /// **'RANK'**
+  String get rankHeader;
+
+  /// Header for player column
+  ///
+  /// In en, this message translates to:
+  /// **'PLAYER'**
+  String get playerHeader;
+
+  /// Tab for matches currently in progress
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get feedTabLive;
+
+  /// Tab for upcoming matches within 14 days
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get feedTabUpcoming;
+
+  /// Tab for finished matches within last 7 days
+  ///
+  /// In en, this message translates to:
+  /// **'Finished'**
+  String get feedTabFinished;
+
+  /// Teaser countdown button label in days
+  ///
+  /// In en, this message translates to:
+  /// **'Opens in {days}d'**
+  String teaserOpensInDays(int days);
+
+  /// Teaser countdown button label in hours
+  ///
+  /// In en, this message translates to:
+  /// **'Opens in {hours}h'**
+  String teaserOpensInHours(int hours);
+
+  /// Teaser countdown button label in minutes
+  ///
+  /// In en, this message translates to:
+  /// **'Opens in {minutes}m'**
+  String teaserOpensInMinutes(int minutes);
+
+  /// Subtext explaining when prediction window opens for teaser cards
+  ///
+  /// In en, this message translates to:
+  /// **'Prediction window opens 7 days before kickoff'**
+  String get teaserCountdownSubtext;
+
+  /// Pico Points badge for exact score settlement
+  ///
+  /// In en, this message translates to:
+  /// **'+5 Points'**
+  String get pointsOutcomeExact;
+
+  /// Pico Points badge for correct winner settlement
+  ///
+  /// In en, this message translates to:
+  /// **'+3 Points'**
+  String get pointsOutcomeWinner;
+
+  /// Pico Points badge for incorrect prediction settlement
+  ///
+  /// In en, this message translates to:
+  /// **'0 Points'**
+  String get pointsOutcomeIncorrect;
+
+  /// Badge when match finished without user prediction
+  ///
+  /// In en, this message translates to:
+  /// **'No Prediction'**
+  String get pointsOutcomeNone;
+
+  /// Empty state title for live matches tab
+  ///
+  /// In en, this message translates to:
+  /// **'No live matches right now'**
+  String get noLiveMatches;
+
+  /// Empty state subtitle for live matches tab
+  ///
+  /// In en, this message translates to:
+  /// **'Check back during matchdays for real-time fixtures.'**
+  String get noLiveMatchesSub;
+
+  /// Empty state title for upcoming matches tab
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming matches in the next 14 days'**
+  String get feedNoUpcomingMatches;
+
+  /// Empty state subtitle for upcoming matches tab
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming fixtures will appear here once scheduled.'**
+  String get noUpcomingMatchesSub;
+
+  /// Empty state title for finished matches tab
+  ///
+  /// In en, this message translates to:
+  /// **'No finished matches in the last 7 days'**
+  String get noFinishedMatches;
+
+  /// Empty state subtitle for finished matches tab
+  ///
+  /// In en, this message translates to:
+  /// **'Recently concluded matches and points will be shown here.'**
+  String get noFinishedMatchesSub;
 }
 
 class _AppLocalizationsDelegate

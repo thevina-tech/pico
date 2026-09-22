@@ -11,16 +11,28 @@ const besoccerApiKey = Deno.env.get("BESOCCER_API_KEY") ?? "";
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 /**
- * Predefined core competitions to guarantee relational integrity.
+ * Strictly limited top-tier competitions (Sprint 4 requirement):
+ * 1. Primera División (La Liga) - BeSoccer ID: 1
+ * 2. Premier League - BeSoccer ID: 10
+ * 3. Serie A - BeSoccer ID: 7
+ * 4. Bundesliga - BeSoccer ID: 8
+ * 5. Ligue 1 - BeSoccer ID: 16
+ * 6. Champions League - BeSoccer ID: 107
+ * 7. Europa League - BeSoccer ID: 117
+ * 8. Conference League - BeSoccer ID: 2492
  */
 const CORE_COMPETITIONS: Array<{ id: string; name: string; emblem_url?: string | null }> = [
-  { id: "1", name: "La Liga", emblem_url: "https://thumb.besoccer.com/media/competitions/category_1.png" },
-  { id: "10", name: "Premier League", emblem_url: "https://thumb.besoccer.com/media/competitions/category_10.png" },
-  { id: "2", name: "Serie A", emblem_url: "https://thumb.besoccer.com/media/competitions/category_2.png" },
-  { id: "3", name: "Bundesliga", emblem_url: "https://thumb.besoccer.com/media/competitions/category_3.png" },
-  { id: "4", name: "Ligue 1", emblem_url: "https://thumb.besoccer.com/media/competitions/category_4.png" },
-  { id: "6", name: "Champions League", emblem_url: "https://thumb.besoccer.com/media/competitions/category_6.png" },
+  { id: "1", name: "Primera División (La Liga)", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/1.png?size=120x&lossy=1" },
+  { id: "10", name: "Premier League", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/10.png?size=120x&lossy=1" },
+  { id: "7", name: "Serie A", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/7.png?size=120x&lossy=1" },
+  { id: "8", name: "Bundesliga", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/8.png?size=120x&lossy=1" },
+  { id: "16", name: "Ligue 1", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/16.png?size=120x&lossy=1" },
+  { id: "107", name: "Champions League", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/107.png?size=120x&lossy=1" },
+  { id: "117", name: "Europa League", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/117.png?size=120x&lossy=1" },
+  { id: "2492", name: "Conference League", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/2492.png?size=120x&lossy=1" },
 ];
+
+const ALLOWED_COMPETITION_IDS = new Set(CORE_COMPETITIONS.map((c) => c.id));
 
 /**
  * Strips query parameters like '&v=...' or '?v=...' from BeSoccer image URLs.
@@ -130,33 +142,50 @@ async function callBeSoccer(params: Record<string, string>): Promise<any> {
 }
 
 /**
- * 1. Sync Top Competitions (Endpoint 5: req=competitions + Core Competitions)
+ * 1. Sync Top Competitions (Sprint 4: strictly limited to the curated 8 top-tier competitions)
+ * Only processes and upserts these specific 8 competitions and ignores all other API data.
  */
 async function syncCompetitions(): Promise<number> {
-  // First, guarantee core competitions exist
-  await supabase
+  // First, guarantee core competitions exist with curated names and emblems
+  const { error: upsertErr } = await supabase
     .from("competitions")
     .upsert(CORE_COMPETITIONS, { onConflict: "id" });
 
-  try {
-    const data = await callBeSoccer({ req: "competitions" });
-    const rawList: any[] = Array.isArray(data)
-      ? data
-      : data.category || data.competitions || data.data || [];
+  if (upsertErr) {
+    console.error("Supabase upsert core competitions error:", upsertErr.message);
+    throw upsertErr;
+  }
 
-    if (rawList.length > 0) {
-      const records = rawList.map((c: any) => ({
-        id: String(c.id || c.category_id),
-        name: c.name || c.category_name || "Unknown Competition",
-        emblem_url: cleanImageUrl(c.logo || c.image || c.shield || c.emblem),
-      }));
+  try {
+    const data = await callBeSoccer({ req: "categories", filter: "competitions" });
+    const allComps: any[] = [];
+    if (data?.category?.competitions) {
+      for (const list of Object.values(data.category.competitions)) {
+        if (Array.isArray(list)) allComps.push(...list);
+      }
+    }
+
+    // STRICT: Only process and upsert the 8 permitted competitions, ignore all other API data
+    const permittedOnly = allComps.filter((c: any) => 
+      ALLOWED_COMPETITION_IDS.has(String(c.id || c.category_id))
+    );
+
+    if (permittedOnly.length > 0) {
+      const records = permittedOnly.map((c: any) => {
+        const id = String(c.id || c.category_id);
+        const core = CORE_COMPETITIONS.find((item) => item.id === id);
+        return {
+          id,
+          name: core?.name || c.name || "Unknown Competition",
+          emblem_url: cleanImageUrl(c.logo || c.logo_png || c.shield) || core?.emblem_url,
+        };
+      });
 
       const { error } = await supabase
         .from("competitions")
         .upsert(records, { onConflict: "id" });
 
       if (error) console.warn("Supabase upsert competitions warning:", error.message);
-      return records.length + CORE_COMPETITIONS.length;
     }
   } catch (err: any) {
     console.warn("BeSoccer fetch competitions error:", err.message);
@@ -169,6 +198,11 @@ async function syncCompetitions(): Promise<number> {
  * 2. Sync Teams for a Competition (Endpoint 10: req=teams)
  */
 async function syncTeams(leagueId: string): Promise<number> {
+  if (!ALLOWED_COMPETITION_IDS.has(leagueId)) {
+    console.warn(`Skipping syncTeams for disallowed competition: ${leagueId}`);
+    return 0;
+  }
+
   const data = await callBeSoccer({ req: "teams", league: leagueId });
   const rawList: any[] = Array.isArray(data)
     ? data
@@ -193,9 +227,15 @@ async function syncTeams(leagueId: string): Promise<number> {
 
 /**
  * 3. Sync Matches for a Competition (Endpoint 13: req=matchs)
+ * Strictly restricted to the 8 top-tier competitions.
  * Automatically ensures referenced competition and teams exist to avoid foreign key violations.
  */
 async function syncMatches(leagueId: string): Promise<number> {
+  if (!ALLOWED_COMPETITION_IDS.has(leagueId)) {
+    console.warn(`Skipping syncMatches for disallowed competition: ${leagueId}`);
+    return 0;
+  }
+
   const data = await callBeSoccer({ req: "matchs", league: leagueId });
   const rawList: any[] = Array.isArray(data)
     ? data
@@ -204,10 +244,9 @@ async function syncMatches(leagueId: string): Promise<number> {
   if (!rawList.length) return 0;
 
   // 1. Relational Integrity: Ensure parent competition exists in public.competitions
-  const compName = rawList[0]?.competition_name || rawList[0]?.category_name || (
-    CORE_COMPETITIONS.find((c) => c.id === leagueId)?.name || `Competition ${leagueId}`
-  );
-  const compEmblem = cleanImageUrl(rawList[0]?.cflag_local || rawList[0]?.logo || rawList[0]?.shield);
+  const coreComp = CORE_COMPETITIONS.find((c) => c.id === leagueId);
+  const compName = coreComp?.name || rawList[0]?.competition_name || rawList[0]?.category_name || `Competition ${leagueId}`;
+  const compEmblem = coreComp?.emblem_url || cleanImageUrl(rawList[0]?.cflag_local || rawList[0]?.logo || rawList[0]?.shield);
 
   await supabase
     .from("competitions")
@@ -352,7 +391,19 @@ serve(async (req: Request) => {
         break;
       }
       case "sync-matches": {
-        results.matchesSynced = await syncMatches(league);
+        if (league === "all") {
+          let total = 0;
+          for (const compId of ALLOWED_COMPETITION_IDS) {
+            try {
+              total += await syncMatches(compId);
+            } catch (e: any) {
+              console.warn(`Sync error for comp ${compId}:`, e.message);
+            }
+          }
+          results.matchesSynced = total;
+        } else {
+          results.matchesSynced = await syncMatches(league);
+        }
         break;
       }
       case "sync-live":
@@ -362,8 +413,15 @@ serve(async (req: Request) => {
       }
       case "sync-all": {
         results.competitionsSynced = await syncCompetitions();
-        results.teamsSynced = await syncTeams(league);
-        results.matchesSynced = await syncMatches(league);
+        let totalMatches = 0;
+        for (const compId of ALLOWED_COMPETITION_IDS) {
+          try {
+            totalMatches += await syncMatches(compId);
+          } catch (e: any) {
+            console.warn(`Sync error for comp ${compId}:`, e.message);
+          }
+        }
+        results.matchesSynced = totalMatches;
         results.matchesDayUpdated = await syncMatchesDay(date);
         break;
       }

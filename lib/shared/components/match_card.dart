@@ -4,6 +4,7 @@ import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
 import 'pico_button.dart';
+import 'prediction_controls.dart';
 
 /// The 4 distinct lifecycle states of a match card in Pico.
 enum MatchCardState {
@@ -43,6 +44,17 @@ class MatchCard extends StatelessWidget {
     this.scoreBadgeLabel,
     this.isExactScore = false,
     this.awardedPoints,
+    this.isTeaser = false,
+    this.teaserLabel,
+    this.teaserSubtext,
+    this.settlementOutcomeLabel,
+    this.showInlinePrediction = false,
+    this.inlineHomeScore,
+    this.inlineAwayScore,
+    this.onInlineHomeScoreChanged,
+    this.onInlineAwayScoreChanged,
+    this.onQuickPredict,
+    this.onCardTap,
     this.onPredictPressed,
     this.onModifyPressed,
     this.onViewPredictionPressed,
@@ -55,6 +67,17 @@ class MatchCard extends StatelessWidget {
     required PicoMatch match,
     int? predictedHomeScore,
     int? predictedAwayScore,
+    int? awardedPoints,
+    String? settlementOutcomeLabel,
+    String? teaserCountdownLabel,
+    String? teaserSubtext,
+    bool showInlinePrediction = false,
+    int? inlineHomeScore,
+    int? inlineAwayScore,
+    ValueChanged<int>? onInlineHomeScoreChanged,
+    ValueChanged<int>? onInlineAwayScoreChanged,
+    VoidCallback? onQuickPredict,
+    VoidCallback? onCardTap,
     VoidCallback? onPredictPressed,
     VoidCallback? onModifyPressed,
     VoidCallback? onViewPredictionPressed,
@@ -63,6 +86,17 @@ class MatchCard extends StatelessWidget {
     final bool hasPrediction = predictedHomeScore != null && predictedAwayScore != null;
 
     if (match.status == MatchStatus.finished) {
+      final int? points = awardedPoints ??
+          match.calculateSettlementPoints(predictedHomeScore, predictedAwayScore);
+      final String outcome;
+      if (settlementOutcomeLabel != null) {
+        outcome = settlementOutcomeLabel;
+      } else if (hasPrediction && points != null) {
+        outcome = points > 0 ? '+$points Points' : '0 Points';
+      } else {
+        outcome = 'No Prediction';
+      }
+
       return MatchCard.finished(
         key: key,
         competition: match.competitionName.toUpperCase(),
@@ -75,7 +109,12 @@ class MatchCard extends StatelessWidget {
         finalHomeScore: match.homeScore ?? 0,
         finalAwayScore: match.awayScore ?? 0,
         scoreBadgeLabel: 'FINAL',
-        statusSubtext: 'Full time · Points awarded',
+        statusSubtext: hasPrediction
+            ? 'Your prediction: $predictedHomeScore - $predictedAwayScore'
+            : 'Full time · Points awarded',
+        awardedPoints: points ?? 0,
+        settlementOutcomeLabel: outcome,
+        onCardTap: onCardTap,
         onTapResult: onTapResult,
       );
     }
@@ -96,6 +135,7 @@ class MatchCard extends StatelessWidget {
         statusSubtext: match.status == MatchStatus.live
             ? 'Match in progress'
             : 'Prediction locked · Kickoff at ${match.kickoffTimeFormatted}',
+        onCardTap: onCardTap,
         onViewPredictionPressed: onViewPredictionPressed,
       );
     }
@@ -113,8 +153,38 @@ class MatchCard extends StatelessWidget {
         awayTeamBadgeUrl: match.awayTeamBadgeUrl,
         predictedHomeScore: predictedHomeScore,
         predictedAwayScore: predictedAwayScore,
+        showInlinePrediction: showInlinePrediction,
+        inlineHomeScore: inlineHomeScore,
+        inlineAwayScore: inlineAwayScore,
+        onInlineHomeScoreChanged: onInlineHomeScoreChanged,
+        onInlineAwayScoreChanged: onInlineAwayScoreChanged,
+        onQuickPredict: onQuickPredict,
+        onCardTap: onCardTap,
         editableUntilTime: match.closesAtTimeFormatted,
         onModifyPressed: onModifyPressed,
+      );
+    }
+
+    // Teaser window: 7 to 14 days out
+    if (match.isTeaser) {
+      final String countdownText = teaserCountdownLabel ??
+          'Opens in ${match.teaserCountdownShort}';
+      return MatchCard.unpredicted(
+        key: key,
+        competition: match.competitionName.toUpperCase(),
+        kickoffTime: match.kickoffTimeFormatted,
+        homeTeamName: match.homeTeamName,
+        homeTeamCode: match.homeTeamCode,
+        homeTeamBadgeUrl: match.homeTeamBadgeUrl,
+        awayTeamName: match.awayTeamName,
+        awayTeamCode: match.awayTeamCode,
+        awayTeamBadgeUrl: match.awayTeamBadgeUrl,
+        closesAtTime: match.closesAtTimeFormatted,
+        isTeaser: true,
+        teaserLabel: countdownText,
+        teaserSubtext: teaserSubtext,
+        onCardTap: onCardTap,
+        onPredictPressed: null, // Disabled in teaser window
       );
     }
 
@@ -129,6 +199,13 @@ class MatchCard extends StatelessWidget {
       awayTeamCode: match.awayTeamCode,
       awayTeamBadgeUrl: match.awayTeamBadgeUrl,
       closesAtTime: match.closesAtTimeFormatted,
+      showInlinePrediction: showInlinePrediction,
+      inlineHomeScore: inlineHomeScore,
+      inlineAwayScore: inlineAwayScore,
+      onInlineHomeScoreChanged: onInlineHomeScoreChanged,
+      onInlineAwayScoreChanged: onInlineAwayScoreChanged,
+      onQuickPredict: onQuickPredict,
+      onCardTap: onCardTap,
       onPredictPressed: onPredictPressed,
     );
   }
@@ -147,6 +224,16 @@ class MatchCard extends StatelessWidget {
     String? homeTeamBadgeUrl,
     String? awayTeamBadgeUrl,
     String? closesAtTime,
+    bool isTeaser = false,
+    String? teaserLabel,
+    String? teaserSubtext,
+    bool showInlinePrediction = false,
+    int? inlineHomeScore,
+    int? inlineAwayScore,
+    ValueChanged<int>? onInlineHomeScoreChanged,
+    ValueChanged<int>? onInlineAwayScoreChanged,
+    VoidCallback? onQuickPredict,
+    VoidCallback? onCardTap,
     VoidCallback? onPredictPressed,
   }) {
     return MatchCard(
@@ -163,6 +250,16 @@ class MatchCard extends StatelessWidget {
       awayTeamBadgeUrl: awayTeamBadgeUrl,
       state: MatchCardState.unpredicted,
       closesAtTime: closesAtTime,
+      isTeaser: isTeaser,
+      teaserLabel: teaserLabel,
+      teaserSubtext: teaserSubtext,
+      showInlinePrediction: showInlinePrediction,
+      inlineHomeScore: inlineHomeScore,
+      inlineAwayScore: inlineAwayScore,
+      onInlineHomeScoreChanged: onInlineHomeScoreChanged,
+      onInlineAwayScoreChanged: onInlineAwayScoreChanged,
+      onQuickPredict: onQuickPredict,
+      onCardTap: onCardTap,
       onPredictPressed: onPredictPressed,
     );
   }
@@ -183,6 +280,13 @@ class MatchCard extends StatelessWidget {
     required int predictedHomeScore,
     required int predictedAwayScore,
     String? editableUntilTime,
+    bool showInlinePrediction = false,
+    int? inlineHomeScore,
+    int? inlineAwayScore,
+    ValueChanged<int>? onInlineHomeScoreChanged,
+    ValueChanged<int>? onInlineAwayScoreChanged,
+    VoidCallback? onQuickPredict,
+    VoidCallback? onCardTap,
     VoidCallback? onModifyPressed,
   }) {
     return MatchCard(
@@ -201,15 +305,22 @@ class MatchCard extends StatelessWidget {
       predictedHomeScore: predictedHomeScore,
       predictedAwayScore: predictedAwayScore,
       editableUntilTime: editableUntilTime,
+      showInlinePrediction: showInlinePrediction,
+      inlineHomeScore: inlineHomeScore,
+      inlineAwayScore: inlineAwayScore,
+      onInlineHomeScoreChanged: onInlineHomeScoreChanged,
+      onInlineAwayScoreChanged: onInlineAwayScoreChanged,
+      onQuickPredict: onQuickPredict,
+      onCardTap: onCardTap,
       onModifyPressed: onModifyPressed,
     );
   }
 
-  /// Factory constructor for a locked match close to kickoff (Card 3 in Matches.jpeg).
+  /// Factory constructor for a locked match fixture (Card 3 in Matches.jpeg).
   factory MatchCard.locked({
     Key? key,
     required String competition,
-    String lockStatusLabel = 'Locks Soon',
+    String lockStatusLabel = 'LOCKED',
     required String homeTeamName,
     required String homeTeamCode,
     required String awayTeamName,
@@ -221,6 +332,7 @@ class MatchCard extends StatelessWidget {
     required int lockedHomeScore,
     required int lockedAwayScore,
     String? statusSubtext = 'Prediction locked · Kickoff in 10 mins',
+    VoidCallback? onCardTap,
     VoidCallback? onViewPredictionPressed,
   }) {
     return MatchCard(
@@ -239,6 +351,7 @@ class MatchCard extends StatelessWidget {
       predictedHomeScore: lockedHomeScore,
       predictedAwayScore: lockedAwayScore,
       statusSubtext: statusSubtext,
+      onCardTap: onCardTap,
       onViewPredictionPressed: onViewPredictionPressed,
     );
   }
@@ -260,7 +373,9 @@ class MatchCard extends StatelessWidget {
     String scoreBadgeLabel = 'EXACT SCORE',
     bool isExactScore = true,
     int awardedPoints = 3,
+    String? settlementOutcomeLabel,
     String? statusSubtext = 'Full time · Points awarded to leaderboard',
+    VoidCallback? onCardTap,
     VoidCallback? onTapResult,
   }) {
     return MatchCard(
@@ -280,7 +395,9 @@ class MatchCard extends StatelessWidget {
       scoreBadgeLabel: scoreBadgeLabel,
       isExactScore: isExactScore,
       awardedPoints: awardedPoints,
+      settlementOutcomeLabel: settlementOutcomeLabel,
       statusSubtext: statusSubtext,
+      onCardTap: onCardTap,
       onTapResult: onTapResult,
     );
   }
@@ -340,6 +457,17 @@ class MatchCard extends StatelessWidget {
   final String? scoreBadgeLabel;
   final bool isExactScore;
   final int? awardedPoints;
+  final bool isTeaser;
+  final String? teaserLabel;
+  final String? teaserSubtext;
+  final String? settlementOutcomeLabel;
+  final bool showInlinePrediction;
+  final int? inlineHomeScore;
+  final int? inlineAwayScore;
+  final ValueChanged<int>? onInlineHomeScoreChanged;
+  final ValueChanged<int>? onInlineAwayScoreChanged;
+  final VoidCallback? onQuickPredict;
+  final VoidCallback? onCardTap;
   final VoidCallback? onPredictPressed;
   final VoidCallback? onModifyPressed;
   final VoidCallback? onViewPredictionPressed;
@@ -369,32 +497,36 @@ class MatchCard extends StatelessWidget {
           ),
 
           // Main Card Face
-          Container(
-            padding: const EdgeInsets.all(20.0),
-            decoration: BoxDecoration(
-              color: PicoColors.cardFace,
-              borderRadius: BorderRadius.circular(22.0),
-              border: Border.all(color: PicoColors.cardBorder, width: 1.0),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x1A000000),
-                  offset: Offset(0, 4),
-                  blurRadius: 10,
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildHeader(),
-                const SizedBox(height: 20.0),
-                _buildTeamsRow(),
-                const SizedBox(height: 22.0),
-                _buildActionArea(),
-                const SizedBox(height: 8.0),
-                _buildSubtext(),
-              ],
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onCardTap,
+            child: Container(
+              padding: const EdgeInsets.all(20.0),
+              decoration: BoxDecoration(
+                color: PicoColors.cardFace,
+                borderRadius: BorderRadius.circular(22.0),
+                border: Border.all(color: PicoColors.cardBorder, width: 1.0),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x1A000000),
+                    offset: Offset(0, 4),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildHeader(),
+                  const SizedBox(height: 20.0),
+                  _buildTeamsRow(),
+                  const SizedBox(height: 22.0),
+                  _buildActionArea(),
+                  const SizedBox(height: 8.0),
+                  _buildSubtext(),
+                ],
+              ),
             ),
           ),
         ],
@@ -582,7 +714,7 @@ class MatchCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(6.0),
               ),
               child: Text(
-                'NOT PREDICTED',
+                isTeaser ? 'OPENS SOON' : 'NOT PREDICTED',
                 style: PicoTypography.labelPillSm.copyWith(
                   color: PicoColors.textTactileMuted,
                   fontWeight: FontWeight.w800,
@@ -769,8 +901,99 @@ class MatchCard extends StatelessWidget {
 
   /// Action Area matching each state
   Widget _buildActionArea() {
+    if (showInlinePrediction &&
+        state != MatchCardState.finished &&
+        state != MatchCardState.locked) {
+      final homeScore = inlineHomeScore ?? predictedHomeScore ?? 0;
+      final awayScore = inlineAwayScore ?? predictedAwayScore ?? 0;
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+            decoration: BoxDecoration(
+              color: PicoColors.cardTray,
+              borderRadius: BorderRadius.circular(16.0),
+              border: Border.all(color: PicoColors.cardBorder, width: 1.0),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Home Stepper
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      homeTeamCode.toUpperCase(),
+                      style: PicoTypography.labelPillSm.copyWith(
+                        color: PicoColors.textTactileMuted,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11.0,
+                      ),
+                    ),
+                    const SizedBox(height: 6.0),
+                    ScoreStepper(
+                      score: homeScore,
+                      onChanged: onInlineHomeScoreChanged ?? (_) {},
+                      size: 32.0,
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 18.0),
+                  child: Text(
+                    ':',
+                    style: PicoTypography.headlineMd.copyWith(
+                      color: PicoColors.textTactileMuted,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 22.0,
+                    ),
+                  ),
+                ),
+                // Away Stepper
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      awayTeamCode.toUpperCase(),
+                      style: PicoTypography.labelPillSm.copyWith(
+                        color: PicoColors.textTactileMuted,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11.0,
+                      ),
+                    ),
+                    const SizedBox(height: 6.0),
+                    ScoreStepper(
+                      score: awayScore,
+                      onChanged: onInlineAwayScoreChanged ?? (_) {},
+                      size: 32.0,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10.0),
+          PicoButton.gold(
+            text: state == MatchCardState.predicted
+                ? 'Update Prediction ($homeScore - $awayScore)'
+                : 'Quick Predict ($homeScore - $awayScore)',
+            onPressed: onQuickPredict ?? onPredictPressed,
+          ),
+        ],
+      );
+    }
+
     switch (state) {
       case MatchCardState.unpredicted:
+        if (isTeaser) {
+          return PicoButton.gold(
+            text: teaserLabel ?? 'Opens in 2d',
+            onPressed: null,
+          );
+        }
         return PicoButton.gold(
           text: 'Make Prediction →',
           onPressed: onPredictPressed,
@@ -791,6 +1014,10 @@ class MatchCard extends StatelessWidget {
         );
 
       case MatchCardState.finished:
+        final String badgeText = settlementOutcomeLabel ??
+            (awardedPoints != null
+                ? (awardedPoints! > 0 ? '+$awardedPoints PTS' : '0 PTS')
+                : '+3 PTS');
         return GestureDetector(
           onTap: onTapResult,
           child: Container(
@@ -838,7 +1065,7 @@ class MatchCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12.0),
                   ),
                   child: Text(
-                    '+${awardedPoints ?? 3} PTS',
+                    badgeText,
                     style: const TextStyle(
                       color: Color(0xFF2C1C02),
                       fontWeight: FontWeight.w900,
@@ -858,9 +1085,11 @@ class MatchCard extends StatelessWidget {
     final String text;
     switch (state) {
       case MatchCardState.unpredicted:
-        text = closesAtTime != null
-            ? 'Not predicted yet · Closes at $closesAtTime'
-            : (statusSubtext ?? 'Not predicted yet · Closes before kickoff');
+        text = isTeaser
+            ? (teaserSubtext ?? 'Prediction window opens 7 days before kickoff')
+            : (closesAtTime != null
+                ? 'Not predicted yet · Closes at $closesAtTime'
+                : (statusSubtext ?? 'Not predicted yet · Closes before kickoff'));
         break;
       case MatchCardState.predicted:
         text = editableUntilTime != null

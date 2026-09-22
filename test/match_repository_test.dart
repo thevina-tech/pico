@@ -40,8 +40,10 @@ void main() {
       expect(match.status, MatchStatus.upcoming);
       expect(match.homeScore, isNull);
       expect(match.awayScore, isNull);
-      expect(match.kickoffTimeFormatted, '20:45');
-      expect(match.closesAtTimeFormatted, '20:35');
+      expect(match.kickoffTimeOnly, '20:45');
+      expect(match.closesAtTimeOnly, '20:35');
+      expect(match.kickoffTimeFormatted, contains('20:45'));
+      expect(match.closesAtTimeFormatted, contains('20:35'));
     });
 
     test('parses finished match with actual scores from result string', () {

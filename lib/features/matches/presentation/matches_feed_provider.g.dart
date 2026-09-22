@@ -8,22 +8,25 @@ part of 'matches_feed_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// AsyncNotifier provider fetching and caching lists of matches from Supabase.
+/// AsyncNotifier provider fetching matches and filtering them strictly
+/// to ONLY those linked to the competition_id of tournaments the user has joined.
 
 @ProviderFor(MatchesFeed)
 final matchesFeedProvider = MatchesFeedProvider._();
 
-/// AsyncNotifier provider fetching and caching lists of matches from Supabase.
+/// AsyncNotifier provider fetching matches and filtering them strictly
+/// to ONLY those linked to the competition_id of tournaments the user has joined.
 final class MatchesFeedProvider
     extends $AsyncNotifierProvider<MatchesFeed, List<PicoMatch>> {
-  /// AsyncNotifier provider fetching and caching lists of matches from Supabase.
+  /// AsyncNotifier provider fetching matches and filtering them strictly
+  /// to ONLY those linked to the competition_id of tournaments the user has joined.
   MatchesFeedProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'matchesFeedProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -36,9 +39,10 @@ final class MatchesFeedProvider
   MatchesFeed create() => MatchesFeed();
 }
 
-String _$matchesFeedHash() => r'd5ef2dafcb6f472adf64578289255bfea960ea7f';
+String _$matchesFeedHash() => r'2dd397c6a234d85f7aa9f5dd7e0b7f3e800841b5';
 
-/// AsyncNotifier provider fetching and caching lists of matches from Supabase.
+/// AsyncNotifier provider fetching matches and filtering them strictly
+/// to ONLY those linked to the competition_id of tournaments the user has joined.
 
 abstract class _$MatchesFeed extends $AsyncNotifier<List<PicoMatch>> {
   FutureOr<List<PicoMatch>> build();

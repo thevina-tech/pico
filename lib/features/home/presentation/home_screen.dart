@@ -6,6 +6,7 @@ import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
 import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
+import 'package:pico/features/predictions/presentation/prediction_controller.dart';
 import 'package:pico/features/profile/domain/user_profile.dart';
 import 'package:pico/features/profile/presentation/user_profile_provider.dart';
 import 'package:pico/l10n/app_localizations.dart';
@@ -90,6 +91,64 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       widget.onNavigateProfile!();
     } else {
       context.go('/profile');
+    }
+  }
+
+  final Map<String, (int, int)> _inlineScores = {};
+
+  Future<void> _onQuickPredictMatch(PicoMatch match) async {
+    final predictions = ref.read(predictionControllerProvider);
+    final existing = predictions.value?[match.id];
+    final scores = _inlineScores[match.id] ??
+        (existing != null ? (existing.homeScore, existing.awayScore) : (2, 1));
+    final homeScore = scores.$1;
+    final awayScore = scores.$2;
+    final winner = homeScore > awayScore
+        ? 'home'
+        : (awayScore > homeScore ? 'away' : 'draw');
+
+    final success = await ref
+        .read(predictionControllerProvider.notifier)
+        .submitPrediction(
+          match: match,
+          homeScore: homeScore,
+          awayScore: awayScore,
+          predictedWinner: winner,
+        );
+
+    if (!mounted) return;
+
+    final l10n = AppLocalizations.of(context);
+    if (success) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n?.predictionSavedToast ?? 'Prediction locked in! Good luck.',
+          ),
+          backgroundColor: PicoColors.primary,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n?.predictionWindowClosed ??
+                'Predictions are closed for this match',
+          ),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  void _openDetailedPrediction(PicoMatch match) {
+    if (widget.onMakePrediction != null) {
+      widget.onMakePrediction!();
+    } else {
+      context.push('/prediction/${match.id}', extra: match);
     }
   }
 
@@ -305,14 +364,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           return _buildEmptyMatchesState();
         }
 
-        // index 3: The single featured match on the Home screen
+        // index 3: The single featured match on the Home screen with inline prediction controls
         if (index == 3) {
           final featuredMatch = allMatches.first;
+          final predictions = ref.watch(predictionControllerProvider);
+          final existing = predictions.value?[featuredMatch.id];
+          final currentScores = _inlineScores[featuredMatch.id] ??
+              (existing != null
+                  ? (existing.homeScore, existing.awayScore)
+                  : (2, 1));
+
           return Padding(
             padding: EdgeInsets.only(bottom: hasMultipleMatches ? 10.0 : 14.0),
             child: MatchCard.fromMatch(
               match: featuredMatch,
-              onPredictPressed: () => widget.onMakePrediction?.call(),
+              predictedHomeScore: existing?.homeScore,
+              predictedAwayScore: existing?.awayScore,
+              showInlinePrediction: true,
+              inlineHomeScore: currentScores.$1,
+              inlineAwayScore: currentScores.$2,
+              onInlineHomeScoreChanged: (val) {
+                setState(() {
+                  _inlineScores[featuredMatch.id] = (val, currentScores.$2);
+                });
+              },
+              onInlineAwayScoreChanged: (val) {
+                setState(() {
+                  _inlineScores[featuredMatch.id] = (currentScores.$1, val);
+                });
+              },
+              onQuickPredict: () => _onQuickPredictMatch(featuredMatch),
+              onCardTap: () => _openDetailedPrediction(featuredMatch),
+              onPredictPressed: () => _openDetailedPrediction(featuredMatch),
+              onModifyPressed: () => _openDetailedPrediction(featuredMatch),
+              onViewPredictionPressed: () => _openDetailedPrediction(featuredMatch),
             ),
           );
         }

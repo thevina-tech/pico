@@ -8,7 +8,7 @@ part 'matches_feed_provider.g.dart';
 
 /// AsyncNotifier provider fetching matches and filtering them strictly
 /// to ONLY those linked to the competition_id of tournaments the user has joined.
-@riverpod
+@Riverpod(keepAlive: true)
 class MatchesFeed extends _$MatchesFeed {
   @override
   FutureOr<List<PicoMatch>> build() async {
@@ -41,6 +41,22 @@ class MatchesFeed extends _$MatchesFeed {
   }
 }
 
+/// Normalizes string by lowering case, replacing accented vowels, and stripping punctuation.
+String _normalizeCompetitionText(String input) {
+  return input
+      .toLowerCase()
+      .replaceAll('á', 'a')
+      .replaceAll('é', 'e')
+      .replaceAll('í', 'i')
+      .replaceAll('ó', 'o')
+      .replaceAll('ú', 'u')
+      .replaceAll('ü', 'u')
+      .replaceAll('ñ', 'n')
+      .replaceAll(RegExp(r'[^a-z0-9]'), ' ')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
+}
+
 /// Helper method determining if a [PicoMatch] is linked to an enrolled [Tournament].
 bool matchBelongsToTournament(PicoMatch match, Tournament tournament) {
   // 1. Match by competitionId directly or via known provider aliases
@@ -66,43 +82,49 @@ bool isSameCompetition(String id1, String id2) {
   if (id1.isEmpty || id2.isEmpty) return false;
   if (id1 == id2) return true;
   const aliases = [
-    {'la_liga', '1'},
-    {'premier_league', '10'},
-    {'serie_a', '2'},
-    {'bundesliga', '3'},
-    {'ligue_1', '4'},
-    {'champions_league', '6', '70393'},
+    {'la_liga', 'laliga', '1', 'primera_division', 'primera division'},
+    {'premier_league', 'epl', '10'},
+    {'serie_a', '7', '2'},
+    {'bundesliga', '8', '3'},
+    {'ligue_1', '16', '4'},
+    {'champions_league', 'ucl', '107', '6', '70393'},
+    {'europa_league', 'uel', '117', '7'},
+    {'conference_league', 'uecl', '2492', '8'},
     {'championship', '67799'},
   ];
 
   for (final set in aliases) {
     if (set.contains(id1) && set.contains(id2)) return true;
   }
-  final s1 = id1.toLowerCase().trim();
-  final s2 = id2.toLowerCase().trim();
+  final s1 = _normalizeCompetitionText(id1);
+  final s2 = _normalizeCompetitionText(id2);
   return s1 == s2;
 }
 
 /// Compares competition names including localized and commercial titles.
 bool isSameCompetitionName(String name1, String name2) {
-  final n1 = name1.toLowerCase().trim();
-  final n2 = name2.toLowerCase().trim();
+  final n1 = _normalizeCompetitionText(name1);
+  final n2 = _normalizeCompetitionText(name2);
   if (n1.isEmpty || n2.isEmpty) return false;
   if (n1 == n2) return true;
   if (n1.contains(n2) || n2.contains(n1)) return true;
 
   const nameAliases = [
-    {'la liga', 'laliga', 'primera división', 'primera division', 'la liga ea sports', 'spanish laliga'},
+    {'la liga', 'laliga', 'primera division', 'primera division la liga', 'la liga ea sports', 'spanish laliga'},
     {'premier league', 'epl', 'english premier league', 'barclays premier league'},
     {'serie a', 'italian serie a', 'serie a tim'},
     {'bundesliga', 'german bundesliga'},
     {'ligue 1', 'french ligue 1', 'ligue 1 mcdonalds', 'ligue 1 uber eats'},
     {'champions league', 'ucl', 'uefa champions league'},
+    {'europa league', 'uel', 'uefa europa league'},
+    {'conference league', 'uecl', 'uefa conference league', 'uefa europa conference league'},
     {'championship', 'efl championship', 'english league championship'},
   ];
 
   for (final set in nameAliases) {
-    if (set.contains(n1) && set.contains(n2)) return true;
+    final hasN1 = set.any((alias) => n1.contains(alias) || alias.contains(n1));
+    final hasN2 = set.any((alias) => n2.contains(alias) || alias.contains(n2));
+    if (hasN1 && hasN2) return true;
   }
   return false;
 }

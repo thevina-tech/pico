@@ -9,7 +9,7 @@ part 'user_profile_provider.g.dart';
 
 /// Riverpod provider for the current user's profile.
 /// Watches [authProvider] and queries [profileRepositoryProvider].
-@riverpod
+@Riverpod(keepAlive: true)
 class CurrentUserProfile extends _$CurrentUserProfile {
   @override
   FutureOr<UserProfile> build() async {

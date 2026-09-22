@@ -286,4 +286,364 @@ class AppLocalizationsEn extends AppLocalizations {
   String levelPill(int level) {
     return 'LVL $level';
   }
+
+  @override
+  String get predictAction => 'PREDICT';
+
+  @override
+  String get exactScore => 'Exact score';
+
+  @override
+  String get exactScoreTitle => 'Exact Score Prediction';
+
+  @override
+  String get pickWinner => 'Pick Winner';
+
+  @override
+  String get whoWins => 'Who wins?';
+
+  @override
+  String get homeOutcome => 'Home';
+
+  @override
+  String get drawOutcome => 'Draw';
+
+  @override
+  String get awayOutcome => 'Away';
+
+  @override
+  String get savePredictionCta => 'Save Prediction (+10 XP)';
+
+  @override
+  String get modifyPrediction => 'Modify Prediction';
+
+  @override
+  String get predictionLockedTitle => 'Prediction Locked! ⚽';
+
+  @override
+  String predictionLockedBanner(String time) {
+    return 'Prediction locked · Kickoff at $time';
+  }
+
+  @override
+  String get predictionWindowClosed => 'Predictions are closed for this match';
+
+  @override
+  String get predictionLockNote =>
+      'Predictions lock exactly 10 minutes before kickoff.';
+
+  @override
+  String get potentialPointsHeader => 'Potential Pico Points';
+
+  @override
+  String get potentialPointsBreakdown =>
+      '+5 for exact score · +3 for correct winner';
+
+  @override
+  String get quickPredict => 'Quick Predict';
+
+  @override
+  String get predictionSavedToast => 'Prediction locked in! Good luck.';
+
+  @override
+  String get tournamentsTitle => 'Tournaments';
+
+  @override
+  String get tournamentsSubtitle => 'Compete with friends · No real money';
+
+  @override
+  String get myLeaguesTab => 'My Leagues';
+
+  @override
+  String get discoverTab => 'Discover';
+
+  @override
+  String get createOrJoinAction => '+ Create / Join';
+
+  @override
+  String get createPrivateLeagueTitle => 'Create Private League';
+
+  @override
+  String get createPrivateLeagueSubtitle =>
+      'Compete against friends, banter, and crown your group champion.';
+
+  @override
+  String get joinPrivateLeagueTitle => 'Join Private League';
+
+  @override
+  String get joinPrivateLeagueSubtitle =>
+      'Enter the 6-character code shared by your friend.';
+
+  @override
+  String get leagueNameLabel => 'LEAGUE NAME';
+
+  @override
+  String get leagueNamePlaceholder => 'e.g., Friday Football Kings';
+
+  @override
+  String get baseTournamentLabel => 'BASE TOURNAMENT / COMPETITION';
+
+  @override
+  String get baseTournamentHelper =>
+      'Matches and standings are linked to this competition.';
+
+  @override
+  String get freeSetupBadge => 'Free Instant Setup';
+
+  @override
+  String get createLeagueButton => 'Create Private League';
+
+  @override
+  String get joinLeagueButton => 'Join Private League';
+
+  @override
+  String get enterLeagueCodeLabel => 'ENTER 6-CHARACTER CODE';
+
+  @override
+  String get pasteCode => 'Paste';
+
+  @override
+  String get codeCopiedToast => 'Invite code copied to clipboard!';
+
+  @override
+  String shareInviteMessage(String code) {
+    return 'Join my private league on Pico! Use code: $code';
+  }
+
+  @override
+  String get inviteCodeLabel => 'INVITE CODE';
+
+  @override
+  String get copyCodeButton => 'Copy Code';
+
+  @override
+  String get shareCodeButton => 'Share Invite';
+
+  @override
+  String get emptyPrivateLeaguesTitle => 'No Private Leagues Yet';
+
+  @override
+  String get emptyPrivateLeaguesSubtitle =>
+      'Create a league for your friends or join one with an invite code.';
+
+  @override
+  String get officialTournamentBadge => 'OFFICIAL TOURNAMENT';
+
+  @override
+  String get leagueCreatedSuccessTitle => 'League Created! 🎉';
+
+  @override
+  String get leagueJoinedSuccessTitle => 'You\'re In! ⚽';
+
+  @override
+  String leagueJoinedSuccessSubtitle(String leagueName) {
+    return 'You have joined $leagueName';
+  }
+
+  @override
+  String get invalidLeagueCodeError =>
+      'Invalid invite code. Please check the code and try again.';
+
+  @override
+  String get alreadyMemberOfLeagueError =>
+      'You are already a member of this league.';
+
+  @override
+  String get creatorCannotRejoinError =>
+      'You created this league and are already its owner.';
+
+  @override
+  String get leagueCodeFormatError =>
+      'Code must be exactly 6 characters (e.g., K9X2P1)';
+
+  @override
+  String get doneButton => 'Done';
+
+  @override
+  String get privateLeagueSecurityNote =>
+      'Only players with your invite code can join';
+
+  @override
+  String get officialBaseTournamentNote => 'Official Base Tournament';
+
+  @override
+  String competitionsAvailableCount(int count) {
+    return '$count available';
+  }
+
+  @override
+  String get friendsAndColleaguesBadge => 'FRIENDS & COLLEAGUES';
+
+  @override
+  String get privateCommunitySubtitle => 'Private Community';
+
+  @override
+  String selectBaseTournamentSheetTitle(int count) {
+    return 'Select Base Tournament ($count Available)';
+  }
+
+  @override
+  String get tournamentDetailsTitle => 'Tournament Details';
+
+  @override
+  String get privateLeagueDetailsTitle => 'Private League';
+
+  @override
+  String get inviteCodeBannerTitle => 'LEAGUE INVITE CODE';
+
+  @override
+  String get inviteCodeBannerSubtitle =>
+      'Share with friends to compete together';
+
+  @override
+  String shareInviteCodeMessage(String leagueName, String code) {
+    return 'Join my private football prediction league \"$leagueName\" on Pico! Use invite code: $code';
+  }
+
+  @override
+  String get adminControlsTitle => 'ADMIN CONTROLS';
+
+  @override
+  String get deleteLeagueButton => 'Delete League';
+
+  @override
+  String get deleteLeagueConfirmTitle => 'Delete Private League?';
+
+  @override
+  String get deleteLeagueConfirmBody =>
+      'This action is permanent. All members will be removed and standings will be erased.';
+
+  @override
+  String get deleteLeagueAction => 'Delete';
+
+  @override
+  String get removeMemberButton => 'Remove';
+
+  @override
+  String get removeMemberConfirmTitle => 'Remove Member?';
+
+  @override
+  String removeMemberConfirmBody(String username) {
+    return 'Are you sure you want to remove $username from this league?';
+  }
+
+  @override
+  String get leaveLeagueButton => 'Leave League';
+
+  @override
+  String get leaveLeagueConfirmTitle => 'Leave League?';
+
+  @override
+  String leaveLeagueConfirmBody(String leagueName) {
+    return 'Are you sure you want to leave $leagueName? You will need the invite code to rejoin.';
+  }
+
+  @override
+  String get leaveLeagueAction => 'Leave';
+
+  @override
+  String get leaderboardTab => 'Standings';
+
+  @override
+  String get matchesTab => 'Matches';
+
+  @override
+  String get upcomingMatchesSection => 'Upcoming Matches';
+
+  @override
+  String get finishedMatchesSection => 'Completed Matches';
+
+  @override
+  String get noParticipantsYet => 'No participants yet';
+
+  @override
+  String get noMatchesForCompetition => 'No matches found for this competition';
+
+  @override
+  String get leagueDeletedToast => 'League deleted successfully';
+
+  @override
+  String get memberRemovedToast => 'Member removed';
+
+  @override
+  String get leftLeagueToast => 'You left the league';
+
+  @override
+  String get creatorBadge => 'CREATOR';
+
+  @override
+  String get memberBadge => 'MEMBER';
+
+  @override
+  String get cancelButton => 'Cancel';
+
+  @override
+  String get pointsAbbreviation => 'PTS';
+
+  @override
+  String get rankHeader => 'RANK';
+
+  @override
+  String get playerHeader => 'PLAYER';
+
+  @override
+  String get feedTabLive => 'Live';
+
+  @override
+  String get feedTabUpcoming => 'Upcoming';
+
+  @override
+  String get feedTabFinished => 'Finished';
+
+  @override
+  String teaserOpensInDays(int days) {
+    return 'Opens in ${days}d';
+  }
+
+  @override
+  String teaserOpensInHours(int hours) {
+    return 'Opens in ${hours}h';
+  }
+
+  @override
+  String teaserOpensInMinutes(int minutes) {
+    return 'Opens in ${minutes}m';
+  }
+
+  @override
+  String get teaserCountdownSubtext =>
+      'Prediction window opens 7 days before kickoff';
+
+  @override
+  String get pointsOutcomeExact => '+5 Points';
+
+  @override
+  String get pointsOutcomeWinner => '+3 Points';
+
+  @override
+  String get pointsOutcomeIncorrect => '0 Points';
+
+  @override
+  String get pointsOutcomeNone => 'No Prediction';
+
+  @override
+  String get noLiveMatches => 'No live matches right now';
+
+  @override
+  String get noLiveMatchesSub =>
+      'Check back during matchdays for real-time fixtures.';
+
+  @override
+  String get feedNoUpcomingMatches => 'No upcoming matches in the next 14 days';
+
+  @override
+  String get noUpcomingMatchesSub =>
+      'Upcoming fixtures will appear here once scheduled.';
+
+  @override
+  String get noFinishedMatches => 'No finished matches in the last 7 days';
+
+  @override
+  String get noFinishedMatchesSub =>
+      'Recently concluded matches and points will be shown here.';
 }

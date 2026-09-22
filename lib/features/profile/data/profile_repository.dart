@@ -7,7 +7,7 @@ import 'package:pico/features/profile/domain/user_profile.dart';
 part 'profile_repository.g.dart';
 
 /// Provider for [ProfileRepository].
-@riverpod
+@Riverpod(keepAlive: true)
 ProfileRepository profileRepository(Ref ref) {
   final supabase = ref.watch(supabaseClientProvider);
   return SupabaseProfileRepository(supabase);

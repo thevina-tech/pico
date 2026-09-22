@@ -9,7 +9,15 @@ import 'package:pico/features/home/presentation/home_screen.dart';
 import 'package:pico/features/matches/presentation/matches_screen.dart';
 import 'package:pico/features/profile/presentation/personalization_screen.dart';
 import 'package:pico/features/profile/presentation/profile_screen.dart';
+import 'package:pico/features/tournaments/domain/tournament.dart';
+import 'package:pico/features/tournaments/domain/private_league.dart';
+import 'package:pico/features/tournaments/presentation/create_private_league_screen.dart';
+import 'package:pico/features/tournaments/presentation/join_private_league_screen.dart';
+import 'package:pico/features/tournaments/presentation/public_tournament_screen.dart';
+import 'package:pico/features/tournaments/presentation/private_tournament_screen.dart';
 import 'package:pico/features/tournaments/presentation/tournaments_screen.dart';
+import 'package:pico/features/matches/domain/pico_match.dart';
+import 'package:pico/features/predictions/presentation/prediction_screen.dart';
 import 'package:pico/shared/components/game_exit_dialog.dart';
 import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
 
@@ -95,6 +103,69 @@ class AppRouter {
           pageBuilder: (context, state) => const NoTransitionPage(
             child: PersonalizationScreen(),
           ),
+        ),
+        GoRoute(
+          parentNavigatorKey: rootNavigatorKey,
+          path: '/prediction/:matchId',
+          pageBuilder: (context, state) {
+            final match = state.extra as PicoMatch?;
+            if (match == null) {
+              return MaterialPage(
+                child: Scaffold(
+                  appBar: AppBar(title: const Text('Match Prediction')),
+                  body: const Center(child: Text('Match information unavailable')),
+                ),
+              );
+            }
+            return MaterialPage(
+              child: PredictionScreen(
+                match: match,
+                onBack: () => context.pop(),
+              ),
+            );
+          },
+        ),
+        GoRoute(
+          parentNavigatorKey: rootNavigatorKey,
+          path: '/tournaments/create',
+          pageBuilder: (context, state) => const MaterialPage(
+            child: CreatePrivateLeagueScreen(),
+          ),
+        ),
+        GoRoute(
+          parentNavigatorKey: rootNavigatorKey,
+          path: '/tournaments/join',
+          pageBuilder: (context, state) => const MaterialPage(
+            child: JoinPrivateLeagueScreen(),
+          ),
+        ),
+        GoRoute(
+          parentNavigatorKey: rootNavigatorKey,
+          path: '/tournaments/public/:id',
+          pageBuilder: (context, state) {
+            final id = state.pathParameters['id'] ?? '';
+            final tournament = state.extra as Tournament?;
+            return MaterialPage(
+              child: PublicTournamentScreen(
+                tournamentId: id,
+                initialTournament: tournament,
+              ),
+            );
+          },
+        ),
+        GoRoute(
+          parentNavigatorKey: rootNavigatorKey,
+          path: '/tournaments/private/:id',
+          pageBuilder: (context, state) {
+            final id = state.pathParameters['id'] ?? '';
+            final league = state.extra as PrivateLeague?;
+            return MaterialPage(
+              child: PrivateTournamentScreen(
+                leagueId: id,
+                initialLeague: league,
+              ),
+            );
+          },
         ),
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) {

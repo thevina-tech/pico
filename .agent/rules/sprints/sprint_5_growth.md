@@ -9,7 +9,7 @@ trigger: always_on
 
 ## 2. Referral Tracking
 *   Create the `referrals` table[cite: 6].
-*   Write a Supabase trigger that updates the referral status to "ACTIVATED" only when the referred user submits their first prediction[cite: 6].
+*   Write a Supabase trigger that updates the referral status to "ACTIVATED" only when the referred user submits their first prediction.
 
 ## 3. Social Sharing
-*   Build shareable victory banners and integrate native OS share sheets (using `share_plus`)[cite: 6].
+*   Build shareable victory banners and integrate native OS share sheets (using `share_plus`).
