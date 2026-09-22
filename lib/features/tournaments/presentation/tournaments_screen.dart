@@ -5,7 +5,10 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/core/theme/pico_typography.dart';
+import 'package:pico/features/auth/domain/auth_state.dart';
+import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/matches/domain/competition.dart';
+import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
 import 'package:pico/features/tournaments/data/tournament_repository.dart';
 import 'package:pico/features/tournaments/domain/private_league.dart';
 import 'package:pico/features/tournaments/domain/tournament.dart';
@@ -272,6 +275,8 @@ class TournamentsScreen extends ConsumerWidget {
     Map<String, Competition> compsMap,
   ) {
     final publicTournamentsAsync = ref.watch(publicTournamentsProvider);
+    final enrolledAsync = ref.watch(enrolledTournamentsProvider);
+    final enrolledIds = enrolledAsync.value?.map((t) => t.id).toSet() ?? {};
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -289,7 +294,17 @@ class TournamentsScreen extends ConsumerWidget {
         publicTournamentsAsync.when(
           data: (tournaments) {
             return Column(
-              children: tournaments.map((t) => _buildDiscoverTournamentCard(context, t, l10n, compsMap)).toList(),
+              children: tournaments.map((t) {
+                final isEnrolled = enrolledIds.contains(t.id);
+                return _buildDiscoverTournamentCard(
+                  context,
+                  t,
+                  l10n,
+                  compsMap,
+                  isEnrolled,
+                  ref,
+                );
+              }).toList(),
             );
           },
           loading: () => Center(
@@ -312,156 +327,168 @@ class TournamentsScreen extends ConsumerWidget {
   ) {
     final comp = compsMap[league.competitionId];
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12.0),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: PicoColors.darkTray,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(18.0),
-        border: Border.all(
-          color: PicoColors.primary.withValues(alpha: 0.3),
-          width: 1.2,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x33000000),
-            offset: Offset(0, 3),
-            blurRadius: 6,
+        onTap: () {
+          if (onViewLeaderboard != null) {
+            onViewLeaderboard?.call(league.name);
+          } else {
+            context.push('/tournaments/private/${league.id}', extra: league);
+          }
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12.0),
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: PicoColors.darkTray,
+            borderRadius: BorderRadius.circular(18.0),
+            border: Border.all(
+              color: PicoColors.primary.withValues(alpha: 0.3),
+              width: 1.2,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x33000000),
+                offset: Offset(0, 3),
+                blurRadius: 6,
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // League Badge with Solid White Background
-              _buildCompEmblem(comp),
-              const SizedBox(width: 12.0),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      league.name,
-                      style: PicoTypography.titleCard.copyWith(
-                        color: PicoColors.textWhite,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16.0,
+              Row(
+                children: [
+                  // League Badge with Solid White Background
+                  _buildCompEmblem(comp),
+                  const SizedBox(width: 12.0),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          league.name,
+                          style: PicoTypography.titleCard.copyWith(
+                            color: PicoColors.textWhite,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16.0,
+                          ),
+                        ),
+                        const SizedBox(height: 2.0),
+                        Text(
+                          comp != null
+                              ? '${comp.name} · ${league.memberCount} ${league.memberCount == 1 ? "Member" : "Members"}'
+                              : '${league.memberCount} Members',
+                          style: PicoTypography.bodySm.copyWith(
+                            color: PicoColors.textWhiteMuted,
+                            fontSize: 12.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Invite Code Pill (tap to copy)
+                  InkWell(
+                    onTap: () {
+                      Clipboard.setData(ClipboardData(text: league.inviteCode));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(l10n.codeCopiedToast),
+                          backgroundColor: PicoColors.primary,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10.0,
+                        vertical: 6.0,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0D1B13),
+                        borderRadius: BorderRadius.circular(8.0),
+                        border: Border.all(color: PicoColors.gold, width: 1.0),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            league.inviteCode,
+                            style: PicoTypography.headlineMd.copyWith(
+                              color: PicoColors.gold,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13.0,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          const SizedBox(width: 4.0),
+                          const Icon(
+                            Icons.copy_rounded,
+                            size: 13.0,
+                            color: PicoColors.gold,
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 2.0),
-                    Text(
-                      comp != null
-                          ? '${comp.name} · ${league.memberCount} ${league.memberCount == 1 ? "Member" : "Members"}'
-                          : '${league.memberCount} Members',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12.0),
+              // CTA row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 3.0),
+                    decoration: BoxDecoration(
+                      color: PicoColors.primary.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6.0),
+                    ),
+                    child: Text(
+                      'PRIVATE LEAGUE',
+                      style: PicoTypography.labelPillSm.copyWith(
+                        color: PicoColors.primary,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 10.0,
+                      ),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (onViewLeaderboard != null) {
+                        onViewLeaderboard?.call(league.name);
+                      } else {
+                        context.push('/tournaments/private/${league.id}', extra: league);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF152B20),
+                      foregroundColor: PicoColors.textWhite,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    child: Text(
+                      'Standings',
                       style: PicoTypography.bodySm.copyWith(
-                        color: PicoColors.textWhiteMuted,
+                        fontWeight: FontWeight.w700,
                         fontSize: 12.0,
                       ),
                     ),
-                  ],
-                ),
-              ),
-              // Invite Code Pill (tap to copy)
-              InkWell(
-                onTap: () {
-                  Clipboard.setData(ClipboardData(text: league.inviteCode));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(l10n.codeCopiedToast),
-                      backgroundColor: PicoColors.primary,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-                borderRadius: BorderRadius.circular(8.0),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10.0,
-                    vertical: 6.0,
                   ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0D1B13),
-                    borderRadius: BorderRadius.circular(8.0),
-                    border: Border.all(color: PicoColors.gold, width: 1.0),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        league.inviteCode,
-                        style: PicoTypography.headlineMd.copyWith(
-                          color: PicoColors.gold,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 13.0,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                      const SizedBox(width: 4.0),
-                      const Icon(
-                        Icons.copy_rounded,
-                        size: 13.0,
-                        color: PicoColors.gold,
-                      ),
-                    ],
-                  ),
-                ),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 12.0),
-          // CTA row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 3.0),
-                decoration: BoxDecoration(
-                  color: PicoColors.primary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6.0),
-                ),
-                child: Text(
-                  'PRIVATE LEAGUE',
-                  style: PicoTypography.labelPillSm.copyWith(
-                    color: PicoColors.primary,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 10.0,
-                  ),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  if (onViewLeaderboard != null) {
-                    onViewLeaderboard?.call(league.name);
-                  } else {
-                    context.push('/tournaments/private/${league.id}', extra: league);
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF152B20),
-                  foregroundColor: PicoColors.textWhite,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                ),
-                child: Text(
-                  'Standings',
-                  style: PicoTypography.bodySm.copyWith(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12.0,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
-
   Widget _buildOfficialTournamentCard(
     BuildContext context,
     Tournament tournament,
@@ -470,83 +497,96 @@ class TournamentsScreen extends ConsumerWidget {
   ) {
     final comp = compsMap[tournament.competitionId];
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12.0),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: PicoColors.darkTray,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(18.0),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-      ),
-      child: Row(
-        children: [
-          // Emblem with Solid White Background
-          _buildCompEmblem(comp),
-          const SizedBox(width: 14.0),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF152B20),
-                    borderRadius: BorderRadius.circular(4.0),
-                  ),
-                  child: Text(
-                    l10n.officialTournamentBadge,
-                    style: PicoTypography.labelPillSm.copyWith(
-                      color: PicoColors.primary,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 9.5,
+        onTap: () {
+          if (onViewLeaderboard != null) {
+            onViewLeaderboard?.call(tournament.name);
+          } else {
+            context.push('/tournaments/public/${tournament.id}', extra: tournament);
+          }
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12.0),
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: PicoColors.darkTray,
+            borderRadius: BorderRadius.circular(18.0),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+          ),
+          child: Row(
+            children: [
+              // Emblem with Solid White Background
+              _buildCompEmblem(comp),
+              const SizedBox(width: 14.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF152B20),
+                        borderRadius: BorderRadius.circular(4.0),
+                      ),
+                      child: Text(
+                        l10n.officialTournamentBadge,
+                        style: PicoTypography.labelPillSm.copyWith(
+                          color: PicoColors.primary,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 9.5,
+                        ),
+                      ),
                     ),
+                    const SizedBox(height: 4.0),
+                    Text(
+                      tournament.name,
+                      style: PicoTypography.titleCard.copyWith(
+                        color: PicoColors.textWhite,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15.0,
+                      ),
+                    ),
+                    Text(
+                      comp?.name ?? 'Top-Tier Competition',
+                      style: PicoTypography.bodySm.copyWith(
+                        color: PicoColors.textWhiteMuted,
+                        fontSize: 12.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (onViewLeaderboard != null) {
+                    onViewLeaderboard?.call(tournament.name);
+                  } else {
+                    context.push('/tournaments/public/${tournament.id}', extra: tournament);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: PicoColors.primary,
+                  foregroundColor: PicoColors.textWhite,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
                   ),
                 ),
-                const SizedBox(height: 4.0),
-                Text(
-                  tournament.name,
-                  style: PicoTypography.titleCard.copyWith(
-                    color: PicoColors.textWhite,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15.0,
-                  ),
-                ),
-                Text(
-                  comp?.name ?? 'Top-Tier Competition',
+                child: Text(
+                  'View Table',
                   style: PicoTypography.bodySm.copyWith(
-                    color: PicoColors.textWhiteMuted,
+                    fontWeight: FontWeight.w700,
                     fontSize: 12.0,
                   ),
                 ),
-              ],
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (onViewLeaderboard != null) {
-                onViewLeaderboard?.call(tournament.name);
-              } else {
-                context.push('/tournaments/public/${tournament.id}', extra: tournament);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: PicoColors.primary,
-              foregroundColor: PicoColors.textWhite,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
               ),
-            ),
-            child: Text(
-              'View Table',
-              style: PicoTypography.bodySm.copyWith(
-                fontWeight: FontWeight.w700,
-                fontSize: 12.0,
-              ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -556,72 +596,179 @@ class TournamentsScreen extends ConsumerWidget {
     Tournament tournament,
     AppLocalizations l10n,
     Map<String, Competition> compsMap,
+    bool isEnrolled,
+    WidgetRef ref,
   ) {
     final comp = compsMap[tournament.competitionId];
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12.0),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: PicoColors.darkTray,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(18.0),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-      ),
-      child: Row(
-        children: [
-          // Emblem with Solid White Background
-          _buildCompEmblem(comp),
-          const SizedBox(width: 14.0),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  tournament.name,
-                  style: PicoTypography.titleCard.copyWith(
-                    color: PicoColors.textWhite,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15.0,
+        onTap: () {
+          if (onViewLeaderboard != null) {
+            onViewLeaderboard?.call(tournament.name);
+          } else {
+            context.push('/tournaments/public/${tournament.id}', extra: tournament);
+          }
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12.0),
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: PicoColors.darkTray,
+            borderRadius: BorderRadius.circular(18.0),
+            border: Border.all(
+              color: isEnrolled
+                  ? PicoColors.primary.withValues(alpha: 0.25)
+                  : Colors.white.withValues(alpha: 0.08),
+            ),
+          ),
+          child: Row(
+            children: [
+              // Emblem with Solid White Background
+              _buildCompEmblem(comp),
+              const SizedBox(width: 14.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (isEnrolled) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                        decoration: BoxDecoration(
+                          color: PicoColors.primary.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.check_rounded, size: 11.0, color: PicoColors.primary),
+                            const SizedBox(width: 3.0),
+                            Text(
+                              l10n.joinedBadge,
+                              style: PicoTypography.labelPillSm.copyWith(
+                                color: PicoColors.primary,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 9.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 3.0),
+                    ],
+                    Text(
+                      tournament.name,
+                      style: PicoTypography.titleCard.copyWith(
+                        color: PicoColors.textWhite,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15.0,
+                      ),
+                    ),
+                    const SizedBox(height: 2.0),
+                    Text(
+                      comp?.name ?? 'Top-Tier Competition',
+                      style: PicoTypography.bodySm.copyWith(
+                        color: PicoColors.textWhiteMuted,
+                        fontSize: 12.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (!isEnrolled) ...[
+                ElevatedButton(
+                  onPressed: () async {
+                    final authState = ref.read(authProvider);
+                    if (authState is! PicoAuthAuthenticated || authState.user == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(l10n.signInToJoinTournament),
+                          backgroundColor: PicoColors.accentCoral,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                      return;
+                    }
+                    try {
+                      await ref.read(tournamentRepositoryProvider).enrollInTournament(
+                            userId: authState.user!.id,
+                            tournamentId: tournament.id,
+                          );
+                      ref.invalidate(enrolledTournamentsProvider);
+                      ref.invalidate(tournamentLeaderboardProvider(tournament.id));
+                      ref.invalidate(matchesFeedProvider);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(l10n.joinTournamentSuccessToast(tournament.name)),
+                            backgroundColor: PicoColors.primary,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(e.toString()),
+                            backgroundColor: PicoColors.accentCoral,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: PicoColors.primary,
+                    foregroundColor: PicoColors.pitchBackground,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  child: Text(
+                    l10n.joinAction,
+                    style: PicoTypography.bodySm.copyWith(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12.0,
+                      color: PicoColors.pitchBackground,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 2.0),
-                Text(
-                  comp?.name ?? 'Top-Tier Competition',
-                  style: PicoTypography.bodySm.copyWith(
-                    color: PicoColors.textWhiteMuted,
-                    fontSize: 12.0,
+              ] else ...[
+                ElevatedButton(
+                  onPressed: () {
+                    if (onViewLeaderboard != null) {
+                      onViewLeaderboard?.call(tournament.name);
+                    } else {
+                      context.push('/tournaments/public/${tournament.id}', extra: tournament);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF26332A),
+                    foregroundColor: PicoColors.textWhite,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                    ),
+                  ),
+                  child: Text(
+                    'View Table',
+                    style: PicoTypography.bodySm.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12.0,
+                    ),
                   ),
                 ),
               ],
-            ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              if (onViewLeaderboard != null) {
-                onViewLeaderboard?.call(tournament.name);
-              } else {
-                context.push('/tournaments/public/${tournament.id}', extra: tournament);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF26332A),
-              foregroundColor: PicoColors.textWhite,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-                side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-              ),
-            ),
-            child: Text(
-              'View',
-              style: PicoTypography.bodySm.copyWith(
-                fontWeight: FontWeight.w700,
-                fontSize: 12.0,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

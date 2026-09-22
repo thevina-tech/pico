@@ -189,7 +189,17 @@
   "feedNoUpcomingMatches": "No hay partidos próximos en los siguientes 14 días",
   "noUpcomingMatchesSub": "Los partidos programados aparecerán aquí.",
   "noFinishedMatches": "No hay partidos finalizados en los últimos 7 días",
-  "noFinishedMatchesSub": "Los partidos finalizados recientemente y los puntos se mostrarán aquí."
+  "noFinishedMatchesSub": "Los partidos finalizados recientemente y los puntos se mostrarán aquí.",
+  "joinTournamentBannerBadge": "ÚNETE A LA COMPETICIÓN",
+  "joinTournamentBannerTitle": "Predice y Compite",
+  "joinTournamentBannerSub": "Únete a este torneo para predecir los próximos partidos, ganar Pico Points y subir en la clasificación.",
+  "joinTournamentAction": "Unirse al Torneo",
+  "joinTournamentSuccessToast": "¡Te has unido a {tournamentName}! Predicciones desbloqueadas.",
+  "joinedBadge": "Unido",
+  "joinAction": "Unirse",
+  "previewModeBanner": "Modo Vista Previa · Únete a este torneo para desbloquear predicciones",
+  "joinAndPredictAction": "Únete para Predecir",
+  "signInToJoinTournament": "Inicia sesión para unirte a torneos y hacer predicciones."
 }
 
 

@@ -403,113 +403,135 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Home Team
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildTeamBadge(
-                widget.match.homeTeamName,
-                widget.match.homeTeamBadgeUrl,
-                widget.match.homeTeamCode,
-              ),
-              const SizedBox(height: 6.0),
-              Text(
-                widget.match.homeTeamName,
-                style: PicoTypography.titleCard.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14.0,
+          // Home Team Column
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _buildTeamBadge(
+                  widget.match.homeTeamName,
+                  widget.match.homeTeamBadgeUrl,
+                  widget.match.homeTeamCode,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 3.0),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF102A1E),
-                  borderRadius: BorderRadius.circular(999.0),
-                ),
-                child: Text(
-                  AppLocalizations.of(context)?.homeOutcome ?? 'Home',
-                  style: PicoTypography.labelPillSm.copyWith(
-                    color: PicoColors.primaryFixedDim,
-                    fontSize: 10.0,
-                    fontWeight: FontWeight.w700,
+                const SizedBox(height: 6.0),
+                SizedBox(
+                  height: 38.0,
+                  child: Center(
+                    child: Text(
+                      widget.match.homeTeamName,
+                      textAlign: TextAlign.center,
+                      style: PicoTypography.titleCard.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13.5,
+                        height: 1.2,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-
-          // VS Circular Center Pill
-          Container(
-            width: 36.0,
-            height: 36.0,
-            decoration: BoxDecoration(
-              color: const Color(0xFF1B432F),
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFF2F7552), width: 1.0),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x22000000),
-                  offset: Offset(0, 2),
-                  blurRadius: 4,
+                const SizedBox(height: 4.0),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF102A1E),
+                    borderRadius: BorderRadius.circular(999.0),
+                  ),
+                  child: Text(
+                    AppLocalizations.of(context)?.homeOutcome ?? 'Home',
+                    style: PicoTypography.labelPillSm.copyWith(
+                      color: PicoColors.primaryFixedDim,
+                      fontSize: 10.0,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ],
             ),
-            child: Center(
-              child: Text(
-                'VS',
-                style: PicoTypography.labelPillSm.copyWith(
-                  color: const Color(0xFFF5F4EF),
-                  fontWeight: FontWeight.w800,
-                  fontSize: 12.5,
+          ),
+
+          // VS Circular Center Pill (aligned vertically with the 56px badges)
+          Padding(
+            padding: const EdgeInsets.only(top: 10.0, left: 6.0, right: 6.0),
+            child: Container(
+              width: 36.0,
+              height: 36.0,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1B432F),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFF2F7552), width: 1.0),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x22000000),
+                    offset: Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Text(
+                  'VS',
+                  style: PicoTypography.labelPillSm.copyWith(
+                    color: const Color(0xFFF5F4EF),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12.5,
+                  ),
                 ),
               ),
             ),
           ),
 
-          // Away Team
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildTeamBadge(
-                widget.match.awayTeamName,
-                widget.match.awayTeamBadgeUrl,
-                widget.match.awayTeamCode,
-              ),
-              const SizedBox(height: 6.0),
-              Text(
-                widget.match.awayTeamName,
-                style: PicoTypography.titleCard.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14.0,
+          // Away Team Column
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _buildTeamBadge(
+                  widget.match.awayTeamName,
+                  widget.match.awayTeamBadgeUrl,
+                  widget.match.awayTeamCode,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 3.0),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF261A00),
-                  borderRadius: BorderRadius.circular(999.0),
-                ),
-                child: Text(
-                  AppLocalizations.of(context)?.awayOutcome ?? 'Away',
-                  style: PicoTypography.labelPillSm.copyWith(
-                    color: PicoColors.gold,
-                    fontSize: 10.0,
-                    fontWeight: FontWeight.w700,
+                const SizedBox(height: 6.0),
+                SizedBox(
+                  height: 38.0,
+                  child: Center(
+                    child: Text(
+                      widget.match.awayTeamName,
+                      textAlign: TextAlign.center,
+                      style: PicoTypography.titleCard.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13.5,
+                        height: 1.2,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 4.0),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF261A00),
+                    borderRadius: BorderRadius.circular(999.0),
+                  ),
+                  child: Text(
+                    AppLocalizations.of(context)?.awayOutcome ?? 'Away',
+                    style: PicoTypography.labelPillSm.copyWith(
+                      color: PicoColors.gold,
+                      fontSize: 10.0,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

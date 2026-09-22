@@ -39,7 +39,7 @@ final class MatchesControllerProvider
   MatchesController create() => MatchesController();
 }
 
-String _$matchesControllerHash() => r'087c327e1e8df0eb261a686b87646f8d5575657a';
+String _$matchesControllerHash() => r'bb8fba45287ea73012218c1004ece2d0d27564a5';
 
 /// Production-grade Riverpod controller managing match state and predictions.
 /// Dynamically updates sorting pills and matches based on the user's enrolled tournaments.

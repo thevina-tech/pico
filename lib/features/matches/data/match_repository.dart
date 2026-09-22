@@ -58,7 +58,7 @@ class SupabaseMatchRepository implements MatchRepository {
         home_score,
         away_score,
         settled,
-        competition:competitions(id, name, emblem_url),
+        competition:competitions(id, name, short_name, flag, emblem_url),
         home_team:teams!matches_home_team_id_fkey(id, name, short_name, crest_url),
         away_team:teams!matches_away_team_id_fkey(id, name, short_name, crest_url)
       ''').order('kickoff_at', ascending: true);
@@ -95,7 +95,7 @@ class SupabaseMatchRepository implements MatchRepository {
         home_score,
         away_score,
         settled,
-        competition:competitions(id, name, emblem_url),
+        competition:competitions(id, name, short_name, flag, emblem_url),
         home_team:teams!matches_home_team_id_fkey(id, name, short_name, crest_url),
         away_team:teams!matches_away_team_id_fkey(id, name, short_name, crest_url)
       ''').eq('status', 'live');
@@ -138,7 +138,7 @@ class SupabaseMatchRepository implements MatchRepository {
         home_score,
         away_score,
         settled,
-        competition:competitions(id, name, emblem_url),
+        competition:competitions(id, name, short_name, flag, emblem_url),
         home_team:teams!matches_home_team_id_fkey(id, name, short_name, crest_url),
         away_team:teams!matches_away_team_id_fkey(id, name, short_name, crest_url)
       ''').eq('status', 'upcoming').lt('kickoff_at', maxKickoff);
@@ -184,7 +184,7 @@ class SupabaseMatchRepository implements MatchRepository {
         home_score,
         away_score,
         settled,
-        competition:competitions(id, name, emblem_url),
+        competition:competitions(id, name, short_name, flag, emblem_url),
         home_team:teams!matches_home_team_id_fkey(id, name, short_name, crest_url),
         away_team:teams!matches_away_team_id_fkey(id, name, short_name, crest_url)
       ''').eq('status', 'finished').gt('kickoff_at', minKickoff);

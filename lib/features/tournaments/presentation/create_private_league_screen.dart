@@ -528,11 +528,14 @@ class _CreatePrivateLeagueScreenState
                       color: PicoColors.primary,
                     ),
                     const SizedBox(width: 6.0),
-                    Text(
-                      l10n.privateLeagueSecurityNote,
-                      style: PicoTypography.bodySm.copyWith(
-                        color: PicoColors.textWhiteMuted,
-                        fontSize: 12.0,
+                    Flexible(
+                      child: Text(
+                        l10n.privateLeagueSecurityNote,
+                        textAlign: TextAlign.center,
+                        style: PicoTypography.bodySm.copyWith(
+                          color: PicoColors.textWhiteMuted,
+                          fontSize: 12.0,
+                        ),
                       ),
                     ),
                   ],

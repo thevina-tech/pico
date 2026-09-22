@@ -646,4 +646,39 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noFinishedMatchesSub =>
       'Recently concluded matches and points will be shown here.';
+
+  @override
+  String get joinTournamentBannerBadge => 'JOIN THE COMPETITION';
+
+  @override
+  String get joinTournamentBannerTitle => 'Predict & Compete';
+
+  @override
+  String get joinTournamentBannerSub =>
+      'Join this tournament to predict upcoming matches, score Pico Points, and climb the public standings.';
+
+  @override
+  String get joinTournamentAction => 'Join Tournament';
+
+  @override
+  String joinTournamentSuccessToast(String tournamentName) {
+    return 'You joined $tournamentName! Predictions unlocked.';
+  }
+
+  @override
+  String get joinedBadge => 'Joined';
+
+  @override
+  String get joinAction => 'Join';
+
+  @override
+  String get previewModeBanner =>
+      'Preview Mode · Join this tournament to unlock predictions';
+
+  @override
+  String get joinAndPredictAction => 'Join to Predict';
+
+  @override
+  String get signInToJoinTournament =>
+      'Sign in to join tournaments and submit predictions.';
 }

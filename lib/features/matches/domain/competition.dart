@@ -9,6 +9,8 @@ abstract class Competition with _$Competition {
   const factory Competition({
     required String id,
     @Default('') String name,
+    @JsonKey(name: 'short_name') String? shortName,
+    @Default('🏆') String flag,
     @JsonKey(name: 'emblem_url') String? emblemUrl,
   }) = _Competition;
 
@@ -17,49 +19,6 @@ abstract class Competition with _$Competition {
 }
 
 extension CompetitionExtension on Competition {
-  String get flag {
-    switch (id) {
-      case '1':
-        return '🇪🇸';
-      case '10':
-        return '🏴󠁧󠁢󠁥󠁮󠁧󠁿';
-      case '7':
-        return '🇮🇹';
-      case '8':
-        return '🇩🇪';
-      case '16':
-        return '🇫🇷';
-      case '107':
-        return '⭐';
-      case '117':
-        return '🟠';
-      case '2492':
-        return '🟢';
-      default:
-        return '🏆';
-    }
-  }
-
-  String get shortName {
-    switch (id) {
-      case '1':
-        return 'La Liga';
-      case '10':
-        return 'Premier League';
-      case '7':
-        return 'Serie A';
-      case '8':
-        return 'Bundesliga';
-      case '16':
-        return 'Ligue 1';
-      case '107':
-        return 'UCL';
-      case '117':
-        return 'UEL';
-      case '2492':
-        return 'UECL';
-      default:
-        return name;
-    }
-  }
+  String get displayFlag => flag.isNotEmpty ? flag : '🏆';
+  String get displayName => shortName != null && shortName!.isNotEmpty ? shortName! : name;
 }

@@ -119,6 +119,10 @@ abstract class TournamentRepository {
     required String userId,
     required List<String> leagueIds,
   });
+  Future<void> enrollInTournament({
+    required String userId,
+    required String tournamentId,
+  });
   Future<List<TournamentParticipant>> getParticipantsForUser(String userId);
 
   // Tournament Details & Leaderboard
@@ -164,41 +168,57 @@ class SupabaseTournamentRepository implements TournamentRepository {
     const Competition(
       id: '1',
       name: 'Primera División (La Liga)',
+      shortName: 'La Liga',
+      flag: '🇪🇸',
       emblemUrl: 'https://t.resfu.com/img_data/competiciones/logo/1.png?size=120x&lossy=1',
     ),
     const Competition(
       id: '10',
       name: 'Premier League',
+      shortName: 'Premier League',
+      flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
       emblemUrl: 'https://t.resfu.com/img_data/competiciones/logo/10.png?size=120x&lossy=1',
     ),
     const Competition(
       id: '7',
       name: 'Serie A',
+      shortName: 'Serie A',
+      flag: '🇮🇹',
       emblemUrl: 'https://t.resfu.com/img_data/competiciones/logo/7.png?size=120x&lossy=1',
     ),
     const Competition(
       id: '8',
       name: 'Bundesliga',
+      shortName: 'Bundesliga',
+      flag: '🇩🇪',
       emblemUrl: 'https://t.resfu.com/img_data/competiciones/logo/8.png?size=120x&lossy=1',
     ),
     const Competition(
       id: '16',
       name: 'Ligue 1',
+      shortName: 'Ligue 1',
+      flag: '🇫🇷',
       emblemUrl: 'https://t.resfu.com/img_data/competiciones/logo/16.png?size=120x&lossy=1',
     ),
     const Competition(
       id: '107',
       name: 'Champions League',
+      shortName: 'UCL',
+      flag: '⭐',
       emblemUrl: 'https://t.resfu.com/img_data/competiciones/logo/107.png?size=120x&lossy=1',
     ),
     const Competition(
       id: '117',
       name: 'Europa League',
+      shortName: 'UEL',
+      flag: '🟠',
       emblemUrl: 'https://t.resfu.com/img_data/competiciones/logo/117.png?size=120x&lossy=1',
     ),
     const Competition(
       id: '2492',
       name: 'Conference League',
+      shortName: 'UECL',
+      flag: '🟢',
       emblemUrl: 'https://t.resfu.com/img_data/competiciones/logo/2492.png?size=120x&lossy=1',
     ),
   ];
@@ -207,7 +227,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
   static final Map<String, Tournament> _defaultOfficialTournaments = {
     '1': const Tournament(
       id: '10000000-0000-0000-0000-000000000001',
-      name: 'Primera Division',
+      name: 'Primera División',
       competitionId: '1',
     ),
     '10': const Tournament(
@@ -444,6 +464,34 @@ class SupabaseTournamentRepository implements TournamentRepository {
         e,
         st,
       );
+    }
+  }
+
+  @override
+  Future<void> enrollInTournament({
+    required String userId,
+    required String tournamentId,
+  }) async {
+    _mockParticipants.putIfAbsent(userId, () => <String>{}).add(tournamentId);
+
+    if (_supabase == null) {
+      AppLogger.info('Mock enrollment of user $userId into tournament $tournamentId');
+      return;
+    }
+
+    try {
+      await _supabase.from('tournament_participants').upsert(
+        {
+          'tournament_id': tournamentId,
+          'user_id': userId,
+          'pico_points': 0,
+        },
+        onConflict: 'tournament_id,user_id',
+      );
+      AppLogger.info('Enrolled user $userId into tournament $tournamentId');
+    } catch (e, st) {
+      AppLogger.error('Failed to enroll user $userId into tournament $tournamentId', e, st);
+      rethrow;
     }
   }
 

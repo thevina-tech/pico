@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Competition {
 
- String get id; String get name;@JsonKey(name: 'emblem_url') String? get emblemUrl;
+ String get id; String get name;@JsonKey(name: 'short_name') String? get shortName; String get flag;@JsonKey(name: 'emblem_url') String? get emblemUrl;
 /// Create a copy of Competition
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $CompetitionCopyWith<Competition> get copyWith => _$CompetitionCopyWithImpl<Comp
 @override
 bool operator ==(Object other) {
   final _this = this as Competition;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Competition&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.emblemUrl, _this.emblemUrl) || other.emblemUrl == _this.emblemUrl));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Competition&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.shortName, _this.shortName) || other.shortName == _this.shortName)&&(identical(other.flag, _this.flag) || other.flag == _this.flag)&&(identical(other.emblemUrl, _this.emblemUrl) || other.emblemUrl == _this.emblemUrl));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Competition;
-  return Object.hash(runtimeType,_this.id,_this.name,_this.emblemUrl);
+  return Object.hash(runtimeType,_this.id,_this.name,_this.shortName,_this.flag,_this.emblemUrl);
 }
 
 @override
 String toString() {
   final _this = this as Competition;
-  return 'Competition(id: ${_this.id}, name: ${_this.name}, emblemUrl: ${_this.emblemUrl})';
+  return 'Competition(id: ${_this.id}, name: ${_this.name}, shortName: ${_this.shortName}, flag: ${_this.flag}, emblemUrl: ${_this.emblemUrl})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $CompetitionCopyWith<$Res>  {
   factory $CompetitionCopyWith(Competition value, $Res Function(Competition) _then) = _$CompetitionCopyWithImpl;
 @useResult
 $Res call({
- String id, String name,@JsonKey(name: 'emblem_url') String? emblemUrl
+ String id, String name,@JsonKey(name: 'short_name') String? shortName, String flag,@JsonKey(name: 'emblem_url') String? emblemUrl
 });
 
 
@@ -71,10 +71,12 @@ class _$CompetitionCopyWithImpl<$Res>
 
 /// Create a copy of Competition
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? emblemUrl = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? shortName = freezed,Object? flag = null,Object? emblemUrl = freezed,}) {
   return _then(Competition(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,shortName: freezed == shortName ? _self.shortName : shortName // ignore: cast_nullable_to_non_nullable
+as String?,flag: null == flag ? _self.flag : flag // ignore: cast_nullable_to_non_nullable
 as String,emblemUrl: freezed == emblemUrl ? _self.emblemUrl : emblemUrl // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
@@ -161,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(name: 'emblem_url')  String? emblemUrl)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(name: 'short_name')  String? shortName,  String flag, @JsonKey(name: 'emblem_url')  String? emblemUrl)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Competition() when $default != null:
-return $default(_that.id,_that.name,_that.emblemUrl);case _:
+return $default(_that.id,_that.name,_that.shortName,_that.flag,_that.emblemUrl);case _:
   return orElse();
 
 }
@@ -182,10 +184,10 @@ return $default(_that.id,_that.name,_that.emblemUrl);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(name: 'emblem_url')  String? emblemUrl)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(name: 'short_name')  String? shortName,  String flag, @JsonKey(name: 'emblem_url')  String? emblemUrl)  $default,) {final _that = this;
 switch (_that) {
 case _Competition():
-return $default(_that.id,_that.name,_that.emblemUrl);case _:
+return $default(_that.id,_that.name,_that.shortName,_that.flag,_that.emblemUrl);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +204,10 @@ return $default(_that.id,_that.name,_that.emblemUrl);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name, @JsonKey(name: 'emblem_url')  String? emblemUrl)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name, @JsonKey(name: 'short_name')  String? shortName,  String flag, @JsonKey(name: 'emblem_url')  String? emblemUrl)?  $default,) {final _that = this;
 switch (_that) {
 case _Competition() when $default != null:
-return $default(_that.id,_that.name,_that.emblemUrl);case _:
+return $default(_that.id,_that.name,_that.shortName,_that.flag,_that.emblemUrl);case _:
   return null;
 
 }
@@ -217,11 +219,13 @@ return $default(_that.id,_that.name,_that.emblemUrl);case _:
 @JsonSerializable()
 
 class _Competition implements Competition {
-  const _Competition({required this.id, this.name = '', @JsonKey(name: 'emblem_url') this.emblemUrl});
+  const _Competition({required this.id, this.name = '', @JsonKey(name: 'short_name') this.shortName, this.flag = '🏆', @JsonKey(name: 'emblem_url') this.emblemUrl});
   factory _Competition.fromJson(Map<String, dynamic> json) => _$CompetitionFromJson(json);
 
 @override final  String id;
 @override@JsonKey() final  String name;
+@override@JsonKey(name: 'short_name') final  String? shortName;
+@override@JsonKey() final  String flag;
 @override@JsonKey(name: 'emblem_url') final  String? emblemUrl;
 
 /// Create a copy of Competition
@@ -237,18 +241,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Competition&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.emblemUrl, emblemUrl) || other.emblemUrl == emblemUrl));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Competition&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.shortName, shortName) || other.shortName == shortName)&&(identical(other.flag, flag) || other.flag == flag)&&(identical(other.emblemUrl, emblemUrl) || other.emblemUrl == emblemUrl));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,name,emblemUrl);
+    return Object.hash(runtimeType,id,name,shortName,flag,emblemUrl);
 }
 
 @override
 String toString() {
-    return 'Competition(id: $id, name: $name, emblemUrl: $emblemUrl)';
+    return 'Competition(id: $id, name: $name, shortName: $shortName, flag: $flag, emblemUrl: $emblemUrl)';
 }
 
 
@@ -259,7 +263,7 @@ abstract mixin class _$CompetitionCopyWith<$Res> implements $CompetitionCopyWith
   factory _$CompetitionCopyWith(_Competition value, $Res Function(_Competition) _then) = __$CompetitionCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name,@JsonKey(name: 'emblem_url') String? emblemUrl
+ String id, String name,@JsonKey(name: 'short_name') String? shortName, String flag,@JsonKey(name: 'emblem_url') String? emblemUrl
 });
 
 
@@ -276,10 +280,12 @@ class __$CompetitionCopyWithImpl<$Res>
 
 /// Create a copy of Competition
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? emblemUrl = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? shortName = freezed,Object? flag = null,Object? emblemUrl = freezed,}) {
   return _then(_Competition(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,shortName: freezed == shortName ? _self.shortName : shortName // ignore: cast_nullable_to_non_nullable
+as String?,flag: null == flag ? _self.flag : flag // ignore: cast_nullable_to_non_nullable
 as String,emblemUrl: freezed == emblemUrl ? _self.emblemUrl : emblemUrl // ignore: cast_nullable_to_non_nullable
 as String?,
   ));

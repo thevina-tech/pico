@@ -655,4 +655,39 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get noFinishedMatchesSub =>
       'Los partidos finalizados recientemente y los puntos se mostrarán aquí.';
+
+  @override
+  String get joinTournamentBannerBadge => 'ÚNETE A LA COMPETICIÓN';
+
+  @override
+  String get joinTournamentBannerTitle => 'Predice y Compite';
+
+  @override
+  String get joinTournamentBannerSub =>
+      'Únete a este torneo para predecir los próximos partidos, ganar Pico Points y subir en la clasificación.';
+
+  @override
+  String get joinTournamentAction => 'Unirse al Torneo';
+
+  @override
+  String joinTournamentSuccessToast(String tournamentName) {
+    return '¡Te has unido a $tournamentName! Predicciones desbloqueadas.';
+  }
+
+  @override
+  String get joinedBadge => 'Unido';
+
+  @override
+  String get joinAction => 'Unirse';
+
+  @override
+  String get previewModeBanner =>
+      'Modo Vista Previa · Únete a este torneo para desbloquear predicciones';
+
+  @override
+  String get joinAndPredictAction => 'Únete para Predecir';
+
+  @override
+  String get signInToJoinTournament =>
+      'Inicia sesión para unirte a torneos y hacer predicciones.';
 }

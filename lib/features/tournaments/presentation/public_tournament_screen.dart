@@ -8,6 +8,7 @@ import 'package:pico/features/auth/domain/auth_state.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/matches/domain/competition.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
+import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
 import 'package:pico/features/tournaments/data/tournament_repository.dart';
 import 'package:pico/features/tournaments/domain/tournament.dart';
 import 'package:pico/l10n/app_localizations.dart';
@@ -32,6 +33,57 @@ class PublicTournamentScreen extends ConsumerStatefulWidget {
 class _PublicTournamentScreenState
     extends ConsumerState<PublicTournamentScreen> {
   int _selectedTabIndex = 0; // 0: Standings, 1: Matches
+  bool _isJoining = false;
+
+  Future<void> _handleJoinTournament(Tournament tournament, AppLocalizations l10n) async {
+    final authState = ref.read(authProvider);
+    if (authState is! PicoAuthAuthenticated || authState.user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.signInToJoinTournament),
+          backgroundColor: PicoColors.accentCoral,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isJoining = true);
+    try {
+      final userId = authState.user!.id;
+      await ref.read(tournamentRepositoryProvider).enrollInTournament(
+            userId: userId,
+            tournamentId: tournament.id,
+          );
+      ref.invalidate(enrolledTournamentsProvider);
+      ref.invalidate(tournamentLeaderboardProvider(tournament.id));
+      ref.invalidate(matchesFeedProvider);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.joinTournamentSuccessToast(tournament.name)),
+            backgroundColor: PicoColors.primary,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: PicoColors.accentCoral,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isJoining = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +92,10 @@ class _PublicTournamentScreenState
     final compsMap = ref.watch(competitionsMapProvider).value ?? {};
 
     final currentTournament = tournamentAsync.value ?? widget.initialTournament;
+    final enrolledAsync = ref.watch(enrolledTournamentsProvider);
+    final enrolledTournaments = enrolledAsync.value ?? const [];
+    final isEnrolled = currentTournament != null &&
+        enrolledTournaments.any((t) => t.id == currentTournament.id);
 
     return Scaffold(
       backgroundColor: PicoColors.pitchBackground,
@@ -72,13 +128,20 @@ class _PublicTournamentScreenState
                     children: [
                       // Header Card
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 12.0),
+                        padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
                         child: _buildHeaderCard(
                           currentTournament,
                           compsMap[currentTournament.competitionId],
                           l10n,
                         ),
                       ),
+
+                      // Attractive Join CTA Banner (if not enrolled)
+                      if (!isEnrolled)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 10.0),
+                          child: _buildJoinBanner(currentTournament, l10n),
+                        ),
 
                       // Segmented Tab Selector
                       Padding(
@@ -91,7 +154,11 @@ class _PublicTournamentScreenState
                       Expanded(
                         child: _selectedTabIndex == 0
                             ? _buildLeaderboardView(currentTournament.id, l10n)
-                            : _buildMatchesView(currentTournament.competitionId, l10n),
+                            : _buildMatchesView(
+                                currentTournament,
+                                isEnrolled,
+                                l10n,
+                              ),
                       ),
                     ],
                   ),
@@ -483,8 +550,161 @@ class _PublicTournamentScreenState
     );
   }
 
-  Widget _buildMatchesView(String competitionId, AppLocalizations l10n) {
-    final matchesAsync = ref.watch(competitionMatchesProvider(competitionId));
+  Widget _buildJoinBanner(Tournament tournament, AppLocalizations l10n) {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF163E28),
+            Color(0xFF0F2B1B),
+            Color(0xFF081910),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(18.0),
+        border: Border.all(
+          color: PicoColors.gold.withValues(alpha: 0.5),
+          width: 1.5,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x66000000),
+            offset: Offset(0, 4),
+            blurRadius: 10,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 3.0),
+                decoration: BoxDecoration(
+                  color: PicoColors.gold.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(6.0),
+                  border: Border.all(
+                    color: PicoColors.gold.withValues(alpha: 0.5),
+                    width: 0.8,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.bolt_rounded, size: 13.0, color: PicoColors.gold),
+                    const SizedBox(width: 4.0),
+                    Text(
+                      l10n.joinTournamentBannerBadge,
+                      style: PicoTypography.labelPillSm.copyWith(
+                        color: PicoColors.gold,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 10.0,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8.0),
+          Text(
+            l10n.joinTournamentBannerTitle,
+            style: PicoTypography.headlineMd.copyWith(
+              color: PicoColors.textWhite,
+              fontWeight: FontWeight.w900,
+              fontSize: 17.0,
+            ),
+          ),
+          const SizedBox(height: 4.0),
+          Text(
+            l10n.joinTournamentBannerSub,
+            style: PicoTypography.bodySm.copyWith(
+              color: PicoColors.textWhiteMuted,
+              fontSize: 12.0,
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 12.0),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _isJoining ? null : () => _handleJoinTournament(tournament, l10n),
+              icon: _isJoining
+                  ? const SizedBox(
+                      width: 16.0,
+                      height: 16.0,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.0,
+                        color: PicoColors.pitchBackground,
+                      ),
+                    )
+                  : const Icon(Icons.sports_soccer_rounded, size: 18.0),
+              label: Text(
+                _isJoining ? '...' : l10n.joinTournamentAction,
+                style: PicoTypography.labelPillSm.copyWith(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13.0,
+                  letterSpacing: 0.8,
+                  color: PicoColors.pitchBackground,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: PicoColors.primary,
+                foregroundColor: PicoColors.pitchBackground,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 11.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPreviewModeBanner(AppLocalizations l10n) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 9.0),
+      decoration: BoxDecoration(
+        color: const Color(0xFF14241B),
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(
+          color: PicoColors.gold.withValues(alpha: 0.35),
+          width: 1.0,
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.visibility_rounded, color: PicoColors.gold, size: 16.0),
+          const SizedBox(width: 8.0),
+          Expanded(
+            child: Text(
+              l10n.previewModeBanner,
+              style: PicoTypography.bodySm.copyWith(
+                color: PicoColors.textWhiteMuted,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMatchesView(
+    Tournament tournament,
+    bool isEnrolled,
+    AppLocalizations l10n,
+  ) {
+    final matchesAsync = ref.watch(competitionMatchesProvider(tournament.competitionId));
 
     return matchesAsync.when(
       loading: () => const Center(
@@ -515,17 +735,25 @@ class _PublicTournamentScreenState
 
         return ListView.builder(
           padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 24.0),
-          itemCount: matches.length,
+          itemCount: matches.length + (!isEnrolled ? 1 : 0),
           itemBuilder: (context, index) {
-            final match = matches[index];
-            return _buildMatchCard(match, l10n);
+            if (!isEnrolled && index == 0) {
+              return _buildPreviewModeBanner(l10n);
+            }
+            final match = matches[!isEnrolled ? index - 1 : index];
+            return _buildMatchCard(match, tournament, isEnrolled, l10n);
           },
         );
       },
     );
   }
 
-  Widget _buildMatchCard(PicoMatch match, AppLocalizations l10n) {
+  Widget _buildMatchCard(
+    PicoMatch match,
+    Tournament tournament,
+    bool isEnrolled,
+    AppLocalizations l10n,
+  ) {
     final isFinished = match.status == MatchStatus.finished;
 
     return Container(
@@ -647,27 +875,54 @@ class _PublicTournamentScreenState
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  context.push('/prediction/${match.id}', extra: match);
-                },
+                onPressed: _isJoining
+                    ? null
+                    : () async {
+                        if (!isEnrolled) {
+                          await _handleJoinTournament(tournament, l10n);
+                          final refreshedEnrolled = ref.read(enrolledTournamentsProvider).value ?? const [];
+                          final nowEnrolled = refreshedEnrolled.any((t) => t.id == tournament.id);
+                          if (!nowEnrolled) return;
+                        }
+                        if (!mounted) return;
+                        context.push('/prediction/${match.id}', extra: match);
+                      },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: PicoColors.primary,
-                  foregroundColor: PicoColors.pitchBackground,
+                  backgroundColor: isEnrolled ? PicoColors.primary : PicoColors.gold,
+                  foregroundColor: const Color(0xFF0F1A13),
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                 ),
-                child: Text(
-                  l10n.predictAction,
-                  style: PicoTypography.labelPillSm.copyWith(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 11.5,
-                    letterSpacing: 1.0,
-                    color: PicoColors.pitchBackground,
-                  ),
-                ),
+                child: _isJoining
+                    ? const SizedBox(
+                        width: 14.0,
+                        height: 14.0,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.0,
+                          color: Color(0xFF0F1A13),
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (!isEnrolled) ...[
+                            const Icon(Icons.bolt_rounded, size: 14.0, color: Color(0xFF0F1A13)),
+                            const SizedBox(width: 4.0),
+                          ],
+                          Text(
+                            isEnrolled ? l10n.predictAction : l10n.joinAndPredictAction,
+                            style: PicoTypography.labelPillSm.copyWith(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 11.5,
+                              letterSpacing: 0.8,
+                              color: const Color(0xFF0F1A13),
+                            ),
+                          ),
+                        ],
+                      ),
               ),
             ),
           ],

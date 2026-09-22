@@ -21,15 +21,15 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
  * 7. Europa League - BeSoccer ID: 117
  * 8. Conference League - BeSoccer ID: 2492
  */
-const CORE_COMPETITIONS: Array<{ id: string; name: string; emblem_url?: string | null }> = [
-  { id: "1", name: "Primera División (La Liga)", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/1.png?size=120x&lossy=1" },
-  { id: "10", name: "Premier League", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/10.png?size=120x&lossy=1" },
-  { id: "7", name: "Serie A", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/7.png?size=120x&lossy=1" },
-  { id: "8", name: "Bundesliga", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/8.png?size=120x&lossy=1" },
-  { id: "16", name: "Ligue 1", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/16.png?size=120x&lossy=1" },
-  { id: "107", name: "Champions League", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/107.png?size=120x&lossy=1" },
-  { id: "117", name: "Europa League", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/117.png?size=120x&lossy=1" },
-  { id: "2492", name: "Conference League", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/2492.png?size=120x&lossy=1" },
+const CORE_COMPETITIONS: Array<{ id: string; name: string; short_name: string; flag: string; emblem_url?: string | null }> = [
+  { id: "1", name: "Primera División (La Liga)", short_name: "La Liga", flag: "🇪🇸", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/1.png?size=120x&lossy=1" },
+  { id: "10", name: "Premier League", short_name: "Premier League", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/10.png?size=120x&lossy=1" },
+  { id: "7", name: "Serie A", short_name: "Serie A", flag: "🇮🇹", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/7.png?size=120x&lossy=1" },
+  { id: "8", name: "Bundesliga", short_name: "Bundesliga", flag: "🇩🇪", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/8.png?size=120x&lossy=1" },
+  { id: "16", name: "Ligue 1", short_name: "Ligue 1", flag: "🇫🇷", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/16.png?size=120x&lossy=1" },
+  { id: "107", name: "Champions League", short_name: "UCL", flag: "⭐", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/107.png?size=120x&lossy=1" },
+  { id: "117", name: "Europa League", short_name: "UEL", flag: "🟠", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/117.png?size=120x&lossy=1" },
+  { id: "2492", name: "Conference League", short_name: "UECL", flag: "🟢", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/2492.png?size=120x&lossy=1" },
 ];
 
 const ALLOWED_COMPETITION_IDS = new Set(CORE_COMPETITIONS.map((c) => c.id));
@@ -250,7 +250,15 @@ async function syncMatches(leagueId: string): Promise<number> {
 
   await supabase
     .from("competitions")
-    .upsert([{ id: leagueId, name: compName, emblem_url: compEmblem }], { onConflict: "id" });
+    .upsert([
+      {
+        id: leagueId,
+        name: compName,
+        short_name: coreComp?.short_name ?? compName,
+        flag: coreComp?.flag ?? "🏆",
+        emblem_url: compEmblem,
+      },
+    ], { onConflict: "id" });
 
   // 2. Relational Integrity: Extract and upsert all teams from the match payload
   const teamsMap = new Map<string, { id: string; name: string; short_name: string | null; crest_url: string | null }>();

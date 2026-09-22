@@ -651,7 +651,7 @@ class MatchCard extends StatelessWidget {
   Widget _buildTeamsRow() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Home Team
         Expanded(
@@ -664,8 +664,11 @@ class MatchCard extends StatelessWidget {
           ),
         ),
 
-        // Center Indicator (VS, Score, or Locked)
-        _buildCenterIndicator(),
+        // Center Indicator (VS, Score, or Locked) aligned with crest center
+        Padding(
+          padding: const EdgeInsets.only(top: 10.0),
+          child: _buildCenterIndicator(),
+        ),
 
         // Away Team
         Expanded(
@@ -1153,16 +1156,22 @@ class _TeamBlock extends StatelessWidget {
         ),
         const SizedBox(height: 8.0),
 
-        // Team Name
-        Text(
-          name,
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: PicoTypography.headlineMd.copyWith(
-            color: PicoColors.textPitchInk,
-            fontSize: 15.0,
-            fontWeight: FontWeight.w700,
+        // Team Name (Centered, up to 2 lines, completely visible like PredictionScreen)
+        SizedBox(
+          height: 38.0,
+          child: Center(
+            child: Text(
+              name,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: PicoTypography.headlineMd.copyWith(
+                color: PicoColors.textPitchInk,
+                fontSize: 14.0,
+                fontWeight: FontWeight.w700,
+                height: 1.2,
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 2.0),

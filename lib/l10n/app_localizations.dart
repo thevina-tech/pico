@@ -1225,6 +1225,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recently concluded matches and points will be shown here.'**
   String get noFinishedMatchesSub;
+
+  /// Eyebrow badge on the join tournament CTA banner
+  ///
+  /// In en, this message translates to:
+  /// **'JOIN THE COMPETITION'**
+  String get joinTournamentBannerBadge;
+
+  /// Title on the join tournament CTA banner
+  ///
+  /// In en, this message translates to:
+  /// **'Predict & Compete'**
+  String get joinTournamentBannerTitle;
+
+  /// Subtitle on the join tournament CTA banner
+  ///
+  /// In en, this message translates to:
+  /// **'Join this tournament to predict upcoming matches, score Pico Points, and climb the public standings.'**
+  String get joinTournamentBannerSub;
+
+  /// Action button text to enroll in tournament
+  ///
+  /// In en, this message translates to:
+  /// **'Join Tournament'**
+  String get joinTournamentAction;
+
+  /// Success message after enrolling in tournament
+  ///
+  /// In en, this message translates to:
+  /// **'You joined {tournamentName}! Predictions unlocked.'**
+  String joinTournamentSuccessToast(String tournamentName);
+
+  /// Badge indicating user is already joined in tournament
+  ///
+  /// In en, this message translates to:
+  /// **'Joined'**
+  String get joinedBadge;
+
+  /// Short join action label
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get joinAction;
+
+  /// Banner message on matches tab when user is in preview mode
+  ///
+  /// In en, this message translates to:
+  /// **'Preview Mode · Join this tournament to unlock predictions'**
+  String get previewModeBanner;
+
+  /// Button label when user needs to join to predict
+  ///
+  /// In en, this message translates to:
+  /// **'Join to Predict'**
+  String get joinAndPredictAction;
+
+  /// Prompt when unauthenticated user tries to join tournament
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to join tournaments and submit predictions.'**
+  String get signInToJoinTournament;
 }
 
 class _AppLocalizationsDelegate

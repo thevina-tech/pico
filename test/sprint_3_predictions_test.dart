@@ -318,6 +318,51 @@ void main() {
       await tester.pumpAndSettle();
       expect(cardTapped, isTrue);
     });
+
+    testWidgets('MatchCard renders centered 2-line team names completely with aligned crest baselines',
+        (tester) async {
+      final asymmetricMatch = PicoMatch(
+        id: 'asymmetric_card_1',
+        providerMatchId: 'prov_card_asym_1',
+        competitionId: 'pl',
+        competitionName: 'Premier League',
+        homeTeamId: 'bha',
+        homeTeamName: 'Brighton & Hove Albion',
+        homeTeamCode: 'BHA',
+        awayTeamId: 'ars',
+        awayTeamName: 'Arsenal',
+        awayTeamCode: 'ARS',
+        kickoffAt: DateTime.now().add(const Duration(days: 2)),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MatchCard.fromMatch(match: asymmetricMatch),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final homeNameFinder = find.text('Brighton & Hove Albion');
+      final awayNameFinder = find.text('Arsenal');
+      expect(homeNameFinder, findsOneWidget);
+      expect(awayNameFinder, findsOneWidget);
+
+      final homeText = tester.widget<Text>(homeNameFinder);
+      final awayText = tester.widget<Text>(awayNameFinder);
+      expect(homeText.textAlign, TextAlign.center);
+      expect(awayText.textAlign, TextAlign.center);
+      expect(homeText.maxLines, 2);
+      expect(awayText.maxLines, 2);
+
+      // Verify crests share identical vertical baseline
+      final bhaCodeFinder = find.text('BHA').first;
+      final arsCodeFinder = find.text('ARS').first;
+      final bhaTopLeft = tester.getTopLeft(bhaCodeFinder);
+      final arsTopLeft = tester.getTopLeft(arsCodeFinder);
+      expect(bhaTopLeft.dy, equals(arsTopLeft.dy));
+    });
   });
 
   group('Sprint 3: Zero-Client Trust 10-Minute Lock Rule', () {
@@ -412,6 +457,57 @@ void main() {
 
       // Verify confirmation toast
       expect(find.text('Prediction Locked! ⚽'), findsOneWidget);
+    });
+
+    testWidgets('PredictionScreen aligns faceoff badges and centers multi-line team names (e.g. Brighton & Hove Albion vs Arsenal)',
+        (tester) async {
+      final asymmetricMatch = PicoMatch(
+        id: 'asymmetric_match_1',
+        providerMatchId: 'prov_asym_1',
+        competitionId: 'pl',
+        competitionName: 'Premier League',
+        homeTeamId: 'bha',
+        homeTeamName: 'Brighton & Hove Albion',
+        homeTeamCode: 'BHA',
+        awayTeamId: 'ars',
+        awayTeamName: 'Arsenal',
+        awayTeamCode: 'ARS',
+        kickoffAt: DateTime.now().add(const Duration(days: 2)),
+      );
+
+      await tester.pumpWidget(
+        createTestApp(
+          PredictionScreen(match: asymmetricMatch),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify team names rendered
+      final homeNameFinder = find.text('Brighton & Hove Albion');
+      final awayNameFinder = find.text('Arsenal');
+      expect(homeNameFinder, findsOneWidget);
+      expect(awayNameFinder, findsOneWidget);
+
+      // Both names should be centered and support 2 lines
+      final homeTextWidget = tester.widget<Text>(homeNameFinder);
+      final awayTextWidget = tester.widget<Text>(awayNameFinder);
+      expect(homeTextWidget.textAlign, TextAlign.center);
+      expect(awayTextWidget.textAlign, TextAlign.center);
+      expect(homeTextWidget.maxLines, 2);
+      expect(awayTextWidget.maxLines, 2);
+
+      // Verify badges have identical vertical top alignment
+      final bhaCodeFinder = find.text('BHA').first;
+      final arsCodeFinder = find.text('ARS').first;
+      expect(bhaCodeFinder, findsOneWidget);
+      expect(arsCodeFinder, findsOneWidget);
+
+      final bhaTopLeft = tester.getTopLeft(bhaCodeFinder);
+      final arsTopLeft = tester.getTopLeft(arsCodeFinder);
+      expect(bhaTopLeft.dy, equals(arsTopLeft.dy));
+
+      // Verify VS pill is present and aligned
+      expect(find.text('VS'), findsOneWidget);
     });
   });
 

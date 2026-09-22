@@ -26,14 +26,14 @@ class _FakeTournamentRepository implements TournamentRepository {
   final List<PrivateLeague> privateLeagues = [];
   final Map<String, List<PrivateLeagueMember>> leagueMembers = {};
   final List<Competition> competitions = [
-    const Competition(id: '1', name: 'Primera División (La Liga)'),
-    const Competition(id: '10', name: 'Premier League'),
-    const Competition(id: '7', name: 'Serie A'),
-    const Competition(id: '8', name: 'Bundesliga'),
-    const Competition(id: '16', name: 'Ligue 1'),
-    const Competition(id: '107', name: 'Champions League'),
-    const Competition(id: '117', name: 'Europa League'),
-    const Competition(id: '2492', name: 'Conference League'),
+    const Competition(id: '1', name: 'Primera División (La Liga)', shortName: 'La Liga', flag: '🇪🇸'),
+    const Competition(id: '10', name: 'Premier League', shortName: 'Premier League', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿'),
+    const Competition(id: '7', name: 'Serie A', shortName: 'Serie A', flag: '🇮🇹'),
+    const Competition(id: '8', name: 'Bundesliga', shortName: 'Bundesliga', flag: '🇩🇪'),
+    const Competition(id: '16', name: 'Ligue 1', shortName: 'Ligue 1', flag: '🇫🇷'),
+    const Competition(id: '107', name: 'Champions League', shortName: 'UCL', flag: '⭐'),
+    const Competition(id: '117', name: 'Europa League', shortName: 'UEL', flag: '🟠'),
+    const Competition(id: '2492', name: 'Conference League', shortName: 'UECL', flag: '🟢'),
   ];
 
   @override
@@ -42,14 +42,34 @@ class _FakeTournamentRepository implements TournamentRepository {
   @override
   Future<List<Tournament>> getPublicTournaments() async => tournaments;
 
+  List<Tournament>? customEnrolledTournaments;
+  final List<String> enrolledIds = [];
+
   @override
-  Future<List<Tournament>> getEnrolledTournaments(String userId) async => tournaments;
+  Future<List<Tournament>> getEnrolledTournaments(String userId) async {
+    if (customEnrolledTournaments != null) {
+      final base = customEnrolledTournaments!;
+      final newlyJoined = tournaments.where((t) => enrolledIds.contains(t.id));
+      return {...base, ...newlyJoined}.toList();
+    }
+    return tournaments;
+  }
 
   @override
   Future<void> enrollInDefaultTournaments({
     required String userId,
     required List<String> leagueIds,
   }) async {}
+
+  @override
+  Future<void> enrollInTournament({
+    required String userId,
+    required String tournamentId,
+  }) async {
+    if (!enrolledIds.contains(tournamentId)) {
+      enrolledIds.add(tournamentId);
+    }
+  }
 
   @override
   Future<List<TournamentParticipant>> getParticipantsForUser(String userId) async => [];
@@ -271,18 +291,19 @@ void main() {
       expect(map['2492']?.name, equals('Conference League'));
     });
 
-    test('CompetitionExtension provides shortName and flags', () {
-      const laLiga = Competition(id: '1', name: 'Primera División');
-      expect(laLiga.flag, equals('🇪🇸'));
-      expect(laLiga.shortName, equals('La Liga'));
+    test('Competition provides shortName and flag from schema and defaults gracefully', () {
+      final fromJson = Competition.fromJson({
+        'id': '10',
+        'name': 'Premier League',
+        'short_name': 'Premier League',
+        'flag': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+      });
+      expect(fromJson.flag, equals('🏴󠁧󠁢󠁥󠁮󠁧󠁿'));
+      expect(fromJson.shortName, equals('Premier League'));
 
-      const premier = Competition(id: '10', name: 'Premier League');
-      expect(premier.flag, equals('🏴󠁧󠁢󠁥󠁮󠁧󠁿'));
-      expect(premier.shortName, equals('Premier League'));
-
-      const ucl = Competition(id: '107', name: 'Champions League');
-      expect(ucl.flag, equals('⭐'));
-      expect(ucl.shortName, equals('UCL'));
+      const fallback = Competition(id: '99', name: 'Custom Cup');
+      expect(fallback.flag, equals('🏆'));
+      expect(fallback.displayName, equals('Custom Cup'));
     });
   });
 
@@ -439,6 +460,7 @@ void main() {
       required Widget child,
       TournamentRepository? repo,
       AuthNotifier Function()? authOverride,
+      Locale? locale,
     }) {
       final fakeRepo = repo ?? _FakeTournamentRepository();
       return ProviderScope(
@@ -448,6 +470,7 @@ void main() {
           currentUserProfileProvider.overrideWith(() => _FakeProfileNotifier()),
         ],
         child: MaterialApp(
+          locale: locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: child,
@@ -553,6 +576,31 @@ void main() {
         scrollable: find.byType(Scrollable).last,
       );
       expect(find.text('Conference League'), findsOneWidget);
+    });
+
+    testWidgets('CreatePrivateLeagueScreen security note does not overflow on narrow screen with Spanish locale', (tester) async {
+      tester.view.physicalSize = const Size(360 * 3, 700 * 3);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final repo = _FakeTournamentRepository();
+      await tester.pumpWidget(
+        buildHarness(
+          child: const CreatePrivateLeagueScreen(),
+          repo: repo,
+          locale: const Locale('es'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.byType(ListView), const Offset(0, -400));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Solo los jugadores con tu código de invitación podrán unirse'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('JoinPrivateLeagueScreen accepts 6-character code input', (tester) async {
@@ -717,6 +765,88 @@ void main() {
 
       // Verify Leave League button IS rendered for members
       expect(find.byIcon(Icons.logout_rounded), findsOneWidget);
+    });
+
+    testWidgets('PublicTournamentScreen renders accented Primera División, standings, and Join CTA when not joined', (tester) async {
+      final repo = _FakeTournamentRepository();
+      const tournament = Tournament(
+        id: '10000000-0000-0000-0000-000000000001',
+        name: 'Primera División',
+        competitionId: '1',
+      );
+      repo.tournaments.add(tournament);
+      repo.customEnrolledTournaments = []; // Not joined
+
+      await tester.pumpWidget(
+        buildHarness(
+          child: const PublicTournamentScreen(
+            tournamentId: '10000000-0000-0000-0000-000000000001',
+            initialTournament: tournament,
+          ),
+          repo: repo,
+          authOverride: () => _FakeAuthNotifier(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Accented tournament name is properly rendered
+      expect(find.text('Primera División'), findsOneWidget);
+
+      // Standings/leaderboard are viewable even without being enrolled
+      expect(find.text('PicoChamp'), findsOneWidget);
+      expect(find.text('FootballFan99'), findsOneWidget);
+
+      // Attractive Join CTA banner is rendered
+      expect(find.text('JOIN THE COMPETITION'), findsOneWidget);
+      expect(find.text('Predict & Compete'), findsOneWidget);
+      expect(find.text('Join Tournament'), findsOneWidget);
+
+      // Tap Join Tournament CTA
+      await tester.tap(find.text('Join Tournament'));
+      await tester.pumpAndSettle();
+
+      // Verify user enrolled
+      expect(repo.enrolledIds.contains(tournament.id), isTrue);
+    });
+
+    testWidgets('TournamentsScreen cards are clickable and Discover tab shows Join CTA for unjoined tournaments', (tester) async {
+      final repo = _FakeTournamentRepository();
+      const tournament = Tournament(
+        id: '10000000-0000-0000-0000-000000000001',
+        name: 'Primera División',
+        competitionId: '1',
+      );
+      repo.tournaments.add(tournament);
+      repo.customEnrolledTournaments = []; // User has not joined yet
+
+      await tester.pumpWidget(
+        buildHarness(
+          child: const TournamentsScreen(),
+          repo: repo,
+          authOverride: () => _FakeAuthNotifier(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Switch to Discover tab
+      await tester.tap(find.text('Discover'));
+      await tester.pumpAndSettle();
+
+      // Accented tournament name is rendered
+      expect(find.text('Primera División'), findsOneWidget);
+
+      // Unjoined tournament displays a Join button
+      expect(find.text('Join'), findsOneWidget);
+
+      // Card is wrapped in an InkWell (clickable card container)
+      expect(find.byType(InkWell), findsWidgets);
+
+      // Tap Join button
+      await tester.tap(find.text('Join'));
+      await tester.pumpAndSettle();
+
+      // Verify user enrolled in repository
+      expect(repo.enrolledIds.contains(tournament.id), isTrue);
     });
   });
 }
