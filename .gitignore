@@ -49,3 +49,7 @@ app.*.map.json
 
 # Environment variables
 .env
+
+# Supabase internal linking files
+supabase/.temp/
+supabase/supabase/
