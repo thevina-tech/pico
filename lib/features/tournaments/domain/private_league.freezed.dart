@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PrivateLeague {
 
- String get id; String get name;@JsonKey(name: 'owner_id') String get ownerId;@JsonKey(name: 'competition_id') String? get competitionId;@JsonKey(name: 'invite_code') String get inviteCode;@JsonKey(name: 'created_at') DateTime? get createdAt; String get ownerName; String get competitionName; int get memberCount;
+ String get id; String get name;@JsonKey(name: 'owner_id') String get ownerId;@JsonKey(name: 'admin_id') String? get adminId;@JsonKey(name: 'competition_id') String? get competitionId;@JsonKey(name: 'invite_code') String get inviteCode;@JsonKey(name: 'created_at') DateTime? get createdAt; String get ownerName; String get competitionName; int get memberCount; String get description;
 /// Create a copy of PrivateLeague
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $PrivateLeagueCopyWith<PrivateLeague> get copyWith => _$PrivateLeagueCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as PrivateLeague;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PrivateLeague&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.ownerId, _this.ownerId) || other.ownerId == _this.ownerId)&&(identical(other.competitionId, _this.competitionId) || other.competitionId == _this.competitionId)&&(identical(other.inviteCode, _this.inviteCode) || other.inviteCode == _this.inviteCode)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.ownerName, _this.ownerName) || other.ownerName == _this.ownerName)&&(identical(other.competitionName, _this.competitionName) || other.competitionName == _this.competitionName)&&(identical(other.memberCount, _this.memberCount) || other.memberCount == _this.memberCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PrivateLeague&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.ownerId, _this.ownerId) || other.ownerId == _this.ownerId)&&(identical(other.adminId, _this.adminId) || other.adminId == _this.adminId)&&(identical(other.competitionId, _this.competitionId) || other.competitionId == _this.competitionId)&&(identical(other.inviteCode, _this.inviteCode) || other.inviteCode == _this.inviteCode)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.ownerName, _this.ownerName) || other.ownerName == _this.ownerName)&&(identical(other.competitionName, _this.competitionName) || other.competitionName == _this.competitionName)&&(identical(other.memberCount, _this.memberCount) || other.memberCount == _this.memberCount)&&(identical(other.description, _this.description) || other.description == _this.description));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as PrivateLeague;
-  return Object.hash(runtimeType,_this.id,_this.name,_this.ownerId,_this.competitionId,_this.inviteCode,_this.createdAt,_this.ownerName,_this.competitionName,_this.memberCount);
+  return Object.hash(runtimeType,_this.id,_this.name,_this.ownerId,_this.adminId,_this.competitionId,_this.inviteCode,_this.createdAt,_this.ownerName,_this.competitionName,_this.memberCount,_this.description);
 }
 
 @override
 String toString() {
   final _this = this as PrivateLeague;
-  return 'PrivateLeague(id: ${_this.id}, name: ${_this.name}, ownerId: ${_this.ownerId}, competitionId: ${_this.competitionId}, inviteCode: ${_this.inviteCode}, createdAt: ${_this.createdAt}, ownerName: ${_this.ownerName}, competitionName: ${_this.competitionName}, memberCount: ${_this.memberCount})';
+  return 'PrivateLeague(id: ${_this.id}, name: ${_this.name}, ownerId: ${_this.ownerId}, adminId: ${_this.adminId}, competitionId: ${_this.competitionId}, inviteCode: ${_this.inviteCode}, createdAt: ${_this.createdAt}, ownerName: ${_this.ownerName}, competitionName: ${_this.competitionName}, memberCount: ${_this.memberCount}, description: ${_this.description})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $PrivateLeagueCopyWith<$Res>  {
   factory $PrivateLeagueCopyWith(PrivateLeague value, $Res Function(PrivateLeague) _then) = _$PrivateLeagueCopyWithImpl;
 @useResult
 $Res call({
- String id, String name,@JsonKey(name: 'owner_id') String ownerId,@JsonKey(name: 'competition_id') String? competitionId,@JsonKey(name: 'invite_code') String inviteCode,@JsonKey(name: 'created_at') DateTime? createdAt, String ownerName, String competitionName, int memberCount
+ String id, String name,@JsonKey(name: 'owner_id') String ownerId,@JsonKey(name: 'admin_id') String? adminId,@JsonKey(name: 'competition_id') String? competitionId,@JsonKey(name: 'invite_code') String inviteCode,@JsonKey(name: 'created_at') DateTime? createdAt, String ownerName, String competitionName, int memberCount, String description
 });
 
 
@@ -71,18 +71,20 @@ class _$PrivateLeagueCopyWithImpl<$Res>
 
 /// Create a copy of PrivateLeague
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? ownerId = null,Object? competitionId = freezed,Object? inviteCode = null,Object? createdAt = freezed,Object? ownerName = null,Object? competitionName = null,Object? memberCount = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? ownerId = null,Object? adminId = freezed,Object? competitionId = freezed,Object? inviteCode = null,Object? createdAt = freezed,Object? ownerName = null,Object? competitionName = null,Object? memberCount = null,Object? description = null,}) {
   return _then(PrivateLeague(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,ownerId: null == ownerId ? _self.ownerId : ownerId // ignore: cast_nullable_to_non_nullable
-as String,competitionId: freezed == competitionId ? _self.competitionId : competitionId // ignore: cast_nullable_to_non_nullable
+as String,adminId: freezed == adminId ? _self.adminId : adminId // ignore: cast_nullable_to_non_nullable
+as String?,competitionId: freezed == competitionId ? _self.competitionId : competitionId // ignore: cast_nullable_to_non_nullable
 as String?,inviteCode: null == inviteCode ? _self.inviteCode : inviteCode // ignore: cast_nullable_to_non_nullable
 as String,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,ownerName: null == ownerName ? _self.ownerName : ownerName // ignore: cast_nullable_to_non_nullable
 as String,competitionName: null == competitionName ? _self.competitionName : competitionName // ignore: cast_nullable_to_non_nullable
 as String,memberCount: null == memberCount ? _self.memberCount : memberCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 
@@ -167,10 +169,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(name: 'owner_id')  String ownerId, @JsonKey(name: 'competition_id')  String? competitionId, @JsonKey(name: 'invite_code')  String inviteCode, @JsonKey(name: 'created_at')  DateTime? createdAt,  String ownerName,  String competitionName,  int memberCount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(name: 'owner_id')  String ownerId, @JsonKey(name: 'admin_id')  String? adminId, @JsonKey(name: 'competition_id')  String? competitionId, @JsonKey(name: 'invite_code')  String inviteCode, @JsonKey(name: 'created_at')  DateTime? createdAt,  String ownerName,  String competitionName,  int memberCount,  String description)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PrivateLeague() when $default != null:
-return $default(_that.id,_that.name,_that.ownerId,_that.competitionId,_that.inviteCode,_that.createdAt,_that.ownerName,_that.competitionName,_that.memberCount);case _:
+return $default(_that.id,_that.name,_that.ownerId,_that.adminId,_that.competitionId,_that.inviteCode,_that.createdAt,_that.ownerName,_that.competitionName,_that.memberCount,_that.description);case _:
   return orElse();
 
 }
@@ -188,10 +190,10 @@ return $default(_that.id,_that.name,_that.ownerId,_that.competitionId,_that.invi
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(name: 'owner_id')  String ownerId, @JsonKey(name: 'competition_id')  String? competitionId, @JsonKey(name: 'invite_code')  String inviteCode, @JsonKey(name: 'created_at')  DateTime? createdAt,  String ownerName,  String competitionName,  int memberCount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(name: 'owner_id')  String ownerId, @JsonKey(name: 'admin_id')  String? adminId, @JsonKey(name: 'competition_id')  String? competitionId, @JsonKey(name: 'invite_code')  String inviteCode, @JsonKey(name: 'created_at')  DateTime? createdAt,  String ownerName,  String competitionName,  int memberCount,  String description)  $default,) {final _that = this;
 switch (_that) {
 case _PrivateLeague():
-return $default(_that.id,_that.name,_that.ownerId,_that.competitionId,_that.inviteCode,_that.createdAt,_that.ownerName,_that.competitionName,_that.memberCount);case _:
+return $default(_that.id,_that.name,_that.ownerId,_that.adminId,_that.competitionId,_that.inviteCode,_that.createdAt,_that.ownerName,_that.competitionName,_that.memberCount,_that.description);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -208,10 +210,10 @@ return $default(_that.id,_that.name,_that.ownerId,_that.competitionId,_that.invi
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name, @JsonKey(name: 'owner_id')  String ownerId, @JsonKey(name: 'competition_id')  String? competitionId, @JsonKey(name: 'invite_code')  String inviteCode, @JsonKey(name: 'created_at')  DateTime? createdAt,  String ownerName,  String competitionName,  int memberCount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name, @JsonKey(name: 'owner_id')  String ownerId, @JsonKey(name: 'admin_id')  String? adminId, @JsonKey(name: 'competition_id')  String? competitionId, @JsonKey(name: 'invite_code')  String inviteCode, @JsonKey(name: 'created_at')  DateTime? createdAt,  String ownerName,  String competitionName,  int memberCount,  String description)?  $default,) {final _that = this;
 switch (_that) {
 case _PrivateLeague() when $default != null:
-return $default(_that.id,_that.name,_that.ownerId,_that.competitionId,_that.inviteCode,_that.createdAt,_that.ownerName,_that.competitionName,_that.memberCount);case _:
+return $default(_that.id,_that.name,_that.ownerId,_that.adminId,_that.competitionId,_that.inviteCode,_that.createdAt,_that.ownerName,_that.competitionName,_that.memberCount,_that.description);case _:
   return null;
 
 }
@@ -222,19 +224,21 @@ return $default(_that.id,_that.name,_that.ownerId,_that.competitionId,_that.invi
 /// @nodoc
 @JsonSerializable()
 
-class _PrivateLeague implements PrivateLeague {
-  const _PrivateLeague({required this.id, required this.name, @JsonKey(name: 'owner_id') required this.ownerId, @JsonKey(name: 'competition_id') this.competitionId, @JsonKey(name: 'invite_code') required this.inviteCode, @JsonKey(name: 'created_at') this.createdAt, this.ownerName = '', this.competitionName = '', this.memberCount = 1});
+class _PrivateLeague extends PrivateLeague {
+  const _PrivateLeague({required this.id, required this.name, @JsonKey(name: 'owner_id') required this.ownerId, @JsonKey(name: 'admin_id') this.adminId, @JsonKey(name: 'competition_id') this.competitionId, @JsonKey(name: 'invite_code') required this.inviteCode, @JsonKey(name: 'created_at') this.createdAt, this.ownerName = '', this.competitionName = '', this.memberCount = 1, this.description = ''}): super._();
   factory _PrivateLeague.fromJson(Map<String, dynamic> json) => _$PrivateLeagueFromJson(json);
 
 @override final  String id;
 @override final  String name;
 @override@JsonKey(name: 'owner_id') final  String ownerId;
+@override@JsonKey(name: 'admin_id') final  String? adminId;
 @override@JsonKey(name: 'competition_id') final  String? competitionId;
 @override@JsonKey(name: 'invite_code') final  String inviteCode;
 @override@JsonKey(name: 'created_at') final  DateTime? createdAt;
 @override@JsonKey() final  String ownerName;
 @override@JsonKey() final  String competitionName;
 @override@JsonKey() final  int memberCount;
+@override@JsonKey() final  String description;
 
 /// Create a copy of PrivateLeague
 /// with the given fields replaced by the non-null parameter values.
@@ -249,18 +253,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PrivateLeague&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.ownerId, ownerId) || other.ownerId == ownerId)&&(identical(other.competitionId, competitionId) || other.competitionId == competitionId)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.ownerName, ownerName) || other.ownerName == ownerName)&&(identical(other.competitionName, competitionName) || other.competitionName == competitionName)&&(identical(other.memberCount, memberCount) || other.memberCount == memberCount));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PrivateLeague&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.ownerId, ownerId) || other.ownerId == ownerId)&&(identical(other.adminId, adminId) || other.adminId == adminId)&&(identical(other.competitionId, competitionId) || other.competitionId == competitionId)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.ownerName, ownerName) || other.ownerName == ownerName)&&(identical(other.competitionName, competitionName) || other.competitionName == competitionName)&&(identical(other.memberCount, memberCount) || other.memberCount == memberCount)&&(identical(other.description, description) || other.description == description));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,name,ownerId,competitionId,inviteCode,createdAt,ownerName,competitionName,memberCount);
+    return Object.hash(runtimeType,id,name,ownerId,adminId,competitionId,inviteCode,createdAt,ownerName,competitionName,memberCount,description);
 }
 
 @override
 String toString() {
-    return 'PrivateLeague(id: $id, name: $name, ownerId: $ownerId, competitionId: $competitionId, inviteCode: $inviteCode, createdAt: $createdAt, ownerName: $ownerName, competitionName: $competitionName, memberCount: $memberCount)';
+    return 'PrivateLeague(id: $id, name: $name, ownerId: $ownerId, adminId: $adminId, competitionId: $competitionId, inviteCode: $inviteCode, createdAt: $createdAt, ownerName: $ownerName, competitionName: $competitionName, memberCount: $memberCount, description: $description)';
 }
 
 
@@ -271,7 +275,7 @@ abstract mixin class _$PrivateLeagueCopyWith<$Res> implements $PrivateLeagueCopy
   factory _$PrivateLeagueCopyWith(_PrivateLeague value, $Res Function(_PrivateLeague) _then) = __$PrivateLeagueCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name,@JsonKey(name: 'owner_id') String ownerId,@JsonKey(name: 'competition_id') String? competitionId,@JsonKey(name: 'invite_code') String inviteCode,@JsonKey(name: 'created_at') DateTime? createdAt, String ownerName, String competitionName, int memberCount
+ String id, String name,@JsonKey(name: 'owner_id') String ownerId,@JsonKey(name: 'admin_id') String? adminId,@JsonKey(name: 'competition_id') String? competitionId,@JsonKey(name: 'invite_code') String inviteCode,@JsonKey(name: 'created_at') DateTime? createdAt, String ownerName, String competitionName, int memberCount, String description
 });
 
 
@@ -288,18 +292,20 @@ class __$PrivateLeagueCopyWithImpl<$Res>
 
 /// Create a copy of PrivateLeague
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? ownerId = null,Object? competitionId = freezed,Object? inviteCode = null,Object? createdAt = freezed,Object? ownerName = null,Object? competitionName = null,Object? memberCount = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? ownerId = null,Object? adminId = freezed,Object? competitionId = freezed,Object? inviteCode = null,Object? createdAt = freezed,Object? ownerName = null,Object? competitionName = null,Object? memberCount = null,Object? description = null,}) {
   return _then(_PrivateLeague(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,ownerId: null == ownerId ? _self.ownerId : ownerId // ignore: cast_nullable_to_non_nullable
-as String,competitionId: freezed == competitionId ? _self.competitionId : competitionId // ignore: cast_nullable_to_non_nullable
+as String,adminId: freezed == adminId ? _self.adminId : adminId // ignore: cast_nullable_to_non_nullable
+as String?,competitionId: freezed == competitionId ? _self.competitionId : competitionId // ignore: cast_nullable_to_non_nullable
 as String?,inviteCode: null == inviteCode ? _self.inviteCode : inviteCode // ignore: cast_nullable_to_non_nullable
 as String,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,ownerName: null == ownerName ? _self.ownerName : ownerName // ignore: cast_nullable_to_non_nullable
 as String,competitionName: null == competitionName ? _self.competitionName : competitionName // ignore: cast_nullable_to_non_nullable
 as String,memberCount: null == memberCount ? _self.memberCount : memberCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 

@@ -145,43 +145,54 @@ class _PublicTournamentScreenState
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 440.0),
-                  child: Column(
-                    children: [
-                      // Header Card
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
-                        child: _buildHeaderCard(
-                          currentTournament,
-                          compsMap[currentTournament.competitionId],
-                          l10n,
-                        ),
-                      ),
-
-                      // Attractive Join CTA Banner (if not enrolled)
-                      if (!isEnrolled)
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 10.0),
-                          child: _buildJoinBanner(currentTournament, l10n),
-                        ),
-
-                      // Segmented Tab Selector
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: _buildTabSelector(l10n),
-                      ),
-                      const SizedBox(height: 12.0),
-
-                      // Tab View Content
-                      Expanded(
-                        child: _selectedTabIndex == 0
-                            ? _buildLeaderboardView(currentTournament.id, l10n)
-                            : _buildMatchesView(
-                                currentTournament,
-                                isEnrolled,
-                                l10n,
+                  child: NestedScrollView(
+                    headerSliverBuilder: (context, innerBoxIsScrolled) {
+                      return [
+                        SliverToBoxAdapter(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // Header Card
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+                                child: _buildHeaderCard(
+                                  currentTournament,
+                                  compsMap[currentTournament.competitionId],
+                                  l10n,
+                                ),
                               ),
-                      ),
-                    ],
+
+                              // Attractive Join CTA Banner (if not enrolled)
+                              if (!isEnrolled)
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 8.0),
+                                  child: _buildJoinBanner(currentTournament, l10n),
+                                ),
+                            ],
+                          ),
+                        ),
+
+                        // Pinned Segmented Tab Selector
+                        SliverPersistentHeader(
+                          pinned: true,
+                          delegate: _TabSelectorHeaderDelegate(
+                            height: 52.0,
+                            child: Container(
+                              color: PicoColors.pitchBackground,
+                              padding: const EdgeInsets.fromLTRB(16.0, 2.0, 16.0, 6.0),
+                              child: _buildTabSelector(l10n),
+                            ),
+                          ),
+                        ),
+                      ];
+                    },
+                    body: _selectedTabIndex == 0
+                        ? _buildLeaderboardView(currentTournament.id, l10n)
+                        : _buildMatchesView(
+                            currentTournament,
+                            isEnrolled,
+                            l10n,
+                          ),
                   ),
                 ),
               ),
@@ -237,7 +248,7 @@ class _PublicTournamentScreenState
                         borderRadius: BorderRadius.circular(4.0),
                       ),
                       child: Text(
-                        'OFFICIAL TOURNAMENT',
+                        'PICO TOURNAMENT',
                         style: PicoTypography.labelPillSm.copyWith(
                           color: PicoColors.gold,
                           fontWeight: FontWeight.w800,
@@ -1054,3 +1065,34 @@ class _PublicTournamentScreenState
     );
   }
 }
+
+class _TabSelectorHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _TabSelectorHeaderDelegate({
+    required this.child,
+    required this.height,
+  });
+
+  final Widget child;
+  final double height;
+
+  @override
+  double get minExtent => height;
+
+  @override
+  double get maxExtent => height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return SizedBox.expand(child: child);
+  }
+
+  @override
+  bool shouldRebuild(covariant _TabSelectorHeaderDelegate oldDelegate) {
+    return oldDelegate.height != height || oldDelegate.child != child;
+  }
+}
+

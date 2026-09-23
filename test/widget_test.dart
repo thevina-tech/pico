@@ -1,8 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pico/features/auth/domain/auth_state.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/auth/presentation/onboarding_screen.dart';
+import 'package:pico/features/matches/presentation/matches_screen.dart';
 import 'package:pico/features/profile/presentation/profile_screen.dart';
 import 'package:pico/features/tournaments/presentation/tournaments_screen.dart';
 import 'package:pico/main.dart';
@@ -58,6 +60,28 @@ void main() {
     expect(find.descendant(of: navBar, matching: find.text('Profile')), findsOneWidget);
   });
 
+  testWidgets('PicoApp anti-flicker: does not render OnboardingScreen before HomeScreen',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authProvider.overrideWith(() => _FakeAuthenticatedNotifier()),
+        ],
+        child: const PicoApp(),
+      ),
+    );
+
+    // Initial frame renders AuthGate with loader and does NOT render OnboardingScreen
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(OnboardingScreen), findsNothing);
+
+    await tester.pumpAndSettle();
+
+    // Succeeded directly to home shell without ever showing OnboardingScreen
+    expect(find.byType(PicoBottomNavBar), findsOneWidget);
+    expect(find.byType(OnboardingScreen), findsNothing);
+  });
+
   testWidgets('PicoApp tab navigation - switches branches via bottom nav bar',
       (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -75,7 +99,7 @@ void main() {
     // Tap Matches tab
     await tester.tap(find.descendant(of: navBar, matching: find.text('Matches')));
     await tester.pumpAndSettle();
-    expect(find.text('Round 32 Predictions · Sunday'), findsOneWidget);
+    expect(find.byType(MatchesScreen), findsOneWidget);
 
     // Tap Tournaments tab
     await tester.tap(find.descendant(of: navBar, matching: find.text('Tournaments')));

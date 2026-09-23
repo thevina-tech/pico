@@ -11,6 +11,7 @@ _PrivateLeague _$PrivateLeagueFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       name: json['name'] as String,
       ownerId: json['owner_id'] as String,
+      adminId: json['admin_id'] as String?,
       competitionId: json['competition_id'] as String?,
       inviteCode: json['invite_code'] as String,
       createdAt: json['created_at'] == null
@@ -19,6 +20,7 @@ _PrivateLeague _$PrivateLeagueFromJson(Map<String, dynamic> json) =>
       ownerName: json['ownerName'] as String? ?? '',
       competitionName: json['competitionName'] as String? ?? '',
       memberCount: (json['memberCount'] as num?)?.toInt() ?? 1,
+      description: json['description'] as String? ?? '',
     );
 
 Map<String, dynamic> _$PrivateLeagueToJson(_PrivateLeague instance) =>
@@ -26,10 +28,12 @@ Map<String, dynamic> _$PrivateLeagueToJson(_PrivateLeague instance) =>
       'id': instance.id,
       'name': instance.name,
       'owner_id': instance.ownerId,
+      'admin_id': instance.adminId,
       'competition_id': instance.competitionId,
       'invite_code': instance.inviteCode,
       'created_at': instance.createdAt?.toIso8601String(),
       'ownerName': instance.ownerName,
       'competitionName': instance.competitionName,
       'memberCount': instance.memberCount,
+      'description': instance.description,
     };

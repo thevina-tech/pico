@@ -272,69 +272,19 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
   );
 }
 
-  /// Header with title, round subtitle, and calendar date capsule
+  /// Header with page title
   Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Matches',
-                style: PicoTypography.headlineLgMobile.copyWith(
-                  color: PicoColors.textWhite,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 26.0,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: 2.0),
-              Text(
-                'Round 32 Predictions · Sunday',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: PicoTypography.bodySm.copyWith(
-                  color: PicoColors.textWhiteMuted,
-                  fontSize: 12.0,
-                ),
-              ),
-            ],
-          ),
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        'Matches',
+        style: PicoTypography.headlineLgMobile.copyWith(
+          color: PicoColors.textWhite,
+          fontWeight: FontWeight.w800,
+          fontSize: 26.0,
+          letterSpacing: -0.5,
         ),
-        const SizedBox(width: 8.0),
-
-        // Date / Calendar Pill
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-          decoration: BoxDecoration(
-            color: const Color(0xFF152B21),
-            borderRadius: BorderRadius.circular(999.0),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.calendar_today_rounded,
-                size: 14.0,
-                color: PicoColors.primaryFixed,
-              ),
-              const SizedBox(width: 6.0),
-              Text(
-                'Today, 18 May',
-                style: PicoTypography.labelPillSm.copyWith(
-                  color: PicoColors.textWhite,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 11.0,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+      ),
     );
   }
 

@@ -17,6 +17,7 @@ import 'package:pico/features/tournaments/presentation/create_private_league_scr
 import 'package:pico/features/tournaments/presentation/join_private_league_screen.dart';
 import 'package:pico/features/tournaments/presentation/public_tournament_screen.dart';
 import 'package:pico/features/tournaments/presentation/private_tournament_screen.dart';
+import 'package:pico/features/tournaments/domain/league_message.dart';
 import 'package:pico/features/tournaments/presentation/tournaments_screen.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
@@ -25,6 +26,7 @@ class _FakeTournamentRepository implements TournamentRepository {
   final List<Tournament> tournaments = [];
   final List<PrivateLeague> privateLeagues = [];
   final Map<String, List<PrivateLeagueMember>> leagueMembers = {};
+  final Map<String, List<LeagueMessage>> leagueMessagesMap = {};
   final List<Competition> competitions = [
     const Competition(id: '1', name: 'Primera División (La Liga)', shortName: 'La Liga', flag: '🇪🇸'),
     const Competition(id: '10', name: 'Premier League', shortName: 'Premier League', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿'),
@@ -207,6 +209,32 @@ class _FakeTournamentRepository implements TournamentRepository {
       throw const LeagueOwnerCannotLeaveException();
     }
     leagueMembers[leagueId]?.removeWhere((m) => m.userId == userId);
+  }
+
+  @override
+  Future<List<LeagueMessage>> getLeagueMessages(String leagueId, {int limit = 50}) async {
+    return List<LeagueMessage>.from(leagueMessagesMap[leagueId] ?? []);
+  }
+
+  @override
+  Future<LeagueMessage> sendLeagueMessage({
+    required String leagueId,
+    required String userId,
+    required String message,
+    String? username,
+    String? avatarUrl,
+  }) async {
+    final newMsg = LeagueMessage(
+      id: 'mock_msg_${DateTime.now().millisecondsSinceEpoch}',
+      leagueId: leagueId,
+      userId: userId,
+      message: message,
+      createdAt: DateTime.now(),
+      username: username ?? 'Player',
+      avatarUrl: avatarUrl,
+    );
+    leagueMessagesMap.putIfAbsent(leagueId, () => []).insert(0, newMsg);
+    return newMsg;
   }
 }
 
@@ -528,11 +556,11 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check both are rendered in My Leagues
-      expect(find.text('OFFICIAL TOURNAMENTS'), findsOneWidget);
+      expect(find.text('PICO TOURNAMENTS'), findsOneWidget);
       expect(find.text('PRIVATE LEAGUES'), findsOneWidget);
 
-      // Verify vertical position: official tournaments appear before private leagues
-      final officialPos = tester.getTopLeft(find.text('OFFICIAL TOURNAMENTS')).dy;
+      // Verify vertical position: pico tournaments appear before private leagues
+      final officialPos = tester.getTopLeft(find.text('PICO TOURNAMENTS')).dy;
       final privatePos = tester.getTopLeft(find.text('PRIVATE LEAGUES')).dy;
       expect(officialPos, lessThan(privatePos));
     });

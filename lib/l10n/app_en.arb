@@ -560,7 +560,7 @@
   "@tournamentsTitle": {
     "description": "Title for tournaments screen"
   },
-  "tournamentsSubtitle": "Compete with friends · No real money",
+  "tournamentsSubtitle": "Climb the leaderboards or compete with friends",
   "@tournamentsSubtitle": {
     "description": "Subtitle for tournaments screen"
   },
@@ -662,7 +662,7 @@
   "@emptyPrivateLeaguesSubtitle": {
     "description": "Empty state subtitle for private leagues"
   },
-  "officialTournamentBadge": "OFFICIAL TOURNAMENT",
+  "officialTournamentBadge": "PICO TOURNAMENT",
   "@officialTournamentBadge": {
     "description": "Badge for official public tournaments"
   },

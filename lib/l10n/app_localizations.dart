@@ -797,7 +797,7 @@ abstract class AppLocalizations {
   /// Subtitle for tournaments screen
   ///
   /// In en, this message translates to:
-  /// **'Compete with friends · No real money'**
+  /// **'Climb the leaderboards or compete with friends'**
   String get tournamentsSubtitle;
 
   /// Tab label for user's joined and owned leagues
@@ -941,7 +941,7 @@ abstract class AppLocalizations {
   /// Badge for official public tournaments
   ///
   /// In en, this message translates to:
-  /// **'OFFICIAL TOURNAMENT'**
+  /// **'PICO TOURNAMENT'**
   String get officialTournamentBadge;
 
   /// Success modal title after creating private league

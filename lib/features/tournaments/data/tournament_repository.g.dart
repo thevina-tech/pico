@@ -638,6 +638,92 @@ final class PrivateLeagueMembersFamily extends $Family
   String toString() => r'privateLeagueMembersProvider';
 }
 
+/// Provider for a private league's message feed.
+
+@ProviderFor(leagueMessages)
+final leagueMessagesProvider = LeagueMessagesFamily._();
+
+/// Provider for a private league's message feed.
+
+final class LeagueMessagesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<LeagueMessage>>,
+          List<LeagueMessage>,
+          FutureOr<List<LeagueMessage>>
+        >
+    with
+        $FutureModifier<List<LeagueMessage>>,
+        $FutureProvider<List<LeagueMessage>> {
+  /// Provider for a private league's message feed.
+  LeagueMessagesProvider._({
+    required LeagueMessagesFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'leagueMessagesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$leagueMessagesHash();
+
+  @override
+  String toString() {
+    return r'leagueMessagesProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<LeagueMessage>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<LeagueMessage>> create(Ref ref) {
+    final argument = this.argument as String;
+    return leagueMessages(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is LeagueMessagesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$leagueMessagesHash() => r'38c776cfbe7305881f900e28e9296c643d1da73c';
+
+/// Provider for a private league's message feed.
+
+final class LeagueMessagesFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<LeagueMessage>>, String> {
+  LeagueMessagesFamily._()
+    : super(
+        retry: null,
+        name: r'leagueMessagesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Provider for a private league's message feed.
+
+  LeagueMessagesProvider call(String leagueId) =>
+      LeagueMessagesProvider._(argument: leagueId, from: this);
+
+  @override
+  String toString() => r'leagueMessagesProvider';
+}
+
 /// Provider for matches filtered by competition ID.
 
 @ProviderFor(competitionMatches)

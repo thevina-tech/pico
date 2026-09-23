@@ -78,56 +78,39 @@ class TournamentsScreen extends ConsumerWidget {
   }
 
   Widget _buildHeader(BuildContext context, AppLocalizations l10n) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.tournamentsTitle,
-                style: PicoTypography.headlineLgMobile.copyWith(
-                  color: PicoColors.textWhite,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 26.0,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: 2.0),
-              Text(
-                l10n.tournamentsSubtitle,
-                style: PicoTypography.bodySm.copyWith(
-                  color: PicoColors.textWhiteMuted,
-                  fontSize: 12.0,
-                ),
-              ),
-            ],
+        const SizedBox(height: 6.0),
+        Text(
+          l10n.tournamentsTitle,
+          textAlign: TextAlign.center,
+          style: PicoTypography.headlineLgMobile.copyWith(
+            color: PicoColors.textWhite,
+            fontWeight: FontWeight.w900,
+            fontSize: 28.0,
+            letterSpacing: -0.5,
           ),
         ),
-        const SizedBox(width: 8.0),
-        // Quick Action Button "+ Create / Join"
-        ElevatedButton.icon(
+        const SizedBox(height: 4.0),
+        Text(
+          l10n.tournamentsSubtitle,
+          textAlign: TextAlign.center,
+          style: PicoTypography.bodySm.copyWith(
+            color: PicoColors.textWhiteMuted,
+            fontSize: 13.0,
+          ),
+        ),
+        const SizedBox(height: 16.0),
+        // 3D tactile Clash Royale "Battle" clear yellow button
+        PicoBattleButton(
+          text: l10n.createOrJoinAction,
+          icon: const Icon(
+            Icons.add_rounded,
+            size: 20.0,
+            color: Color(0xFF261700),
+          ),
           onPressed: () => _openCreateOrJoinModal(context, l10n),
-          icon: const Icon(Icons.add_rounded, size: 16.0),
-          label: Text(
-            l10n.createOrJoinAction,
-            style: PicoTypography.labelPillSm.copyWith(
-              fontWeight: FontWeight.w800,
-              fontSize: 11.5,
-            ),
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: PicoColors.gold,
-            foregroundColor: const Color(0xFF261A00),
-            elevation: 0,
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(999.0),
-            ),
-            shadowColor: const Color(0xFFC99520),
-          ),
         ),
       ],
     );
@@ -190,9 +173,9 @@ class TournamentsScreen extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section 1: Joined Official Tournaments (Public First)
+        // Section 1: Joined Pico Tournaments (Public First)
         Text(
-          'OFFICIAL TOURNAMENTS',
+          'PICO TOURNAMENTS',
           style: PicoTypography.labelPillSm.copyWith(
             color: PicoColors.textWhiteMuted,
             letterSpacing: 1.1,
@@ -890,7 +873,7 @@ class TournamentsScreen extends ConsumerWidget {
       child: Column(
         children: [
           Text(
-            'Explore official tournaments in the Discover tab',
+            'Explore pico tournaments in the Discover tab',
             textAlign: TextAlign.center,
             style: PicoTypography.bodySm.copyWith(
               color: PicoColors.textWhiteMuted,
@@ -1167,3 +1150,106 @@ class _TabButton extends StatelessWidget {
     );
   }
 }
+
+/// A tactile, physical 3D push button styled like the iconic Clash Royale
+/// "Battle" clear yellow button with mechanical bevel depression.
+class PicoBattleButton extends StatefulWidget {
+  const PicoBattleButton({
+    super.key,
+    required this.text,
+    required this.onPressed,
+    this.icon,
+    this.height = 54.0,
+    this.width,
+  });
+
+  final String text;
+  final VoidCallback onPressed;
+  final Widget? icon;
+  final double height;
+  final double? width;
+
+  @override
+  State<PicoBattleButton> createState() => _PicoBattleButtonState();
+}
+
+class _PicoBattleButtonState extends State<PicoBattleButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    const double bevel = 4.0;
+    final double translationY = _isPressed ? bevel : 0.0;
+    final double currentBevel = _isPressed ? 0.0 : bevel;
+
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) {
+        setState(() => _isPressed = false);
+        widget.onPressed();
+      },
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 60),
+        curve: Curves.easeOut,
+        transform: Matrix4.translationValues(0.0, translationY, 0.0),
+        width: widget.width ?? double.infinity,
+        height: widget.height,
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFD41D),
+          gradient: const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFFFEA75),
+              Color(0xFFFFD41D),
+              Color(0xFFFFB800),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(16.0),
+          border: Border.all(
+            color: const Color(0xFFFFF6B0),
+            width: 1.5,
+          ),
+          boxShadow: [
+            if (currentBevel > 0.0) ...[
+              const BoxShadow(
+                color: Color(0xFF9E6500),
+                offset: Offset(0, 4),
+                blurRadius: 0,
+                spreadRadius: 0,
+              ),
+              const BoxShadow(
+                color: Color(0x33000000),
+                offset: Offset(0, 8),
+                blurRadius: 12,
+                spreadRadius: 0,
+              ),
+            ],
+          ],
+        ),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (widget.icon != null) ...[
+              widget.icon!,
+              const SizedBox(width: 8.0),
+            ],
+            Text(
+              widget.text,
+              style: const TextStyle(
+                color: Color(0xFF261700),
+                fontWeight: FontWeight.w900,
+                fontSize: 16.0,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

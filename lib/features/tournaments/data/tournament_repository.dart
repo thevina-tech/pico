@@ -8,6 +8,7 @@ import 'package:pico/features/matches/domain/competition.dart';
 import 'package:pico/features/matches/data/match_repository.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
 import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
+import '../domain/league_message.dart';
 import '../domain/private_league.dart';
 import '../domain/private_league_exceptions.dart';
 import '../domain/private_league_member.dart';
@@ -100,6 +101,16 @@ Future<List<PrivateLeagueMember>> privateLeagueMembers(
   return await repo.getPrivateLeagueMembers(leagueId);
 }
 
+/// Provider for a private league's message feed.
+@riverpod
+Future<List<LeagueMessage>> leagueMessages(
+  Ref ref,
+  String leagueId,
+) async {
+  final repo = ref.watch(tournamentRepositoryProvider);
+  return await repo.getLeagueMessages(leagueId);
+}
+
 /// Provider for matches filtered by competition ID.
 @riverpod
 Future<List<PicoMatch>> competitionMatches(
@@ -159,6 +170,16 @@ abstract class TournamentRepository {
   Future<void> leavePrivateLeague({
     required String leagueId,
     required String userId,
+  });
+
+  // League Chat
+  Future<List<LeagueMessage>> getLeagueMessages(String leagueId, {int limit = 50});
+  Future<LeagueMessage> sendLeagueMessage({
+    required String leagueId,
+    required String userId,
+    required String message,
+    String? username,
+    String? avatarUrl,
   });
 }
 
@@ -276,6 +297,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
   final Map<String, Set<String>> _mockParticipants = {};
   final Map<String, PrivateLeague> _mockPrivateLeagues = {};
   final Map<String, Set<String>> _mockLeagueMembers = {};
+  final Map<String, List<LeagueMessage>> _mockLeagueMessages = {};
 
   @override
   Future<List<Competition>> getCompetitions() async {
@@ -952,7 +974,12 @@ class SupabaseTournamentRepository implements TournamentRepository {
     if (_supabase == null) {
       final league = _mockPrivateLeagues[leagueId];
       if (league != null && league.ownerId == userId) {
-        throw const LeagueOwnerCannotLeaveException();
+        final remaining = (_mockLeagueMembers[leagueId] ?? {}).where((id) => id != userId).toList();
+        if (remaining.isNotEmpty) {
+          _mockPrivateLeagues[leagueId] = league.copyWith(ownerId: remaining.first, adminId: remaining.first);
+        } else {
+          _mockPrivateLeagues.remove(leagueId);
+        }
       }
       _mockLeagueMembers[leagueId]?.remove(userId);
       return;
@@ -961,16 +988,107 @@ class SupabaseTournamentRepository implements TournamentRepository {
     try {
       await _supabase.rpc('leave_private_league', params: {
         'p_league_id': leagueId,
+        'p_user_id': userId,
       });
     } on PostgrestException catch (e) {
       AppLogger.warning('Postgrest error leaving league: ${e.message}');
-      final msg = e.message.toLowerCase();
-      if (msg.contains('owner_cannot_leave')) {
-        throw const LeagueOwnerCannotLeaveException();
-      }
       throw LeagueGenericException(e.message);
     } catch (e, st) {
       AppLogger.error('Failed to leave private league $leagueId', e, st);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<LeagueMessage>> getLeagueMessages(String leagueId, {int limit = 50}) async {
+    if (_supabase == null) {
+      return List<LeagueMessage>.from(_mockLeagueMessages[leagueId] ?? []);
+    }
+
+    try {
+      final response = await _supabase
+          .from('league_messages')
+          .select('''
+            id,
+            league_id,
+            user_id,
+            message,
+            created_at,
+            profile:profiles(username, avatar_url)
+          ''')
+          .eq('league_id', leagueId)
+          .order('created_at', ascending: false)
+          .limit(limit);
+
+      return (response as List<dynamic>).map((row) {
+        final rowMap = Map<String, dynamic>.from(row as Map);
+        final profile = (rowMap['profile'] ?? rowMap['profiles']) as Map<String, dynamic>?;
+        return LeagueMessage.fromJson({
+          ...rowMap,
+          'username': profile?['username'] ?? 'Player',
+          'avatar_url': profile?['avatar_url'],
+        });
+      }).toList();
+    } catch (e, st) {
+      AppLogger.error('Failed to get league messages for $leagueId', e, st);
+      return [];
+    }
+  }
+
+  @override
+  Future<LeagueMessage> sendLeagueMessage({
+    required String leagueId,
+    required String userId,
+    required String message,
+    String? username,
+    String? avatarUrl,
+  }) async {
+    final cleanMessage = message.trim();
+    if (cleanMessage.isEmpty) {
+      throw ArgumentError('Message cannot be empty');
+    }
+
+    if (_supabase == null) {
+      final newMsg = LeagueMessage(
+        id: 'msg_${DateTime.now().millisecondsSinceEpoch}',
+        leagueId: leagueId,
+        userId: userId,
+        message: cleanMessage,
+        createdAt: DateTime.now(),
+        username: username ?? 'You',
+        avatarUrl: avatarUrl,
+      );
+      _mockLeagueMessages.putIfAbsent(leagueId, () => []).insert(0, newMsg);
+      return newMsg;
+    }
+
+    try {
+      final response = await _supabase
+          .from('league_messages')
+          .insert({
+            'league_id': leagueId,
+            'user_id': userId,
+            'message': cleanMessage,
+          })
+          .select('''
+            id,
+            league_id,
+            user_id,
+            message,
+            created_at,
+            profile:profiles(username, avatar_url)
+          ''')
+          .single();
+
+      final rowMap = Map<String, dynamic>.from(response);
+      final profile = (rowMap['profile'] ?? rowMap['profiles']) as Map<String, dynamic>?;
+      return LeagueMessage.fromJson({
+        ...rowMap,
+        'username': profile?['username'] ?? username ?? 'Player',
+        'avatar_url': profile?['avatar_url'] ?? avatarUrl,
+      });
+    } catch (e, st) {
+      AppLogger.error('Failed to send league message', e, st);
       rethrow;
     }
   }

@@ -411,7 +411,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tournamentsTitle => 'Torneos';
 
   @override
-  String get tournamentsSubtitle => 'Compite con amigos · Sin dinero real';
+  String get tournamentsSubtitle => 'Sube en las tablas o compite con amigos';
 
   @override
   String get myLeaguesTab => 'Mis Ligas';
@@ -489,7 +489,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Crea una liga para tus amigos o únete con un código de invitación.';
 
   @override
-  String get officialTournamentBadge => 'TORNEO OFICIAL';
+  String get officialTournamentBadge => 'TORNEO PICO';
 
   @override
   String get leagueCreatedSuccessTitle => '¡Liga Creada! 🎉';

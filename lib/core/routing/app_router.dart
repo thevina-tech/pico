@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/features/auth/domain/auth_state.dart';
+import 'package:pico/features/auth/presentation/auth_gate.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/auth/presentation/onboarding_screen.dart';
 import 'package:pico/features/home/presentation/home_screen.dart';
@@ -15,6 +16,7 @@ import 'package:pico/features/tournaments/presentation/create_private_league_scr
 import 'package:pico/features/tournaments/presentation/join_private_league_screen.dart';
 import 'package:pico/features/tournaments/presentation/public_tournament_screen.dart';
 import 'package:pico/features/tournaments/presentation/private_tournament_screen.dart';
+import 'package:pico/features/tournaments/presentation/league_chat_screen.dart';
 import 'package:pico/features/tournaments/presentation/tournaments_screen.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
 import 'package:pico/features/predictions/presentation/prediction_screen.dart';
@@ -61,6 +63,11 @@ class AppRouter {
     PicoAuthState authState,
     String matchedLocation,
   ) {
+    // 0. AuthGate at root is the primary decision-maker on app startup.
+    if (matchedLocation == '/') {
+      return null;
+    }
+
     final isGoingToOnboarding = matchedLocation.startsWith('/onboarding');
     final isGoingToPersonalization = matchedLocation == '/personalization';
 
@@ -69,8 +76,8 @@ class AppRouter {
       return isGoingToOnboarding ? null : '/onboarding';
     }
 
-    // 2. Authenticating -> allow current transition
-    if (authState is PicoAuthAuthenticating) {
+    // 2. Initializing or Authenticating -> allow current transition
+    if (authState is PicoAuthInitial || authState is PicoAuthAuthenticating) {
       return null;
     }
 
@@ -95,18 +102,25 @@ class AppRouter {
   /// Factory creating a configured [GoRouter] with auth guard redirects.
   static GoRouter createRouter(
     PicoAuthState authState, {
+    String initialLocation = '/',
     Listenable? refreshListenable,
     PicoAuthState Function()? currentAuthState,
   }) {
     return GoRouter(
       navigatorKey: rootNavigatorKey,
-      initialLocation: '/home',
+      initialLocation: initialLocation,
       refreshListenable: refreshListenable,
       redirect: (context, state) {
         final current = currentAuthState != null ? currentAuthState() : authState;
         return resolveRedirect(current, state.matchedLocation);
       },
       routes: [
+        GoRoute(
+          path: '/',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: AuthGate(),
+          ),
+        ),
         GoRoute(
           path: '/onboarding',
           pageBuilder: (context, state) => const NoTransitionPage(
@@ -179,6 +193,20 @@ class AppRouter {
         GoRoute(
           parentNavigatorKey: rootNavigatorKey,
           path: '/tournaments/private/:id',
+          pageBuilder: (context, state) {
+            final id = state.pathParameters['id'] ?? '';
+            final league = state.extra as PrivateLeague?;
+            return MaterialPage(
+              child: LeagueChatScreen(
+                leagueId: id,
+                initialLeague: league,
+              ),
+            );
+          },
+        ),
+        GoRoute(
+          parentNavigatorKey: rootNavigatorKey,
+          path: '/tournaments/private/:id/standings',
           pageBuilder: (context, state) {
             final id = state.pathParameters['id'] ?? '';
             final league = state.extra as PrivateLeague?;
