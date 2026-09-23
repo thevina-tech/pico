@@ -87,6 +87,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
         backgroundColor: PicoColors.pitchBackground,
         appBar: PicoAppBar(
           onProfileTap: () => context.go('/profile'),
+          onCoinsTap: () => context.go('/shop'),
         ),
       bottomNavigationBar: widget.showBottomNavBar
           ? Center(
@@ -98,6 +99,22 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
                   onTap: (idx) {
                     setState(() => _currentNavIndex = idx);
                     widget.onNavTap?.call(idx);
+                    switch (idx) {
+                      case 0:
+                        context.go('/shop');
+                        break;
+                      case 1:
+                        break;
+                      case 2:
+                        context.go('/home');
+                        break;
+                      case 3:
+                        context.go('/tournaments');
+                        break;
+                      case 4:
+                        context.go('/profile');
+                        break;
+                    }
                   },
                 ),
               ),

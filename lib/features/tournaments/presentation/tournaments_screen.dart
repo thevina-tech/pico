@@ -37,7 +37,9 @@ class TournamentsScreen extends ConsumerWidget {
     return PicoGameExitScope(
       child: Scaffold(
         backgroundColor: PicoColors.pitchBackground,
-        appBar: const PicoAppBar(),
+        appBar: PicoAppBar(
+          onCoinsTap: () => context.go('/shop'),
+        ),
         body: PicoPitchBackground(
           child: SafeArea(
             top: false,

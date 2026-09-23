@@ -28,8 +28,9 @@ class HomeScreen extends ConsumerStatefulWidget {
     super.key,
     this.heroMatch,
     this.showBottomNavBar = true,
-    this.currentNavIndex = 0,
+    this.currentNavIndex = 2,
     this.onNavTap,
+    this.onNavigateShop,
     this.onNavigateMatches,
     this.onNavigateTournaments,
     this.onNavigateProfile,
@@ -42,6 +43,7 @@ class HomeScreen extends ConsumerStatefulWidget {
   final bool showBottomNavBar;
   final int currentNavIndex;
   final ValueChanged<int>? onNavTap;
+  final VoidCallback? onNavigateShop;
   final VoidCallback? onNavigateMatches;
   final VoidCallback? onNavigateTournaments;
   final VoidCallback? onNavigateProfile;
@@ -67,6 +69,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.currentNavIndex != widget.currentNavIndex) {
       _currentNavIndex = widget.currentNavIndex;
+    }
+  }
+
+  void _navigateToShop() {
+    if (widget.onNavigateShop != null) {
+      widget.onNavigateShop!();
+    } else {
+      context.go('/shop');
     }
   }
 
@@ -172,6 +182,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         backgroundColor: PicoColors.pitchBackground,
         appBar: PicoAppBar(
           onProfileTap: _navigateToProfile,
+          onCoinsTap: _navigateToShop,
         ),
         bottomNavigationBar: widget.showBottomNavBar
             ? Center(
@@ -185,14 +196,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       widget.onNavTap?.call(idx);
                       switch (idx) {
                         case 0:
+                          _navigateToShop();
                           break;
                         case 1:
                           _navigateToMatches();
                           break;
                         case 2:
-                          _navigateToTournaments();
+                          // Already Home (center tab)
                           break;
                         case 3:
+                          _navigateToTournaments();
+                          break;
+                        case 4:
                           _navigateToProfile();
                           break;
                       }

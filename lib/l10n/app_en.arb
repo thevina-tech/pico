@@ -8,6 +8,10 @@
   "@predictButton": {
     "description": "Label for the predict CTA button"
   },
+  "navShop": "Shop",
+  "@navShop": {
+    "description": "Bottom navigation Shop tab label"
+  },
   "navHome": "Home",
   "@navHome": {
     "description": "Bottom navigation Home tab label"
