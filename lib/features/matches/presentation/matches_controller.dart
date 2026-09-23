@@ -121,6 +121,9 @@ class MatchesState {
         if (isSameCompetition(m.competitionId ?? '', selected.competitionId!)) {
           return true;
         }
+        if (m.competitionId != null && m.competitionId!.isNotEmpty) {
+          return false;
+        }
       }
       if (m.competitionName == selected.competitionName) return true;
       if (m.competitionId == selected.competitionName) return true;

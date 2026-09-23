@@ -60,11 +60,9 @@ String _normalizeCompetitionText(String input) {
 /// Helper method determining if a [PicoMatch] is linked to an enrolled [Tournament].
 bool matchBelongsToTournament(PicoMatch match, Tournament tournament) {
   // 1. Match by competitionId directly or via known provider aliases
-  if (match.competitionId != null && match.competitionId!.isNotEmpty) {
+  if (match.competitionId != null && match.competitionId!.isNotEmpty && tournament.competitionId.isNotEmpty) {
     if (match.competitionId == tournament.competitionId) return true;
-    if (isSameCompetition(match.competitionId!, tournament.competitionId)) {
-      return true;
-    }
+    return isSameCompetition(match.competitionId!, tournament.competitionId);
   }
 
   // 2. Match by competitionName directly or via known localized/commercial aliases
@@ -84,12 +82,12 @@ bool isSameCompetition(String id1, String id2) {
   const aliases = [
     {'la_liga', 'laliga', '1', 'primera_division', 'primera division'},
     {'premier_league', 'epl', '10'},
-    {'serie_a', '7', '2'},
-    {'bundesliga', '8', '3'},
-    {'ligue_1', '16', '4'},
-    {'champions_league', 'ucl', '107', '6', '70393'},
-    {'europa_league', 'uel', '117', '7'},
-    {'conference_league', 'uecl', '2492', '8'},
+    {'serie_a', '7'},
+    {'bundesliga', '8'},
+    {'ligue_1', '16'},
+    {'champions_league', 'ucl', '107', '70393'},
+    {'europa_league', 'uel', '117'},
+    {'conference_league', 'uecl', '2492'},
     {'championship', '67799'},
   ];
 
