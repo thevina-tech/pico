@@ -222,7 +222,26 @@
   "predictionSaveFailed": "Error al guardar la predicción. Por favor inténtalo de nuevo.",
   "matchFinishedLabel": "Partido finalizado",
   "feedTabAll": "Todos",
-  "matchLocksAt": "Cierra a las {time}"
+  "matchLocksAt": "Cierra a las {time}",
+  "matchesTotalSub": "Total",
+  "bestStreak": "Mejor: {count}",
+  "hitRateTrendUp": "↑ +{rate}%",
+  "achievementsTitle": "Logros",
+  "seeAll": "Ver todos",
+  "achievementOnFireTitle": "En Racha",
+  "achievementOnFireDesc": "Racha de {count}",
+  "achievementSharpshooterTitle": "Francotirador",
+  "achievementSharpshooterDesc": "{rate}% de acierto",
+  "achievementPodiumTitle": "Podio",
+  "achievementPodiumDesc": "{count} podios",
+  "achievementStreak10Title": "Racha 10",
+  "achievementLockedLabel": "Bloqueado",
+  "helpAndSupportTitle": "Ayuda y Soporte",
+  "helpAndSupportSubtitle": "Reglas, guía de puntuación y contacto",
+  "accountSettingsAria": "Ajustes de Cuenta",
+  "signOutButton": "Cerrar Sesión",
+  "picoRulesTitle": "Reglas del Juego y Puntuación",
+  "picoRulesSubtitle": "Juego limpio, cierres en servidor y puntuación transparente"
 }
 
 

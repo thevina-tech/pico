@@ -254,7 +254,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get followingAccordionTitle => 'Following';
 
   @override
-  String get followingAccordionSubtitle => 'Clubs, leagues & priority alerts';
+  String get followingAccordionSubtitle => 'Clubs, leagues & alerts';
 
   @override
   String followingPinnedCount(int count) {
@@ -265,8 +265,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get historyAccordionTitle => 'History';
 
   @override
-  String get historyAccordionSubtitle =>
-      'Predictions slip archive & past trophies';
+  String get historyAccordionSubtitle => 'Predictions, archive & past trophies';
 
   @override
   String historySummary(int count, int rate) {
@@ -761,4 +760,69 @@ class AppLocalizationsEn extends AppLocalizations {
   String matchLocksAt(String time) {
     return 'Locks $time';
   }
+
+  @override
+  String get matchesTotalSub => 'Total';
+
+  @override
+  String bestStreak(int count) {
+    return 'Best: $count';
+  }
+
+  @override
+  String hitRateTrendUp(int rate) {
+    return '↑ +$rate%';
+  }
+
+  @override
+  String get achievementsTitle => 'Achievements';
+
+  @override
+  String get seeAll => 'See all';
+
+  @override
+  String get achievementOnFireTitle => 'On Fire';
+
+  @override
+  String achievementOnFireDesc(int count) {
+    return '$count streak';
+  }
+
+  @override
+  String get achievementSharpshooterTitle => 'Sharpshooter';
+
+  @override
+  String achievementSharpshooterDesc(int rate) {
+    return '$rate% hit rate';
+  }
+
+  @override
+  String get achievementPodiumTitle => 'Podium';
+
+  @override
+  String achievementPodiumDesc(int count) {
+    return '$count podiums';
+  }
+
+  @override
+  String get achievementStreak10Title => '10 Streak';
+
+  @override
+  String get achievementLockedLabel => 'Locked';
+
+  @override
+  String get helpAndSupportTitle => 'Help & Support';
+
+  @override
+  String get helpAndSupportSubtitle => 'Rules, scoring guide & contact';
+
+  @override
+  String get accountSettingsAria => 'Account Settings';
+
+  @override
+  String get picoRulesTitle => 'Game Rules & Scoring';
+
+  @override
+  String get picoRulesSubtitle =>
+      'Fair play, server-side locks & transparent scoring';
 }

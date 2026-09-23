@@ -428,7 +428,7 @@ abstract class AppLocalizations {
   /// **'Settings & Menu'**
   String get homeMenuTitle;
 
-  /// Action label to sign out
+  /// Button to sign out of user account
   ///
   /// In en, this message translates to:
   /// **'Sign Out'**
@@ -539,7 +539,7 @@ abstract class AppLocalizations {
   /// Subtitle of the Following accordion section
   ///
   /// In en, this message translates to:
-  /// **'Clubs, leagues & priority alerts'**
+  /// **'Clubs, leagues & alerts'**
   String get followingAccordionSubtitle;
 
   /// Badge showing pinned items count
@@ -557,7 +557,7 @@ abstract class AppLocalizations {
   /// Subtitle of the History accordion section
   ///
   /// In en, this message translates to:
-  /// **'Predictions slip archive & past trophies'**
+  /// **'Predictions, archive & past trophies'**
   String get historyAccordionSubtitle;
 
   /// Badge in history accordion header
@@ -1423,6 +1423,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Locks {time}'**
   String matchLocksAt(String time);
+
+  /// Sub-label for total matches card in profile
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get matchesTotalSub;
+
+  /// Best streak indicator in profile
+  ///
+  /// In en, this message translates to:
+  /// **'Best: {count}'**
+  String bestStreak(int count);
+
+  /// Positive hit rate trend
+  ///
+  /// In en, this message translates to:
+  /// **'↑ +{rate}%'**
+  String hitRateTrendUp(int rate);
+
+  /// Section title for Achievements
+  ///
+  /// In en, this message translates to:
+  /// **'Achievements'**
+  String get achievementsTitle;
+
+  /// See all button label
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get seeAll;
+
+  /// Title for on fire achievement badge
+  ///
+  /// In en, this message translates to:
+  /// **'On Fire'**
+  String get achievementOnFireTitle;
+
+  /// Description for on fire achievement badge
+  ///
+  /// In en, this message translates to:
+  /// **'{count} streak'**
+  String achievementOnFireDesc(int count);
+
+  /// Title for sharpshooter achievement badge
+  ///
+  /// In en, this message translates to:
+  /// **'Sharpshooter'**
+  String get achievementSharpshooterTitle;
+
+  /// Description for sharpshooter achievement badge
+  ///
+  /// In en, this message translates to:
+  /// **'{rate}% hit rate'**
+  String achievementSharpshooterDesc(int rate);
+
+  /// Title for podium finisher achievement badge
+  ///
+  /// In en, this message translates to:
+  /// **'Podium'**
+  String get achievementPodiumTitle;
+
+  /// Description for podium finisher achievement badge
+  ///
+  /// In en, this message translates to:
+  /// **'{count} podiums'**
+  String achievementPodiumDesc(int count);
+
+  /// Title for 10 streak achievement badge
+  ///
+  /// In en, this message translates to:
+  /// **'10 Streak'**
+  String get achievementStreak10Title;
+
+  /// Locked indicator for achievement badge
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get achievementLockedLabel;
+
+  /// Title for Help & Support quick action
+  ///
+  /// In en, this message translates to:
+  /// **'Help & Support'**
+  String get helpAndSupportTitle;
+
+  /// Subtitle for Help & Support quick action
+  ///
+  /// In en, this message translates to:
+  /// **'Rules, scoring guide & contact'**
+  String get helpAndSupportSubtitle;
+
+  /// Aria label for account settings icon button
+  ///
+  /// In en, this message translates to:
+  /// **'Account Settings'**
+  String get accountSettingsAria;
+
+  /// Title for game rules dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Game Rules & Scoring'**
+  String get picoRulesTitle;
+
+  /// Subtitle for game rules dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Fair play, server-side locks & transparent scoring'**
+  String get picoRulesSubtitle;
 }
 
 class _AppLocalizationsDelegate

@@ -770,4 +770,69 @@ class AppLocalizationsEs extends AppLocalizations {
   String matchLocksAt(String time) {
     return 'Cierra a las $time';
   }
+
+  @override
+  String get matchesTotalSub => 'Total';
+
+  @override
+  String bestStreak(int count) {
+    return 'Mejor: $count';
+  }
+
+  @override
+  String hitRateTrendUp(int rate) {
+    return '↑ +$rate%';
+  }
+
+  @override
+  String get achievementsTitle => 'Logros';
+
+  @override
+  String get seeAll => 'Ver todos';
+
+  @override
+  String get achievementOnFireTitle => 'En Racha';
+
+  @override
+  String achievementOnFireDesc(int count) {
+    return 'Racha de $count';
+  }
+
+  @override
+  String get achievementSharpshooterTitle => 'Francotirador';
+
+  @override
+  String achievementSharpshooterDesc(int rate) {
+    return '$rate% de acierto';
+  }
+
+  @override
+  String get achievementPodiumTitle => 'Podio';
+
+  @override
+  String achievementPodiumDesc(int count) {
+    return '$count podios';
+  }
+
+  @override
+  String get achievementStreak10Title => 'Racha 10';
+
+  @override
+  String get achievementLockedLabel => 'Bloqueado';
+
+  @override
+  String get helpAndSupportTitle => 'Ayuda y Soporte';
+
+  @override
+  String get helpAndSupportSubtitle => 'Reglas, guía de puntuación y contacto';
+
+  @override
+  String get accountSettingsAria => 'Ajustes de Cuenta';
+
+  @override
+  String get picoRulesTitle => 'Reglas del Juego y Puntuación';
+
+  @override
+  String get picoRulesSubtitle =>
+      'Juego limpio, cierres en servidor y puntuación transparente';
 }

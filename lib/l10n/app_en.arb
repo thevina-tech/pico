@@ -332,7 +332,7 @@
   "@followingAccordionTitle": {
     "description": "Title of the Following accordion section"
   },
-  "followingAccordionSubtitle": "Clubs, leagues & priority alerts",
+  "followingAccordionSubtitle": "Clubs, leagues & alerts",
   "@followingAccordionSubtitle": {
     "description": "Subtitle of the Following accordion section"
   },
@@ -350,7 +350,7 @@
   "@historyAccordionTitle": {
     "description": "Title of the History accordion section"
   },
-  "historyAccordionSubtitle": "Predictions slip archive & past trophies",
+  "historyAccordionSubtitle": "Predictions, archive & past trophies",
   "@historyAccordionSubtitle": {
     "description": "Subtitle of the History accordion section"
   },
@@ -1045,6 +1045,112 @@
         "example": "19:50"
       }
     }
+  },
+  "matchesTotalSub": "Total",
+  "@matchesTotalSub": {
+    "description": "Sub-label for total matches card in profile"
+  },
+  "bestStreak": "Best: {count}",
+  "@bestStreak": {
+    "description": "Best streak indicator in profile",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "6"
+      }
+    }
+  },
+  "hitRateTrendUp": "↑ +{rate}%",
+  "@hitRateTrendUp": {
+    "description": "Positive hit rate trend",
+    "placeholders": {
+      "rate": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "achievementsTitle": "Achievements",
+  "@achievementsTitle": {
+    "description": "Section title for Achievements"
+  },
+  "seeAll": "See all",
+  "@seeAll": {
+    "description": "See all button label"
+  },
+  "achievementOnFireTitle": "On Fire",
+  "@achievementOnFireTitle": {
+    "description": "Title for on fire achievement badge"
+  },
+  "achievementOnFireDesc": "{count} streak",
+  "@achievementOnFireDesc": {
+    "description": "Description for on fire achievement badge",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "achievementSharpshooterTitle": "Sharpshooter",
+  "@achievementSharpshooterTitle": {
+    "description": "Title for sharpshooter achievement badge"
+  },
+  "achievementSharpshooterDesc": "{rate}% hit rate",
+  "@achievementSharpshooterDesc": {
+    "description": "Description for sharpshooter achievement badge",
+    "placeholders": {
+      "rate": {
+        "type": "int",
+        "example": "70"
+      }
+    }
+  },
+  "achievementPodiumTitle": "Podium",
+  "@achievementPodiumTitle": {
+    "description": "Title for podium finisher achievement badge"
+  },
+  "achievementPodiumDesc": "{count} podiums",
+  "@achievementPodiumDesc": {
+    "description": "Description for podium finisher achievement badge",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "achievementStreak10Title": "10 Streak",
+  "@achievementStreak10Title": {
+    "description": "Title for 10 streak achievement badge"
+  },
+  "achievementLockedLabel": "Locked",
+  "@achievementLockedLabel": {
+    "description": "Locked indicator for achievement badge"
+  },
+  "helpAndSupportTitle": "Help & Support",
+  "@helpAndSupportTitle": {
+    "description": "Title for Help & Support quick action"
+  },
+  "helpAndSupportSubtitle": "Rules, scoring guide & contact",
+  "@helpAndSupportSubtitle": {
+    "description": "Subtitle for Help & Support quick action"
+  },
+  "accountSettingsAria": "Account Settings",
+  "@accountSettingsAria": {
+    "description": "Aria label for account settings icon button"
+  },
+  "signOutButton": "Sign Out",
+  "@signOutButton": {
+    "description": "Button to sign out of user account"
+  },
+  "picoRulesTitle": "Game Rules & Scoring",
+  "@picoRulesTitle": {
+    "description": "Title for game rules dialog"
+  },
+  "picoRulesSubtitle": "Fair play, server-side locks & transparent scoring",
+  "@picoRulesSubtitle": {
+    "description": "Subtitle for game rules dialog"
   }
 }
 

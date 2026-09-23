@@ -76,8 +76,8 @@ void main() {
     );
   }
 
-  group('Sprint 2: ProfileScreen - Visuals & Data Consistency', () {
-    testWidgets('Renders dynamic profile identity: username, level, streak, coins, and XP',
+  group('ProfileScreen - Dark Stadium Gamer Hub Design & Authenticated User', () {
+    testWidgets('Renders dynamic profile identity: username, Matchday Prophet, LVL, and XP progress',
         (WidgetTester tester) async {
       await tester.pumpWidget(createSubject());
       await tester.pumpAndSettle();
@@ -86,87 +86,144 @@ void main() {
       expect(find.text('CR7_Predictor'), findsOneWidget);
       expect(find.text('Matchday Prophet'), findsOneWidget);
 
-      // Level badge
+      // Level badge & XP text
       expect(find.text('LVL 12'), findsOneWidget);
+      expect(find.text('450 / 1,000 XP'), findsOneWidget);
+    });
 
-      // Streak & Coins pills
-      expect(find.textContaining('14 Streak'), findsOneWidget);
-      expect(find.textContaining('3,200 Coins'), findsOneWidget);
+    testWidgets('Renders Quick Stats Grid (Hit Rate, Matches, Streak)',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createSubject());
+      await tester.pumpAndSettle();
 
-      // Tactical stats grid
-      expect(find.text('HIT RATE'), findsOneWidget);
+      // Hit Rate
       expect(find.text('70%'), findsOneWidget);
-      expect(find.text('MATCHES'), findsOneWidget);
+      expect(find.text('Hit Rate'), findsOneWidget);
+      expect(find.text('↑ +4%'), findsOneWidget);
+
+      // Matches
       expect(find.text('84'), findsOneWidget);
-      expect(find.text('PODIUMS'), findsOneWidget);
-      expect(find.text('3'), findsOneWidget);
-      expect(find.text('CLUB RANK'), findsOneWidget);
-      expect(find.text('#12'), findsNWidgets(2));
+      expect(find.text('Matches'), findsOneWidget);
+      expect(find.text('Total'), findsOneWidget);
 
-      // XP Progress to next level
-      expect(find.text('XP Progress to LVL 13'), findsOneWidget);
-      expect(find.textContaining('450', findRichText: true), findsOneWidget);
-      expect(find.textContaining('/ 1,000 XP', findRichText: true), findsOneWidget);
+      // Streak
+      expect(find.text('14'), findsOneWidget);
+      expect(find.text('Streak'), findsOneWidget);
+      expect(find.text('Best: 14'), findsOneWidget);
     });
 
-    testWidgets('Renders all 4 Stitch expandable accordions',
+    testWidgets('Renders Spotlight Tournament Card and Hub Paired Cards',
         (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(800, 2000);
+      tester.view.physicalSize = const Size(800, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
       await tester.pumpWidget(createSubject());
       await tester.pumpAndSettle();
 
+      // Spotlight Tournament card
       expect(find.text('Tournaments'), findsOneWidget);
+      expect(find.text('Active cups & weekly leagues'), findsOneWidget);
+      expect(find.text('2 Active'), findsOneWidget);
+      expect(find.byKey(const Key('profile_tournaments_card')), findsOneWidget);
+
+      // Following Hub Card
       expect(find.text('Following'), findsOneWidget);
+      expect(find.text('Clubs, leagues & alerts'), findsOneWidget);
+      expect(find.text('4 Pinned'), findsOneWidget);
+      expect(find.byKey(const Key('profile_following_card')), findsOneWidget);
+
+      // History Hub Card
       expect(find.text('History'), findsOneWidget);
-      expect(find.text('Settings'), findsOneWidget);
-
-      // Tournaments is expanded by default: check for content
-      expect(find.text('La Liga Weekly'), findsOneWidget);
-      expect(find.text('The Friday Five'), findsOneWidget);
-
-      // Following is expanded by default: check for followed teams
-      expect(find.text('Real Madrid'), findsOneWidget);
-      expect(find.text('Arsenal'), findsOneWidget);
+      expect(find.text('Predictions, archive & past trophies'), findsOneWidget);
+      expect(find.text('84 Matches · 70%'), findsOneWidget);
+      expect(find.byKey(const Key('profile_history_card')), findsOneWidget);
     });
 
-    testWidgets('Toggles accordion expansion when tapping accordion header',
+    testWidgets('Renders Achievements showcase with 4 Hexagon Badges',
         (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(800, 2000);
+      tester.view.physicalSize = const Size(800, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
       await tester.pumpWidget(createSubject());
       await tester.pumpAndSettle();
 
-      final crossFades =
-          tester.widgetList<AnimatedCrossFade>(find.byType(AnimatedCrossFade)).toList();
-      expect(crossFades[0].crossFadeState, CrossFadeState.showSecond);
-      expect(crossFades[1].crossFadeState, CrossFadeState.showSecond);
-      expect(crossFades[2].crossFadeState, CrossFadeState.showFirst);
-      expect(crossFades[3].crossFadeState, CrossFadeState.showFirst);
+      expect(find.text('Achievements'), findsOneWidget);
+      expect(find.text('See all'), findsOneWidget);
 
-      // Tap History accordion header
-      await tester.tap(find.text('History'));
-      await tester.pumpAndSettle();
+      expect(find.text('On Fire'), findsOneWidget);
+      expect(find.text('14 streak'), findsOneWidget);
 
-      final updatedCrossFades =
-          tester.widgetList<AnimatedCrossFade>(find.byType(AnimatedCrossFade)).toList();
-      expect(updatedCrossFades[2].crossFadeState, CrossFadeState.showSecond);
+      expect(find.text('Sharpshooter'), findsOneWidget);
+      expect(find.text('70% hit rate'), findsOneWidget);
 
-      // Tap Tournaments accordion header to collapse it
-      await tester.tap(find.text('Tournaments'));
-      await tester.pumpAndSettle();
+      expect(find.text('Podium'), findsOneWidget);
+      expect(find.text('3 podiums'), findsOneWidget);
 
-      final afterTournamentsToggle =
-          tester.widgetList<AnimatedCrossFade>(find.byType(AnimatedCrossFade)).toList();
-      expect(afterTournamentsToggle[0].crossFadeState, CrossFadeState.showFirst);
+      expect(find.text('10 Streak'), findsOneWidget);
+      expect(find.text('Locked'), findsOneWidget);
     });
 
-    testWidgets('Floating "Share Matchday Card" CTA opens bottom sheet modal',
+    testWidgets('Quick Actions: Help & Support opens game rules modal',
         (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(800, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(createSubject());
+      await tester.pumpAndSettle();
+
+      final helpAction = find.byKey(const Key('profile_help_action'));
+      expect(helpAction, findsOneWidget);
+
+      await tester.tap(helpAction);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Game Rules & Scoring'), findsOneWidget);
+      expect(find.text('Scoring Pico Points'), findsOneWidget);
+      expect(find.text('Prediction Lock Window'), findsOneWidget);
+
+      // Dismiss modal
+      await tester.tap(find.text('Done'));
+      await tester.pumpAndSettle();
+      expect(find.text('Game Rules & Scoring'), findsNothing);
+    });
+
+    testWidgets('Quick Actions: Settings opens settings modal and Sign Out triggers auth signOut',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(800, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final spyAuth = _SpyAuthNotifier();
+      await tester.pumpWidget(createSubject(authNotifier: spyAuth));
+      await tester.pumpAndSettle();
+
+      final settingsAction = find.byKey(const Key('profile_settings_action'));
+      expect(settingsAction, findsOneWidget);
+
+      await tester.tap(settingsAction);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Push Notifications'), findsOneWidget);
+      expect(find.text('Matchday Haptics'), findsOneWidget);
+
+      final signOutFinder = find.byKey(const Key('profile_sign_out_button'));
+      expect(signOutFinder, findsOneWidget);
+
+      await tester.tap(signOutFinder);
+      await tester.pumpAndSettle();
+
+      expect(spyAuth.signOutCalled, isTrue);
+    });
+
+    testWidgets('Floating "Share Matchday Card" CTA opens modal and copies summary',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(800, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
       await tester.pumpWidget(createSubject());
       await tester.pumpAndSettle();
 
@@ -188,29 +245,6 @@ void main() {
       // Modal dismissed and snackbar shown
       expect(find.text('Matchday Trading Card'), findsNothing);
       expect(find.text('Profile summary copied to clipboard!'), findsOneWidget);
-    });
-
-    testWidgets('Settings accordion Sign Out button triggers auth signOut',
-        (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(800, 2000);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
-
-      final spyAuth = _SpyAuthNotifier();
-      await tester.pumpWidget(createSubject(authNotifier: spyAuth));
-      await tester.pumpAndSettle();
-
-      // Expand Settings accordion
-      await tester.tap(find.text('Settings'));
-      await tester.pumpAndSettle();
-
-      final signOutFinder = find.byKey(const Key('profile_sign_out_button'));
-      expect(signOutFinder, findsOneWidget);
-
-      await tester.tap(signOutFinder);
-      await tester.pumpAndSettle();
-
-      expect(spyAuth.signOutCalled, isTrue);
     });
   });
 }
