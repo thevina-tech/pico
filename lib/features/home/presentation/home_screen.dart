@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,7 +16,6 @@ import 'package:pico/shared/components/match_card.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
 import 'package:pico/shared/components/pico_companion.dart';
-import 'package:pico/shared/components/pico_pitch_background.dart';
 
 /// The official Pico Home screen based on Stitch "Direction A: Clash Royale Resource Bar & Subheader".
 ///
@@ -178,79 +178,130 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final matchesAsync = ref.watch(matchesFeedProvider);
 
     return PicoGameExitScope(
-      child: Scaffold(
-        backgroundColor: PicoColors.pitchBackground,
-        appBar: PicoAppBar(
-          onProfileTap: _navigateToProfile,
-          onCoinsTap: _navigateToShop,
-        ),
-        bottomNavigationBar: widget.showBottomNavBar
-            ? Center(
-                heightFactor: 1.0,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 440.0),
-                  child: PicoBottomNavBar(
-                    currentIndex: _currentNavIndex,
-                    onTap: (idx) {
-                      setState(() => _currentNavIndex = idx);
-                      widget.onNavTap?.call(idx);
-                      switch (idx) {
-                        case 0:
-                          _navigateToShop();
-                          break;
-                        case 1:
-                          _navigateToMatches();
-                          break;
-                        case 2:
-                          // Already Home (center tab)
-                          break;
-                        case 3:
-                          _navigateToTournaments();
-                          break;
-                        case 4:
-                          _navigateToProfile();
-                          break;
-                      }
-                    },
+      child: Stack(
+        children: [
+          // 1. Full-Bleed Sunny Pitch Background (Clouds & sky at top, subtly softened)
+          Positioned.fill(
+            child: ImageFiltered(
+              imageFilter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
+              child: Transform.scale(
+                scale: 1.02, // Subtle scale to prevent edge bleed
+                child: Image.asset(
+                  'assets/images/home_pitch_background.png',
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: PicoColors.pitchBackground,
                   ),
-                ),
-              )
-            : null,
-        body: PicoPitchBackground(
-          child: SafeArea(
-            top: false,
-            bottom: false,
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 440.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // 1. Home-Specific Subheader Row (Username on left, Menu on right)
-                    _buildSubHeaderRow(context, profile),
-
-                    // 2. Main Content & Matches Feed
-                    Expanded(
-                      child: RefreshIndicator(
-                        color: PicoColors.primary,
-                        backgroundColor: PicoColors.pitchSurfaceElevated,
-                        onRefresh: () async {
-                          await ref.read(matchesFeedProvider.notifier).refresh();
-                          await ref.read(currentUserProfileProvider.notifier).refresh();
-                        },
-                        child: matchesAsync.when(
-                          data: (matches) => _buildMatchesList(context, profile, matches),
-                          loading: () => _buildLoadingList(context, profile),
-                          error: (err, _) => _buildErrorList(context, profile, err),
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               ),
             ),
           ),
-        ),
+
+          // 2. Soft darkening overlay to tone down bright colors
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Container(
+                color: Colors.black.withValues(alpha: 0.18),
+              ),
+            ),
+          ),
+
+          // 3. Subtle pitch contrast vignette over the middle/bottom grass
+          Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: const [0.0, 0.20, 0.50, 1.0],
+                    colors: [
+                      Colors.transparent, // Sky & clouds remain clean behind Top Bar
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.12),
+                      Colors.black.withValues(alpha: 0.28),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // 3. Transparent Scaffold hosting floating top bar and scrollable content
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            appBar: PicoAppBar(
+              onProfileTap: _navigateToProfile,
+              onCoinsTap: _navigateToShop,
+            ),
+            bottomNavigationBar: widget.showBottomNavBar
+                ? Center(
+                    heightFactor: 1.0,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 440.0),
+                      child: PicoBottomNavBar(
+                        currentIndex: _currentNavIndex,
+                        onTap: (idx) {
+                          setState(() => _currentNavIndex = idx);
+                          widget.onNavTap?.call(idx);
+                          switch (idx) {
+                            case 0:
+                              _navigateToShop();
+                              break;
+                            case 1:
+                              _navigateToMatches();
+                              break;
+                            case 2:
+                              // Already Home (center tab)
+                              break;
+                            case 3:
+                              _navigateToTournaments();
+                              break;
+                            case 4:
+                              _navigateToProfile();
+                              break;
+                          }
+                        },
+                      ),
+                    ),
+                  )
+                : null,
+            body: SafeArea(
+              top: false,
+              bottom: false,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 440.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // 1. Home-Specific Subheader Row (Username on left, Menu on right)
+                      _buildSubHeaderRow(context, profile),
+
+                      // 2. Main Content & Matches Feed
+                      Expanded(
+                        child: RefreshIndicator(
+                          color: PicoColors.primary,
+                          backgroundColor: PicoColors.pitchSurfaceElevated,
+                          onRefresh: () async {
+                            await ref.read(matchesFeedProvider.notifier).refresh();
+                            await ref.read(currentUserProfileProvider.notifier).refresh();
+                          },
+                          child: matchesAsync.when(
+                            data: (matches) => _buildMatchesList(context, profile, matches),
+                            loading: () => _buildLoadingList(context, profile),
+                            error: (err, _) => _buildErrorList(context, profile, err),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

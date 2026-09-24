@@ -111,10 +111,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         if (didPop) return;
         _handleBack();
       },
-      child: Scaffold(
-        backgroundColor: const Color(0xFF0B1B13),
-        body: PicoPitchBackground(
-          child: SafeArea(
+      child: PicoPitchBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 440.0),

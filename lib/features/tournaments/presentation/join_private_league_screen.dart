@@ -6,6 +6,7 @@ import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/features/tournaments/domain/private_league_exceptions.dart';
 import 'package:pico/features/tournaments/presentation/private_league_controller.dart';
+import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
 /// Screen allowing users to join an existing Private League via a 6-character code.
@@ -131,11 +132,12 @@ class _JoinPrivateLeagueScreenState
     final l10n = AppLocalizations.of(context)!;
     final currentCode = _codeController.text.toUpperCase();
 
-    return Scaffold(
-      backgroundColor: PicoColors.pitchBackground,
-      appBar: AppBar(
-        backgroundColor: PicoColors.darkTray,
-        elevation: 0,
+    return PicoPitchBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded, color: PicoColors.textWhite),
           onPressed: () => Navigator.of(context).pop(),
@@ -359,8 +361,9 @@ class _JoinPrivateLeagueScreenState
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildHeroHeader(AppLocalizations l10n) {
     return Container(

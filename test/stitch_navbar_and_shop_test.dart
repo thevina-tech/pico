@@ -123,6 +123,64 @@ void main() {
       expect(find.text('Torneos'), findsOneWidget);
       expect(find.text('Perfil'), findsOneWidget);
     });
+
+    testWidgets('renders grass-blending dark emerald gradient, meadow text, and protruding pop icons',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en'), Locale('es')],
+          home: Scaffold(
+            bottomNavigationBar: PicoBottomNavBar(
+              currentIndex: 2, // Home active
+              onTap: _noOp,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // 1. Verify dark stadium grass gradient on the outer container
+      final containerFinder = find.byWidgetPredicate(
+        (w) =>
+            w is Container &&
+            w.decoration is BoxDecoration &&
+            (w.decoration as BoxDecoration).gradient is LinearGradient,
+      );
+      expect(containerFinder, findsWidgets);
+
+      // 2. Verify all 5 tab icons are rendered at 44x44 without opacity dimming
+      expect(find.byType(Image), findsNWidgets(5));
+      expect(find.byType(AnimatedOpacity), findsNothing);
+
+      // 3. Verify text colors (active is crisp white, inactive is soft meadow mint)
+      final homeText = tester.widget<Text>(find.text('Home'));
+      expect(homeText.style?.color, Colors.white);
+
+      final shopText = tester.widget<Text>(find.text('Shop'));
+      expect(shopText.style?.color, const Color(0xFFA7D1BC));
+
+      // 4. Verify gold pill indicator (#FCCB2B)
+      final goldPillFinder = find.byWidgetPredicate(
+        (w) =>
+            w is AnimatedContainer &&
+            w.decoration is BoxDecoration &&
+            (w.decoration as BoxDecoration).color == const Color(0xFFFCCB2B),
+      );
+      expect(goldPillFinder, findsOneWidget);
+
+      // 5. Verify the active Home icon has translation and scale pop (protruding out of navbar)
+      final animatedContainers = tester.widgetList<AnimatedContainer>(find.byType(AnimatedContainer));
+      final poppedContainer = animatedContainers.firstWhere(
+        (c) => c.transform != null && c.transform!.getTranslation().y < -5.0,
+      );
+      expect(poppedContainer.transform!.getTranslation().y, -8.0);
+    });
   });
 
   group('ShopScreen Tests', () {

@@ -17,6 +17,7 @@ import 'package:pico/features/tournaments/domain/league_message.dart';
 import 'package:pico/features/tournaments/domain/private_league.dart';
 import 'package:pico/features/tournaments/domain/private_league_member.dart';
 import 'package:pico/features/tournaments/presentation/widgets/league_details_sheet.dart';
+import 'package:pico/shared/components/pico_pitch_background.dart';
 
 /// Private League Room screen featuring a Chat-First layout (Clash Royale style),
 /// Supabase Realtime messaging feed, interactive trigger AppBar, and League Details Sheet.
@@ -213,9 +214,10 @@ class _LeagueChatScreenState extends ConsumerState<LeagueChatScreen> {
     final authState = ref.watch(authProvider);
     final currentUserId = authState is PicoAuthAuthenticated ? authState.user?.id : null;
 
-    return Scaffold(
-      backgroundColor: PicoColors.pitchBackground,
-      resizeToAvoidBottomInset: true,
+    return PicoPitchBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        resizeToAvoidBottomInset: true,
       appBar: _buildInteractiveAppBar(
         currentLeague: currentLeague,
         competition: competition,
@@ -260,8 +262,9 @@ class _LeagueChatScreenState extends ConsumerState<LeagueChatScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   /// 3. Interactive AppBar (The Trigger)
   /// Shows League Crest, Name, and "Active Members" count.
@@ -278,7 +281,7 @@ class _LeagueChatScreenState extends ConsumerState<LeagueChatScreen> {
         : (currentLeague?.memberCount ?? 1);
 
     return AppBar(
-      backgroundColor: const Color(0xFF0F1722),
+      backgroundColor: Colors.transparent,
       elevation: 0,
       leading: IconButton(
         icon: const Icon(

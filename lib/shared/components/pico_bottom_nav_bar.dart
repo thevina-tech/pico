@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pico/core/theme/pico_colors.dart';
+import 'package:flutter/services.dart';
 import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
@@ -70,28 +70,46 @@ class PicoBottomNavBar extends StatelessWidget {
       ),
     ];
 
-    return Container(
-      decoration: const BoxDecoration(
-        color: PicoColors.pitchSurface,
-        border: Border(
-          top: BorderSide(color: Color(0x1AFFFFFF), width: 1.0),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x66000000),
-            offset: Offset(0, -4),
-            blurRadius: 16,
-          ),
-        ],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        systemNavigationBarColor: Color(0xFF081B13),
+        systemNavigationBarIconBrightness: Brightness.light,
       ),
-      child: SafeArea(
-        top: false,
-        child: Container(
-          height: 74.0,
-          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: navItems.map((item) => _buildNavItem(context, item)).toList(),
+      child: Container(
+        clipBehavior: Clip.none,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xF20F2F20), // Rich emerald turf highlight
+              Color(0xFA081B13), // Deep grass ground
+            ],
+          ),
+          border: Border(
+            top: BorderSide(
+              color: Color(0x334ADE80), // Soft pitch line green
+              width: 1.2,
+            ),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x66000000),
+              offset: Offset(0, -6),
+              blurRadius: 18,
+            ),
+          ],
+        ),
+        child: SafeArea(
+          top: false,
+          child: Container(
+            clipBehavior: Clip.none,
+            height: 76.0,
+            padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: navItems.map((item) => _buildNavItem(context, item)).toList(),
+            ),
           ),
         ),
       ),
@@ -114,29 +132,28 @@ class PicoBottomNavBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 3D Illustrated Icon with elevation pop
+              // 3D Illustrated Icon with subtle, proportional elevation pop
               AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                curve: Curves.easeInOut,
-                transform: Matrix4.translationValues(0.0, isSelected ? -3.0 : 0.0, 0.0),
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 150),
-                  opacity: isSelected ? 1.0 : 0.60,
-                  child: SizedBox(
-                    width: 38.0,
-                    height: 38.0,
-                    child: Image.asset(
-                      item.assetPath,
-                      width: 38.0,
-                      height: 38.0,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => Icon(
-                        item.fallbackIcon,
-                        size: 28.0,
-                        color: isSelected
-                            ? PicoColors.textWhite
-                            : PicoColors.textTactileMuted,
-                      ),
+                duration: Duration(milliseconds: isSelected ? 220 : 180),
+                curve: isSelected ? Curves.easeOutBack : Curves.easeInOut,
+                transform: Matrix4.identity()
+                  ..setTranslationRaw(0.0, isSelected ? -8.0 : 0.0, 0.0)
+                  ..scaleByDouble(isSelected ? 1.10 : 1.0, isSelected ? 1.10 : 1.0, 1.0, 1.0),
+                transformAlignment: Alignment.bottomCenter,
+                child: SizedBox(
+                  width: 40.0,
+                  height: 40.0,
+                  child: Image.asset(
+                    item.assetPath,
+                    width: 40.0,
+                    height: 40.0,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => Icon(
+                      item.fallbackIcon,
+                      size: 28.0,
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFFA7D1BC),
                     ),
                   ),
                 ),
@@ -147,7 +164,9 @@ class PicoBottomNavBar extends StatelessWidget {
               Text(
                 item.label,
                 style: PicoTypography.labelPillSm.copyWith(
-                  color: isSelected ? PicoColors.textWhite : PicoColors.textTactileMuted,
+                  color: isSelected
+                      ? Colors.white
+                      : const Color(0xFFA7D1BC),
                   fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                   fontSize: 10.5,
                   letterSpacing: 0.2,
@@ -164,11 +183,20 @@ class PicoBottomNavBar extends StatelessWidget {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
                   curve: Curves.easeInOut,
-                  width: isSelected ? 22.0 : 0.0,
+                  width: isSelected ? 24.0 : 0.0,
                   height: 3.5,
                   decoration: BoxDecoration(
                     color: isSelected ? const Color(0xFFFCCB2B) : Colors.transparent,
                     borderRadius: BorderRadius.circular(2.0),
+                    boxShadow: isSelected
+                        ? const [
+                            BoxShadow(
+                              color: Color(0x66FCCB2B),
+                              blurRadius: 4.0,
+                              offset: Offset(0, 1),
+                            ),
+                          ]
+                        : null,
                   ),
                 ),
               ),

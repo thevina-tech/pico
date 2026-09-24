@@ -50,44 +50,44 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     final userCoins = profileAsync.value?.coins ?? 1450;
 
     return PicoGameExitScope(
-      child: Scaffold(
-        backgroundColor: PicoColors.pitchBackground,
-        appBar: PicoAppBar(
-          onProfileTap: () => context.go('/profile'),
-        ),
-        bottomNavigationBar: widget.showBottomNavBar
-            ? Center(
-                heightFactor: 1.0,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 440.0),
-                  child: PicoBottomNavBar(
-                    currentIndex: _currentNavIndex,
-                    onTap: (idx) {
-                      setState(() => _currentNavIndex = idx);
-                      widget.onNavTap?.call(idx);
-                      switch (idx) {
-                        case 0:
-                          break;
-                        case 1:
-                          context.go('/matches');
-                          break;
-                        case 2:
-                          context.go('/home');
-                          break;
-                        case 3:
-                          context.go('/tournaments');
-                          break;
-                        case 4:
-                          context.go('/profile');
-                          break;
-                      }
-                    },
+      child: PicoPitchBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: PicoAppBar(
+            onProfileTap: () => context.go('/profile'),
+          ),
+          bottomNavigationBar: widget.showBottomNavBar
+              ? Center(
+                  heightFactor: 1.0,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 440.0),
+                    child: PicoBottomNavBar(
+                      currentIndex: _currentNavIndex,
+                      onTap: (idx) {
+                        setState(() => _currentNavIndex = idx);
+                        widget.onNavTap?.call(idx);
+                        switch (idx) {
+                          case 0:
+                            break;
+                          case 1:
+                            context.go('/matches');
+                            break;
+                          case 2:
+                            context.go('/home');
+                            break;
+                          case 3:
+                            context.go('/tournaments');
+                            break;
+                          case 4:
+                            context.go('/profile');
+                            break;
+                        }
+                      },
+                    ),
                   ),
-                ),
-              )
-            : null,
-        body: PicoPitchBackground(
-          child: SafeArea(
+                )
+              : null,
+          body: SafeArea(
             top: false,
             bottom: false,
             child: Center(

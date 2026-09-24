@@ -1,126 +1,88 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../core/theme/pico_colors.dart';
 
-/// Option B: Deep tactical football pitch background with atmospheric radial glows
-/// and tactical pitch geometry contour lines (center circle, halfway line, penalty box).
+/// Full-bleed sunny stadium pitch & sky background.
+///
+/// Features:
+/// - Sunny blue sky and fluffy cartoon clouds positioned at the topmost part of the UI.
+/// - Subtle blur (sigma 2.0) with slight scaling to prevent edge bleed.
+/// - Soft darkening overlay to tame bright saturation.
+/// - Contrast vignette over the grass for console-grade legibility.
 class PicoPitchBackground extends StatelessWidget {
   const PicoPitchBackground({
     super.key,
     required this.child,
-    this.showContours = true,
+    this.blurSigma = 2.0,
+    this.showVignette = true,
+    this.showContours = false,
   });
 
   final Widget child;
+  final double blurSigma;
+  final bool showVignette;
   final bool showContours;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: PicoColors.pitchBackground,
-        gradient: RadialGradient(
-          center: Alignment(0.0, -0.7),
-          radius: 1.1,
-          colors: [
-            Color(0x382D8B55), // Ambient pitch turf glow
-            PicoColors.pitchGradientTop,
-            PicoColors.pitchBackground,
-          ],
-          stops: [0.0, 0.45, 1.0],
-        ),
-      ),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          if (showContours)
-            Positioned.fill(
-              child: IgnorePointer(
-                child: CustomPaint(
-                  painter: _PitchGeometryPainter(),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // 1. Full-Bleed Sunny Pitch Background (Clouds & sky at top, subtly softened)
+        Positioned.fill(
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(
+              sigmaX: blurSigma,
+              sigmaY: blurSigma,
+            ),
+            child: Transform.scale(
+              scale: blurSigma > 0 ? 1.02 : 1.0,
+              child: Image.asset(
+                'assets/images/home_pitch_background.png',
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: PicoColors.pitchBackground,
                 ),
               ),
             ),
-          child,
-        ],
-      ),
+          ),
+        ),
+
+        // 2. Soft darkening overlay to tone down bright colors
+        Positioned.fill(
+          child: IgnorePointer(
+            child: Container(
+              color: Colors.black.withValues(alpha: 0.18),
+            ),
+          ),
+        ),
+
+        // 3. Subtle pitch contrast vignette over the middle/bottom grass
+        if (showVignette)
+          Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: const [0.0, 0.20, 0.50, 1.0],
+                    colors: [
+                      Colors.transparent, // Sky & clouds remain clean behind Top Bar
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.12),
+                      Colors.black.withValues(alpha: 0.28),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+        // 4. Content Child (e.g. Scaffold or inner layout)
+        child,
+      ],
     );
   }
-}
-
-class _PitchGeometryPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final linePaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.08)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-
-    final dotPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.12)
-      ..style = PaintingStyle.fill;
-
-    final centerX = size.width / 2;
-    final halfwayY = size.height * 0.28;
-
-    // 1. Halfway Line
-    canvas.drawLine(
-      Offset(0, halfwayY),
-      Offset(size.width, halfwayY),
-      linePaint,
-    );
-
-    // 2. Center Kick-off Point
-    canvas.drawCircle(Offset(centerX, halfwayY), 3.5, dotPaint);
-
-    // 3. Center Circle (dashed style effect)
-    const circleRadius = 110.0;
-    _drawDashedCircle(canvas, Offset(centerX, halfwayY), circleRadius, linePaint);
-
-    // 4. Penalty Area Box (Top)
-    final penaltyWidth = (size.width * 0.72).clamp(240.0, 320.0);
-    const penaltyHeight = 85.0;
-    final penaltyRect = Rect.fromLTWH(
-      centerX - (penaltyWidth / 2),
-      0,
-      penaltyWidth,
-      penaltyHeight,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(penaltyRect, const Radius.circular(8.0)),
-      linePaint,
-    );
-
-    // 5. Goal Area Box (Top)
-    const goalWidth = 140.0;
-    const goalHeight = 35.0;
-    final goalRect = Rect.fromLTWH(
-      centerX - (goalWidth / 2),
-      0,
-      goalWidth,
-      goalHeight,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(goalRect, const Radius.circular(4.0)),
-      linePaint,
-    );
-  }
-
-  void _drawDashedCircle(Canvas canvas, Offset center, double radius, Paint paint) {
-    const dashCount = 36;
-    const sweep = (3.141592653589793 * 2) / dashCount;
-    for (int i = 0; i < dashCount; i++) {
-      if (i % 2 == 0) {
-        canvas.drawArc(
-          Rect.fromCircle(center: center, radius: radius),
-          i * sweep,
-          sweep * 0.7,
-          false,
-          paint,
-        );
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

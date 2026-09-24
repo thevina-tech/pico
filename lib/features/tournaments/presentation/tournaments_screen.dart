@@ -35,13 +35,13 @@ class TournamentsScreen extends ConsumerWidget {
     final compsMap = ref.watch(competitionsMapProvider).value ?? {};
 
     return PicoGameExitScope(
-      child: Scaffold(
-        backgroundColor: PicoColors.pitchBackground,
-        appBar: PicoAppBar(
-          onCoinsTap: () => context.go('/shop'),
-        ),
-        body: PicoPitchBackground(
-          child: SafeArea(
+      child: PicoPitchBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: PicoAppBar(
+            onCoinsTap: () => context.go('/shop'),
+          ),
+          body: SafeArea(
             top: false,
             bottom: false,
             child: Center(

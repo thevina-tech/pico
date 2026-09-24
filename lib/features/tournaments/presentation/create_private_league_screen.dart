@@ -8,6 +8,7 @@ import 'package:pico/features/matches/domain/competition.dart';
 import 'package:pico/features/tournaments/data/tournament_repository.dart';
 import 'package:pico/features/tournaments/domain/private_league.dart';
 import 'package:pico/features/tournaments/presentation/private_league_controller.dart';
+import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
 /// Screen allowing users to create a new Private League.
@@ -335,11 +336,12 @@ class _CreatePrivateLeagueScreenState
                     'https://t.resfu.com/img_data/competiciones/logo/1.png?size=120x&lossy=1',
               ));
 
-    return Scaffold(
-      backgroundColor: PicoColors.pitchBackground,
-      appBar: AppBar(
-        backgroundColor: PicoColors.darkTray,
-        elevation: 0,
+    return PicoPitchBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded, color: PicoColors.textWhite),
           onPressed: () => Navigator.of(context).pop(),
@@ -600,8 +602,9 @@ class _CreatePrivateLeagueScreenState
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildHeroHeader(AppLocalizations l10n) {
     return Container(

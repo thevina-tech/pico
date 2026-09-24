@@ -9,6 +9,7 @@ import 'package:pico/features/profile/domain/user_profile.dart';
 import 'package:pico/features/profile/presentation/user_profile_provider.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/game_exit_dialog.dart';
+import 'package:pico/shared/components/pico_pitch_background.dart';
 
 /// The official Profile screen displaying user stats, streak, level, XP progress,
 /// tournaments banner, following & history hubs, achievements showcase,
@@ -34,10 +35,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profileAsync = ref.watch(currentUserProfileProvider);
 
     return PicoGameExitScope(
-      child: Scaffold(
-        backgroundColor: const Color(0xFF030B07),
-        body: _StadiumBackground(
-          child: SafeArea(
+      child: PicoPitchBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
             bottom: false,
             child: Center(
               child: ConstrainedBox(
@@ -1930,56 +1931,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 // REUSABLE HELPER WIDGETS
 // =============================================================================
 
-/// Stadium atmospheric background layer with radial glow, floodlight cones,
-/// and subtle pitch turf grid.
-class _StadiumBackground extends StatelessWidget {
-  const _StadiumBackground({required this.child});
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Base dark gradient
-        Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF06150F),
-                Color(0xFF040E0A),
-                Color(0xFF020805),
-              ],
-            ),
-          ),
-        ),
-
-        // Stadium glow (radial glow from top)
-        Positioned.fill(
-          child: IgnorePointer(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(0, -1.1),
-                  radius: 1.2,
-                  colors: [
-                    Color(0x3B14B8A6),
-                    Color(0x1F10B981),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-
-        // Child content
-        child,
-      ],
-    );
-  }
-}
 
 /// Tactile Card with 3D bottom bevel shadow and press depression feedback.
 class _TactileCard extends StatefulWidget {

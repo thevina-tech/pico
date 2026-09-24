@@ -17,6 +17,7 @@ import 'package:pico/features/tournaments/domain/private_league_member.dart';
 import 'package:pico/features/tournaments/presentation/private_league_controller.dart';
 import 'package:pico/shared/components/match_card.dart';
 import 'package:pico/shared/components/prediction_bottom_sheet.dart';
+import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
 /// Detail screen for Private Leagues.
@@ -55,11 +56,12 @@ class _PrivateTournamentScreenState
     final currentUserId = authState is PicoAuthAuthenticated ? authState.user?.id : null;
     final isOwner = currentLeague != null && currentUserId != null && currentLeague.ownerId == currentUserId;
 
-    return Scaffold(
-      backgroundColor: PicoColors.pitchBackground,
-      appBar: AppBar(
-        backgroundColor: PicoColors.pitchBackground,
-        elevation: 0,
+    return PicoPitchBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: PicoColors.textWhite),
           onPressed: () => context.pop(),
@@ -137,6 +139,7 @@ class _PrivateTournamentScreenState
                 ),
               ),
             ),
+      ),
     );
   }
 

@@ -14,6 +14,7 @@ import 'package:pico/features/tournaments/data/tournament_repository.dart';
 import 'package:pico/features/tournaments/domain/tournament.dart';
 import 'package:pico/shared/components/match_card.dart';
 import 'package:pico/shared/components/prediction_bottom_sheet.dart';
+import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
 /// Detail screen for official Public Tournaments.
@@ -118,11 +119,12 @@ class _PublicTournamentScreenState
     final isEnrolled = currentTournament != null &&
         enrolledTournaments.any((t) => t.id == currentTournament.id);
 
-    return Scaffold(
-      backgroundColor: PicoColors.pitchBackground,
-      appBar: AppBar(
-        backgroundColor: PicoColors.pitchBackground,
-        elevation: 0,
+    return PicoPitchBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: PicoColors.textWhite),
           onPressed: () => context.pop(),
@@ -197,6 +199,7 @@ class _PublicTournamentScreenState
                 ),
               ),
             ),
+      ),
     );
   }
 

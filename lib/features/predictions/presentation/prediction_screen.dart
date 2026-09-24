@@ -287,11 +287,11 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
       }
     });
 
-    return Scaffold(
-      backgroundColor: PicoColors.pitchBackground,
-      body: PicoPitchBackground(
-        showContours: true,
-        child: SafeArea(
+    return PicoPitchBackground(
+      showContours: true,
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 440.0),

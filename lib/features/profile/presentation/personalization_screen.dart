@@ -144,10 +144,10 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
     final l10n = AppLocalizations.of(context);
     final state = ref.watch(personalizationControllerProvider);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF0B1D14),
-      body: PicoPitchBackground(
-        child: SafeArea(
+    return PicoPitchBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 440.0),

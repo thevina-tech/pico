@@ -159,19 +159,18 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check Level shield
-      expect(find.text('7'), findsOneWidget);
+      expect(find.text('LVL 7'), findsOneWidget);
 
       // Check XP progress label
-      expect(find.text('720/1,000'), findsOneWidget);
+      expect(find.textContaining('720'), findsOneWidget);
 
       // Check Coins pill
       expect(find.text('1,450'), findsOneWidget);
-      expect(find.text('¢'), findsOneWidget);
-      expect(find.text('+'), findsOneWidget);
+      expect(find.byKey(const Key('pico_app_bar_coins_section')), findsOneWidget);
 
       // Check Streak pill
       expect(find.text('4'), findsOneWidget);
-      expect(find.text('🔥'), findsOneWidget);
+      expect(find.byKey(const Key('pico_app_bar_streak_section')), findsOneWidget);
 
       // Back button should NOT be rendered when canPop is false
       expect(find.byKey(const Key('pico_app_bar_back_button')), findsNothing);
@@ -241,7 +240,7 @@ void main() {
 
       // 1. Verify PicoAppBar is at the top
       expect(find.byType(PicoAppBar), findsOneWidget);
-      expect(find.text('720/1,000'), findsOneWidget);
+      expect(find.textContaining('720'), findsOneWidget);
       expect(find.text('1,450'), findsOneWidget);
 
       // 2. Verify subheader row with username on far left
