@@ -71,4 +71,12 @@ class CurrentUserProfile extends _$CurrentUserProfile {
           );
     });
   }
+
+  /// Adds coins to the current profile state (e.g. from rewarded video ads).
+  void addCoins(int amount) {
+    final current = state.value;
+    if (current != null) {
+      state = AsyncData(current.copyWith(coins: current.coins + amount));
+    }
+  }
 }

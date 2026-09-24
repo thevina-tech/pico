@@ -184,7 +184,7 @@ void main() {
   });
 
   group('ShopScreen Tests', () {
-    testWidgets('renders club shop header, VIP pass, and coin packages',
+    testWidgets('renders club shop header and clean reward ad option',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         const ProviderScope(
@@ -203,16 +203,46 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('CLUB SHOP'), findsOneWidget);
-      expect(find.text('PICO PRO'), findsOneWidget);
-      expect(find.text('COINS VAULT'), findsOneWidget);
+      expect(find.text('REWARD ADS'), findsOneWidget);
+      expect(find.text('Free Coins Refill'), findsOneWidget);
+      expect(find.text('WATCH VIDEO (+50 COINS)'), findsOneWidget);
+      expect(find.text('COMING SOON'), findsNothing);
+    });
 
-      await tester.scrollUntilVisible(
-        find.text('TACTICAL BOOSTERS'),
-        300,
-        scrollable: find.byType(Scrollable),
+    testWidgets('tapping watch video ad opens simulated sponsor dialog and awards +50 coins',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: [Locale('en'), Locale('es')],
+            home: ShopScreen(showBottomNavBar: false),
+          ),
+        ),
       );
-      expect(find.text('TACTICAL BOOSTERS'), findsOneWidget);
-      expect(find.text('Streak Shield'), findsOneWidget);
+      await tester.pumpAndSettle();
+
+      // Tap Watch Video
+      await tester.tap(find.text('WATCH VIDEO (+50 COINS)'));
+      await tester.pumpAndSettle();
+
+      // Verify dialog is presented
+      expect(find.text('SPONSOR PREVIEW'), findsOneWidget);
+      expect(find.text('Video Ad Completed!'), findsOneWidget);
+      expect(find.text('CLAIM +50 COINS'), findsOneWidget);
+
+      // Tap Claim
+      await tester.tap(find.text('CLAIM +50 COINS'));
+      await tester.pumpAndSettle();
+
+      // Verify dialog dismissed and SnackBar shown
+      expect(find.text('SPONSOR PREVIEW'), findsNothing);
+      expect(find.textContaining('+50 Pico Coins'), findsOneWidget);
     });
   });
 }

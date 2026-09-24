@@ -10,14 +10,12 @@ import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 
-/// The official Pico Shop screen based on Stitch "Friendly Football World" game aesthetics.
+/// The official Pico Shop screen.
 ///
-/// Features:
+/// Features a streamlined, uncluttered experience:
 /// 1. Top bar with Level/XP, Coins, and Streak.
-/// 2. Featured Pico Pro Pass with tactile rewards and perks.
-/// 3. Coins Vault with tiered coin packages.
-/// 4. Game Boosters (Streak Shields, Private League Expansion).
-/// 5. Mascot Wardrobe & Customizations.
+/// 2. Header banner showing current club coin balance.
+/// 3. Free Reward Video Ad card allowing users to earn coins (+50 coins per watch).
 class ShopScreen extends ConsumerStatefulWidget {
   const ShopScreen({
     super.key,
@@ -36,6 +34,7 @@ class ShopScreen extends ConsumerStatefulWidget {
 
 class _ShopScreenState extends ConsumerState<ShopScreen> {
   late int _currentNavIndex;
+  bool _isWatchingAd = false;
 
   @override
   void initState() {
@@ -98,43 +97,17 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                   children: [
                     // 1. Header Banner
                     _buildHeader(l10n, userCoins),
-                    const SizedBox(height: 16.0),
+                    const SizedBox(height: 20.0),
 
-                    // 2. Featured: Pico VIP Pass
-                    _buildVipPassCard(context),
-                    const SizedBox(height: 24.0),
-
-                    // 3. Coins Vault
+                    // 2. Reward Ad Section (Earn Free Coins)
                     _buildSectionTitle(
-                      title: 'COINS VAULT',
-                      subtitle: 'Use coins to unlock extra private leagues & shields',
-                      icon: Icons.monetization_on_rounded,
+                      title: 'REWARD ADS',
+                      subtitle: 'Watch short sponsor videos to earn free coins',
+                      icon: Icons.play_circle_fill_rounded,
                       color: PicoColors.gold,
                     ),
                     const SizedBox(height: 12.0),
-                    _buildCoinsGrid(context),
-                    const SizedBox(height: 24.0),
-
-                    // 4. Game Boosters
-                    _buildSectionTitle(
-                      title: 'TACTICAL BOOSTERS',
-                      subtitle: 'Strengthen your prediction edge',
-                      icon: Icons.bolt_rounded,
-                      color: PicoColors.electricMint,
-                    ),
-                    const SizedBox(height: 12.0),
-                    _buildBoostersList(context),
-                    const SizedBox(height: 24.0),
-
-                    // 5. Mascot Wardrobe Preview
-                    _buildSectionTitle(
-                      title: 'MASCOT WARDROBE',
-                      subtitle: 'Customize Coach Pico on matchday',
-                      icon: Icons.checkroom_rounded,
-                      color: PicoColors.primaryFixed,
-                    ),
-                    const SizedBox(height: 12.0),
-                    _buildWardrobeSection(context),
+                    _buildRewardAdCard(context),
                   ],
                 ),
               ),
@@ -197,7 +170,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                 ),
                 const SizedBox(height: 2.0),
                 Text(
-                  'Boosts, passes & stadium gear',
+                  'Watch ads to earn free coins',
                   style: PicoTypography.bodySm.copyWith(
                     color: PicoColors.textWhiteMuted,
                   ),
@@ -271,19 +244,19 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     );
   }
 
-  Widget _buildVipPassCard(BuildContext context) {
+  Widget _buildRewardAdCard(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF2E240D),
-            Color(0xFF171305),
+            Color(0xFF1A2A20),
+            Color(0xFF0F1A14),
           ],
         ),
         borderRadius: BorderRadius.circular(20.0),
-        border: Border.all(color: PicoColors.gold, width: 1.5),
+        border: Border.all(color: PicoColors.gold.withValues(alpha: 0.6), width: 1.5),
         boxShadow: const [
           BoxShadow(
             color: Color(0x66000000),
@@ -294,13 +267,14 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
       ),
       child: Stack(
         children: [
+          // Background subtle coin glow watermark
           Positioned(
             right: -15,
             top: -15,
             child: Icon(
-              Icons.stars_rounded,
+              Icons.monetization_on_rounded,
               size: 130,
-              color: PicoColors.gold.withValues(alpha: 0.08),
+              color: PicoColors.gold.withValues(alpha: 0.05),
             ),
           ),
           Padding(
@@ -308,6 +282,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Top Tag & Value Pill
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -324,73 +299,143 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                           ),
                         ],
                       ),
-                      child: Text(
-                        'FEATURED PASS',
-                        style: PicoTypography.labelPillSm.copyWith(
-                          color: const Color(0xFF1B1607),
-                          fontWeight: FontWeight.w900,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.smart_display_rounded,
+                            size: 13.0,
+                            color: Color(0xFF1B1607),
+                          ),
+                          const SizedBox(width: 4.0),
+                          Text(
+                            'REWARD VIDEO',
+                            style: PicoTypography.labelPillSm.copyWith(
+                              color: const Color(0xFF1B1607),
+                              fontWeight: FontWeight.w900,
+                              fontSize: 10.0,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Text(
-                      'PICO PRO',
-                      style: PicoTypography.statCounter.copyWith(
-                        color: PicoColors.gold,
-                        fontSize: 18.0,
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 3.0),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF263B2E),
+                        borderRadius: BorderRadius.circular(6.0),
+                        border: Border.all(color: PicoColors.electricMint, width: 1.0),
+                      ),
+                      child: Text(
+                        '+50 COINS',
+                        style: PicoTypography.labelPillSm.copyWith(
+                          color: PicoColors.electricMint,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12.0),
-                Text(
-                  'The Ultimate Football Predictor Pass',
-                  style: PicoTypography.headlineMd.copyWith(
-                    color: PicoColors.textWhite,
-                    fontWeight: FontWeight.w800,
-                  ),
+                const SizedBox(height: 14.0),
+
+                // Main Content with 3D Coin and Description
+                Row(
+                  children: [
+                    Container(
+                      width: 58.0,
+                      height: 58.0,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF16251C),
+                        borderRadius: BorderRadius.circular(16.0),
+                        border: Border.all(color: PicoColors.gold.withValues(alpha: 0.3), width: 1.0),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16.0),
+                        child: Image.asset(
+                          'assets/images/coin_3d.png',
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, _, _) => const Icon(
+                            Icons.monetization_on_rounded,
+                            color: PicoColors.gold,
+                            size: 32.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 14.0),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Free Coins Refill',
+                            style: PicoTypography.headlineMd.copyWith(
+                              color: PicoColors.textWhite,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 17.0,
+                            ),
+                          ),
+                          const SizedBox(height: 3.0),
+                          Text(
+                            'Watch a quick video sponsor to receive 50 free Pico Coins in your club wallet.',
+                            style: PicoTypography.bodySm.copyWith(
+                              color: PicoColors.textWhiteMuted,
+                              fontSize: 12.0,
+                              height: 1.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 10.0),
-                _buildPerkRow('Ad-Free Matchday Experience'),
-                _buildPerkRow('Unlimited Private Leagues (Beyond 10)'),
-                _buildPerkRow('Exclusive Trophy Cabinet Frames'),
-                _buildPerkRow('2x XP Multipliers on Big Derbies'),
                 const SizedBox(height: 16.0),
-                // CTA Button
+
+                // Watch Video Button
                 SizedBox(
                   width: double.infinity,
-                  height: 46.0,
+                  height: 48.0,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: PicoColors.primary,
-                      foregroundColor: PicoColors.textWhite,
+                      backgroundColor: PicoColors.gold,
+                      foregroundColor: const Color(0xFF1B1607),
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.0),
                       ),
                       shadowColor: Colors.transparent,
                     ),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Pico Pro Pass powered by RevenueCat!'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.flash_on_rounded, size: 18.0),
-                        const SizedBox(width: 8.0),
-                        Text(
-                          'GET PICO PRO • \$3.99/mo',
-                          style: PicoTypography.labelPill.copyWith(
-                            color: PicoColors.textWhite,
-                            fontWeight: FontWeight.w800,
+                    onPressed: _isWatchingAd ? null : _handleWatchAd,
+                    child: _isWatchingAd
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.smart_display_rounded, size: 20.0),
+                              const SizedBox(width: 6.0),
+                              Text(
+                                'WATCHING AD...',
+                                style: PicoTypography.labelPill.copyWith(
+                                  color: const Color(0xFF1B1607),
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.play_arrow_rounded, size: 22.0),
+                              const SizedBox(width: 6.0),
+                              Text(
+                                'WATCH VIDEO (+50 COINS)',
+                                style: PicoTypography.labelPill.copyWith(
+                                  color: const Color(0xFF1B1607),
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
               ],
@@ -401,309 +446,199 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     );
   }
 
-  Widget _buildPerkRow(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6.0),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.check_circle_rounded,
-            size: 16.0,
-            color: PicoColors.electricMint,
+  Future<void> _handleWatchAd() async {
+    setState(() => _isWatchingAd = true);
+
+    final rewarded = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogCtx) => const _SimulatedRewardAdDialog(),
+    );
+
+    if (mounted) {
+      setState(() => _isWatchingAd = false);
+      if (rewarded == true) {
+        ref.read(currentUserProfileProvider.notifier).addCoins(50);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: PicoColors.pitchSurfaceElevated,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.0),
+              side: const BorderSide(color: PicoColors.gold, width: 1.2),
+            ),
+            content: Row(
+              children: [
+                const Icon(Icons.stars_rounded, color: PicoColors.gold, size: 24.0),
+                const SizedBox(width: 10.0),
+                Expanded(
+                  child: Text(
+                    '🎉 Reward granted! +50 Pico Coins added to your club wallet.',
+                    style: PicoTypography.bodySm.copyWith(
+                      color: PicoColors.textWhite,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            duration: const Duration(seconds: 3),
           ),
-          const SizedBox(width: 8.0),
-          Expanded(
-            child: Text(
-              text,
+        );
+      }
+    }
+  }
+}
+
+/// Simulated ad dialog shown when the user taps "Watch Video".
+class _SimulatedRewardAdDialog extends StatelessWidget {
+  const _SimulatedRewardAdDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.all(20.0),
+      child: Container(
+        padding: const EdgeInsets.all(20.0),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0F1A14),
+          borderRadius: BorderRadius.circular(20.0),
+          border: Border.all(color: PicoColors.gold, width: 1.5),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x80000000),
+              offset: Offset(0, 8),
+              blurRadius: 24,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                  decoration: BoxDecoration(
+                    color: PicoColors.gold.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6.0),
+                    border: Border.all(color: PicoColors.gold, width: 0.8),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.smart_display_rounded, size: 12.0, color: PicoColors.gold),
+                      const SizedBox(width: 4.0),
+                      Text(
+                        'SPONSOR PREVIEW',
+                        style: PicoTypography.labelPillSm.copyWith(
+                          color: PicoColors.gold,
+                          fontSize: 9.0,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close_rounded, color: PicoColors.textWhiteMuted, size: 20.0),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16.0),
+            // Simulated video player canvas
+            Container(
+              width: double.infinity,
+              height: 140.0,
+              decoration: BoxDecoration(
+                color: const Color(0xFF070C09),
+                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(color: const Color(0x26FFFFFF), width: 1.0),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 50.0,
+                    height: 50.0,
+                    decoration: BoxDecoration(
+                      color: PicoColors.gold.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.play_circle_fill_rounded,
+                      color: PicoColors.gold,
+                      size: 36.0,
+                    ),
+                  ),
+                  const SizedBox(height: 10.0),
+                  Text(
+                    'Sponsor Video Demonstration',
+                    style: PicoTypography.labelPill.copyWith(
+                      color: PicoColors.textWhite,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12.0,
+                    ),
+                  ),
+                  const SizedBox(height: 2.0),
+                  Text(
+                    'Ready to claim reward',
+                    style: PicoTypography.bodySm.copyWith(
+                      color: PicoColors.electricMint,
+                      fontSize: 10.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 18.0),
+            Text(
+              'Video Ad Completed!',
+              style: PicoTypography.headlineMd.copyWith(
+                color: PicoColors.textWhite,
+                fontSize: 18.0,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 4.0),
+            Text(
+              'Claim your +50 Pico Coins bonus to use in your club wallet.',
+              textAlign: TextAlign.center,
               style: PicoTypography.bodySm.copyWith(
                 color: PicoColors.textWhiteMuted,
                 fontSize: 12.0,
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCoinsGrid(BuildContext context) {
-    final packs = [
-      {'name': 'Scout Bag', 'coins': '500', 'price': '\$0.99', 'popular': false},
-      {'name': 'Captain Chest', 'coins': '1,200', 'price': '\$1.99', 'popular': true},
-      {'name': 'Champion Safe', 'coins': '3,500', 'price': '\$4.99', 'popular': false},
-    ];
-
-    return Row(
-      children: packs.map((pack) {
-        final bool isPopular = pack['popular'] as bool;
-        return Expanded(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 4.0),
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-            decoration: BoxDecoration(
-              color: PicoColors.pitchSurfaceElevated,
-              borderRadius: BorderRadius.circular(14.0),
-              border: Border.all(
-                color: isPopular ? PicoColors.gold : const Color(0x24FFFFFF),
-                width: isPopular ? 1.5 : 1.0,
-              ),
-            ),
-            child: Column(
-              children: [
-                if (isPopular)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 6.0),
-                    padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
-                    decoration: BoxDecoration(
-                      color: PicoColors.gold,
-                      borderRadius: BorderRadius.circular(4.0),
-                    ),
-                    child: Text(
-                      'BEST VALUE',
-                      style: PicoTypography.labelPillSm.copyWith(
-                        color: const Color(0xFF1B1607),
-                        fontSize: 8.0,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                const Icon(
-                  Icons.monetization_on_rounded,
-                  size: 28.0,
-                  color: PicoColors.gold,
-                ),
-                const SizedBox(height: 6.0),
-                Text(
-                  '${pack['coins']}',
-                  style: PicoTypography.statCounter.copyWith(
-                    color: PicoColors.textWhite,
-                    fontSize: 16.0,
-                  ),
-                ),
-                Text(
-                  pack['name'] as String,
-                  style: PicoTypography.bodySm.copyWith(
-                    color: PicoColors.textWhiteMuted,
-                    fontSize: 10.0,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 10.0),
-                SizedBox(
-                  width: double.infinity,
-                  height: 32.0,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isPopular ? PicoColors.gold : const Color(0xFF26332B),
-                      foregroundColor: isPopular ? const Color(0xFF1B1607) : PicoColors.textWhite,
-                      padding: EdgeInsets.zero,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Purchased ${pack['name']}!'),
-                          duration: const Duration(seconds: 1),
-                        ),
-                      );
-                    },
-                    child: Text(
-                      pack['price'] as String,
-                      style: PicoTypography.labelPillSm.copyWith(
-                        color: isPopular ? const Color(0xFF1B1607) : PicoColors.textWhite,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildBoostersList(BuildContext context) {
-    final boosters = [
-      {
-        'title': 'Streak Shield',
-        'desc': 'Preserves your streak if a single match goes wrong',
-        'cost': '150 Coins',
-        'icon': Icons.shield_rounded,
-        'color': PicoColors.electricMint,
-      },
-      {
-        'title': 'Private League Pass',
-        'desc': 'Create an extra private league slot beyond your free 10',
-        'cost': '250 Coins',
-        'icon': Icons.group_add_rounded,
-        'color': PicoColors.gold,
-      },
-      {
-        'title': 'Double XP Boost (24h)',
-        'desc': 'Earn 2x XP across all submitted and settled matches',
-        'cost': '300 Coins',
-        'icon': Icons.trending_up_rounded,
-        'color': PicoColors.primaryFixed,
-      },
-    ];
-
-    return Column(
-      children: boosters.map((booster) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 8.0),
-          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
-          decoration: BoxDecoration(
-            color: PicoColors.pitchSurfaceElevated,
-            borderRadius: BorderRadius.circular(14.0),
-            border: Border.all(color: const Color(0x1FFFFFFF), width: 1.0),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 38.0,
-                height: 38.0,
-                decoration: BoxDecoration(
-                  color: (booster['color'] as Color).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: Icon(
-                  booster['icon'] as IconData,
-                  color: booster['color'] as Color,
-                  size: 20.0,
-                ),
-              ),
-              const SizedBox(width: 12.0),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      booster['title'] as String,
-                      style: PicoTypography.labelPill.copyWith(
-                        color: PicoColors.textWhite,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 2.0),
-                    Text(
-                      booster['desc'] as String,
-                      style: PicoTypography.bodySm.copyWith(
-                        color: PicoColors.textWhiteMuted,
-                        fontSize: 11.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8.0),
-              ElevatedButton(
+            const SizedBox(height: 20.0),
+            SizedBox(
+              width: double.infinity,
+              height: 44.0,
+              child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E3A2B),
-                  foregroundColor: PicoColors.primaryFixed,
+                  backgroundColor: PicoColors.gold,
+                  foregroundColor: const Color(0xFF1B1607),
                   elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+                    borderRadius: BorderRadius.circular(10.0),
                   ),
                 ),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Activated ${booster['title']}!'),
-                      duration: const Duration(seconds: 1),
-                    ),
-                  );
-                },
+                onPressed: () => Navigator.of(context).pop(true),
                 child: Text(
-                  booster['cost'] as String,
-                  style: PicoTypography.labelPillSm.copyWith(
-                    color: PicoColors.primaryFixed,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildWardrobeSection(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: PicoColors.pitchSurfaceElevated,
-        borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(color: const Color(0x1FFFFFFF), width: 1.0),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48.0,
-            height: 48.0,
-            decoration: BoxDecoration(
-              color: PicoColors.primaryDark,
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12.0),
-              child: Image.asset(
-                'assets/images/nav_profile.png',
-                fit: BoxFit.contain,
-                errorBuilder: (_, _, _) => const Icon(
-                  Icons.person_rounded,
-                  color: PicoColors.primaryFixed,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 14.0),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Coach Pico Gear',
+                  'CLAIM +50 COINS',
                   style: PicoTypography.labelPill.copyWith(
-                    color: PicoColors.textWhite,
-                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1B1607),
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
                   ),
                 ),
-                const SizedBox(height: 2.0),
-                Text(
-                  'Exclusive manager caps, retro shirts & golden whistle customizations arriving in next drop.',
-                  style: PicoTypography.bodySm.copyWith(
-                    color: PicoColors.textWhiteMuted,
-                    fontSize: 11.0,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8.0),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-            decoration: BoxDecoration(
-              color: const Color(0x26FFFFFF),
-              borderRadius: BorderRadius.circular(6.0),
-            ),
-            child: Text(
-              'SOON',
-              style: PicoTypography.labelPillSm.copyWith(
-                color: PicoColors.textWhiteMuted,
-                fontWeight: FontWeight.w800,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
