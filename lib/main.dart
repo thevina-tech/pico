@@ -8,6 +8,7 @@ import 'package:pico/core/logging/app_logger.dart';
 import 'package:pico/core/routing/app_router.dart';
 import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/l10n/app_localizations.dart';
+import 'package:pico/services/revenuecat_ad_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +31,20 @@ Future<void> main() async {
     }
   } else {
     AppLogger.warning('Supabase credentials missing in $envFile');
+  }
+
+  // Initialize RevenueCat & Google Mobile Ads AdTracker Service
+  try {
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+    await RevenueCatAdService.instance.initialize(initialUserId: currentUserId);
+
+    // Sync RevenueCat identity on auth changes
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      final user = data.session?.user;
+      RevenueCatAdService.instance.syncUser(user?.id);
+    });
+  } catch (e) {
+    AppLogger.warning('RevenueCatAdService initialization skipped: $e');
   }
 
   // Set immersive dark system UI matching Pico pitch world

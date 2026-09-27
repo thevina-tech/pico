@@ -16,6 +16,7 @@ import 'package:pico/shared/components/prediction_controls.dart';
 import 'package:pico/features/predictions/presentation/prediction_controller.dart';
 import 'package:pico/shared/components/prediction_bottom_sheet.dart';
 import 'package:pico/l10n/app_localizations.dart';
+import 'package:pico/widgets/ads/native_ad_card_widget.dart';
 
 /// The official "Pico — Matches" screen.
 ///
@@ -180,6 +181,11 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
                         if (matches.isEmpty) {
                           return _buildEmptyState(context, state.selectedTab);
                         }
+
+                        // Dynamically calculate total items injecting NativeAdCardWidget every 6th item
+                        final adCount = matches.length ~/ 5;
+                        final totalCount = matches.length + adCount;
+
                         return ListView.builder(
                           padding: const EdgeInsets.fromLTRB(
                             16.0,
@@ -187,9 +193,17 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
                             16.0,
                             24.0,
                           ),
-                          itemCount: matches.length,
+                          itemCount: totalCount,
                           itemBuilder: (context, index) {
-                            final match = matches[index];
+                            // Inject Native Ad Card at every 6th index (index 5, 11, 17, ...)
+                            if ((index + 1) % 6 == 0) {
+                              return const NativeAdCardWidget(
+                                placement: 'match_feed',
+                              );
+                            }
+
+                            final matchIndex = index - ((index + 1) ~/ 6);
+                            final match = matches[matchIndex];
                             final userPred = predictionsAsync.value?[match.id];
                             final localPred = state.getPrediction(match.id);
                             final predictedHomeScore = userPred?.homeScore ?? localPred?.homeScore;

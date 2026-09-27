@@ -16,20 +16,18 @@ void main() {
       await dotenv.load(fileName: ".env.dev");
       expect(dotenv.env['SUPABASE_URL'], isNotEmpty);
       expect(dotenv.env['SUPABASE_ANON_KEY'], isNotEmpty);
-      expect(dotenv.env['ADMOB_BANNER_DASHBOARD_ANDROID'], isNotEmpty);
-      expect(dotenv.env['ADMOB_NATIVE_MATCH_FEED_ANDROID'], isNotEmpty);
-      expect(
-          dotenv.env['ADMOB_INTERSTITIAL_PRIVATE_LEAGUE_ANDROID'], isNotEmpty);
+      expect(dotenv.env['ADMOB_BANNER_ID_ANDROID'], isNotEmpty);
+      expect(dotenv.env['ADMOB_NATIVE_MATCH_FEED_ID_ANDROID'], isNotEmpty);
+      expect(dotenv.env['ADMOB_INTERSTITIAL_ID_ANDROID'], isNotEmpty);
     });
 
     test('dotenv loads .env.prod successfully from assets bundle', () async {
       await dotenv.load(fileName: ".env.prod");
       expect(dotenv.env['SUPABASE_URL'], isNotEmpty);
       expect(dotenv.env['SUPABASE_ANON_KEY'], isNotEmpty);
-      expect(dotenv.env['ADMOB_BANNER_DASHBOARD_ANDROID'], isNotEmpty);
-      expect(dotenv.env['ADMOB_NATIVE_MATCH_FEED_ANDROID'], isNotEmpty);
-      expect(
-          dotenv.env['ADMOB_INTERSTITIAL_PRIVATE_LEAGUE_ANDROID'], isNotEmpty);
+      expect(dotenv.env['ADMOB_BANNER_ID_ANDROID'], isNotEmpty);
+      expect(dotenv.env['ADMOB_NATIVE_MATCH_FEED_ID_ANDROID'], isNotEmpty);
+      expect(dotenv.env['ADMOB_INTERSTITIAL_ID_ANDROID'], isNotEmpty);
     });
   });
 

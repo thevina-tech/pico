@@ -10,6 +10,7 @@ import 'package:pico/features/tournaments/domain/private_league.dart';
 import 'package:pico/features/tournaments/presentation/private_league_controller.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/l10n/app_localizations.dart';
+import 'package:pico/services/revenuecat_ad_service.dart';
 
 /// Screen allowing users to create a new Private League.
 /// Strictly limited to the 8 curated top-tier base competitions.
@@ -33,6 +34,9 @@ class _CreatePrivateLeagueScreenState
     super.initState();
     // Default to the first competition ID (Primera División / La Liga)
     _selectedCompetitionId = '1';
+    RevenueCatAdService.instance.preloadInterstitialAd(
+      placement: 'private_league_creation',
+    );
   }
 
   @override
@@ -68,7 +72,14 @@ class _CreatePrivateLeagueScreenState
       if (!mounted) return;
       setState(() => _isLoading = false);
 
-      _showSuccessDialog(newLeague);
+      await RevenueCatAdService.instance.showInterstitialAd(
+        placement: 'private_league_creation',
+        onDismissed: () {
+          if (mounted) {
+            _showSuccessDialog(newLeague);
+          }
+        },
+      );
     } catch (e) {
       if (!mounted) return;
       setState(() {

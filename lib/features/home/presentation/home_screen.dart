@@ -16,6 +16,7 @@ import 'package:pico/shared/components/match_card.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
 import 'package:pico/shared/components/pico_companion.dart';
+import 'package:pico/widgets/ads/banner_ad_widget.dart';
 
 /// The official Pico Home screen based on Stitch "Direction A: Clash Royale Resource Bar & Subheader".
 ///
@@ -236,37 +237,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               onCoinsTap: _navigateToShop,
             ),
             bottomNavigationBar: widget.showBottomNavBar
-                ? Center(
-                    heightFactor: 1.0,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 440.0),
-                      child: PicoBottomNavBar(
-                        currentIndex: _currentNavIndex,
-                        onTap: (idx) {
-                          setState(() => _currentNavIndex = idx);
-                          widget.onNavTap?.call(idx);
-                          switch (idx) {
-                            case 0:
-                              _navigateToShop();
-                              break;
-                            case 1:
-                              _navigateToMatches();
-                              break;
-                            case 2:
-                              // Already Home (center tab)
-                              break;
-                            case 3:
-                              _navigateToTournaments();
-                              break;
-                            case 4:
-                              _navigateToProfile();
-                              break;
-                          }
-                        },
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const BannerAdWidget(placement: 'dashboard_bottom'),
+                      Center(
+                        heightFactor: 1.0,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 440.0),
+                          child: PicoBottomNavBar(
+                            currentIndex: _currentNavIndex,
+                            onTap: (idx) {
+                              setState(() => _currentNavIndex = idx);
+                              widget.onNavTap?.call(idx);
+                              switch (idx) {
+                                case 0:
+                                  _navigateToShop();
+                                  break;
+                                case 1:
+                                  _navigateToMatches();
+                                  break;
+                                case 2:
+                                  // Already Home (center tab)
+                                  break;
+                                case 3:
+                                  _navigateToTournaments();
+                                  break;
+                                case 4:
+                                  _navigateToProfile();
+                                  break;
+                              }
+                            },
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   )
-                : null,
+                : const BannerAdWidget(placement: 'dashboard_bottom'),
             body: SafeArea(
               top: false,
               bottom: false,
