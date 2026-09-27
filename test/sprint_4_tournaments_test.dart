@@ -647,6 +647,37 @@ void main() {
       expect(find.byType(Dialog), findsNothing);
     });
 
+    testWidgets('CreatePrivateLeagueScreen displays success SnackBar before ad transition and dialog modal', (tester) async {
+      final repo = _FakeTournamentRepository();
+      await tester.pumpWidget(
+        buildHarness(child: const CreatePrivateLeagueScreen(), repo: repo),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'Test SnackBar League');
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.byType(ListView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(ElevatedButton));
+      // Pump initial frame so backend execution completes and SnackBar is posted
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // Visibly verify the success SnackBar is rendered
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.text('League created successfully!'), findsOneWidget);
+
+      // Now advance past the 300ms micro-delay to trigger ad transition and modal
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pumpAndSettle();
+
+      // Verify the dialog modal is displayed upon ad transition
+      expect(find.byType(Dialog), findsOneWidget);
+      expect(find.descendant(of: find.byType(Dialog), matching: find.text('Test SnackBar League')), findsOneWidget);
+    });
+
     testWidgets('CreatePrivateLeagueScreen security note does not overflow on narrow screen with Spanish locale', (tester) async {
       tester.view.physicalSize = const Size(360 * 3, 700 * 3);
       tester.view.devicePixelRatio = 3.0;

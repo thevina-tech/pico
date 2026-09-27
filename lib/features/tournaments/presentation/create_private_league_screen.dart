@@ -62,6 +62,7 @@ class _CreatePrivateLeagueScreenState
     });
 
     try {
+      // 1. Backend Execution: Await the Supabase call to create the private league.
       final newLeague = await ref
           .read(privateLeagueControllerProvider.notifier)
           .createLeague(
@@ -72,14 +73,36 @@ class _CreatePrivateLeagueScreenState
       if (!mounted) return;
       setState(() => _isLoading = false);
 
-      await RevenueCatAdService.instance.showInterstitialAd(
-        placement: 'private_league_creation',
-        onDismissed: () {
-          if (mounted) {
-            _showSuccessDialog(newLeague);
-          }
-        },
+      // 2. Success Confirmation: Immediately display a success Snackbar.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('League created successfully!'),
+          backgroundColor: PicoColors.primary,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
+
+      // 3. Yield to UI: Add a brief micro-delay so the Flutter framework renders the Snackbar.
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (!mounted) return;
+
+      // 4. Show Ad & Transition: Call RevenueCatAdService and transition when ad closes or degrades.
+      var dialogShown = false;
+      void showLeagueSuccess() {
+        if (!dialogShown && mounted) {
+          dialogShown = true;
+          _showSuccessDialog(newLeague);
+        }
+      }
+
+      try {
+        await RevenueCatAdService.instance.showInterstitialAd(
+          placement: 'private_league_creation',
+          onDismissed: showLeagueSuccess,
+        );
+      } catch (_) {
+        showLeagueSuccess();
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
