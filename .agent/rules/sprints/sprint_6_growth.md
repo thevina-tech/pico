@@ -2,7 +2,7 @@
 trigger: always_on
 ---
 
-# SPRINT 5: GROWTH & REFERRALS
+# SPRINT 6: GROWTH & REFERRALS
 
 ## 1. Invite Codes
 *   Implement simple 6-8 character alphanumeric invite codes for joining Private Leagues (e.g., `PICO-AB12`). Build a UI modal to enter these codes.

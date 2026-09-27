@@ -48,7 +48,8 @@ app.*.map.json
 .widget_preview/
 
 # Environment variables
-.env
+.env.dev
+.env.prod
 
 # Supabase internal linking files
 supabase/.temp/

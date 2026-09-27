@@ -11,12 +11,25 @@ import 'package:pico/l10n/app_localizations.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('Sprint 0 - Environment (.env)', () {
-    test('dotenv loads .env successfully from assets bundle', () async {
-      await dotenv.load(fileName: ".env");
+  group('Sprint 0 - Environment (.env.dev & .env.prod)', () {
+    test('dotenv loads .env.dev successfully from assets bundle', () async {
+      await dotenv.load(fileName: ".env.dev");
       expect(dotenv.env['SUPABASE_URL'], isNotEmpty);
       expect(dotenv.env['SUPABASE_ANON_KEY'], isNotEmpty);
-      expect(dotenv.env['BESOCCER_API_KEY'], isNotEmpty);
+      expect(dotenv.env['ADMOB_BANNER_DASHBOARD_ANDROID'], isNotEmpty);
+      expect(dotenv.env['ADMOB_NATIVE_MATCH_FEED_ANDROID'], isNotEmpty);
+      expect(
+          dotenv.env['ADMOB_INTERSTITIAL_PRIVATE_LEAGUE_ANDROID'], isNotEmpty);
+    });
+
+    test('dotenv loads .env.prod successfully from assets bundle', () async {
+      await dotenv.load(fileName: ".env.prod");
+      expect(dotenv.env['SUPABASE_URL'], isNotEmpty);
+      expect(dotenv.env['SUPABASE_ANON_KEY'], isNotEmpty);
+      expect(dotenv.env['ADMOB_BANNER_DASHBOARD_ANDROID'], isNotEmpty);
+      expect(dotenv.env['ADMOB_NATIVE_MATCH_FEED_ANDROID'], isNotEmpty);
+      expect(
+          dotenv.env['ADMOB_INTERSTITIAL_PRIVATE_LEAGUE_ANDROID'], isNotEmpty);
     });
   });
 
