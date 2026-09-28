@@ -34,10 +34,11 @@ void main() {
     await tester.pumpWidget(const ProviderScope(child: PicoApp()));
     await tester.pumpAndSettle();
 
-    // Verify OnboardingScreen is rendered
+    // Verify OnboardingScreen is rendered at "How Pico Works" (start of Auth flow)
     expect(find.byType(OnboardingScreen), findsOneWidget);
     expect(find.textContaining('Pico'), findsWidgets);
-    expect(find.text('Get Started'), findsOneWidget);
+    expect(find.text('How Pico Works'), findsOneWidget);
+    expect(find.text('Continue with Google'), findsOneWidget);
   });
 
   testWidgets('PicoApp authenticated - boots and displays bottom nav shell',

@@ -359,10 +359,10 @@ void main() {
       expect(find.text('Win tournament trophies'), findsOneWidget);
       expect(find.text('2/5'), findsOneWidget);
 
-      // Tap Continue on Step 2
-      expect(find.text('Continue'), findsOneWidget);
-      await tester.ensureVisible(find.text('Continue'));
-      await tester.tap(find.text('Continue'));
+      // Tap Continue with Google on Step 2
+      expect(find.text('Continue with Google'), findsOneWidget);
+      await tester.ensureVisible(find.text('Continue with Google'));
+      await tester.tap(find.text('Continue with Google'));
       await tester.pumpAndSettle();
     });
 

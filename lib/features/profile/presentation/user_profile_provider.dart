@@ -23,15 +23,11 @@ class CurrentUserProfile extends _$CurrentUserProfile {
         return profile;
       }
 
-      final fallbackUsername = user.userMetadata?['full_name'] as String? ??
-          (user.email != null && user.email!.isNotEmpty
-              ? user.email!.split('@').first
-              : 'Guest_${user.id.length >= 6 ? user.id.substring(0, 6) : user.id}');
-
+      // Do not use Google display name, full_name, or email prefix as app username
       return UserProfile(
         id: user.id,
         email: user.email,
-        username: fallbackUsername,
+        username: null,
         level: 1,
         xp: 0,
         streak: 0,

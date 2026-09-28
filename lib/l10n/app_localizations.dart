@@ -164,6 +164,12 @@ abstract class AppLocalizations {
   /// **'Get Started'**
   String get getStartedButton;
 
+  /// Button label for Google Sign-In on onboarding screen 2
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get continueWithGoogle;
+
   /// Hint reassuring the user about setup speed
   ///
   /// In en, this message translates to:

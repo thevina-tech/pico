@@ -1,4 +1,4 @@
-package com.example.pico
+package com.thevinatech.pico
 
 import io.flutter.embedding.android.FlutterActivity
 

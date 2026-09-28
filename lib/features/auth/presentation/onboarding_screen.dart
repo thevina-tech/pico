@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pico/core/logging/app_logger.dart';
 import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/features/auth/domain/auth_state.dart';
@@ -44,27 +46,34 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   String? _selectedTeamId;
   final Set<String> _selectedLeagueIds = {};
   String? _step3ErrorMessage;
+  bool _isGoogleAuthenticating = false;
 
   @override
   void initState() {
     super.initState();
     final authState = ref.read(authProvider);
-    if (widget.initialPage == 0 &&
-        authState is PicoAuthAuthenticated &&
-        !authState.isPersonalized) {
-      // If user is already authenticated (e.g. from anonymous login) but not personalized,
-      // resume at Step 3 (or Step 4 if username is already chosen) instead of replaying Welcome.
+
+    // If already authenticated from a previous session:
+    // Never show Welcome (0) or How It Works (1) to an authenticated user
+    if (authState is PicoAuthAuthenticated) {
       final profile = ref.read(currentUserProfileProvider).value;
       if (profile != null &&
           profile.username != null &&
-          profile.username!.isNotEmpty &&
+          profile.username!.trim().isNotEmpty &&
           !profile.username!.startsWith('Guest_')) {
         _username = profile.username!;
-        _currentPage = 3; // Step 4: Team Selection
+        if (profile.favoriteTeamId != null) {
+          _selectedTeamId = profile.favoriteTeamId;
+          _currentPage = 4; // Step 5: Leagues Selection
+        } else {
+          _currentPage = 3; // Step 4: Team Selection
+        }
       } else {
-        _currentPage = 2; // Step 3: Username
+        // Incomplete profile missing username: start at Step B (Unique Username Selection)
+        _currentPage = widget.initialPage >= 2 ? widget.initialPage.clamp(2, 4) : 2;
       }
     } else {
+      // Unauthenticated user: show the requested initialPage (defaults to 1: How it works)
       _currentPage = widget.initialPage.clamp(0, 4);
     }
     _pageController = PageController(initialPage: _currentPage);
@@ -101,6 +110,54 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     } catch (_) {}
   }
 
+  Future<void> _handleGoogleSignIn() async {
+    setState(() => _isGoogleAuthenticating = true);
+    try {
+      final user = await ref.read(authProvider.notifier).signInWithGoogle();
+      if (!mounted) return;
+      if (user == null) {
+        // User cancelled Google sign-in; dismiss loading gracefully
+        setState(() => _isGoogleAuthenticating = false);
+        return;
+      }
+
+      // Query database profile to check if returning user already has a chosen username
+      try {
+        final profile =
+            await ref.read(profileRepositoryProvider).getProfile(user.id);
+        if (!mounted) return;
+        if (profile != null &&
+            profile.username != null &&
+            profile.username!.trim().isNotEmpty &&
+            !profile.username!.startsWith('Guest_')) {
+          // Returning user: bypass onboarding and route directly to /home
+          ref.read(authProvider.notifier).markPersonalized();
+          context.go('/home');
+          return;
+        }
+      } catch (profileError) {
+        AppLogger.warning('Returning user profile check skipped: $profileError');
+      }
+
+      // New user without established username: advance to Step B (index 2: Username)
+      if (mounted) {
+        setState(() => _isGoogleAuthenticating = false);
+        _goToPage(2);
+      }
+    } catch (e, st) {
+      AppLogger.error('Google sign-in error in onboarding', e, st);
+      if (mounted) {
+        setState(() => _isGoogleAuthenticating = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to sign in with Google: $e'),
+            backgroundColor: PicoColors.error,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -129,13 +186,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       onGetStarted: () => _goToPage(1),
                     ),
 
-                    // Step 2/5: How Pico Works
+                    // Step 2/5: How Pico Works (Continue with Google)
                     _OnboardingHowItWorksStep(
                       l10n: l10n,
-                      isAuthenticating: false,
+                      isAuthenticating: _isGoogleAuthenticating,
                       onBack: () => _goToPage(0),
                       onSkip: () => _goToPage(2),
-                      onContinue: () => _goToPage(2),
+                      onContinue: _handleGoogleSignIn,
                     ),
 
                     // Step 3/5: Authentication & Username
@@ -181,6 +238,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         setState(() {
                           _step3ErrorMessage = error;
                         });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(error),
+                            backgroundColor: PicoColors.error,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
                         _goToPage(2);
                       },
                       onFinished: () => context.go('/home'),
@@ -733,9 +797,9 @@ class _OnboardingHowItWorksStep extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Column(
         children: [
-          // Championship Warm Gold Action Button ("Continue →")
-          _TactileGoldButton(
-            text: l10n?.continueButton ?? 'Continue',
+          // Google Sign-In Action Button ("Continue with Google")
+          _TactileGoogleButton(
+            text: l10n?.continueWithGoogle ?? 'Continue with Google',
             isLoading: isAuthenticating,
             onPressed: isAuthenticating ? null : onContinue,
           ),
@@ -869,6 +933,121 @@ class _ExplainerCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+const String _googleSvg = '''
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+  <path fill="none" d="M0 0h48v48H0z"/>
+</svg>''';
+
+/// 3D Tactile Google Sign-in Button with authentic Google logo and Stitch tactile styling.
+class _TactileGoogleButton extends StatefulWidget {
+  const _TactileGoogleButton({
+    required this.text,
+    required this.onPressed,
+    this.isLoading = false,
+  });
+
+  final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+
+  @override
+  State<_TactileGoogleButton> createState() => _TactileGoogleButtonState();
+}
+
+class _TactileGoogleButtonState extends State<_TactileGoogleButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    const double bevelHeight = 4.0;
+
+    return GestureDetector(
+      onTapDown: widget.onPressed == null
+          ? null
+          : (_) => setState(() => _isPressed = true),
+      onTapUp: widget.onPressed == null
+          ? null
+          : (_) {
+              setState(() => _isPressed = false);
+              widget.onPressed?.call();
+            },
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 75),
+        margin: EdgeInsets.only(
+          top: _isPressed ? bevelHeight : 0,
+          bottom: _isPressed ? 0 : bevelHeight,
+        ),
+        width: double.infinity,
+        height: 56.0,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.0),
+          border: Border.all(
+            color: const Color(0xFFE2E8F0),
+            width: 1.0,
+          ),
+          boxShadow: _isPressed
+              ? []
+              : const [
+                  BoxShadow(
+                    color: Color(0xFFCBD5E1),
+                    offset: Offset(0, bevelHeight),
+                  ),
+                  BoxShadow(
+                    color: Color(0x33000000),
+                    offset: Offset(0, 8),
+                    blurRadius: 16,
+                  ),
+                ],
+        ),
+        child: Center(
+          child: widget.isLoading
+              ? const SizedBox(
+                  width: 24.0,
+                  height: 24.0,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4285F4)),
+                  ),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SvgPicture.string(
+                      _googleSvg,
+                      width: 22.0,
+                      height: 22.0,
+                    ),
+                    const SizedBox(width: 12.0),
+                    Text(
+                      widget.text,
+                      style: const TextStyle(
+                        fontFamily: 'Rubik',
+                        fontSize: 16.5,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1F2937),
+                        letterSpacing: 0.1,
+                      ),
+                    ),
+                    const SizedBox(width: 8.0),
+                    const Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 18.0,
+                      color: Color(0xFF64748B),
+                    ),
+                  ],
+                ),
+        ),
       ),
     );
   }
@@ -1207,6 +1386,14 @@ class _OnboardingAuthStepState extends ConsumerState<_OnboardingAuthStep> {
       setState(() {
         _errorMessage =
             l10n?.usernameErrorTooShort ?? 'Username must be at least 3 characters';
+      });
+      return;
+    }
+
+    if (_usernameController.text.contains(' ') ||
+        !RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(username)) {
+      setState(() {
+        _errorMessage = 'Username must be alphanumeric with no spaces';
       });
       return;
     }
@@ -1966,6 +2153,16 @@ class _OnboardingLeaguesSelectionStepState
     } catch (e) {
       if (mounted) {
         setState(() => _isSubmitting = false);
+        if (e.toString().contains('23505') ||
+            e.toString().contains('profiles_username_key') ||
+            e.toString().toLowerCase().contains('taken') ||
+            e.toString().toLowerCase().contains('unique constraint')) {
+          widget.onUsernameConflict(
+            l10n?.usernameTakenError ??
+                'This username is already taken. Please choose another one.',
+          );
+          return;
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to complete onboarding: $e'),

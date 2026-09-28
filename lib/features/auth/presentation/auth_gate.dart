@@ -53,6 +53,7 @@ class AuthGate extends ConsumerStatefulWidget {
 class _AuthGateState extends ConsumerState<AuthGate> {
   StreamSubscription<supa.AuthState>? _authSubscription;
   _AuthDestination _destination = _AuthDestination.loading;
+  int _onboardingStep = 1;
   bool _isLoading = true;
 
   @override
@@ -98,28 +99,35 @@ class _AuthGateState extends ConsumerState<AuthGate> {
 
     // 1. Production / initialized Supabase client
     if (client != null) {
-      final session = client.auth.currentSession;
-      final user = session?.user ?? client.auth.currentUser;
+      final user = client.auth.currentUser;
 
-      if (session == null || user == null) {
-        _routeTo(_AuthDestination.onboarding);
+      if (user == null) {
+        // User not logged in: Show the "How it works" screen (Start of Auth flow)
+        _routeToOnboarding(step: 1);
         return;
       }
 
-      // Check database profile to see if user has finished the onboarding flow
+      // Check database profile to see if user has completed profile (username exists)
       try {
         final profileRepo = ref.read(profileRepositoryProvider);
         final profile = await profileRepo.getProfile(user.id);
 
-        final isCompleted = profile != null &&
+        final hasUsername = profile != null &&
             profile.username != null &&
-            !profile.username!.startsWith('Guest_') &&
-            profile.favoriteTeamId != null;
+            profile.username!.trim().isNotEmpty &&
+            !profile.username!.startsWith('Guest_');
 
-        _routeTo(isCompleted ? _AuthDestination.home : _AuthDestination.onboarding);
+        if (hasUsername) {
+          // Returning User with completed profile: Route directly to Main Dashboard
+          ref.read(authProvider.notifier).markPersonalized();
+          _routeToHome();
+        } else {
+          // Incomplete profile: Route directly to Step B (Unique Username Selection)
+          _routeToOnboarding(step: 2);
+        }
       } catch (e, st) {
         AppLogger.error('AuthGate: failed to fetch profile for onboarding check', e, st);
-        _routeTo(_AuthDestination.onboarding);
+        _routeToOnboarding(step: 2);
       }
       return;
     }
@@ -128,29 +136,39 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     final authState = ref.read(authProvider);
     if (authState is PicoAuthAuthenticated) {
       if (authState.isPersonalized) {
-        _routeTo(_AuthDestination.home);
+        _routeToHome();
       } else {
-        _routeTo(_AuthDestination.onboarding);
+        _routeToOnboarding(step: 2);
       }
     } else {
-      _routeTo(_AuthDestination.onboarding);
+      _routeToOnboarding(step: 1);
     }
   }
 
-  void _routeTo(_AuthDestination dest) {
+  void _routeToHome() {
     if (!mounted) return;
 
     setState(() {
       _isLoading = false;
-      _destination = dest;
+      _destination = _AuthDestination.home;
     });
 
     if (GoRouter.maybeOf(context) != null) {
-      if (dest == _AuthDestination.home) {
-        context.go('/home');
-      } else if (dest == _AuthDestination.onboarding) {
-        context.go('/onboarding');
-      }
+      context.go('/home');
+    }
+  }
+
+  void _routeToOnboarding({int step = 1}) {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = false;
+      _destination = _AuthDestination.onboarding;
+      _onboardingStep = step;
+    });
+
+    if (GoRouter.maybeOf(context) != null) {
+      context.go('/onboarding?step=$step');
     }
   }
 
@@ -175,7 +193,8 @@ class _AuthGateState extends ConsumerState<AuthGate> {
       if (_destination == _AuthDestination.home) {
         return widget.homeWidget ?? const HomeScreen();
       } else if (_destination == _AuthDestination.onboarding) {
-        return widget.onboardingWidget ?? const OnboardingScreen();
+        return widget.onboardingWidget ??
+            OnboardingScreen(initialPage: _onboardingStep);
       }
     }
 

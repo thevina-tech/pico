@@ -46,6 +46,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get getStartedButton => 'Empezar';
 
   @override
+  String get continueWithGoogle => 'Continuar con Google';
+
+  @override
   String get setupSpeedHint => 'Se configura en menos de 1 minuto.';
 
   @override

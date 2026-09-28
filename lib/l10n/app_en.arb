@@ -50,6 +50,10 @@
   "@getStartedButton": {
     "description": "CTA button label to start guest mode"
   },
+  "continueWithGoogle": "Continue with Google",
+  "@continueWithGoogle": {
+    "description": "Button label for Google Sign-In on onboarding screen 2"
+  },
   "setupSpeedHint": "Takes less than 1 minute to set up.",
   "@setupSpeedHint": {
     "description": "Hint reassuring the user about setup speed"

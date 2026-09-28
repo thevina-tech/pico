@@ -33,12 +33,7 @@ BEGIN
   VALUES (
     NEW.id,
     NEW.email,
-    -- Priority: 1. Full name, 2. Email prefix, 3. Generated Guest name
-    COALESCE(
-      NEW.raw_user_meta_data->>'full_name', 
-      NULLIF(split_part(NEW.email, '@', 1), ''), 
-      'Guest_' || substr(NEW.id::text, 1, 6)
-    ),
+    NULL, -- Custom username must be explicitly chosen by the user during onboarding
     NEW.raw_user_meta_data->>'avatar_url'
   );
   RETURN NEW;

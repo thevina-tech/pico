@@ -34,6 +34,7 @@ class RevenueCatAdService {
   String? _interstitialImpressionId;
 
   bool get isInitialized => _initialized;
+  bool get isPurchasesConfigured => _isPurchasesConfigured;
   bool get hasPreloadedInterstitial => _preloadedInterstitialAd != null;
 
   /// Returns true when running inside Flutter test runner.
@@ -65,7 +66,7 @@ class RevenueCatAdService {
 
     // 2. Initialize RevenueCat
     final rcKey = revenueCatApiKey ?? dotenv.env['REVENUECAT_API_KEY'];
-    if (rcKey != null && rcKey.isNotEmpty) {
+    if (rcKey != null && rcKey.trim().isNotEmpty && !rcKey.contains('placeholder')) {
       try {
         final config = PurchasesConfiguration(rcKey);
         if (initialUserId != null && initialUserId.isNotEmpty) {
@@ -75,9 +76,11 @@ class RevenueCatAdService {
         _isPurchasesConfigured = true;
         AppLogger.info('RevenueCat initialized successfully with AdTracker support');
       } catch (e) {
+        _isPurchasesConfigured = false;
         AppLogger.warning('Failed to configure RevenueCat: $e');
       }
     } else {
+      _isPurchasesConfigured = false;
       AppLogger.info('RevenueCat API key not provided; AdTracker will log events safely');
     }
 
@@ -407,6 +410,7 @@ class RevenueCatAdService {
     required String adUnitId,
     required String impressionId,
   }) {
+    if (!_isPurchasesConfigured) return;
     try {
       Purchases.adTracker.trackAdLoaded(
         AdLoadedData(
@@ -416,7 +420,9 @@ class RevenueCatAdService {
           adUnitId: adUnitId,
           impressionId: impressionId,
         ),
-      );
+      ).catchError((e) {
+        AppLogger.debug('AdTracker.trackAdLoaded error: $e');
+      });
     } catch (e) {
       AppLogger.debug('AdTracker.trackAdLoaded note: $e');
     }
@@ -427,6 +433,7 @@ class RevenueCatAdService {
     required String placement,
     required String adUnitId,
   }) {
+    if (!_isPurchasesConfigured) return;
     try {
       Purchases.adTracker.trackAdFailedToLoad(
         AdFailedToLoadData(
@@ -435,7 +442,9 @@ class RevenueCatAdService {
           placement: placement,
           adUnitId: adUnitId,
         ),
-      );
+      ).catchError((e) {
+        AppLogger.debug('AdTracker.trackAdFailedToLoad error: $e');
+      });
     } catch (e) {
       AppLogger.debug('AdTracker.trackAdFailedToLoad note: $e');
     }
@@ -447,6 +456,7 @@ class RevenueCatAdService {
     required String adUnitId,
     required String impressionId,
   }) {
+    if (!_isPurchasesConfigured) return;
     try {
       Purchases.adTracker.trackAdDisplayed(
         AdDisplayedData(
@@ -456,7 +466,9 @@ class RevenueCatAdService {
           adUnitId: adUnitId,
           impressionId: impressionId,
         ),
-      );
+      ).catchError((e) {
+        AppLogger.debug('AdTracker.trackAdDisplayed error: $e');
+      });
     } catch (e) {
       AppLogger.debug('AdTracker.trackAdDisplayed note: $e');
     }
@@ -468,6 +480,7 @@ class RevenueCatAdService {
     required String adUnitId,
     required String impressionId,
   }) {
+    if (!_isPurchasesConfigured) return;
     try {
       Purchases.adTracker.trackAdOpened(
         AdOpenedData(
@@ -477,7 +490,9 @@ class RevenueCatAdService {
           adUnitId: adUnitId,
           impressionId: impressionId,
         ),
-      );
+      ).catchError((e) {
+        AppLogger.debug('AdTracker.trackAdOpened error: $e');
+      });
     } catch (e) {
       AppLogger.debug('AdTracker.trackAdOpened note: $e');
     }
@@ -492,6 +507,7 @@ class RevenueCatAdService {
     required String currency,
     required AdRevenuePrecision precision,
   }) {
+    if (!_isPurchasesConfigured) return;
     try {
       Purchases.adTracker.trackAdRevenue(
         AdRevenueData(
@@ -504,7 +520,9 @@ class RevenueCatAdService {
           currency: currency.isNotEmpty ? currency : 'USD',
           precision: precision,
         ),
-      );
+      ).catchError((e) {
+        AppLogger.debug('AdTracker.trackAdRevenue error: $e');
+      });
     } catch (e) {
       AppLogger.debug('AdTracker.trackAdRevenue note: $e');
     }

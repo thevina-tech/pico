@@ -124,9 +124,13 @@ class AppRouter {
         ),
         GoRoute(
           path: '/onboarding',
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: OnboardingScreen(),
-          ),
+          pageBuilder: (context, state) {
+            final stepStr = state.uri.queryParameters['step'];
+            final initialPage = int.tryParse(stepStr ?? '') ?? 1;
+            return NoTransitionPage(
+              child: OnboardingScreen(initialPage: initialPage),
+            );
+          },
           routes: [
             GoRoute(
               path: 'how-it-works',

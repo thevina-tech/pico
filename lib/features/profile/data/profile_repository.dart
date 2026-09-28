@@ -161,6 +161,15 @@ class SupabaseProfileRepository implements ProfileRepository {
     }
 
     if (_supabase == null) {
+      final cleanLower = (username ?? '').toLowerCase();
+      final collision = _mockCache.values.any((p) =>
+          p.id != userId && (p.username?.toLowerCase() == cleanLower));
+      if (collision) {
+        throw const PostgrestException(
+          message: 'duplicate key value violates unique constraint "profiles_username_key"',
+          code: '23505',
+        );
+      }
       final existing = _mockCache[userId] ?? UserProfile(id: userId);
       final teams = favoriteTeamIds ??
           (favoriteTeamId != null ? [favoriteTeamId] : existing.favoriteTeamIds);
