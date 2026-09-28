@@ -206,7 +206,7 @@ void main() {
   });
 
   group('Sprint 2 - Phase B: HomeScreen UI & Shell', () {
-    testWidgets('Renders PicoAppBar, subheader row with username, and menu button',
+    testWidgets('Renders Stitch top bar with user details, special event card, and how to play',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -233,37 +233,33 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // 1. Verify PicoAppBar is at the top
-      expect(find.byType(PicoAppBar), findsOneWidget);
-      expect(find.text('DIV 8'), findsOneWidget);
-      expect(find.text('140 PP'), findsOneWidget);
-
-      // 2. Verify subheader row with username on far left
+      // 1. Verify user details on top bar
       expect(find.text('Alex'), findsWidgets);
 
-      // 3. Verify hamburger menu button on far right
-      final menuButton = find.byKey(const Key('home_screen_menu_button'));
-      expect(menuButton, findsOneWidget);
+      // 2. Verify division text on top bar (supports localized Division / División)
+      expect(find.textContaining('Divisi'), findsWidgets);
 
-      // 4. Verify Mascot Greeting
-      expect(find.textContaining('Big match tonight, Alex!'), findsOneWidget);
+      // 3. Verify profile and division pills
+      expect(find.byKey(const Key('home_screen_profile_pill')), findsOneWidget);
+      expect(find.byKey(const Key('home_screen_division_pill')), findsOneWidget);
 
-      // 5. Verify Tournament Card
-      expect(find.text('La Liga Season Hub'), findsOneWidget);
-
-      // 6. Verify single featured Match Card on Home screen
-      expect(find.byType(MatchCard), findsOneWidget);
+      // 4. Verify Special Event Card (El Clásico / featured match)
+      expect(find.text('EL CLÁSICO'), findsOneWidget);
       expect(find.text('Real Madrid'), findsOneWidget);
       expect(find.text('Barcelona'), findsOneWidget);
-      expect(find.text('Arsenal'), findsNothing);
-      expect(find.text('Chelsea'), findsNothing);
-      expect(find.text('+1 more fixtures in Matches'), findsOneWidget);
-      expect(find.text('VIEW ALL'), findsOneWidget);
+      expect(find.text('PREDICT NOW'), findsOneWidget);
+
+      // 5. Verify How to Play Section
+      expect(find.text('HOW TO'), findsOneWidget);
+      expect(find.text('PLAY'), findsOneWidget);
+      expect(find.textContaining('CHOOSE'), findsOneWidget);
+      expect(find.textContaining('PREDICTION'), findsOneWidget);
+      expect(find.textContaining('POINTS'), findsOneWidget);
     });
 
-    testWidgets('Tapping VIEW ALL or explore banner navigates to Matches tab',
+    testWidgets('Tapping predict on special event card triggers prediction flow',
         (WidgetTester tester) async {
-      int navigateMatchesCalled = 0;
+      int makePredictionCalled = 0;
 
       await tester.pumpWidget(
         ProviderScope(
@@ -280,27 +276,21 @@ void main() {
             supportedLocales: AppLocalizations.supportedLocales,
             home: HomeScreen(
               showBottomNavBar: false,
-              onNavigateMatches: () => navigateMatchesCalled++,
+              onMakePrediction: () => makePredictionCalled++,
             ),
           ),
         ),
       );
       await tester.pumpAndSettle();
 
-      final viewAllBtn = find.byKey(const Key('home_screen_view_all_matches_button'));
-      expect(viewAllBtn, findsOneWidget);
-      await tester.tap(viewAllBtn);
+      final predictBtn = find.text('PREDICT NOW');
+      expect(predictBtn, findsOneWidget);
+      await tester.tap(predictBtn);
       await tester.pumpAndSettle();
-      expect(navigateMatchesCalled, 1);
-
-      final exploreBanner = find.byKey(const Key('home_screen_explore_matches_banner'));
-      expect(exploreBanner, findsOneWidget);
-      await tester.tap(exploreBanner);
-      await tester.pumpAndSettle();
-      expect(navigateMatchesCalled, 2);
+      expect(makePredictionCalled, 1);
     });
 
-    testWidgets('Tapping menu button displays the settings bottom sheet',
+    testWidgets('Long pressing profile pill displays the settings bottom sheet',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -323,8 +313,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final menuButton = find.byKey(const Key('home_screen_menu_button'));
-      await tester.tap(menuButton);
+      final profilePill = find.byKey(const Key('home_screen_profile_pill'));
+      await tester.longPress(profilePill);
       await tester.pumpAndSettle();
 
       // Verify bottom sheet content
@@ -333,7 +323,7 @@ void main() {
       expect(find.textContaining('1,450 Coins'), findsOneWidget);
     });
 
-    testWidgets('Renders empty state when matches list is empty',
+    testWidgets('Renders gracefully when matches feed is empty',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -356,11 +346,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Verify empty state is displayed
-      expect(
-        find.text('No upcoming matches right now. Check back soon!'),
-        findsOneWidget,
-      );
+      // Verify Special Event Card and How to Play section are displayed
+      expect(find.text('EL CLÁSICO'), findsOneWidget);
+      expect(find.text('HOW TO'), findsOneWidget);
+      expect(find.text('PLAY'), findsOneWidget);
     });
 
     testWidgets('Android device back button triggers game exit options modal',

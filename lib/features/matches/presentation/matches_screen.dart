@@ -85,6 +85,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
 
     return PicoGameExitScope(
       child: PicoPitchBackground(
+        imageAsset: 'assets/images/tournament_and_matches_bg.png',
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: PicoAppBar(

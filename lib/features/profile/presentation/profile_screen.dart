@@ -1204,8 +1204,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               decoration: const BoxDecoration(
                 color: Color(0xFF091F17),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
-                border: Border(
-                  top: BorderSide(color: Color(0x3310B981), width: 1.0),
+                border: Border.fromBorderSide(
+                  BorderSide(color: Color(0x3310B981), width: 1.0),
                 ),
               ),
               padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 32.0),
@@ -1347,8 +1347,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           decoration: const BoxDecoration(
             color: Color(0xFF091F17),
             borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
-            border: Border(
-              top: BorderSide(color: Color(0x3310B981), width: 1.0),
+            border: Border.fromBorderSide(
+              BorderSide(color: Color(0x3310B981), width: 1.0),
             ),
           ),
           padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 32.0),
@@ -1503,8 +1503,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           decoration: const BoxDecoration(
             color: Color(0xFF091F17),
             borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
-            border: Border(
-              top: BorderSide(color: Color(0x3310B981), width: 1.0),
+            border: Border.fromBorderSide(
+              BorderSide(color: Color(0x3310B981), width: 1.0),
             ),
           ),
           padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 32.0),
@@ -1632,8 +1632,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           decoration: const BoxDecoration(
             color: Color(0xFF091F17),
             borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
-            border: Border(
-              top: BorderSide(color: Color(0x3310B981), width: 1.0),
+            border: Border.fromBorderSide(
+              BorderSide(color: Color(0x3310B981), width: 1.0),
             ),
           ),
           padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 32.0),
@@ -1811,8 +1811,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           decoration: const BoxDecoration(
             color: Color(0xFF091F17),
             borderRadius: BorderRadius.vertical(top: Radius.circular(28.0)),
-            border: Border(
-              top: BorderSide(color: Color(0x3310B981), width: 1.0),
+            border: Border.fromBorderSide(
+              BorderSide(color: Color(0x3310B981), width: 1.0),
             ),
           ),
           padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 32.0),
@@ -2067,11 +2067,9 @@ class _TactileButtonState extends State<_TactileButton> {
         decoration: BoxDecoration(
           gradient: widget.gradient,
           borderRadius: BorderRadius.circular(16.0),
-          border: Border(
-            top: BorderSide(
-              color: Colors.white.withValues(alpha: 0.35),
-              width: 1.0,
-            ),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.35),
+            width: 1.0,
           ),
           boxShadow: [
             BoxShadow(

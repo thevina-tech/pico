@@ -71,8 +71,8 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
       decoration: const BoxDecoration(
         color: Color(0xFF131E29),
         borderRadius: BorderRadius.vertical(top: Radius.circular(28.0)),
-        border: Border(
-          top: BorderSide(color: Color(0x3300E676), width: 1.5),
+        border: Border.fromBorderSide(
+          BorderSide(color: Color(0x3300E676), width: 1.5),
         ),
       ),
       child: SafeArea(

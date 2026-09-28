@@ -13,12 +13,14 @@ class PicoPitchBackground extends StatelessWidget {
   const PicoPitchBackground({
     super.key,
     required this.child,
+    this.imageAsset = 'assets/images/home_pitch_background.png',
     this.blurSigma = 2.0,
     this.showVignette = true,
     this.showContours = false,
   });
 
   final Widget child;
+  final String imageAsset;
   final double blurSigma;
   final bool showVignette;
   final bool showContours;
@@ -38,7 +40,7 @@ class PicoPitchBackground extends StatelessWidget {
             child: Transform.scale(
               scale: blurSigma > 0 ? 1.02 : 1.0,
               child: Image.asset(
-                'assets/images/home_pitch_background.png',
+                imageAsset,
                 fit: BoxFit.cover,
                 alignment: Alignment.topCenter,
                 errorBuilder: (context, error, stackTrace) => Container(

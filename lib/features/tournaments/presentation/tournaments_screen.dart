@@ -37,11 +37,14 @@ class TournamentsScreen extends ConsumerWidget {
 
     return PicoGameExitScope(
       child: PicoPitchBackground(
+        imageAsset: 'assets/images/tournament_and_matches_bg.png',
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: PicoAppBar(
             onCoinsTap: () => context.go('/shop'),
           ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+          floatingActionButton: _buildFloatingCreateOrJoinButton(context, l10n),
           body: SafeArea(
             top: false,
             bottom: false,
@@ -54,9 +57,9 @@ class TournamentsScreen extends ConsumerWidget {
                   onRefresh: () =>
                       ref.read(tournamentsControllerProvider.notifier).refresh(),
                   child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 28.0),
+                    padding: const EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 84.0),
                     children: [
-                      // Header with Quick Action "+ Create / Join"
+                      // Header (Airy & spacious)
                       _buildHeader(context, l10n),
                       const SizedBox(height: 16.0),
 
@@ -77,6 +80,14 @@ class TournamentsScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildFloatingCreateOrJoinButton(
+      BuildContext context, AppLocalizations l10n) {
+    return _TactileFloatingButton(
+      text: l10n.createOrJoinAction,
+      onPressed: () => _openCreateOrJoinModal(context, l10n),
     );
   }
 
@@ -103,17 +114,6 @@ class TournamentsScreen extends ConsumerWidget {
             color: PicoColors.textWhiteMuted,
             fontSize: 13.0,
           ),
-        ),
-        const SizedBox(height: 16.0),
-        // 3D tactile Clash Royale "Battle" clear yellow button
-        PicoBattleButton(
-          text: l10n.createOrJoinAction,
-          icon: const Icon(
-            Icons.add_rounded,
-            size: 20.0,
-            color: Color(0xFF261700),
-          ),
-          onPressed: () => _openCreateOrJoinModal(context, l10n),
         ),
       ],
     );
@@ -962,13 +962,11 @@ class TournamentsScreen extends ConsumerWidget {
               ],
             ),
             borderRadius: BorderRadius.vertical(top: Radius.circular(28.0)),
-            border: Border(
-              top: BorderSide(
-                color: Color(0x664ADE80), // Soft pitch line green
+            border: Border.fromBorderSide(
+              BorderSide(
+                color: Color(0x4D4ADE80), // Soft pitch line green
                 width: 1.5,
               ),
-              left: BorderSide(color: Color(0x334ADE80), width: 1.0),
-              right: BorderSide(color: Color(0x334ADE80), width: 1.0),
             ),
             boxShadow: [
               BoxShadow(
@@ -1182,6 +1180,109 @@ class _TactileMenuButtonState extends State<_TactileMenuButton> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Tactile 2.5D floating pill button for creating or joining leagues.
+class _TactileFloatingButton extends StatefulWidget {
+  const _TactileFloatingButton({
+    required this.text,
+    required this.onPressed,
+  });
+
+  final String text;
+  final VoidCallback onPressed;
+
+  @override
+  State<_TactileFloatingButton> createState() => _TactileFloatingButtonState();
+}
+
+class _TactileFloatingButtonState extends State<_TactileFloatingButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    const double bevel = 3.5;
+    final double translationY = _isPressed ? bevel : 0.0;
+    final double currentBevel = _isPressed ? 0.5 : bevel;
+
+    return Listener(
+      onPointerDown: (_) => setState(() => _isPressed = true),
+      onPointerUp: (_) => setState(() => _isPressed = false),
+      onPointerCancel: (_) => setState(() => _isPressed = false),
+      child: GestureDetector(
+        onTap: widget.onPressed,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 60),
+          curve: Curves.easeOut,
+          transform: Matrix4.translationValues(0.0, translationY, 0.0),
+          padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 12.0),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFFFFEA75),
+                Color(0xFFFFD41D),
+                Color(0xFFFFB800),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(999.0),
+            border: Border.all(
+              color: const Color(0xFFFFF7C2),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF9E6500),
+                offset: Offset(0, currentBevel),
+                blurRadius: 0,
+              ),
+              BoxShadow(
+                color: const Color(0x66FFD41D),
+                offset: Offset(0, currentBevel + 2),
+                blurRadius: 10,
+              ),
+              const BoxShadow(
+                color: Color(0x66000000),
+                offset: Offset(0, 6),
+                blurRadius: 16,
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 24.0,
+                height: 24.0,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF261700).withValues(alpha: 0.14),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.add_rounded,
+                  size: 18.0,
+                  color: Color(0xFF261700),
+                ),
+              ),
+              const SizedBox(width: 8.0),
+              Text(
+                widget.text,
+                style: const TextStyle(
+                  fontFamily: 'Rubik',
+                  color: Color(0xFF261700),
+                  fontWeight: FontWeight.w900,
+                  fontSize: 14.5,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pico/features/auth/domain/auth_state.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/auth/presentation/onboarding_screen.dart';
+import 'package:pico/features/home/presentation/home_screen.dart';
 import 'package:pico/features/matches/presentation/matches_screen.dart';
 import 'package:pico/features/profile/presentation/profile_screen.dart';
 import 'package:pico/features/shop/presentation/shop_screen.dart';
@@ -122,6 +123,6 @@ void main() {
     // Tap Home tab back (center)
     await tester.tap(find.descendant(of: navBar, matching: find.text('Home')));
     await tester.pumpAndSettle();
-    expect(find.text('La Liga Season Hub'), findsOneWidget);
+    expect(find.byType(HomeScreen), findsOneWidget);
   });
 }

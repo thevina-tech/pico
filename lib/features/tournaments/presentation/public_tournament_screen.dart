@@ -151,6 +151,7 @@ class _PublicTournamentScreenState
         enrolledTournaments.any((t) => t.id == currentTournament.id);
 
     return PicoPitchBackground(
+      imageAsset: 'assets/images/tournament_and_matches_bg.png',
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(

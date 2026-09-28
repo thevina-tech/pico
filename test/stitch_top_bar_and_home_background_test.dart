@@ -197,8 +197,9 @@ void main() {
       final scaffold = tester.widget<Scaffold>(scaffoldFinder);
       expect(scaffold.backgroundColor, Colors.transparent);
 
-      // 3. Verify PicoAppBar is at the top
-      expect(find.byType(PicoAppBar), findsOneWidget);
+      // 3. Verify Stitch top bar with profile and division pills
+      expect(find.byKey(const Key('home_screen_profile_pill')), findsOneWidget);
+      expect(find.byKey(const Key('home_screen_division_pill')), findsOneWidget);
 
       // 4. Verify subheader username badge and match feed
       expect(find.text('GoldenBoot'), findsWidgets);

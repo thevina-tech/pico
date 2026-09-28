@@ -237,6 +237,7 @@ class _PrivateLeagueDashboardScreenState
     final isOwner = currentLeague != null && currentUserId != null && currentLeague.ownerId == currentUserId;
 
     return PicoPitchBackground(
+      imageAsset: 'assets/images/tournament_and_matches_bg.png',
       child: Scaffold(
         backgroundColor: Colors.transparent,
         resizeToAvoidBottomInset: true,

@@ -36,10 +36,8 @@ class DivisionLadderSheet extends StatelessWidget {
       decoration: const BoxDecoration(
         color: Color(0xFF071D15),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
-        border: Border(
-          top: BorderSide(color: Color(0xFF14736E), width: 1.5),
-          left: BorderSide(color: Color(0xFF14736E), width: 1.5),
-          right: BorderSide(color: Color(0xFF14736E), width: 1.5),
+        border: Border.fromBorderSide(
+          BorderSide(color: Color(0xFF14736E), width: 1.5),
         ),
       ),
       child: Column(

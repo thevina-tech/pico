@@ -111,10 +111,8 @@ Future<void> showPicoPredictionBottomSheet({
             decoration: const BoxDecoration(
               color: PicoColors.cardFace,
               borderRadius: BorderRadius.vertical(top: Radius.circular(28.0)),
-              border: Border(
-                top: BorderSide(color: Color(0xFFECE7DC), width: 2.0),
-                left: BorderSide(color: Color(0xFFECE7DC), width: 1.0),
-                right: BorderSide(color: Color(0xFFECE7DC), width: 1.0),
+              border: Border.fromBorderSide(
+                BorderSide(color: Color(0xFFECE7DC), width: 1.5),
               ),
               boxShadow: [
                 BoxShadow(

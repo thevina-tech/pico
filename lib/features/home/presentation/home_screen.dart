@@ -12,18 +12,23 @@ import 'package:pico/features/profile/domain/user_profile.dart';
 import 'package:pico/features/profile/presentation/user_profile_provider.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/game_exit_dialog.dart';
-import 'package:pico/shared/components/match_card.dart';
-import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
-import 'package:pico/shared/components/pico_companion.dart';
 import 'package:pico/widgets/ads/banner_ad_widget.dart';
 
-/// The official Pico Home screen based on Stitch "Direction A: Clash Royale Resource Bar & Subheader".
+/// The official Pico Home screen modeled directly on Stitch "Pico home image.png".
 ///
-/// Features:
-/// 1. Reusable global top bar ([PicoAppBar]) displaying Level/XP, Coins, and Streak.
-/// 2. Subheader row immediately below the app bar with user's custom username and tactile menu icon.
-/// 3. Lazy loaded upcoming matches list consuming [matchesFeedProvider].
+/// Layout structure:
+/// 1. Top bar:
+///    - Left: Profile card with custom 3D avatar & real username (no Google account avatar).
+///    - Center: Division card with 3D heraldic crest & division name.
+///    - Right: Tactile hamburger menu button.
+/// 2. Special Event card:
+///    - Prominent cinematic match card (El Clásico / featured match) with stadium lighting,
+///      LALIGA badge, team crests, and tactile "PREDICT NOW" action.
+/// 3. How to Play section:
+///    - Gamified 3-step walkthrough (Choose a match -> Make your prediction -> Earn points).
+/// 4. Bottom navigation bar:
+///    - Preserved [PicoBottomNavBar] integration with 5 game tabs.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({
     super.key,
@@ -105,56 +110,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  final Map<String, (int, int)> _inlineScores = {};
-
-  Future<void> _onQuickPredictMatch(PicoMatch match) async {
-    final predictions = ref.read(predictionControllerProvider);
-    final existing = predictions.value?[match.id];
-    final scores = _inlineScores[match.id] ??
-        (existing != null ? (existing.homeScore, existing.awayScore) : (2, 1));
-    final homeScore = scores.$1;
-    final awayScore = scores.$2;
-    final winner = homeScore > awayScore
-        ? 'home'
-        : (awayScore > homeScore ? 'away' : 'draw');
-
-    final success = await ref
-        .read(predictionControllerProvider.notifier)
-        .submitPrediction(
-          match: match,
-          homeScore: homeScore,
-          awayScore: awayScore,
-          predictedWinner: winner,
-        );
-
-    if (!mounted) return;
-
-    final l10n = AppLocalizations.of(context);
-    if (success) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n?.predictionSavedToast ?? 'Prediction locked in! Good luck.',
-          ),
-          backgroundColor: PicoColors.primary,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n?.predictionWindowClosed ??
-                'Predictions are closed for this match',
-          ),
-          backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
-
   void _openDetailedPrediction(PicoMatch match) {
     if (widget.onMakePrediction != null) {
       widget.onMakePrediction!();
@@ -177,16 +132,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         );
 
     final matchesAsync = ref.watch(matchesFeedProvider);
+    final matches = matchesAsync.value ?? <PicoMatch>[];
+    final allMatches = <PicoMatch>[...matches];
+    if (widget.heroMatch != null &&
+        !allMatches.any((m) => m.id == widget.heroMatch!.id)) {
+      allMatches.insert(0, widget.heroMatch!);
+    }
+    final featuredMatch = allMatches.isNotEmpty ? allMatches.first : null;
 
     return PicoGameExitScope(
       child: Stack(
         children: [
-          // 1. Full-Bleed Sunny Pitch Background (Clouds & sky at top, subtly softened)
+          // 1. Full-Bleed Sunny Pitch Background
           Positioned.fill(
             child: ImageFiltered(
-              imageFilter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
+              imageFilter: ImageFilter.blur(sigmaX: 1.5, sigmaY: 1.5),
               child: Transform.scale(
-                scale: 1.02, // Subtle scale to prevent edge bleed
+                scale: 1.02,
                 child: Image.asset(
                   'assets/images/home_pitch_background.png',
                   fit: BoxFit.cover,
@@ -199,16 +161,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
 
-          // 2. Soft darkening overlay to tone down bright colors
+          // 2. Soft darkening overlay for text legibility
           Positioned.fill(
             child: IgnorePointer(
               child: Container(
-                color: Colors.black.withValues(alpha: 0.18),
+                color: Colors.black.withValues(alpha: 0.16),
               ),
             ),
           ),
 
-          // 3. Subtle pitch contrast vignette over the middle/bottom grass
+          // 3. Subtle pitch contrast vignette
           Positioned.fill(
             child: IgnorePointer(
               child: DecoratedBox(
@@ -216,12 +178,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    stops: const [0.0, 0.20, 0.50, 1.0],
+                    stops: const [0.0, 0.25, 0.60, 1.0],
                     colors: [
-                      Colors.transparent, // Sky & clouds remain clean behind Top Bar
+                      Colors.transparent,
                       Colors.transparent,
                       Colors.black.withValues(alpha: 0.12),
-                      Colors.black.withValues(alpha: 0.28),
+                      Colors.black.withValues(alpha: 0.30),
                     ],
                   ),
                 ),
@@ -229,13 +191,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
 
-          // 3. Transparent Scaffold hosting floating top bar and scrollable content
+          // 4. Scaffold hosting top bar, body content, and bottom navigation
           Scaffold(
             backgroundColor: Colors.transparent,
-            appBar: PicoAppBar(
-              onProfileTap: _navigateToProfile,
-              onCoinsTap: _navigateToShop,
-            ),
             bottomNavigationBar: widget.showBottomNavBar
                 ? Column(
                     mainAxisSize: MainAxisSize.min,
@@ -258,7 +216,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   _navigateToMatches();
                                   break;
                                 case 2:
-                                  // Already Home (center tab)
+                                  // Already Home
                                   break;
                                 case 3:
                                   _navigateToTournaments();
@@ -275,7 +233,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   )
                 : const BannerAdWidget(placement: 'dashboard_bottom'),
             body: SafeArea(
-              top: false,
               bottom: false,
               child: Center(
                 child: ConstrainedBox(
@@ -283,10 +240,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // 1. Home-Specific Subheader Row (Username on left, Menu on right)
-                      _buildSubHeaderRow(context, profile),
+                      // 1. Pinned Top Bar: Profile Pill | Division Pill
+                      _buildTopBar(context, profile),
 
-                      // 2. Main Content & Matches Feed
+                      // 2. Scrollable Content
                       Expanded(
                         child: RefreshIndicator(
                           color: PicoColors.primary,
@@ -295,10 +252,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             await ref.read(matchesFeedProvider.notifier).refresh();
                             await ref.read(currentUserProfileProvider.notifier).refresh();
                           },
-                          child: matchesAsync.when(
-                            data: (matches) => _buildMatchesList(context, profile, matches),
-                            loading: () => _buildLoadingList(context, profile),
-                            error: (err, _) => _buildErrorList(context, profile, err),
+                          child: SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.only(bottom: 24.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                // Special Event Card (Cinematic Match Showcase)
+                                _buildSpecialEventCard(context, featuredMatch),
+
+                                // How to Play Section (Gamified 3-step loop)
+                                _buildHowToPlaySection(context),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -313,730 +279,740 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// 1. Sub-Header Bar (Direction A: Calm, Functional, Tactile)
-  /// User's custom username pill on far left, tactile menu icon on far right.
-  Widget _buildSubHeaderRow(BuildContext context, UserProfile profile) {
-    final username = profile.username != null && profile.username!.isNotEmpty
-        ? profile.username!
-        : 'Alex';
-
+  /// 1. Top Bar: Profile Section (55% width) & Division Section (45% width)
+  /// - Profile Section on Left: person icon + real username
+  /// - Division Section on Right: shield icon + translated division title (matching profile screen)
+  Widget _buildTopBar(BuildContext context, UserProfile profile) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 8.0),
+      padding: const EdgeInsets.fromLTRB(16.0, 2.0, 16.0, 4.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Left: Boxed Username Badge (Clean, tactile, generous padding, no green dot)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.5),
-            decoration: BoxDecoration(
-              color: const Color(0xFF102318),
-              borderRadius: BorderRadius.circular(8.0),
-              border: Border.all(color: const Color(0xFF1E432F), width: 1.5),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0xFF06110A),
-                  offset: Offset(0, 2.5),
-                  blurRadius: 0,
-                ),
-              ],
-            ),
-            child: Text(
-              username,
-              style: const TextStyle(
-                fontFamily: 'Rubik',
-                color: Color(0xFFFAF9F4),
-                fontSize: 14.5,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.1,
-                height: 1.0,
-              ),
-            ),
+          // Left: User Profile Pill (55% of available width)
+          Expanded(
+            flex: 55,
+            child: _buildProfilePill(profile),
           ),
 
-          // Right: Tactile Menu Button
-          GestureDetector(
-            key: const Key('home_screen_menu_button'),
-            onTap: () {
-              if (widget.onMenuTap != null) {
-                widget.onMenuTap!();
-              } else {
-                _showHomeMenuBottomSheet(context, profile);
-              }
-            },
-            child: Container(
-              width: 36.0,
-              height: 36.0,
+          const SizedBox(width: 10.0),
+
+          // Right: Division Pill (45% of available width)
+          Expanded(
+            flex: 45,
+            child: _buildDivisionPill(profile, l10n),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// User Profile Pill (Warm golden-tan 2.5D container, gamer icon, bold real username)
+  Widget _buildProfilePill(UserProfile profile) {
+    final username = profile.username != null && profile.username!.isNotEmpty
+        ? profile.username!
+        : 'Dev';
+
+    return GestureDetector(
+      key: const Key('home_screen_profile_pill'),
+      onTap: _navigateToProfile,
+      onLongPress: () {
+        if (widget.onMenuTap != null) {
+          widget.onMenuTap!();
+        } else {
+          _showHomeMenuBottomSheet(context, profile);
+        }
+      },
+      child: Container(
+        height: 56.0,
+        padding: const EdgeInsets.fromLTRB(8.0, 6.0, 12.0, 6.0),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFE2B76E),
+              Color(0xFFC79848),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(16.0),
+          border: Border.all(color: const Color(0xFF8E6325), width: 1.5),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0xFF6B4815),
+              offset: Offset(0, 3.5),
+              blurRadius: 0,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Gamer Avatar Icon Box (Tactile squircle with person icon)
+            Container(
+              width: 38.0,
+              height: 38.0,
               decoration: BoxDecoration(
-                color: const Color(0xFF102318),
-                borderRadius: BorderRadius.circular(10.0),
-                border: Border.all(color: const Color(0xFF1E432F), width: 2.0),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0xFF06110A),
-                    offset: Offset(0, 2.5),
-                    blurRadius: 0,
-                  ),
-                ],
+                color: const Color(0xFF4A3416),
+                borderRadius: BorderRadius.circular(11.0),
+                border: Border.all(color: const Color(0xFF78511E), width: 1.2),
               ),
               child: const Center(
                 child: Icon(
-                  Icons.menu_rounded,
-                  size: 20.0,
+                  Icons.person_rounded,
                   color: Color(0xFFFAF9F4),
+                  size: 24.0,
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
+            const SizedBox(width: 10.0),
 
-  /// Builds the scrollable feed containing the mascot greeting, active tournament,
-  /// and exactly one featured match ("Match of the Day") on the Home screen.
-  Widget _buildMatchesList(
-    BuildContext context,
-    UserProfile profile,
-    List<PicoMatch> matches,
-  ) {
-    // If heroMatch was explicitly passed, prepend or use it
-    final allMatches = <PicoMatch>[...matches];
-    if (widget.heroMatch != null &&
-        !allMatches.any((m) => m.id == widget.heroMatch!.id)) {
-      allMatches.insert(0, widget.heroMatch!);
-    }
-
-    final hasMatches = allMatches.isNotEmpty;
-    final hasMultipleMatches = allMatches.length > 1;
-    final totalCount = hasMatches ? (hasMultipleMatches ? 5 : 4) : 4;
-
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 24.0),
-      itemCount: totalCount,
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16.0),
-            child: _buildMascotGreetingRow(profile.username ?? 'Alex'),
-          );
-        }
-        if (index == 1) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16.0),
-            child: _buildActiveTournamentCard(),
-          );
-        }
-        if (index == 2) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12.0),
-            child: _buildSectionHeader(allMatches.length),
-          );
-        }
-
-        if (!hasMatches) {
-          return _buildEmptyMatchesState();
-        }
-
-        // index 3: The single featured match on the Home screen with inline prediction controls
-        if (index == 3) {
-          final featuredMatch = allMatches.first;
-          final predictions = ref.watch(predictionControllerProvider);
-          final existing = predictions.value?[featuredMatch.id];
-          final currentScores = _inlineScores[featuredMatch.id] ??
-              (existing != null
-                  ? (existing.homeScore, existing.awayScore)
-                  : (2, 1));
-
-          return Padding(
-            padding: EdgeInsets.only(bottom: hasMultipleMatches ? 10.0 : 14.0),
-            child: MatchCard.fromMatch(
-              match: featuredMatch,
-              predictedHomeScore: existing?.homeScore,
-              predictedAwayScore: existing?.awayScore,
-              showInlinePrediction: true,
-              inlineHomeScore: currentScores.$1,
-              inlineAwayScore: currentScores.$2,
-              onInlineHomeScoreChanged: (val) {
-                setState(() {
-                  _inlineScores[featuredMatch.id] = (val, currentScores.$2);
-                });
-              },
-              onInlineAwayScoreChanged: (val) {
-                setState(() {
-                  _inlineScores[featuredMatch.id] = (currentScores.$1, val);
-                });
-              },
-              onQuickPredict: () => _onQuickPredictMatch(featuredMatch),
-              onCardTap: () => _openDetailedPrediction(featuredMatch),
-              onPredictPressed: () => _openDetailedPrediction(featuredMatch),
-              onModifyPressed: () => _openDetailedPrediction(featuredMatch),
-              onViewPredictionPressed: () => _openDetailedPrediction(featuredMatch),
-            ),
-          );
-        }
-
-        // index 4: Tactile banner navigating to the Matches screen if more matches exist
-        final remaining = allMatches.length - 1;
-        final l10n = AppLocalizations.of(context);
-        final moreText = l10n?.moreMatchesAvailable(remaining) ??
-            '+$remaining more fixtures in Matches';
-
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 14.0),
-          child: GestureDetector(
-            key: const Key('home_screen_explore_matches_banner'),
-            onTap: _navigateToMatches,
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 16.0),
-              decoration: BoxDecoration(
-                color: PicoColors.pitchSurfaceElevated,
-                borderRadius: BorderRadius.circular(16.0),
-                border: Border.all(
-                  color: PicoColors.cardBorder.withValues(alpha: 0.15),
+            // Real Username
+            Expanded(
+              child: Text(
+                username,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: 'Rubik',
+                  fontSize: 15.0,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF26190B),
+                  letterSpacing: 0.1,
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.sports_soccer_rounded,
-                    size: 16.0,
-                    color: PicoColors.primaryFixed,
-                  ),
-                  const SizedBox(width: 8.0),
-                  Text(
-                    moreText,
-                    style: PicoTypography.labelPillSm.copyWith(
-                      color: PicoColors.textWhite,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.2,
-                    ),
-                  ),
-                  const SizedBox(width: 6.0),
-                  const Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 15.0,
-                    color: PicoColors.primaryFixed,
-                  ),
-                ],
-              ),
             ),
-          ),
-        );
-      },
-    );
-  }
-
-  /// Loading state with placeholder skeleton items.
-  Widget _buildLoadingList(BuildContext context, UserProfile profile) {
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 24.0),
-      itemCount: 4,
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16.0),
-            child: _buildMascotGreetingRow(profile.username ?? 'Alex'),
-          );
-        }
-        if (index == 1) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16.0),
-            child: _buildActiveTournamentCard(),
-          );
-        }
-        if (index == 2) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12.0),
-            child: _buildSectionHeader(1),
-          );
-        }
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 14.0),
-          child: _buildSkeletonMatchCard(),
-        );
-      },
-    );
-  }
-
-  /// Tactile skeleton placeholder match card during data loading.
-  Widget _buildSkeletonMatchCard() {
-    return Container(
-      height: 110.0,
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: PicoColors.pitchSurfaceElevated,
-        borderRadius: BorderRadius.circular(20.0),
-        border: Border.all(
-          color: PicoColors.cardBorder.withValues(alpha: 0.12),
+          ],
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 44.0,
-                height: 44.0,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF13281C),
-                  borderRadius: BorderRadius.circular(14.0),
-                ),
-              ),
-              const SizedBox(width: 12.0),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 90.0,
-                    height: 12.0,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1E432F),
-                      borderRadius: BorderRadius.circular(4.0),
-                    ),
-                  ),
-                  const SizedBox(height: 8.0),
-                  Container(
-                    width: 60.0,
-                    height: 10.0,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF13281C),
-                      borderRadius: BorderRadius.circular(4.0),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          Container(
-            width: 70.0,
-            height: 34.0,
-            decoration: BoxDecoration(
-              color: const Color(0xFF13281C),
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
-  /// Error state with retry action.
-  Widget _buildErrorList(BuildContext context, UserProfile profile, Object error) {
-    final l10n = AppLocalizations.of(context);
-    final retryText = l10n?.retryButton ?? 'Retry';
+  /// Division Pill (Tactile dark green container, shield icon, translated division title)
+  Widget _buildDivisionPill(UserProfile profile, AppLocalizations? l10n) {
+    final divisionTitle = l10n != null
+        ? profile.division.localizedTitle(l10n)
+        : profile.division.defaultTitle;
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 24.0),
-      children: [
-        _buildMascotGreetingRow(profile.username ?? 'Alex'),
-        const SizedBox(height: 16.0),
-        _buildActiveTournamentCard(),
-        const SizedBox(height: 20.0),
-        Container(
-          padding: const EdgeInsets.all(20.0),
-          decoration: BoxDecoration(
-            color: PicoColors.pitchSurfaceElevated,
-            borderRadius: BorderRadius.circular(16.0),
-            border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
-          ),
-          child: Column(
-            children: [
-              const Icon(Icons.cloud_off_rounded, color: Colors.redAccent, size: 36.0),
-              const SizedBox(height: 8.0),
-              Text(
-                'Could not load upcoming matches.',
-                style: PicoTypography.bodyMdBold.copyWith(color: PicoColors.textWhite),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 14.0),
-              ElevatedButton.icon(
-                onPressed: () {
-                  ref.read(matchesFeedProvider.notifier).refresh();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: PicoColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                ),
-                icon: const Icon(Icons.refresh_rounded, size: 18.0),
-                label: Text(retryText),
-              ),
-            ],
-          ),
+    return GestureDetector(
+      key: const Key('home_screen_division_pill'),
+      onTap: _navigateToTournaments,
+      child: Container(
+        height: 56.0,
+        padding: const EdgeInsets.fromLTRB(8.0, 5.0, 10.0, 5.0),
+        decoration: BoxDecoration(
+          color: const Color(0xFF092013),
+          borderRadius: BorderRadius.circular(16.0),
+          border: Border.all(color: const Color(0xFF1E432F), width: 1.5),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0xFF040E08),
+              offset: Offset(0, 3.5),
+              blurRadius: 0,
+            ),
+          ],
         ),
-      ],
-    );
-  }
-
-  /// Empty matches state.
-  Widget _buildEmptyMatchesState() {
-    final l10n = AppLocalizations.of(context);
-    final emptyText =
-        l10n?.noUpcomingMatches ?? 'No upcoming matches right now. Check back soon!';
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 32.0),
-      decoration: BoxDecoration(
-        color: PicoColors.pitchSurfaceElevated,
-        borderRadius: BorderRadius.circular(20.0),
-        border: Border.all(color: PicoColors.cardBorder.withValues(alpha: 0.1)),
-      ),
-      child: Column(
-        children: [
-          const Icon(
-            Icons.sports_soccer_rounded,
-            color: PicoColors.primaryFixedDim,
-            size: 40.0,
-          ),
-          const SizedBox(height: 12.0),
-          Text(
-            emptyText,
-            style: PicoTypography.bodyMd.copyWith(
-              color: PicoColors.textWhiteMuted,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Section Header ("MATCH OF THE DAY") with optional "VIEW ALL" button
-  Widget _buildSectionHeader(int count) {
-    final l10n = AppLocalizations.of(context);
-    final title = l10n?.matchOfTheDayTitle.toUpperCase() ?? 'MATCH OF THE DAY';
-    final viewAllText = l10n?.viewAllMatches.toUpperCase() ?? 'VIEW ALL';
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
+        child: Row(
           children: [
+            // Division Shield Icon Box
             Container(
-              width: 4.0,
-              height: 14.0,
+              width: 36.0,
+              height: 36.0,
               decoration: BoxDecoration(
-                color: PicoColors.electricMint,
-                borderRadius: BorderRadius.circular(2.0),
+                color: const Color(0xFF13281C),
+                borderRadius: BorderRadius.circular(10.0),
+                border: Border.all(color: const Color(0xFF224B33), width: 1.2),
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.shield_rounded,
+                  color: profile.division.primaryColor,
+                  size: 22.0,
+                ),
               ),
             ),
             const SizedBox(width: 8.0),
-            Text(
-              title,
-              style: PicoTypography.labelPillSm.copyWith(
-                color: PicoColors.electricMint,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.8,
-              ),
-            ),
-          ],
-        ),
-        if (count > 1)
-          GestureDetector(
-            key: const Key('home_screen_view_all_matches_button'),
-            onTap: _navigateToMatches,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  viewAllText,
-                  style: PicoTypography.labelPillSm.copyWith(
-                    color: PicoColors.primaryFixed,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 11.0,
-                    letterSpacing: 0.5,
+
+            // Translated Division Name & PP Subtitle (matching Profile page)
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    divisionTitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontFamily: 'Rubik',
+                      fontSize: 13.0,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: 0.2,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 4.0),
-                const Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 11.0,
-                  color: PicoColors.primaryFixed,
-                ),
-              ],
-            ),
-          ),
-      ],
-    );
-  }
-
-  /// Mascot Daily Greeting ("Big match tonight, {username}! ⚽")
-  Widget _buildMascotGreetingRow(String username) {
-    final l10n = AppLocalizations.of(context);
-    final greeting = l10n?.mascotGreeting(username) ?? 'Big match tonight, $username! ⚽';
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // Mascot badge avatar with active indicator
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              width: 44.0,
-              height: 44.0,
-              decoration: BoxDecoration(
-                color: PicoColors.primary,
-                borderRadius: BorderRadius.circular(14.0),
-                border: Border.all(color: PicoColors.primaryFixed, width: 2.0),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0xFF134E2D),
-                    offset: Offset(0, 2.5),
-                    blurRadius: 0,
+                  const SizedBox(height: 2.0),
+                  Text(
+                    '${profile.formattedTotalPoints} PP',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: 'Rubik',
+                      fontSize: 11.0,
+                      fontWeight: FontWeight.w700,
+                      color: profile.division.accentColor,
+                    ),
                   ),
                 ],
               ),
-              child: const Center(child: PicoCompanion.avatar(size: 28.0)),
             ),
-            Positioned(
-              top: -2.0,
-              right: -2.0,
-              child: Container(
-                width: 12.0,
-                height: 12.0,
-                decoration: BoxDecoration(
-                  color: PicoColors.electricMint,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: PicoColors.pitchBackground,
-                    width: 2.0,
-                  ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 2. Special Event Card modeled on Stitch "Pico home image.png"
+  /// - Upper half: Arena floodlights banner, red LALIGA badge, gold "EL CLÁSICO" title & kickoff.
+  /// - Lower half: White/cream card face, Real Madrid & Barcelona crests, VS circle, and tactile PREDICT NOW action.
+  Widget _buildSpecialEventCard(BuildContext context, PicoMatch? featuredMatch) {
+    final homeTeam = featuredMatch?.homeTeamName ?? 'Real Madrid';
+    final awayTeam = featuredMatch?.awayTeamName ?? 'Barcelona';
+    final competition = featuredMatch != null
+        ? featuredMatch.competitionName.toUpperCase()
+        : 'LALIGA';
+    final kickoff = featuredMatch != null
+        ? '📅 ${featuredMatch.kickoffTimeFormatted}'
+        : '📅 Sat, 26 Oct • 21:00';
+
+    final predictions = ref.watch(predictionControllerProvider);
+    final predictionMap = predictions.value;
+    final existing = (featuredMatch != null && predictionMap != null)
+        ? predictionMap[featuredMatch.id]
+        : null;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 10.0),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(22.0),
+          border: Border.all(color: const Color(0xFF1E432F), width: 2.0),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0xFF040E08),
+              offset: Offset(0, 4.0),
+              blurRadius: 0,
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Upper Half: Stadium Banner with Title & Kickoff
+              SizedBox(
+                height: 140.0,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Banner Image
+                    Image.asset(
+                      'assets/images/el_clasico_banner.png',
+                      fit: BoxFit.cover,
+                      errorBuilder: (ctx, err, stack) => Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Color(0xFF131B38),
+                              Color(0xFF381428),
+                              Color(0xFF1E0E1B),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Atmospheric Gradient Overlay
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.35),
+                            Colors.black.withValues(alpha: 0.68),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Text & Badges Overlay
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 12.0,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // League Badge (Red LALIGA badge)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0,
+                              vertical: 2.5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE52535),
+                              borderRadius: BorderRadius.circular(6.0),
+                            ),
+                            child: Text(
+                              competition,
+                              style: const TextStyle(
+                                fontFamily: 'Rubik',
+                                fontSize: 10.0,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                          ),
+
+                          const Spacer(),
+
+                          // Match Title ("EL CLÁSICO")
+                          const Text(
+                            'EL CLÁSICO',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Rubik',
+                              fontSize: 25.0,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFFF7C85C),
+                              letterSpacing: 1.2,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black,
+                                  offset: Offset(0, 2.0),
+                                  blurRadius: 6.0,
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 3.0),
+
+                          // Kickoff / Time Label
+                          Text(
+                            kickoff,
+                            style: TextStyle(
+                              fontFamily: 'Rubik',
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white.withValues(alpha: 0.95),
+                            ),
+                          ),
+
+                          const SizedBox(height: 2.0),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+
+              // Lower Half: Cream Surface with Teams & Predict Button
+              Container(
+                color: const Color(0xFFF5F3EC),
+                padding: const EdgeInsets.fromLTRB(16.0, 14.0, 16.0, 14.0),
+                child: Column(
+                  children: [
+                    // Teams Matchup Row
+                    Row(
+                      children: [
+                        // Home Team
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildTeamCrest(
+                                badgeUrl: featuredMatch?.homeTeamBadgeUrl,
+                                isRealMadrid: homeTeam.contains('Real Madrid'),
+                              ),
+                              const SizedBox(height: 6.0),
+                              Text(
+                                homeTeam,
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontFamily: 'Rubik',
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF1C2421),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Center VS Indicator
+                        Container(
+                          width: 36.0,
+                          height: 36.0,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFE4E1D8),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'VS',
+                              style: TextStyle(
+                                fontFamily: 'Rubik',
+                                fontSize: 13.0,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF284836),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // Away Team
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildTeamCrest(
+                                badgeUrl: featuredMatch?.awayTeamBadgeUrl,
+                                isBarcelona: awayTeam.contains('Barcelona'),
+                              ),
+                              const SizedBox(height: 6.0),
+                              Text(
+                                awayTeam,
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontFamily: 'Rubik',
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF1C2421),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12.0),
+
+                    // Prediction Action Button
+                    GestureDetector(
+                      onTap: () {
+                        if (featuredMatch != null) {
+                          _openDetailedPrediction(featuredMatch);
+                        } else {
+                          _navigateToMatches();
+                        }
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        height: 42.0,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Color(0xFF22C55E),
+                              Color(0xFF16A34A),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(12.0),
+                          border: Border.all(
+                            color: const Color(0xFF14532D),
+                            width: 1.5,
+                          ),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0xFF0F3D1F),
+                              offset: Offset(0, 3.0),
+                              blurRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.sports_soccer_rounded,
+                                size: 18.0,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 8.0),
+                              Text(
+                                existing != null
+                                    ? 'PREDICTED: ${existing.homeScore} - ${existing.awayScore}'
+                                    : 'PREDICT NOW',
+                                style: const TextStyle(
+                                  fontFamily: 'Rubik',
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Team crest icon container
+  Widget _buildTeamCrest({
+    String? badgeUrl,
+    bool isRealMadrid = false,
+    bool isBarcelona = false,
+  }) {
+    return Container(
+      width: 46.0,
+      height: 46.0,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(color: const Color(0xFFDDD9CF), width: 1.5),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x18000000),
+            offset: Offset(0, 2),
+            blurRadius: 3,
+          ),
+        ],
+      ),
+      child: Center(
+        child: Icon(
+          Icons.shield_rounded,
+          color: isRealMadrid
+              ? const Color(0xFF0C2340)
+              : (isBarcelona ? const Color(0xFFA50044) : const Color(0xFF1E3A2B)),
+          size: 26.0,
+        ),
+      ),
+    );
+  }
+
+  /// 3. How to Play Section modeled on Stitch "Pico home image.png"
+  /// - Left: "HOW TO" (neon mint), "PLAY" (golden yellow), "Predict. Compete. Earn."
+  /// - Right: 3 step cards (Choose a match -> Make your prediction -> Earn points)
+  Widget _buildHowToPlaySection(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 16.0),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+        decoration: BoxDecoration(
+          color: const Color(0xFF092013),
+          borderRadius: BorderRadius.circular(18.0),
+          border: Border.all(color: const Color(0xFF1E432F), width: 1.5),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0xFF040E08),
+              offset: Offset(0, 3.5),
+              blurRadius: 0,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Left Title Column
+            SizedBox(
+              width: 90.0,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'HOW TO',
+                    style: TextStyle(
+                      fontFamily: 'Rubik',
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF38EF7D),
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const Text(
+                    'PLAY',
+                    style: TextStyle(
+                      fontFamily: 'Rubik',
+                      fontSize: 24.0,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFFE5B348),
+                      height: 1.0,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 4.0),
+                  const Text(
+                    'Predict. Compete. Earn.',
+                    style: TextStyle(
+                      fontFamily: 'Rubik',
+                      fontSize: 8.5,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF6E9E80),
+                      height: 1.15,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 4.0),
+
+            // Right Row: 3 Step Cards connected with Chevrons
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // Step 1: Choose a Match
+                  _buildHowToStepCard(
+                    stepNumber: '1',
+                    label: 'CHOOSE\nA MATCH',
+                    graphic: const Center(
+                      child: Text(
+                        '⚽',
+                        style: TextStyle(fontSize: 18.0),
+                      ),
+                    ),
+                  ),
+
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    size: 14.0,
+                    color: Color(0xFF285438),
+                  ),
+
+                  // Step 2: Make Your Prediction
+                  _buildHowToStepCard(
+                    stepNumber: '2',
+                    label: 'MAKE YOUR\nPREDICTION',
+                    graphic: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        _ScoreTile('2'),
+                        SizedBox(width: 2.0),
+                        _ScoreTile('1'),
+                      ],
+                    ),
+                  ),
+
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    size: 14.0,
+                    color: Color(0xFF285438),
+                  ),
+
+                  // Step 3: Earn Points
+                  _buildHowToStepCard(
+                    stepNumber: '3',
+                    label: 'EARN\nPOINTS',
+                    graphic: const Center(
+                      child: Text(
+                        '🏆',
+                        style: TextStyle(fontSize: 18.0),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
-        const SizedBox(width: 10.0),
-
-        // Speech Bubble
-        Flexible(
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 10.5,
-            ),
-            decoration: const BoxDecoration(
-              color: PicoColors.cardFace,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(4.0),
-                topRight: Radius.circular(18.0),
-                bottomLeft: Radius.circular(18.0),
-                bottomRight: Radius.circular(18.0),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: PicoColors.cardBevelDark,
-                  offset: Offset(0, 3.0),
-                  blurRadius: 0,
-                ),
-                BoxShadow(
-                  color: Color(0x22000000),
-                  offset: Offset(0, 4),
-                  blurRadius: 6,
-                ),
-              ],
-            ),
-            child: Text(
-              greeting,
-              style: PicoTypography.bodyMdBold.copyWith(
-                color: PicoColors.textPitchInk,
-                fontSize: 14.0,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.1,
-              ),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  /// Active Tournament Hub Card (La Liga Season Hub)
-  Widget _buildActiveTournamentCard() {
+  /// Single step card inside "HOW TO PLAY"
+  Widget _buildHowToStepCard({
+    required String stepNumber,
+    required String label,
+    required Widget graphic,
+  }) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16.0),
+      width: 60.0,
+      padding: const EdgeInsets.fromLTRB(3.0, 6.0, 3.0, 4.0),
       decoration: BoxDecoration(
-        color: PicoColors.pitchSurfaceElevated,
-        borderRadius: BorderRadius.circular(20.0),
-        border: Border.all(
-          color: PicoColors.cardBorder.withValues(alpha: 0.15),
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x33000000),
-            offset: Offset(0, 4),
-            blurRadius: 10,
-          ),
-        ],
+        color: const Color(0xFF0D2B1B),
+        borderRadius: BorderRadius.circular(10.0),
+        border: Border.all(color: const Color(0xFF1E4830), width: 1.0),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
-              // Emblem Icon
-              Container(
-                width: 48.0,
-                height: 48.0,
-                decoration: BoxDecoration(
-                  color: PicoColors.pitchBackground,
-                  borderRadius: BorderRadius.circular(14.0),
-                  border: Border.all(
-                    color: PicoColors.primary.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: const Icon(
-                  Icons.emoji_events_rounded,
-                  color: PicoColors.gold,
-                  size: 26.0,
-                ),
-              ),
-              const SizedBox(width: 12.0),
-
-              // Title & Rank
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'ACTIVE TOURNAMENT',
-                      style: PicoTypography.labelPillSm.copyWith(
-                        color: PicoColors.electricMint,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.6,
-                      ),
-                    ),
-                    const SizedBox(height: 2.0),
-                    Text(
-                      'La Liga Season Hub',
-                      style: PicoTypography.headlineMd.copyWith(
-                        color: PicoColors.textWhite,
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2.0),
-                    Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: 'Rank #12',
-                            style: PicoTypography.labelPillSm.copyWith(
-                              color: PicoColors.primaryFixed,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          TextSpan(
-                            text: ' · 42 Pico Points',
-                            style: PicoTypography.bodySm.copyWith(
-                              color: PicoColors.textWhiteMuted,
-                              fontSize: 12.0,
-                            ),
-                          ),
-                        ],
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-
-              // Leaderboard Action Pill
-              GestureDetector(
-                onTap: () {
-                  widget.onViewLeaderboard?.call();
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10.0,
-                    vertical: 6.0,
-                  ),
-                  decoration: BoxDecoration(
-                    color: PicoColors.cardFace,
-                    borderRadius: BorderRadius.circular(10.0),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x22000000),
-                        offset: Offset(0, 2),
-                        blurRadius: 4,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Leaderboard',
-                        style: PicoTypography.labelPillSm.copyWith(
-                          color: PicoColors.textPitchInk,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(width: 2.0),
-                      const Icon(
-                        Icons.chevron_right_rounded,
-                        color: PicoColors.textPitchInk,
-                        size: 14.0,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+          // Graphic container
+          SizedBox(
+            height: 22.0,
+            child: Center(child: graphic),
           ),
-          const SizedBox(height: 14.0),
-          Divider(color: PicoColors.cardBorder.withValues(alpha: 0.1)),
-          const SizedBox(height: 6.0),
 
-          // Ticker Footer Row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 6.0,
-                      height: 6.0,
-                      decoration: const BoxDecoration(
-                        color: PicoColors.electricMint,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 6.0),
-                    Flexible(
-                      child: Text(
-                        'Round 28 of 38 active',
-                        style: PicoTypography.labelPillSm.copyWith(
-                          color: PicoColors.textWhiteMuted,
-                          fontSize: 10.5,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+          const SizedBox(height: 4.0),
+
+          // Number badge
+          Container(
+            width: 15.0,
+            height: 15.0,
+            decoration: BoxDecoration(
+              color: const Color(0xFF183B25),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFF2E6B44), width: 1.0),
+            ),
+            child: Center(
+              child: Text(
+                stepNumber,
+                style: const TextStyle(
+                  fontFamily: 'Rubik',
+                  color: Colors.white,
+                  fontSize: 8.5,
+                  fontWeight: FontWeight.w900,
+                  height: 1.0,
                 ),
               ),
-              const SizedBox(width: 8.0),
-              Text(
-                '3 FIXTURES TODAY',
-                style: PicoTypography.labelPillSm.copyWith(
-                  color: PicoColors.textWhiteMuted,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 10.5,
-                  letterSpacing: 0.5,
-                ),
+            ),
+          ),
+
+          const SizedBox(height: 4.0),
+
+          // Label pill
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 3.0),
+            decoration: BoxDecoration(
+              color: const Color(0xFFD6D3C8),
+              borderRadius: BorderRadius.circular(4.0),
+            ),
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Rubik',
+                fontSize: 6.5,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF1A241E),
+                height: 1.05,
               ),
-            ],
+            ),
           ),
         ],
       ),
@@ -1059,8 +1035,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           decoration: const BoxDecoration(
             color: Color(0xFF0F2417),
             borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
-            border: Border(
-              top: BorderSide(color: Color(0xFF1E432F), width: 2.0),
+            border: Border.fromBorderSide(
+              BorderSide(color: Color(0xFF1E432F), width: 1.5),
             ),
             boxShadow: [
               BoxShadow(
@@ -1175,6 +1151,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Tactile score digit card inside "HOW TO PLAY"
+class _ScoreTile extends StatelessWidget {
+  const _ScoreTile(this.digit);
+  final String digit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 12.0,
+      height: 16.0,
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8E5DC),
+        borderRadius: BorderRadius.circular(2.5),
+        border: Border.all(color: const Color(0xFFB0AC9F), width: 0.8),
+      ),
+      child: Center(
+        child: Text(
+          digit,
+          style: const TextStyle(
+            fontFamily: 'Rubik',
+            fontSize: 9.5,
+            fontWeight: FontWeight.w900,
+            color: Color(0xFF1E3A2B),
+            height: 1.0,
+          ),
+        ),
+      ),
     );
   }
 }
