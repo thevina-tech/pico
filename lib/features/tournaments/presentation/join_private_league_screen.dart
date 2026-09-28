@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/core/theme/pico_typography.dart';
+import 'package:pico/core/utils/input_sanitizer.dart';
 import 'package:pico/features/tournaments/domain/private_league_exceptions.dart';
 import 'package:pico/features/tournaments/presentation/private_league_controller.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
@@ -45,9 +46,7 @@ class _JoinPrivateLeagueScreenState
     final data = await Clipboard.getData(Clipboard.kTextPlain);
     final text = data?.text;
     if (text != null && text.isNotEmpty) {
-      // Extract first 6 uppercase alphanumeric characters
-      final clean = text.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
-      final code = clean.length > 6 ? clean.substring(0, 6) : clean;
+      final code = InputSanitizer.sanitizeInviteCode(text);
       _codeController.text = code;
       setState(() {
         _errorMessage = null;
@@ -60,8 +59,8 @@ class _JoinPrivateLeagueScreenState
 
   Future<void> _handleJoin() async {
     final l10n = AppLocalizations.of(context)!;
-    final code = _codeController.text.trim().toUpperCase();
-    if (code.length != 6) {
+    final code = InputSanitizer.sanitizeInviteCode(_codeController.text);
+    if (!InputSanitizer.isValidInviteCode(code)) {
       setState(() {
         _errorMessage = l10n.leagueCodeFormatError;
       });

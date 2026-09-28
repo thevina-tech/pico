@@ -16,6 +16,7 @@ import 'package:pico/shared/components/match_card.dart';
 import 'package:pico/shared/components/prediction_bottom_sheet.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/shared/components/division_badge.dart';
+import 'package:pico/shared/components/pico_confirmation_modal.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
 /// Detail screen for official Public Tournaments.
@@ -53,6 +54,35 @@ class _PublicTournamentScreenState
       );
       return false;
     }
+
+    final confirmed = await showPicoConfirmationModal(
+      context: context,
+      title: 'Join ${tournament.name}?',
+      message: 'Compete against other fans on the official leaderboard and earn Pico Points from every match!',
+      confirmText: 'Join Tournament',
+      cancelText: l10n.cancelButton,
+      confirmStyle: PicoDialogButtonStyle.green,
+      cancelStyle: PicoDialogButtonStyle.red,
+      customIcon: Container(
+        width: 54.0,
+        height: 54.0,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: const Color(0xFFE8F5E9),
+          border: Border.all(
+            color: const Color(0xFF12944B).withValues(alpha: 0.25),
+            width: 2.0,
+          ),
+        ),
+        child: const Icon(
+          Icons.emoji_events_rounded,
+          color: Color(0xFF12944B),
+          size: 30.0,
+        ),
+      ),
+    );
+
+    if (confirmed != true || !mounted) return false;
 
     setState(() => _isJoining = true);
     try {

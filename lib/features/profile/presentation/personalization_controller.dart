@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 import 'package:pico/core/logging/app_logger.dart';
+import 'package:pico/core/utils/input_sanitizer.dart';
 import 'package:pico/features/auth/domain/auth_state.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/matches/presentation/matches_controller.dart';
@@ -101,6 +102,14 @@ class PersonalizationController extends _$PersonalizationController {
       );
       return false;
     }
+    if (!InputSanitizer.isValidUsername(username)) {
+      state = state.copyWith(
+        errorMessage: 'Username must be 3-20 alphanumeric characters or underscores.',
+      );
+      return false;
+    }
+
+    final cleanUsername = InputSanitizer.sanitizeUsername(username);
 
     final authState = ref.read(authProvider);
     if (authState is! PicoAuthAuthenticated || authState.user == null) {
@@ -114,7 +123,7 @@ class PersonalizationController extends _$PersonalizationController {
       final repo = ref.read(profileRepositoryProvider);
       await repo.updatePersonalization(
         userId: authState.user!.id,
-        username: username,
+        username: cleanUsername,
         favoriteTeamId: state.selectedTeamId,
         favoriteTeamIds: state.selectedTeamIds.toList(),
         favoriteLeagueIds: state.selectedLeagueIds.toList(),

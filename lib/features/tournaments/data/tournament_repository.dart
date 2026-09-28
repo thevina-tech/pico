@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pico/core/logging/app_logger.dart';
 import 'package:pico/core/network/supabase_client_provider.dart';
+import 'package:pico/core/utils/input_sanitizer.dart';
 import 'package:pico/features/auth/domain/auth_state.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/matches/domain/competition.dart';
@@ -611,6 +612,11 @@ class SupabaseTournamentRepository implements TournamentRepository {
     required String competitionId,
     required String userId,
   }) async {
+    final cleanName = InputSanitizer.sanitizeLeagueName(name);
+    if (!InputSanitizer.isValidLeagueName(cleanName)) {
+      throw ArgumentError('League name must be between 3 and 30 characters.');
+    }
+
     final resolvedCompId = _resolveCompetitionId(competitionId);
     final comp = _fallbackCompetitions
         .where((c) => c.id == resolvedCompId)
@@ -621,7 +627,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
       final mockCode = 'K9X2P1';
       final newLeague = PrivateLeague(
         id: mockId,
-        name: name,
+        name: cleanName,
         ownerId: userId,
         competitionId: resolvedCompId,
         inviteCode: mockCode,
@@ -636,7 +642,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
 
     try {
       final insertData = {
-        'name': name.trim(),
+        'name': cleanName,
         'owner_id': userId,
         'competition_id': resolvedCompId,
       };
@@ -672,7 +678,10 @@ class SupabaseTournamentRepository implements TournamentRepository {
     required String inviteCode,
     required String userId,
   }) async {
-    final cleanCode = inviteCode.trim().toUpperCase();
+    final cleanCode = InputSanitizer.sanitizeInviteCode(inviteCode);
+    if (!InputSanitizer.isValidInviteCode(cleanCode)) {
+      throw const LeagueNotFoundException();
+    }
     if (_supabase == null) {
       final found = _mockPrivateLeagues.values.firstWhere(
         (l) => l.inviteCode == cleanCode,
@@ -1055,7 +1064,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
     String? username,
     String? avatarUrl,
   }) async {
-    final cleanMessage = message.trim();
+    final cleanMessage = InputSanitizer.sanitizeChatMessage(message);
     if (cleanMessage.isEmpty) {
       throw ArgumentError('Message cannot be empty');
     }

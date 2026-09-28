@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/core/theme/pico_typography.dart';
+import 'package:pico/core/utils/input_sanitizer.dart';
 import 'package:pico/features/profile/presentation/personalization_controller.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
@@ -383,6 +384,7 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
           const SizedBox(height: 10.0),
           TextField(
             controller: _usernameController,
+            inputFormatters: InputSanitizer.usernameFormatters,
             style: const TextStyle(
               fontFamily: 'Rubik',
               fontSize: 16.0,

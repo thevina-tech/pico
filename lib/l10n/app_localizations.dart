@@ -449,25 +449,25 @@ abstract class AppLocalizations {
   /// Title of the exit confirmation dialog
   ///
   /// In en, this message translates to:
-  /// **'Leaving the Pitch?'**
+  /// **'Exit App?'**
   String get exitDialogTitle;
 
   /// Message explaining consequences of quitting Pico
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to quit Pico? Upcoming matches and predictions are waiting for you!'**
+  /// **'Are you sure you want to exit?'**
   String get exitDialogMessage;
 
   /// Primary action to stay in the game and keep predicting
   ///
   /// In en, this message translates to:
-  /// **'STAY & PREDICT'**
+  /// **'Stay'**
   String get exitDialogStayButton;
 
   /// Secondary action to exit/quit the game
   ///
   /// In en, this message translates to:
-  /// **'Leave Game'**
+  /// **'Exit'**
   String get exitDialogLeaveButton;
 
   /// Section header for the single featured match on Home

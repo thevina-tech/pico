@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/core/theme/pico_typography.dart';
+import 'package:pico/core/utils/input_sanitizer.dart';
 import 'package:pico/features/matches/domain/competition.dart';
 import 'package:pico/features/tournaments/data/tournament_repository.dart';
 import 'package:pico/features/tournaments/domain/private_league.dart';
@@ -46,12 +47,19 @@ class _CreatePrivateLeagueScreenState
   }
 
   Future<void> _handleCreate() async {
-    final name = _nameController.text.trim();
+    final name = InputSanitizer.sanitizeLeagueName(_nameController.text);
     final l10n = AppLocalizations.of(context)!;
 
     if (name.isEmpty) {
       setState(() {
         _errorMessage = l10n.leagueNamePlaceholder;
+      });
+      return;
+    }
+
+    if (!InputSanitizer.isValidLeagueName(name)) {
+      setState(() {
+        _errorMessage = 'League name must be between 3 and 30 characters.';
       });
       return;
     }
@@ -444,6 +452,7 @@ class _CreatePrivateLeagueScreenState
                         ),
                         child: TextField(
                           controller: _nameController,
+                          inputFormatters: InputSanitizer.leagueNameFormatters,
                           style: PicoTypography.bodyLg.copyWith(
                             color: PicoColors.textWhite,
                             fontWeight: FontWeight.w600,
@@ -564,48 +573,11 @@ class _CreatePrivateLeagueScreenState
                   const SizedBox(height: 16.0),
                 ],
 
-                // Submit CTA Button (Tactile Gold Button)
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _handleCreate,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: PicoColors.gold,
-                    foregroundColor: const Color(0xFF261A00),
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.0),
-                    ),
-                    shadowColor: const Color(0xFFC99520),
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 22.0,
-                          width: 22.0,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            valueColor:
-                                AlwaysStoppedAnimation(Color(0xFF261A00)),
-                          ),
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              l10n.createLeagueButton,
-                              style: PicoTypography.titleCard.copyWith(
-                                color: const Color(0xFF261A00),
-                                fontWeight: FontWeight.w800,
-                                fontSize: 16.0,
-                              ),
-                            ),
-                            const SizedBox(width: 8.0),
-                            const Icon(
-                              Icons.arrow_forward_rounded,
-                              size: 20.0,
-                              color: Color(0xFF261A00),
-                            ),
-                          ],
-                        ),
+                // Submit CTA Button (2.5D Tactile Game Button)
+                _TactileSubmitButton(
+                  isLoading: _isLoading,
+                  label: l10n.createLeagueButton,
+                  onPressed: _handleCreate,
                 ),
                 const SizedBox(height: 12.0),
 
@@ -642,108 +614,141 @@ class _CreatePrivateLeagueScreenState
 
   Widget _buildHeroHeader(AppLocalizations l10n) {
     return Container(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(22.0),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
           colors: [
-            Color(0xFF0A1A12),
-            Color(0xFF08150E),
-            Color(0xFF050D09),
+            Color(0xFF1E5238), // Vibrant bright emerald stadium tone
+            Color(0xFF153F2B),
+            Color(0xFF0F2E1F),
           ],
         ),
-        borderRadius: BorderRadius.circular(22.0),
+        borderRadius: BorderRadius.circular(24.0),
         border: Border.all(
-          color: const Color(0xFF1A3828),
+          color: const Color(0x664ADE80), // Bright pitch line green border
           width: 1.5,
         ),
         boxShadow: const [
           BoxShadow(
-            color: Color(0xFF020604),
-            offset: Offset(0, 4),
+            color: Color(0xFF071910),
+            offset: Offset(0, 5),
             blurRadius: 0,
+          ),
+          BoxShadow(
+            color: Color(0x40000000),
+            offset: Offset(0, 8),
+            blurRadius: 18,
           ),
         ],
       ),
       child: Column(
         children: [
-          // Icon badge
+          // Icon badge with glowing stadium frame
           Stack(
             clipBehavior: Clip.none,
             children: [
               Container(
-                width: 64.0,
-                height: 64.0,
+                width: 68.0,
+                height: 68.0,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF143322),
-                  borderRadius: BorderRadius.circular(20.0),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFF2B6B48),
+                      Color(0xFF1B4730),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(22.0),
                   border: Border.all(
-                    color: PicoColors.gold.withValues(alpha: 0.5),
+                    color: PicoColors.gold,
                     width: 2.0,
                   ),
                   boxShadow: const [
                     BoxShadow(
-                      color: Color(0xFF0A1F14),
+                      color: Color(0xFF0E281B),
                       offset: Offset(0, 4),
                       blurRadius: 0,
+                    ),
+                    BoxShadow(
+                      color: Color(0x4DE6C687),
+                      offset: Offset(0, 2),
+                      blurRadius: 12,
                     ),
                   ],
                 ),
                 child: const Icon(
                   Icons.emoji_events_rounded,
                   color: PicoColors.gold,
-                  size: 34.0,
+                  size: 36.0,
                 ),
               ),
               Positioned(
                 bottom: -4.0,
                 right: -4.0,
                 child: Container(
-                  width: 24.0,
-                  height: 24.0,
+                  width: 26.0,
+                  height: 26.0,
                   decoration: BoxDecoration(
-                    color: PicoColors.darkTray,
+                    color: const Color(0xFF0A1F14),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: const Color(0xFF143322),
+                      color: PicoColors.gold,
                       width: 2.0,
                     ),
                   ),
                   child: const Icon(
                     Icons.sports_soccer_rounded,
                     color: PicoColors.primary,
-                    size: 13.0,
+                    size: 14.0,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12.0),
+          const SizedBox(height: 14.0),
           Text(
             l10n.createPrivateLeagueTitle,
             style: PicoTypography.headlineLgMobile.copyWith(
               color: PicoColors.textWhite,
               fontWeight: FontWeight.w800,
               fontSize: 22.0,
+              letterSpacing: -0.3,
             ),
           ),
-          const SizedBox(height: 4.0),
+          const SizedBox(height: 5.0),
           Text(
             l10n.createPrivateLeagueSubtitle,
             textAlign: TextAlign.center,
-            style: PicoTypography.bodyMd.copyWith(
-              color: PicoColors.textWhiteMuted,
-              fontSize: 13.0,
+            style: const TextStyle(
+              fontFamily: 'Plus Jakarta Sans',
+              color: Color(0xFFD1FAE5), // Bright, readable mint chalk
+              fontSize: 13.5,
+              fontWeight: FontWeight.w500,
+              height: 1.35,
             ),
           ),
-          const SizedBox(height: 12.0),
+          const SizedBox(height: 14.0),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 5.0),
             decoration: BoxDecoration(
-              color: const Color(0xFF163A27),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF265A3C), Color(0xFF1B432C)],
+              ),
               borderRadius: BorderRadius.circular(999.0),
-              border: Border.all(color: const Color(0xFF255E3F)),
+              border: Border.all(
+                color: PicoColors.gold.withValues(alpha: 0.6),
+                width: 1.0,
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0xFF0E281A),
+                  offset: Offset(0, 2),
+                  blurRadius: 0,
+                ),
+              ],
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -751,15 +756,16 @@ class _CreatePrivateLeagueScreenState
                 const Icon(
                   Icons.verified_rounded,
                   color: PicoColors.gold,
-                  size: 13.0,
+                  size: 14.0,
                 ),
-                const SizedBox(width: 5.0),
+                const SizedBox(width: 6.0),
                 Text(
                   l10n.freeSetupBadge.toUpperCase(),
                   style: PicoTypography.labelPillSm.copyWith(
                     color: PicoColors.gold,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w900,
                     fontSize: 10.5,
+                    letterSpacing: 0.8,
                   ),
                 ),
               ],
@@ -1034,6 +1040,136 @@ class _CreatePrivateLeagueScreenState
           ),
         );
       },
+    );
+  }
+}
+
+/// Tactile 2.5D submit button with 4px physical bevel and responsive press dynamics.
+/// Wraps an [ElevatedButton] to satisfy test harness finders while rendering custom 3D game geometry.
+class _TactileSubmitButton extends StatefulWidget {
+  const _TactileSubmitButton({
+    required this.isLoading,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final bool isLoading;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  State<_TactileSubmitButton> createState() => _TactileSubmitButtonState();
+}
+
+class _TactileSubmitButtonState extends State<_TactileSubmitButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    const double bevel = 4.0;
+    final double translationY = _isPressed ? bevel : 0.0;
+    final double currentBevel = _isPressed ? 1.0 : bevel;
+
+    return Listener(
+      onPointerDown: (_) {
+        if (!widget.isLoading) {
+          setState(() => _isPressed = true);
+        }
+      },
+      onPointerUp: (_) {
+        if (_isPressed) {
+          setState(() => _isPressed = false);
+        }
+      },
+      onPointerCancel: (_) {
+        if (_isPressed) {
+          setState(() => _isPressed = false);
+        }
+      },
+      child: ElevatedButton(
+        onPressed: widget.isLoading ? null : widget.onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          elevation: 0,
+          padding: EdgeInsets.zero,
+          minimumSize: const Size(double.infinity, 54.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+        ),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 60),
+          curve: Curves.easeOut,
+          transform: Matrix4.translationValues(0.0, translationY, 0.0),
+          width: double.infinity,
+          height: 54.0,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFFFFEA75),
+                Color(0xFFFFD41D),
+                Color(0xFFFFB800),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16.0),
+            border: Border.all(
+              color: const Color(0xFFFFF7C2),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF9E6500),
+                offset: Offset(0, currentBevel),
+                blurRadius: 0,
+              ),
+              BoxShadow(
+                color: const Color(0x40FFD41D),
+                offset: Offset(0, currentBevel + 4),
+                blurRadius: 14,
+              ),
+            ],
+          ),
+          alignment: Alignment.center,
+          child: widget.isLoading
+              ? const SizedBox(
+                  height: 22.0,
+                  width: 22.0,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF261700)),
+                  ),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        widget.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: 'Rubik',
+                          color: Color(0xFF261700),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 15.5,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8.0),
+                    const Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 20.0,
+                      color: Color(0xFF261700),
+                    ),
+                  ],
+                ),
+        ),
+      ),
     );
   }
 }

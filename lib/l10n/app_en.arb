@@ -254,19 +254,19 @@
   "@signOutButton": {
     "description": "Action label to sign out"
   },
-  "exitDialogTitle": "Leaving the Pitch?",
+  "exitDialogTitle": "Exit App?",
   "@exitDialogTitle": {
     "description": "Title of the exit confirmation dialog"
   },
-  "exitDialogMessage": "Are you sure you want to quit Pico? Upcoming matches and predictions are waiting for you!",
+  "exitDialogMessage": "Are you sure you want to exit?",
   "@exitDialogMessage": {
     "description": "Message explaining consequences of quitting Pico"
   },
-  "exitDialogStayButton": "STAY & PREDICT",
+  "exitDialogStayButton": "Stay",
   "@exitDialogStayButton": {
     "description": "Primary action to stay in the game and keep predicting"
   },
-  "exitDialogLeaveButton": "Leave Game",
+  "exitDialogLeaveButton": "Exit",
   "@exitDialogLeaveButton": {
     "description": "Secondary action to exit/quit the game"
   },

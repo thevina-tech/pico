@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pico/core/logging/app_logger.dart';
 import 'package:pico/core/network/supabase_client_provider.dart';
+import 'package:pico/core/utils/input_sanitizer.dart';
 import 'package:pico/features/matches/domain/team.dart';
 import 'package:pico/features/profile/domain/user_profile.dart';
 
@@ -107,8 +108,8 @@ class SupabaseProfileRepository implements ProfileRepository {
 
   @override
   Future<bool> isUsernameAvailable(String username, {String? excludeUserId}) async {
-    final clean = username.trim();
-    if (clean.isEmpty) return false;
+    final clean = InputSanitizer.sanitizeUsername(username);
+    if (!InputSanitizer.isValidUsername(clean)) return false;
 
     if (_supabase == null) {
       final cleanLower = clean.toLowerCase();
@@ -118,10 +119,11 @@ class SupabaseProfileRepository implements ProfileRepository {
     }
 
     try {
+      final escaped = InputSanitizer.escapeSqlWildcards(clean);
       final response = await _supabase
           .from('profiles')
           .select('id')
-          .ilike('username', clean);
+          .ilike('username', escaped);
       final list = response as List<dynamic>;
       if (list.isEmpty) return true;
       if (excludeUserId != null && list.length == 1) {
@@ -145,7 +147,10 @@ class SupabaseProfileRepository implements ProfileRepository {
   }) async {
     final updates = <String, dynamic>{};
     if (username != null && username.isNotEmpty) {
-      updates['username'] = username;
+      final cleanUsername = InputSanitizer.sanitizeUsername(username);
+      if (cleanUsername.isNotEmpty) {
+        updates['username'] = cleanUsername;
+      }
     }
     if (favoriteTeamIds != null) {
       updates['favorite_team_ids'] = favoriteTeamIds;

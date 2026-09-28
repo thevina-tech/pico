@@ -16,6 +16,7 @@ import 'package:pico/features/tournaments/presentation/tournaments_controller.da
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/game_exit_dialog.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
+import 'package:pico/shared/components/pico_confirmation_modal.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 
 /// Central Tournaments Screen featuring "My Leagues" and "Discover" tabs.
@@ -676,6 +677,36 @@ class TournamentsScreen extends ConsumerWidget {
                       );
                       return;
                     }
+
+                    final confirmed = await showPicoConfirmationModal(
+                      context: context,
+                      title: 'Join ${tournament.name}?',
+                      message: 'Compete against other fans on the official leaderboard and earn Pico Points from every match!',
+                      confirmText: 'Join Tournament',
+                      cancelText: l10n.cancelButton,
+                      confirmStyle: PicoDialogButtonStyle.green,
+                      cancelStyle: PicoDialogButtonStyle.red,
+                      customIcon: Container(
+                        width: 54.0,
+                        height: 54.0,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFFE8F5E9),
+                          border: Border.all(
+                            color: const Color(0xFF12944B).withValues(alpha: 0.25),
+                            width: 2.0,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.emoji_events_rounded,
+                          color: Color(0xFF12944B),
+                          size: 30.0,
+                        ),
+                      ),
+                    );
+
+                    if (confirmed != true || !context.mounted) return;
+
                     try {
                       await ref.read(tournamentRepositoryProvider).enrollInTournament(
                             userId: authState.user!.id,
@@ -916,160 +947,243 @@ class TournamentsScreen extends ConsumerWidget {
   void _openCreateOrJoinModal(BuildContext context, AppLocalizations l10n) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: PicoColors.darkTray,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22.0)),
-      ),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (ctx) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 28.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40.0,
-                  height: 4.0,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(999.0),
-                  ),
-                ),
-                const SizedBox(height: 20.0),
-
-                // Option 1: Create Private League
-                InkWell(
-                  onTap: () {
-                    Navigator.of(ctx).pop();
-                    context.push('/tournaments/create');
-                  },
-                  borderRadius: BorderRadius.circular(14.0),
-                  child: Container(
-                    padding: const EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0D1B13),
-                      borderRadius: BorderRadius.circular(14.0),
-                      border: Border.all(
-                        color: PicoColors.primary.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 44.0,
-                          height: 44.0,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF143322),
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          child: const Icon(
-                            Icons.add_circle_outline_rounded,
-                            color: PicoColors.gold,
-                            size: 24.0,
-                          ),
-                        ),
-                        const SizedBox(width: 14.0),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l10n.createPrivateLeagueTitle,
-                                style: PicoTypography.titleCard.copyWith(
-                                  color: PicoColors.textWhite,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const SizedBox(height: 2.0),
-                              Text(
-                                'Set up a private group for your friends',
-                                style: PicoTypography.bodySm.copyWith(
-                                  color: PicoColors.textWhiteMuted,
-                                  fontSize: 12.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 14.0,
-                          color: PicoColors.textWhiteMuted,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12.0),
-
-                // Option 2: Join with Code
-                InkWell(
-                  onTap: () {
-                    Navigator.of(ctx).pop();
-                    context.push('/tournaments/join');
-                  },
-                  borderRadius: BorderRadius.circular(14.0),
-                  child: Container(
-                    padding: const EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0D1B13),
-                      borderRadius: BorderRadius.circular(14.0),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.08),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 44.0,
-                          height: 44.0,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF152B20),
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          child: const Icon(
-                            Icons.vpn_key_rounded,
-                            color: Color(0xFF2D8B55),
-                            size: 22.0,
-                          ),
-                        ),
-                        const SizedBox(width: 14.0),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l10n.joinPrivateLeagueTitle,
-                                style: PicoTypography.titleCard.copyWith(
-                                  color: PicoColors.textWhite,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const SizedBox(height: 2.0),
-                              Text(
-                                'Enter a 6-character code from an invite',
-                                style: PicoTypography.bodySm.copyWith(
-                                  color: PicoColors.textWhiteMuted,
-                                  fontSize: 12.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 14.0,
-                          color: PicoColors.textWhiteMuted,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+        return Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFF0F261B),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF143B29), // Rich emerald turf highlight matching prediction bottom bar
+                Color(0xFF0B2117), // Deep solid grass ground
               ],
+            ),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28.0)),
+            border: Border(
+              top: BorderSide(
+                color: Color(0x664ADE80), // Soft pitch line green
+                width: 1.5,
+              ),
+              left: BorderSide(color: Color(0x334ADE80), width: 1.0),
+              right: BorderSide(color: Color(0x334ADE80), width: 1.0),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x99000000),
+                offset: Offset(0, -8),
+                blurRadius: 24,
+              ),
+            ],
+          ),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20.0, 14.0, 20.0, 28.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Pull pill
+                  Container(
+                    width: 44.0,
+                    height: 4.5,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.35),
+                      borderRadius: BorderRadius.circular(999.0),
+                    ),
+                  ),
+                  const SizedBox(height: 18.0),
+
+                  // Option 1: Create Private League
+                  _TactileMenuButton(
+                    title: l10n.createPrivateLeagueTitle,
+                    subtitle: 'Set up a private group for your friends',
+                    icon: Icons.add_circle_rounded,
+                    accentColor: PicoColors.gold,
+                    gradientColors: const [
+                      Color(0xFF235C3A),
+                      Color(0xFF174229),
+                      Color(0xFF10331F),
+                    ],
+                    bevelColor: const Color(0xFF07190F),
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      context.push('/tournaments/create');
+                    },
+                  ),
+                  const SizedBox(height: 14.0),
+
+                  // Option 2: Join with Code
+                  _TactileMenuButton(
+                    title: l10n.joinPrivateLeagueTitle,
+                    subtitle: 'Enter a 6-character code from an invite',
+                    icon: Icons.vpn_key_rounded,
+                    accentColor: PicoColors.electricMint,
+                    gradientColors: const [
+                      Color(0xFF1C5235),
+                      Color(0xFF143D27),
+                      Color(0xFF0D2C1B),
+                    ],
+                    bevelColor: const Color(0xFF06170E),
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      context.push('/tournaments/join');
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         );
       },
+    );
+  }
+}
+
+/// Tactile 2.5D/3D menu card button with physical bevel and press-down dynamics.
+class _TactileMenuButton extends StatefulWidget {
+  const _TactileMenuButton({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.accentColor,
+    required this.gradientColors,
+    required this.bevelColor,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color accentColor;
+  final List<Color> gradientColors;
+  final Color bevelColor;
+  final VoidCallback onTap;
+
+  @override
+  State<_TactileMenuButton> createState() => _TactileMenuButtonState();
+}
+
+class _TactileMenuButtonState extends State<_TactileMenuButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    const double bevel = 4.0;
+    final double translationY = _isPressed ? bevel : 0.0;
+    final double currentBevel = _isPressed ? 1.0 : bevel;
+
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) {
+        setState(() => _isPressed = false);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 60),
+        curve: Curves.easeOut,
+        transform: Matrix4.translationValues(0.0, translationY, 0.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: widget.gradientColors,
+          ),
+          borderRadius: BorderRadius.circular(18.0),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.20),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: widget.bevelColor,
+              offset: Offset(0, currentBevel),
+              blurRadius: 0,
+            ),
+            BoxShadow(
+              color: const Color(0x40000000),
+              offset: Offset(0, currentBevel + 4),
+              blurRadius: 10,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48.0,
+              height: 48.0,
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.25),
+                borderRadius: BorderRadius.circular(14.0),
+                border: Border.all(
+                  color: widget.accentColor.withValues(alpha: 0.6),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: widget.accentColor.withValues(alpha: 0.2),
+                    blurRadius: 8,
+                  ),
+                ],
+              ),
+              child: Icon(
+                widget.icon,
+                color: widget.accentColor,
+                size: 24.0,
+              ),
+            ),
+            const SizedBox(width: 14.0),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.title,
+                    style: const TextStyle(
+                      fontFamily: 'Rubik',
+                      color: PicoColors.textWhite,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15.5,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                  const SizedBox(height: 3.0),
+                  Text(
+                    widget.subtitle,
+                    style: const TextStyle(
+                      fontFamily: 'Plus Jakarta Sans',
+                      color: Color(0xFFD1FAE5),
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: 30.0,
+              height: 30.0,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.25),
+                  width: 1.0,
+                ),
+              ),
+              child: const Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 13.0,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

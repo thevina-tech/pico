@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pico/core/logging/app_logger.dart';
 import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/core/theme/pico_typography.dart';
+import 'package:pico/core/utils/input_sanitizer.dart';
 import 'package:pico/features/auth/domain/auth_state.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/matches/domain/competition.dart';
@@ -1373,7 +1374,8 @@ class _OnboardingAuthStepState extends ConsumerState<_OnboardingAuthStep> {
 
   Future<void> _handleContinue() async {
     final l10n = widget.l10n;
-    final username = _usernameController.text.trim();
+    final raw = _usernameController.text;
+    final username = raw.trim();
 
     if (username.isEmpty) {
       setState(() {
@@ -1391,13 +1393,14 @@ class _OnboardingAuthStepState extends ConsumerState<_OnboardingAuthStep> {
       return;
     }
 
-    if (_usernameController.text.contains(' ') ||
-        !RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(username)) {
+    if (raw.contains(' ') || !InputSanitizer.isValidUsername(username)) {
       setState(() {
         _errorMessage = 'Username must be alphanumeric with no spaces';
       });
       return;
     }
+
+    final cleanUsername = InputSanitizer.sanitizeUsername(username);
 
     setState(() {
       _isLoading = true;
@@ -1414,7 +1417,7 @@ class _OnboardingAuthStepState extends ConsumerState<_OnboardingAuthStep> {
 
       // Pre-check if username is already taken by another user before advancing
       final isAvailable = await repo.isUsernameAvailable(
-        username,
+        cleanUsername,
         excludeUserId: currentUserId,
       );
       if (!isAvailable) {
@@ -1429,10 +1432,10 @@ class _OnboardingAuthStepState extends ConsumerState<_OnboardingAuthStep> {
       }
 
       // Update personalization controller in-memory
-      ref.read(personalizationControllerProvider.notifier).setUsername(username);
+      ref.read(personalizationControllerProvider.notifier).setUsername(cleanUsername);
 
       if (mounted) {
-        widget.onUsernameConfirmed(username);
+        widget.onUsernameConfirmed(cleanUsername);
       }
     } catch (e) {
       if (mounted) {
@@ -1740,6 +1743,7 @@ class _OnboardingTeamSelectionStepState
                 Expanded(
                   child: TextField(
                     controller: _searchController,
+                    inputFormatters: InputSanitizer.searchFormatters,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14.0,
@@ -1758,7 +1762,8 @@ class _OnboardingTeamSelectionStepState
                           const EdgeInsets.symmetric(vertical: 10.0),
                     ),
                     onChanged: (val) {
-                      setState(() => _searchQuery = val.trim().toLowerCase());
+                      setState(() => _searchQuery =
+                          InputSanitizer.sanitizeSearchQuery(val).toLowerCase());
                     },
                   ),
                 ),

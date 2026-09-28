@@ -12,6 +12,7 @@ import 'package:pico/features/tournaments/data/tournament_repository.dart';
 import 'package:pico/features/tournaments/domain/private_league.dart';
 import 'package:pico/features/tournaments/domain/private_league_member.dart';
 import 'package:pico/shared/components/division_badge.dart';
+import 'package:pico/shared/components/pico_confirmation_modal.dart';
 
 /// Modal bottom sheet displaying League details, invite code,
 /// live standings leaderboard, admin kick controls, and leave league action.
@@ -519,52 +520,16 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
   ) async {
     if (currentUserId == null) return;
 
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showPicoConfirmationModal(
       context: context,
-      builder: (dialogCtx) => AlertDialog(
-        backgroundColor: const Color(0xFF16222F),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-        title: Text(
-          'Leave League?',
-          style: PicoTypography.headlineMd.copyWith(
-            color: PicoColors.textWhite,
-            fontWeight: FontWeight.w800,
-            fontSize: 18.0,
-          ),
-        ),
-        content: Text(
-          isAdmin
-              ? 'You are the league admin. If you leave, another member will be chosen at random as the new admin. If no members remain, the league will be deleted.'
-              : 'Are you sure you want to leave "${widget.league.name}"?',
-          style: PicoTypography.bodyMd.copyWith(
-            color: PicoColors.textWhiteMuted,
-            fontSize: 14.0,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(false),
-            child: Text(
-              'Cancel',
-              style: PicoTypography.bodySm.copyWith(color: PicoColors.textWhiteMuted),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: PicoColors.accentCoral,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-            ),
-            child: Text(
-              'Leave',
-              style: PicoTypography.bodySm.copyWith(
-                color: PicoColors.textWhite,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-        ],
-      ),
+      title: 'Leave League?',
+      message: isAdmin
+          ? 'You are the league admin. If you leave, another member will be chosen at random as the new admin. If no members remain, the league will be deleted.'
+          : 'Are you sure you want to leave "${widget.league.name}"?',
+      cancelText: 'Cancel',
+      confirmText: 'Leave',
+      confirmStyle: PicoDialogButtonStyle.red,
+      cancelStyle: PicoDialogButtonStyle.neutral,
     );
 
     if (confirmed != true || !mounted) return;
@@ -605,50 +570,14 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
   ) async {
     final memberName = member.username ?? 'this member';
 
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showPicoConfirmationModal(
       context: context,
-      builder: (dialogCtx) => AlertDialog(
-        backgroundColor: const Color(0xFF16222F),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-        title: Text(
-          'Kick $memberName?',
-          style: PicoTypography.headlineMd.copyWith(
-            color: PicoColors.textWhite,
-            fontWeight: FontWeight.w800,
-            fontSize: 18.0,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to remove $memberName from "${widget.league.name}"?',
-          style: PicoTypography.bodyMd.copyWith(
-            color: PicoColors.textWhiteMuted,
-            fontSize: 14.0,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(false),
-            child: Text(
-              'Cancel',
-              style: PicoTypography.bodySm.copyWith(color: PicoColors.textWhiteMuted),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: PicoColors.accentCoral,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-            ),
-            child: Text(
-              'Kick',
-              style: PicoTypography.bodySm.copyWith(
-                color: PicoColors.textWhite,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-        ],
-      ),
+      title: 'Kick $memberName?',
+      message: 'Are you sure you want to remove $memberName from "${widget.league.name}"?',
+      cancelText: 'Cancel',
+      confirmText: 'Kick',
+      confirmStyle: PicoDialogButtonStyle.red,
+      cancelStyle: PicoDialogButtonStyle.neutral,
     );
 
     if (confirmed != true || !mounted) return;

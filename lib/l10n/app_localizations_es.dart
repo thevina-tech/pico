@@ -208,17 +208,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get signOutButton => 'Cerrar Sesión';
 
   @override
-  String get exitDialogTitle => '¿Abandonar la Cancha?';
+  String get exitDialogTitle => '¿Salir de la app?';
 
   @override
-  String get exitDialogMessage =>
-      '¿Seguro que quieres salir de Pico? ¡Hay partidos y pronósticos esperándote!';
+  String get exitDialogMessage => '¿Seguro que quieres salir?';
 
   @override
-  String get exitDialogStayButton => 'QUEDARSE Y PREDECIR';
+  String get exitDialogStayButton => 'Quedarse';
 
   @override
-  String get exitDialogLeaveButton => 'Salir del Juego';
+  String get exitDialogLeaveButton => 'Salir';
 
   @override
   String get matchOfTheDayTitle => 'Partido del Día';

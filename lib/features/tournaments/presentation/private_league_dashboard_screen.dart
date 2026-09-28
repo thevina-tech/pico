@@ -10,6 +10,7 @@ import 'package:pico/core/logging/app_logger.dart';
 import 'package:pico/core/network/supabase_client_provider.dart';
 import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/core/theme/pico_typography.dart';
+import 'package:pico/core/utils/input_sanitizer.dart';
 import 'package:pico/features/auth/domain/auth_state.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/matches/domain/competition.dart';
@@ -26,6 +27,7 @@ import 'package:pico/shared/components/match_card.dart';
 import 'package:pico/shared/components/prediction_bottom_sheet.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/shared/components/division_badge.dart';
+import 'package:pico/shared/components/pico_confirmation_modal.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
 /// Unified Clan Dashboard for Private Leagues.
@@ -168,7 +170,7 @@ class _PrivateLeagueDashboardScreenState
   }
 
   Future<void> _sendMessage() async {
-    final text = _textController.text.trim();
+    final text = InputSanitizer.sanitizeChatMessage(_textController.text);
     if (text.isEmpty || _isSending) return;
 
     final authState = ref.read(authProvider);
@@ -794,6 +796,7 @@ class _PrivateLeagueDashboardScreenState
                 ),
                 child: TextField(
                   controller: _textController,
+                  inputFormatters: InputSanitizer.chatMessageFormatters,
                   style: const TextStyle(color: PicoColors.textWhite, fontSize: 14.0),
                   decoration: const InputDecoration(
                     hintText: 'Message league...',
@@ -1738,34 +1741,15 @@ class _PrivateLeagueDashboardScreenState
   // ==========================================
 
   Future<void> _confirmDeleteLeague(PrivateLeague league, AppLocalizations? l10n) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showPicoConfirmationModal(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: PicoColors.darkTray,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-        title: Text(
-          l10n?.deleteLeagueConfirmTitle ?? 'Delete League',
-          style: const TextStyle(color: PicoColors.accentCoral, fontWeight: FontWeight.w800),
-        ),
-        content: Text(
-          l10n?.deleteLeagueConfirmBody ?? 'Are you sure you want to delete this league? This action cannot be undone.',
-          style: const TextStyle(color: PicoColors.textWhiteMuted),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n?.cancelButton ?? 'Cancel', style: const TextStyle(color: PicoColors.textWhiteMuted)),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: PicoColors.accentCoral,
-              foregroundColor: Colors.white,
-            ),
-            child: Text(l10n?.deleteLeagueAction ?? 'Delete'),
-          ),
-        ],
-      ),
+      title: l10n?.deleteLeagueConfirmTitle ?? 'Delete League',
+      message: l10n?.deleteLeagueConfirmBody ??
+          'Are you sure you want to delete this league? This action cannot be undone.',
+      cancelText: l10n?.cancelButton ?? 'Cancel',
+      confirmText: l10n?.deleteLeagueAction ?? 'Delete',
+      confirmStyle: PicoDialogButtonStyle.red,
+      cancelStyle: PicoDialogButtonStyle.neutral,
     );
 
     if (confirmed != true || !mounted) return;
@@ -1800,35 +1784,15 @@ class _PrivateLeagueDashboardScreenState
     PrivateLeagueMember member,
     AppLocalizations? l10n,
   ) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showPicoConfirmationModal(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: PicoColors.darkTray,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-        title: Text(
-          l10n?.removeMemberConfirmTitle ?? 'Remove Member',
-          style: const TextStyle(color: PicoColors.accentCoral, fontWeight: FontWeight.w800),
-        ),
-        content: Text(
-          l10n?.removeMemberConfirmBody(member.username ?? 'Player') ??
-              'Are you sure you want to remove ${member.username ?? "this member"}?',
-          style: const TextStyle(color: PicoColors.textWhiteMuted),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n?.cancelButton ?? 'Cancel', style: const TextStyle(color: PicoColors.textWhiteMuted)),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: PicoColors.accentCoral,
-              foregroundColor: Colors.white,
-            ),
-            child: Text(l10n?.removeMemberButton ?? 'Remove Member'),
-          ),
-        ],
-      ),
+      title: l10n?.removeMemberConfirmTitle ?? 'Remove Member',
+      message: l10n?.removeMemberConfirmBody(member.username ?? 'Player') ??
+          'Are you sure you want to remove ${member.username ?? "this member"}?',
+      cancelText: l10n?.cancelButton ?? 'Cancel',
+      confirmText: l10n?.removeMemberButton ?? 'Remove Member',
+      confirmStyle: PicoDialogButtonStyle.red,
+      cancelStyle: PicoDialogButtonStyle.neutral,
     );
 
     if (confirmed != true || !mounted) return;
@@ -1862,35 +1826,15 @@ class _PrivateLeagueDashboardScreenState
   }
 
   Future<void> _confirmLeaveLeague(PrivateLeague league, AppLocalizations? l10n) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showPicoConfirmationModal(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: PicoColors.darkTray,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-        title: Text(
-          l10n?.leaveLeagueConfirmTitle ?? 'Leave League',
-          style: const TextStyle(color: PicoColors.accentCoral, fontWeight: FontWeight.w800),
-        ),
-        content: Text(
-          l10n?.leaveLeagueConfirmBody(league.name) ??
-              'Are you sure you want to leave ${league.name}?',
-          style: const TextStyle(color: PicoColors.textWhiteMuted),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n?.cancelButton ?? 'Cancel', style: const TextStyle(color: PicoColors.textWhiteMuted)),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: PicoColors.accentCoral,
-              foregroundColor: Colors.white,
-            ),
-            child: Text(l10n?.leaveLeagueAction ?? 'Leave'),
-          ),
-        ],
-      ),
+      title: l10n?.leaveLeagueConfirmTitle ?? 'Leave League',
+      message: l10n?.leaveLeagueConfirmBody(league.name) ??
+          'Are you sure you want to leave ${league.name}?',
+      cancelText: l10n?.cancelButton ?? 'Cancel',
+      confirmText: l10n?.leaveLeagueAction ?? 'Leave',
+      confirmStyle: PicoDialogButtonStyle.red,
+      cancelStyle: PicoDialogButtonStyle.neutral,
     );
 
     if (confirmed != true || !mounted) return;

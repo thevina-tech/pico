@@ -387,7 +387,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Ensure no dialog is showing initially
-      expect(find.text('Leaving the Pitch?'), findsNothing);
+      expect(find.text('Exit App?'), findsNothing);
 
       // Simulate Android back button / back gesture
       final dynamic widgetsAppState = tester.state(find.byType(WidgetsApp));
@@ -395,15 +395,15 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify exit options dialog is displayed
-      expect(find.text('Leaving the Pitch?'), findsOneWidget);
-      expect(find.text('STAY & PREDICT'), findsOneWidget);
-      expect(find.text('Leave Game'), findsOneWidget);
+      expect(find.text('Exit App?'), findsOneWidget);
+      expect(find.text('Stay'), findsOneWidget);
+      expect(find.text('Exit'), findsOneWidget);
 
-      // Tapping "STAY & PREDICT" dismisses the modal
-      await tester.tap(find.text('STAY & PREDICT'));
+      // Tapping "Stay" dismisses the modal
+      await tester.tap(find.text('Stay'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Leaving the Pitch?'), findsNothing);
+      expect(find.text('Exit App?'), findsNothing);
     });
   });
 
@@ -534,20 +534,20 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify exit dialog content
-      expect(find.text('Leaving the Pitch?'), findsOneWidget);
-      expect(find.textContaining('Are you sure you want to quit Pico?'), findsOneWidget);
+      expect(find.text('Exit App?'), findsOneWidget);
+      expect(find.textContaining('Are you sure you want to exit?'), findsOneWidget);
       expect(find.byKey(const Key('game_exit_dialog_stay_button')), findsOneWidget);
       expect(find.byKey(const Key('game_exit_dialog_exit_button')), findsOneWidget);
 
-      // Tap STAY & PREDICT
+      // Tap Stay
       await tester.tap(find.byKey(const Key('game_exit_dialog_stay_button')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Leaving the Pitch?'), findsNothing);
+      expect(find.text('Exit App?'), findsNothing);
       expect(exitResult, isFalse);
     });
 
-    testWidgets('showGameExitDialog returns true when tapping Leave Game',
+    testWidgets('showGameExitDialog returns true when tapping Exit',
         (WidgetTester tester) async {
       bool? exitResult;
 
@@ -574,9 +574,9 @@ void main() {
       await tester.tap(find.text('Trigger Exit'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Leave Game'), findsOneWidget);
+      expect(find.text('Exit'), findsOneWidget);
 
-      // Tap Leave Game button
+      // Tap Exit button
       await tester.tap(find.byKey(const Key('game_exit_dialog_exit_button')));
       await tester.pumpAndSettle();
 
@@ -612,13 +612,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify Spanish localized strings
-      expect(find.text('¿Abandonar la Cancha?'), findsOneWidget);
-      expect(find.textContaining('¿Seguro que quieres salir de Pico?'), findsOneWidget);
-      expect(find.text('QUEDARSE Y PREDECIR'), findsOneWidget);
-      expect(find.text('Salir del Juego'), findsOneWidget);
+      expect(find.text('¿Salir de la app?'), findsOneWidget);
+      expect(find.textContaining('¿Seguro que quieres salir?'), findsOneWidget);
+      expect(find.text('Quedarse'), findsOneWidget);
+      expect(find.text('Salir'), findsOneWidget);
 
-      // Tap Salir del Juego
-      await tester.tap(find.text('Salir del Juego'));
+      // Tap Salir
+      await tester.tap(find.text('Salir'));
       await tester.pumpAndSettle();
 
       expect(exitResult, isTrue);
@@ -640,9 +640,9 @@ void main() {
       debugPrint('DEBUG handlePopRoute returned: $handled');
       await tester.pumpAndSettle();
       debugPrint(
-        'DEBUG Leaving the pitch found: ${find.text("Leaving the Pitch?").evaluate().length}',
+        'DEBUG Exit app found: ${find.text("Exit App?").evaluate().length}',
       );
-      expect(find.text('Leaving the Pitch?'), findsOneWidget);
+      expect(find.text('Exit App?'), findsOneWidget);
     });
   });
 }

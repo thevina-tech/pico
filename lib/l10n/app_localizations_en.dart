@@ -202,17 +202,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signOutButton => 'Sign Out';
 
   @override
-  String get exitDialogTitle => 'Leaving the Pitch?';
+  String get exitDialogTitle => 'Exit App?';
 
   @override
-  String get exitDialogMessage =>
-      'Are you sure you want to quit Pico? Upcoming matches and predictions are waiting for you!';
+  String get exitDialogMessage => 'Are you sure you want to exit?';
 
   @override
-  String get exitDialogStayButton => 'STAY & PREDICT';
+  String get exitDialogStayButton => 'Stay';
 
   @override
-  String get exitDialogLeaveButton => 'Leave Game';
+  String get exitDialogLeaveButton => 'Exit';
 
   @override
   String get matchOfTheDayTitle => 'Match of the Day';

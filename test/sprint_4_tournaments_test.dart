@@ -963,6 +963,12 @@ void main() {
       await tester.tap(find.text('Join Tournament'));
       await tester.pumpAndSettle();
 
+      // Confirm Join in Pico Confirmation Modal
+      if (find.text('Join ${tournament.name}?').evaluate().isNotEmpty) {
+        await tester.tap(find.text('Join Tournament').last);
+        await tester.pumpAndSettle();
+      }
+
       // Verify user enrolled
       expect(repo.enrolledIds.contains(tournament.id), isTrue);
     });
@@ -1002,6 +1008,12 @@ void main() {
       // Tap Join button
       await tester.tap(find.text('Join'));
       await tester.pumpAndSettle();
+
+      // Confirm Join in Pico Confirmation Modal
+      if (find.text('Join ${tournament.name}?').evaluate().isNotEmpty) {
+        await tester.tap(find.text('Join Tournament'));
+        await tester.pumpAndSettle();
+      }
 
       // Verify user enrolled in repository
       expect(repo.enrolledIds.contains(tournament.id), isTrue);
