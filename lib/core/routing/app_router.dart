@@ -18,6 +18,7 @@ import 'package:pico/features/tournaments/presentation/join_private_league_scree
 import 'package:pico/features/tournaments/presentation/public_tournament_screen.dart';
 import 'package:pico/features/tournaments/presentation/private_tournament_screen.dart';
 import 'package:pico/features/tournaments/presentation/league_chat_screen.dart';
+import 'package:pico/features/tournaments/presentation/private_league_dashboard_screen.dart';
 import 'package:pico/features/tournaments/presentation/tournaments_screen.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
 import 'package:pico/features/predictions/presentation/prediction_screen.dart';
@@ -202,9 +203,10 @@ class AppRouter {
             final id = state.pathParameters['id'] ?? '';
             final league = state.extra as PrivateLeague?;
             return MaterialPage(
-              child: LeagueChatScreen(
+              child: PrivateLeagueDashboardScreen(
                 leagueId: id,
                 initialLeague: league,
+                initialTabIndex: 0,
               ),
             );
           },
@@ -216,9 +218,10 @@ class AppRouter {
             final id = state.pathParameters['id'] ?? '';
             final league = state.extra as PrivateLeague?;
             return MaterialPage(
-              child: PrivateTournamentScreen(
+              child: PrivateLeagueDashboardScreen(
                 leagueId: id,
                 initialLeague: league,
+                initialTabIndex: 2,
               ),
             );
           },
