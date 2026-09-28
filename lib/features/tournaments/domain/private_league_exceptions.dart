@@ -37,6 +37,13 @@ class LeagueOwnerCannotBeRemovedException extends PrivateLeagueException {
   const LeagueOwnerCannotBeRemovedException([super.message = 'OWNER_CANNOT_BE_REMOVED']);
 }
 
+/// Thrown when the private league has reached its maximum capacity (e.g. 25 members).
+class LeagueCapacityReachedException extends PrivateLeagueException {
+  const LeagueCapacityReachedException([
+    super.message = 'This league has reached its maximum capacity.',
+  ]);
+}
+
 /// Generic private league exception fallback.
 class LeagueGenericException extends PrivateLeagueException {
   const LeagueGenericException(super.message);

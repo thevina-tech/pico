@@ -21,6 +21,7 @@ _PrivateLeague _$PrivateLeagueFromJson(Map<String, dynamic> json) =>
       competitionName: json['competitionName'] as String? ?? '',
       memberCount: (json['memberCount'] as num?)?.toInt() ?? 1,
       description: json['description'] as String? ?? '',
+      maxCapacity: (json['max_capacity'] as num?)?.toInt() ?? 25,
     );
 
 Map<String, dynamic> _$PrivateLeagueToJson(_PrivateLeague instance) =>
@@ -36,4 +37,5 @@ Map<String, dynamic> _$PrivateLeagueToJson(_PrivateLeague instance) =>
       'competitionName': instance.competitionName,
       'memberCount': instance.memberCount,
       'description': instance.description,
+      'max_capacity': instance.maxCapacity,
     };

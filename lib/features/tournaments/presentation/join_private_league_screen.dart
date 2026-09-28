@@ -96,7 +96,19 @@ class _JoinPrivateLeagueScreenState
     } catch (e) {
       if (!mounted) return;
       String errorDisplay;
-      if (e is LeagueNotFoundException) {
+      if (e is LeagueCapacityReachedException ||
+          e.toString().toLowerCase().contains('capacity') ||
+          e.toString().toLowerCase().contains('league is full') ||
+          e.toString().toLowerCase().contains('full')) {
+        errorDisplay = 'This league is full (Max 25 members).';
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('This league is full (Max 25 members).'),
+            backgroundColor: PicoColors.accentCoral,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } else if (e is LeagueNotFoundException) {
         errorDisplay = l10n.invalidLeagueCodeError;
       } else if (e is LeagueCreatorCannotRejoinException) {
         errorDisplay = l10n.creatorCannotRejoinError;

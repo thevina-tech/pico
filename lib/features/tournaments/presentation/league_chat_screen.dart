@@ -4,7 +4,9 @@ import 'private_league_dashboard_screen.dart';
 
 export 'private_league_dashboard_screen.dart';
 
+/// Deprecated: Use [PrivateLeagueDashboardScreen] instead.
 /// Legacy alias for [PrivateLeagueDashboardScreen] preserving backward compatibility.
+@Deprecated('Use PrivateLeagueDashboardScreen instead')
 class LeagueChatScreen extends StatelessWidget {
   const LeagueChatScreen({
     super.key,

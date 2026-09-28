@@ -546,6 +546,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
               competition_id,
               invite_code,
               created_at,
+              max_capacity,
               owner:profiles!private_leagues_owner_id_fkey(username)
             )
           ''')
@@ -649,7 +650,8 @@ class SupabaseTournamentRepository implements TournamentRepository {
             owner_id,
             competition_id,
             invite_code,
-            created_at
+            created_at,
+            max_capacity
           ''')
           .single();
 
@@ -683,6 +685,9 @@ class SupabaseTournamentRepository implements TournamentRepository {
       if (members.contains(userId)) {
         throw const LeagueAlreadyMemberException();
       }
+      if (members.length >= found.maxCapacity) {
+        throw const LeagueCapacityReachedException();
+      }
       _mockLeagueMembers.putIfAbsent(found.id, () => <String>{}).add(userId);
       return found;
     }
@@ -711,6 +716,12 @@ class SupabaseTournamentRepository implements TournamentRepository {
     } on PostgrestException catch (e) {
       AppLogger.warning('Postgrest error joining private league: ${e.message}');
       final msg = e.message.toLowerCase();
+      if (msg.contains('maximum capacity') ||
+          msg.contains('capacity') ||
+          msg.contains('league is full') ||
+          msg.contains('league full')) {
+        throw const LeagueCapacityReachedException();
+      }
       if (msg.contains('creator_cannot_rejoin') || msg.contains('creator')) {
         throw const LeagueCreatorCannotRejoinException();
       }
@@ -818,6 +829,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
             competition_id,
             invite_code,
             created_at,
+            max_capacity,
             owner:profiles!private_leagues_owner_id_fkey(username)
           ''')
           .eq('id', leagueId)

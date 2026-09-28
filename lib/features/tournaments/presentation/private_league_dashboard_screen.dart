@@ -291,10 +291,10 @@ class _PrivateLeagueDashboardScreenState
       case 0:
         return _buildChatTab(currentLeague, currentUserId);
       case 1:
-        return _buildMatchesTab(currentLeague.competitionId ?? '', l10n);
+        return _buildMatchesView(currentLeague.competitionId ?? '', l10n);
       case 2:
       default:
-        return _buildStandingsTab(currentLeague, competition, isOwner, currentUserId, l10n);
+        return _buildLeaderboardView(currentLeague, competition, isOwner, currentUserId, l10n);
     }
   }
 
@@ -469,78 +469,123 @@ class _PrivateLeagueDashboardScreenState
 
   Widget _buildTopTabBar(AppLocalizations? l10n) {
     return Container(
-      padding: const EdgeInsets.all(4.0),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
-        color: PicoColors.darkTray,
-        borderRadius: BorderRadius.circular(14.0),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        color: const Color(0xFF0F1A24),
+        borderRadius: BorderRadius.circular(20.0),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.08),
+          width: 1.5,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x66000000),
+            blurRadius: 10.0,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          Expanded(
-            child: _buildTopTabItem(
-              title: 'Chat',
-              icon: Icons.chat_bubble_outline_rounded,
-              isSelected: _selectedTabIndex == 0,
-              onTap: () => setState(() => _selectedTabIndex = 0),
-            ),
+          _buildClashTabButton(
+            title: 'Chat',
+            icon: Icons.chat_bubble_outline_rounded,
+            isSelected: _selectedTabIndex == 0,
+            onTap: () => setState(() => _selectedTabIndex = 0),
           ),
-          const SizedBox(width: 4.0),
-          Expanded(
-            child: _buildTopTabItem(
-              title: l10n?.matchesTab ?? 'Matches',
-              icon: Icons.sports_soccer_rounded,
-              isSelected: _selectedTabIndex == 1,
-              onTap: () => setState(() => _selectedTabIndex = 1),
-            ),
+          const SizedBox(width: 8.0),
+          _buildClashTabButton(
+            title: l10n?.matchesTab ?? 'Matches',
+            icon: Icons.sports_soccer_rounded,
+            isSelected: _selectedTabIndex == 1,
+            onTap: () => setState(() => _selectedTabIndex = 1),
           ),
-          const SizedBox(width: 4.0),
-          Expanded(
-            child: _buildTopTabItem(
-              title: l10n?.leaderboardTab ?? 'Standings',
-              icon: Icons.leaderboard_rounded,
-              isSelected: _selectedTabIndex == 2,
-              onTap: () => setState(() => _selectedTabIndex = 2),
-            ),
+          const SizedBox(width: 8.0),
+          _buildClashTabButton(
+            title: l10n?.leaderboardTab ?? 'Standings',
+            icon: Icons.leaderboard_rounded,
+            isSelected: _selectedTabIndex == 2,
+            onTap: () => setState(() => _selectedTabIndex = 2),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTopTabItem({
+  Widget _buildClashTabButton({
     required String title,
     required IconData icon,
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10.0),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        decoration: BoxDecoration(
-          color: isSelected ? PicoColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 15.0,
-              color: isSelected ? PicoColors.textWhite : PicoColors.textWhiteMuted,
-            ),
-            const SizedBox(width: 5.0),
-            Text(
-              title,
-              style: PicoTypography.labelPillSm.copyWith(
-                color: isSelected ? PicoColors.textWhite : PicoColors.textWhiteMuted,
-                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                fontSize: 12.0,
+    const activeColor = PicoColors.primary;
+    const activeBorderBottom = Color(0xFF009650);
+    const inactiveColor = Color(0xFF162534);
+    const inactiveBorderBottom = Color(0xFF090F16);
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeInOut,
+          margin: EdgeInsets.only(top: isSelected ? 2.0 : 0.0),
+          decoration: BoxDecoration(
+            color: isSelected ? activeBorderBottom : inactiveBorderBottom,
+            borderRadius: BorderRadius.circular(16.0),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: activeColor.withValues(alpha: 0.35),
+                      blurRadius: 8.0,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : [
+                    const BoxShadow(
+                      color: Color(0x33000000),
+                      blurRadius: 4.0,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+          ),
+          padding: EdgeInsets.only(bottom: isSelected ? 2.0 : 4.0),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            decoration: BoxDecoration(
+              color: isSelected ? activeColor : inactiveColor,
+              borderRadius: BorderRadius.circular(14.0),
+              border: Border.all(
+                color: isSelected
+                    ? Colors.white.withValues(alpha: 0.35)
+                    : Colors.white.withValues(alpha: 0.08),
+                width: 1.0,
               ),
             ),
-          ],
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 24.0,
+                  color: isSelected ? PicoColors.pitchBackground : PicoColors.textWhiteMuted,
+                ),
+                const SizedBox(height: 6.0),
+                Text(
+                  title,
+                  style: PicoTypography.labelPillSm.copyWith(
+                    color: isSelected ? PicoColors.pitchBackground : PicoColors.textWhiteMuted,
+                    fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+                    fontSize: 12.0,
+                    letterSpacing: 0.2,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -809,6 +854,9 @@ class _PrivateLeagueDashboardScreenState
   // TAB 1: MATCHES FEED (FILTERED & SYNCED)
   // ==========================================
 
+  Widget _buildMatchesView(String competitionId, AppLocalizations? l10n) =>
+      _buildMatchesTab(competitionId, l10n);
+
   Widget _buildMatchesTab(String competitionId, AppLocalizations? l10n) {
     // 1. Dynamic Match Filtering: filtered specifically to this League's competition
     final matchesAsync = ref.watch(competitionMatchesProvider(competitionId));
@@ -842,7 +890,11 @@ class _PrivateLeagueDashboardScreenState
           );
         }
 
-        final matches = allMatches.whereType<PicoMatch>().toList();
+        // Filter strictly to this League's competition
+        final matches = allMatches
+            .whereType<PicoMatch>()
+            .where((m) => m.competitionId == competitionId)
+            .toList();
         final liveMatches = matches.where((m) => m.status == MatchStatus.live).toList();
         final upcomingMatches = matches.where((m) => m.status == MatchStatus.upcoming).toList()
           ..sort((a, b) => a.kickoffAt.compareTo(b.kickoffAt));
@@ -1130,6 +1182,15 @@ class _PrivateLeagueDashboardScreenState
   // ==========================================
   // TAB 2: STANDINGS & LEADERBOARD VIEW
   // ==========================================
+
+  Widget _buildLeaderboardView(
+    PrivateLeague league,
+    Competition? competition,
+    bool isOwner,
+    String? currentUserId,
+    AppLocalizations? l10n,
+  ) =>
+      _buildStandingsTab(league, competition, isOwner, currentUserId, l10n);
 
   Widget _buildStandingsTab(
     PrivateLeague league,

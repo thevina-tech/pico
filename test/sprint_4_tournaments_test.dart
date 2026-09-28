@@ -129,6 +129,9 @@ class _FakeTournamentRepository implements TournamentRepository {
     if (members.any((m) => m.userId == userId)) {
       throw LeagueAlreadyMemberException(cleanCode);
     }
+    if (members.length >= league.maxCapacity) {
+      throw const LeagueCapacityReachedException();
+    }
     return league;
   }
 
@@ -481,6 +484,30 @@ void main() {
         throwsA(isA<LeagueAlreadyMemberException>()),
       );
     });
+
+    test('Join private league throws LeagueCapacityReachedException when at max capacity (25 members)', () async {
+      final repo = _FakeTournamentRepository();
+      final league = await repo.createPrivateLeague(
+        name: 'Full League',
+        competitionId: '1',
+        userId: 'owner_user_id',
+      );
+      // Populate 25 members
+      repo.leagueMembers[league.id] = List.generate(
+        25,
+        (i) => PrivateLeagueMember(
+          privateLeagueId: league.id,
+          userId: 'user_$i',
+          picoPoints: i,
+          joinedAt: DateTime.now(),
+        ),
+      );
+
+      expect(
+        () => repo.joinPrivateLeagueByCode(inviteCode: league.inviteCode, userId: 'user_26_attempt'),
+        throwsA(isA<LeagueCapacityReachedException>()),
+      );
+    });
   });
 
   group('Sprint 4: UI & Widget Integration Tests', () {
@@ -722,6 +749,37 @@ void main() {
       expect(find.text('C'), findsWidgets);
       expect(find.text('O'), findsWidgets);
       expect(find.text('9'), findsWidgets);
+    });
+
+    testWidgets('JoinPrivateLeagueScreen shows SnackBar when league has reached capacity', (tester) async {
+      final repo = _FakeTournamentRepository();
+      final fullLeague = await repo.createPrivateLeague(
+        name: 'Full Clan',
+        competitionId: '1',
+        userId: 'owner_user_id',
+      );
+      repo.leagueMembers[fullLeague.id] = List.generate(
+        25,
+        (i) => PrivateLeagueMember(
+          privateLeagueId: fullLeague.id,
+          userId: 'user_$i',
+          picoPoints: 0,
+          joinedAt: DateTime.now(),
+        ),
+      );
+
+      await tester.pumpWidget(
+        buildHarness(child: const JoinPrivateLeagueScreen(), repo: repo),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), fullLeague.inviteCode);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('This league is full (Max 25 members).'), findsWidgets);
     });
 
     testWidgets('PublicTournamentScreen renders tournament header and switches tabs', (tester) async {

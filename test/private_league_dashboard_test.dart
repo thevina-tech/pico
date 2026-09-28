@@ -419,5 +419,114 @@ void main() {
       expect(find.text('60 PTS'), findsOneWidget);
       expect(find.text('CREATOR'), findsWidgets);
     });
+
+    testWidgets('Tactile 3D Tab Buttons render with Column stacking Icon over Text and responsive 3D styling', (tester) async {
+      await tester.pumpWidget(
+        _buildTestHarness(
+          child: PrivateLeagueDashboardScreen(
+            leagueId: premierLeagueGroup.id,
+            initialLeague: premierLeagueGroup,
+          ),
+          tournamentRepo: tournamentRepo,
+          predictionRepo: predictionRepo,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Find icons inside tab buttons
+      expect(find.byIcon(Icons.chat_bubble_outline_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.sports_soccer_rounded), findsOneWidget);
+
+      // Verify Column stacks Icon above Text in each button
+      final chatText = find.text('Chat');
+      final chatIcon = find.descendant(
+        of: find.ancestor(of: chatText, matching: find.byType(Column)),
+        matching: find.byIcon(Icons.chat_bubble_outline_rounded),
+      );
+      expect(chatIcon, findsOneWidget);
+      expect(tester.getTopLeft(chatIcon).dy < tester.getTopLeft(chatText).dy, isTrue);
+
+      final standingsText = find.text('Standings');
+      final standingsIcon = find.descendant(
+        of: find.ancestor(of: standingsText, matching: find.byType(Column)),
+        matching: find.byIcon(Icons.leaderboard_rounded),
+      );
+      expect(standingsIcon, findsOneWidget);
+      expect(tester.getTopLeft(standingsIcon).dy < tester.getTopLeft(standingsText).dy, isTrue);
+
+      // Default tab index is 0 (Chat) -> active
+      // Tapping Matches changes active tab
+      await tester.tap(find.text('Matches'));
+      await tester.pumpAndSettle();
+
+      final matchesText = find.text('Matches');
+      final matchesIcon = find.descendant(
+        of: find.ancestor(of: matchesText, matching: find.byType(Column)),
+        matching: find.byIcon(Icons.sports_soccer_rounded),
+      );
+      expect(matchesIcon, findsOneWidget);
+      expect(tester.getTopLeft(matchesIcon).dy < tester.getTopLeft(matchesText).dy, isTrue);
+    });
+
+    testWidgets('Matches Tab filters out matches not belonging to league competition_id', (tester) async {
+      final eplMatch = PicoMatch(
+        id: 'match_epl_valid',
+        competitionId: '10', // Matches league.competitionId
+        homeTeamName: 'Arsenal',
+        awayTeamName: 'Chelsea',
+        kickoffAt: DateTime.now().add(const Duration(hours: 2)),
+        status: MatchStatus.upcoming,
+      );
+
+      final laLigaMatch = PicoMatch(
+        id: 'match_laliga_invalid',
+        competitionId: '1', // Does NOT match league.competitionId ('10')
+        homeTeamName: 'Real Madrid',
+        awayTeamName: 'Barcelona',
+        kickoffAt: DateTime.now().add(const Duration(hours: 3)),
+        status: MatchStatus.upcoming,
+      );
+
+      await tester.pumpWidget(
+        _buildTestHarness(
+          child: PrivateLeagueDashboardScreen(
+            leagueId: premierLeagueGroup.id,
+            initialLeague: premierLeagueGroup,
+            initialTabIndex: 1, // Start on Matches tab
+          ),
+          tournamentRepo: tournamentRepo,
+          predictionRepo: predictionRepo,
+          matches: [eplMatch, laLigaMatch],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Only EPL match is shown, La Liga match is strictly filtered out
+      expect(find.text('Arsenal'), findsOneWidget);
+      expect(find.text('Chelsea'), findsOneWidget);
+      expect(find.text('Real Madrid'), findsNothing);
+      expect(find.text('Barcelona'), findsNothing);
+    });
+
+    testWidgets('Displays 25-Member capacity in LeagueDetailsSheet ("Members: 2/25")', (tester) async {
+      await tester.pumpWidget(
+        _buildTestHarness(
+          child: PrivateLeagueDashboardScreen(
+            leagueId: premierLeagueGroup.id,
+            initialLeague: premierLeagueGroup,
+          ),
+          tournamentRepo: tournamentRepo,
+          predictionRepo: predictionRepo,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap on AppBar to open LeagueDetailsSheet
+      await tester.tap(find.text('The Invincibles'));
+      await tester.pumpAndSettle();
+
+      // Verify capacity is displayed as "Members: 2/25"
+      expect(find.text('Members: 2/25'), findsOneWidget);
+    });
   });
 }

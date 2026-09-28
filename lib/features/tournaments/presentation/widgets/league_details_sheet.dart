@@ -123,7 +123,7 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
                         ),
                       ),
                       Text(
-                        '${sortedMembers.length} MEMBERS',
+                        'Members: ${sortedMembers.length}/${widget.league.maxCapacity}',
                         style: PicoTypography.bodySm.copyWith(
                           color: PicoColors.textWhiteMuted,
                           fontWeight: FontWeight.w600,

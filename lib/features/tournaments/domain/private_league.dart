@@ -18,6 +18,7 @@ abstract class PrivateLeague with _$PrivateLeague {
     @Default('') String competitionName,
     @Default(1) int memberCount,
     @Default('') String description,
+    @JsonKey(name: 'max_capacity') @Default(25) int maxCapacity,
   }) = _PrivateLeague;
 
   const PrivateLeague._();
