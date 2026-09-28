@@ -193,6 +193,7 @@ class AuthNotifier extends _$AuthNotifier {
       final user = response.user;
       if (user != null) {
         AppLogger.info('Google sign-in successful for user ${user.id}');
+        await _ensureProfileExists(user);
         await _checkPersonalization(user);
         return user;
       } else {
@@ -218,6 +219,24 @@ class AuthNotifier extends _$AuthNotifier {
       AppLogger.error('Error signing in with Google', e, st);
       state = PicoAuthError(e.toString());
       rethrow;
+    }
+  }
+
+  /// Ensures a base profile record exists in public.profiles for the user upon sign-in.
+  Future<void> _ensureProfileExists(supa.User user) async {
+    final supabase = ref.read(supabaseClientProvider);
+    if (supabase == null) return;
+    try {
+      final avatarUrl = user.userMetadata?['avatar_url'] ??
+          user.userMetadata?['picture'];
+      await supabase.from('profiles').upsert({
+        'id': user.id,
+        'email': user.email,
+        'avatar_url': avatarUrl?.toString(),
+      }, onConflict: 'id', ignoreDuplicates: true);
+      AppLogger.info('Base profile record verified/created for user ${user.id}');
+    } catch (e) {
+      AppLogger.warning('Failed to ensure base profile exists for ${user.id}: $e');
     }
   }
 

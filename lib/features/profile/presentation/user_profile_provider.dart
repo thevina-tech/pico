@@ -75,4 +75,9 @@ class CurrentUserProfile extends _$CurrentUserProfile {
       state = AsyncData(current.copyWith(coins: current.coins + amount));
     }
   }
+
+  /// Sets the profile directly in state (e.g. immediately after onboarding completion).
+  void setProfile(UserProfile profile) {
+    state = AsyncData(profile);
+  }
 }

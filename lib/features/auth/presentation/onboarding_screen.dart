@@ -11,6 +11,7 @@ import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/matches/domain/competition.dart';
 import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
 import 'package:pico/features/profile/data/profile_repository.dart';
+import 'package:pico/features/profile/domain/user_profile.dart';
 import 'package:pico/features/profile/presentation/personalization_controller.dart';
 import 'package:pico/features/profile/presentation/user_profile_provider.dart';
 import 'package:pico/features/tournaments/data/tournament_repository.dart';
@@ -2122,7 +2123,24 @@ class _OnboardingLeaguesSelectionStepState
         leagueIds: _selectedLeagueIds.toList(),
       );
 
-      // 5. Mark as personalized in Auth state & invalidate relevant caches
+      // 5. Update cached profile eagerly & mark as personalized in Auth state
+      try {
+        final updatedProfile = await repo.getProfile(userId);
+        if (updatedProfile != null) {
+          ref.read(currentUserProfileProvider.notifier).setProfile(updatedProfile);
+        } else {
+          ref.read(currentUserProfileProvider.notifier).setProfile(
+            UserProfile(
+              id: userId,
+              username: trimmedUsername,
+              favoriteTeamId: widget.selectedTeamId,
+              favoriteTeamIds: widget.selectedTeamId != null ? [widget.selectedTeamId!] : const [],
+              favoriteLeagueIds: _selectedLeagueIds.toList(),
+            ),
+          );
+        }
+      } catch (_) {}
+
       ref.read(authProvider.notifier).markPersonalized();
       ref.invalidate(currentUserProfileProvider);
       ref.invalidate(enrolledTournamentsProvider);

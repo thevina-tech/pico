@@ -7,6 +7,7 @@ import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/matches/presentation/matches_controller.dart';
 import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
 import 'package:pico/features/profile/data/profile_repository.dart';
+import 'package:pico/features/profile/domain/user_profile.dart';
 import 'package:pico/features/profile/presentation/user_profile_provider.dart';
 import 'package:pico/features/tournaments/data/tournament_repository.dart';
 
@@ -125,6 +126,23 @@ class PersonalizationController extends _$PersonalizationController {
         userId: authState.user!.id,
         leagueIds: state.selectedLeagueIds.toList(),
       );
+
+      try {
+        final updatedProfile = await repo.getProfile(authState.user!.id);
+        if (updatedProfile != null) {
+          ref.read(currentUserProfileProvider.notifier).setProfile(updatedProfile);
+        } else {
+          ref.read(currentUserProfileProvider.notifier).setProfile(
+            UserProfile(
+              id: authState.user!.id,
+              username: username,
+              favoriteTeamId: state.selectedTeamId,
+              favoriteTeamIds: state.selectedTeamIds.toList(),
+              favoriteLeagueIds: state.selectedLeagueIds.toList(),
+            ),
+          );
+        }
+      } catch (_) {}
 
       ref.read(authProvider.notifier).markPersonalized();
       ref.invalidate(currentUserProfileProvider);

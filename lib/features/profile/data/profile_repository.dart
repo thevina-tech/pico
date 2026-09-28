@@ -185,8 +185,25 @@ class SupabaseProfileRepository implements ProfileRepository {
 
     try {
       if (updates.isNotEmpty) {
-        await _supabase.from('profiles').update(updates).eq('id', userId);
-        AppLogger.info('Profile updated successfully in Supabase for user $userId');
+        final payload = <String, dynamic>{
+          'id': userId,
+          ...updates,
+        };
+
+        final currentUser = _supabase.auth.currentUser;
+        if (currentUser != null && currentUser.id == userId) {
+          if (currentUser.email != null) {
+            payload['email'] = currentUser.email;
+          }
+          final avatar = currentUser.userMetadata?['avatar_url'] ??
+              currentUser.userMetadata?['picture'];
+          if (avatar != null) {
+            payload['avatar_url'] = avatar.toString();
+          }
+        }
+
+        await _supabase.from('profiles').upsert(payload, onConflict: 'id');
+        AppLogger.info('Profile upserted successfully in Supabase for user $userId');
       }
     } catch (e, st) {
       AppLogger.error('Failed to update personalization for user $userId', e, st);

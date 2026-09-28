@@ -25,7 +25,9 @@ class _MockProfileRepository implements ProfileRepository {
   }
 
   @override
-  Future<List<Team>> getTeams() async => [];
+  Future<List<Team>> getTeams() async => [
+        const Team(id: '2107', name: 'Real Madrid', shortName: 'RMA'),
+      ];
 
   @override
   Future<void> updatePersonalization({
@@ -265,6 +267,73 @@ void main() {
       expect(find.text('How Pico Works'), findsNothing);
       expect(find.text('What Should We Call You?'), findsOneWidget);
       expect(find.text('3/5'), findsOneWidget);
+    });
+
+    testWidgets('Completing username & leagues after reopen displays chosen username on Home, never Alex', (WidgetTester tester) async {
+      const authenticatedUser = supa.User(
+        id: 'auth_user_test',
+        email: 'cattyto@example.com',
+        appMetadata: {},
+        userMetadata: {},
+        aud: 'authenticated',
+        createdAt: '2026-01-01',
+      );
+
+      final mockRepo = _MockProfileRepository(
+        profile: const UserProfile(
+          id: 'auth_user_test',
+          username: null,
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authProvider.overrideWith(
+              () => _CustomAuthNotifier(
+                initialState: const PicoAuthAuthenticated(
+                  user: authenticatedUser,
+                  isPersonalized: false,
+                ),
+              ),
+            ),
+            profileRepositoryProvider.overrideWithValue(mockRepo),
+          ],
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: OnboardingScreen(initialPage: 2),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Enter username
+      expect(find.text('What Should We Call You?'), findsOneWidget);
+      await tester.enterText(find.byType(TextField), 'Cattyto');
+      await tester.ensureVisible(find.text('Continue'));
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+
+      // Step 4: Pick club and advance
+      expect(find.text('Choose Favorite Team'), findsOneWidget);
+      await tester.tap(find.text('Real Madrid'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Continue'));
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+
+      // Step 5: Pick league and finish
+      expect(find.text('Choose Leagues'), findsOneWidget);
+      await tester.tap(find.text('La Liga'));
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Finish'));
+      await tester.tap(find.text('Finish'));
+      await tester.pumpAndSettle();
+
+      // Verified: profile updated with custom username
+      expect(mockRepo.profile?.username, 'Cattyto');
     });
   });
 }
