@@ -1159,6 +1159,118 @@
   "picoRulesSubtitle": "Fair play, server-side locks & transparent scoring",
   "@picoRulesSubtitle": {
     "description": "Subtitle for game rules dialog"
+  },
+  "division10Title": "Division 10",
+  "@division10Title": {
+    "description": "Title for Division 10 (0-49 PP)"
+  },
+  "division9Title": "Division 9",
+  "@division9Title": {
+    "description": "Title for Division 9 (50-119 PP)"
+  },
+  "division8Title": "Division 8",
+  "@division8Title": {
+    "description": "Title for Division 8 (120-219 PP)"
+  },
+  "division7Title": "Division 7",
+  "@division7Title": {
+    "description": "Title for Division 7 (220-349 PP)"
+  },
+  "division6Title": "Division 6",
+  "@division6Title": {
+    "description": "Title for Division 6 (350-499 PP)"
+  },
+  "division5Title": "Division 5",
+  "@division5Title": {
+    "description": "Title for Division 5 (500-699 PP)"
+  },
+  "division4Title": "Division 4",
+  "@division4Title": {
+    "description": "Title for Division 4 (700-949 PP)"
+  },
+  "division3Title": "Division 3",
+  "@division3Title": {
+    "description": "Title for Division 3 (950-1249 PP)"
+  },
+  "division2Title": "Division 2",
+  "@division2Title": {
+    "description": "Title for Division 2 (1250-1599 PP)"
+  },
+  "division1Title": "Division 1",
+  "@division1Title": {
+    "description": "Title for Division 1 (1600-1999 PP)"
+  },
+  "divisionEliteTitle": "Elite Division",
+  "@divisionEliteTitle": {
+    "description": "Title for Elite Division (2000+ PP)"
+  },
+  "predictionPointsLabel": "Prediction Points",
+  "@predictionPointsLabel": {
+    "description": "Label for unified Prediction Points currency"
+  },
+  "predictionPointsAbbr": "PP",
+  "@predictionPointsAbbr": {
+    "description": "Abbreviation for Prediction Points"
+  },
+  "currentDivisionLabel": "Current Division",
+  "@currentDivisionLabel": {
+    "description": "Label for current division tier"
+  },
+  "divisionLadderTitle": "Division Ladder",
+  "@divisionLadderTitle": {
+    "description": "Title for division ladder section or view"
+  },
+  "divisionLadderSubtitle": "Climb tiers with accurate match predictions",
+  "@divisionLadderSubtitle": {
+    "description": "Subtitle describing the division ladder system"
+  },
+  "pointsToNextDivisionThreshold": "{current} / {target} pts to {nextDivision}",
+  "@pointsToNextDivisionThreshold": {
+    "description": "Progress towards the next division",
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      },
+      "nextDivision": {
+        "type": "String"
+      }
+    }
+  },
+  "pointsToNextDivision": "{points} pts to {nextDivision}",
+  "@pointsToNextDivision": {
+    "description": "Remaining points needed for next division",
+    "placeholders": {
+      "points": {
+        "type": "String"
+      },
+      "nextDivision": {
+        "type": "String"
+      }
+    }
+  },
+  "eliteDivisionStatus": "{points} pts (Elite Division)",
+  "@eliteDivisionStatus": {
+    "description": "Display text when user has achieved Elite Division",
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "pointsOutcomeGoalDiff": "+3 Points",
+  "@pointsOutcomeGoalDiff": {
+    "description": "Points outcome badge for correct winner and goal difference"
+  },
+  "pointsOutcomeOne": "+1 Point",
+  "@pointsOutcomeOne": {
+    "description": "Points outcome badge for correct winner only"
+  },
+  "scoringRuleBannerSprint7": "Exact = +5 PP · Outcome + Diff = +3 PP · Outcome = +1 PP",
+  "@scoringRuleBannerSprint7": {
+    "description": "Compact scoring rules explanation"
   }
 }
 

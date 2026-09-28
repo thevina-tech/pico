@@ -831,4 +831,82 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get picoRulesSubtitle =>
       'Fair play, server-side locks & transparent scoring';
+
+  @override
+  String get division10Title => 'Division 10';
+
+  @override
+  String get division9Title => 'Division 9';
+
+  @override
+  String get division8Title => 'Division 8';
+
+  @override
+  String get division7Title => 'Division 7';
+
+  @override
+  String get division6Title => 'Division 6';
+
+  @override
+  String get division5Title => 'Division 5';
+
+  @override
+  String get division4Title => 'Division 4';
+
+  @override
+  String get division3Title => 'Division 3';
+
+  @override
+  String get division2Title => 'Division 2';
+
+  @override
+  String get division1Title => 'Division 1';
+
+  @override
+  String get divisionEliteTitle => 'Elite Division';
+
+  @override
+  String get predictionPointsLabel => 'Prediction Points';
+
+  @override
+  String get predictionPointsAbbr => 'PP';
+
+  @override
+  String get currentDivisionLabel => 'Current Division';
+
+  @override
+  String get divisionLadderTitle => 'Division Ladder';
+
+  @override
+  String get divisionLadderSubtitle =>
+      'Climb tiers with accurate match predictions';
+
+  @override
+  String pointsToNextDivisionThreshold(
+    String current,
+    String target,
+    String nextDivision,
+  ) {
+    return '$current / $target pts to $nextDivision';
+  }
+
+  @override
+  String pointsToNextDivision(String points, String nextDivision) {
+    return '$points pts to $nextDivision';
+  }
+
+  @override
+  String eliteDivisionStatus(String points) {
+    return '$points pts (Elite Division)';
+  }
+
+  @override
+  String get pointsOutcomeGoalDiff => '+3 Points';
+
+  @override
+  String get pointsOutcomeOne => '+1 Point';
+
+  @override
+  String get scoringRuleBannerSprint7 =>
+      'Exact = +5 PP · Outcome + Diff = +3 PP · Outcome = +1 PP';
 }

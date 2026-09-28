@@ -18,6 +18,7 @@ import 'package:pico/features/tournaments/presentation/private_league_controller
 import 'package:pico/shared/components/match_card.dart';
 import 'package:pico/shared/components/prediction_bottom_sheet.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
+import 'package:pico/shared/components/division_badge.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
 /// Detail screen for Private Leagues.
@@ -644,6 +645,13 @@ class _PrivateTournamentScreenState
                       ],
                     ),
                   ),
+
+                  // Division Badge
+                  DivisionBadge.fromPoints(
+                    points: member.picoPoints,
+                    size: DivisionBadgeSize.small,
+                  ),
+                  const SizedBox(width: 8.0),
 
                   // Points Pill
                   Container(

@@ -52,6 +52,8 @@ void main() {
     xp: 450,
     streak: 14,
     coins: 3200,
+    totalPoints: 140,
+    currentDivisionKey: 'div_8',
     favoriteTeamIds: ['real_madrid', 'arsenal'],
     favoriteLeagueIds: ['la_liga', 'champions_league'],
   );
@@ -77,7 +79,7 @@ void main() {
   }
 
   group('ProfileScreen - Dark Stadium Gamer Hub Design & Authenticated User', () {
-    testWidgets('Renders dynamic profile identity: username, Matchday Prophet, LVL, and XP progress',
+    testWidgets('Renders dynamic profile identity: username, Matchday Prophet, Division, and PP progress',
         (WidgetTester tester) async {
       await tester.pumpWidget(createSubject());
       await tester.pumpAndSettle();
@@ -86,12 +88,13 @@ void main() {
       expect(find.text('CR7_Predictor'), findsOneWidget);
       expect(find.text('Matchday Prophet'), findsOneWidget);
 
-      // Level badge & XP text
-      expect(find.text('LVL 12'), findsOneWidget);
-      expect(find.text('450 / 1,000 XP'), findsOneWidget);
+      // Division badge & progress
+      expect(find.text('DIV 8'), findsWidgets);
+      expect(find.text('Division 8'), findsOneWidget);
+      expect(find.text('140 / 220 PP'), findsOneWidget);
     });
 
-    testWidgets('Renders Quick Stats Grid (Hit Rate, Matches, Streak)',
+    testWidgets('Renders Quick Stats Grid (Hit Rate, Matches, Prediction Points)',
         (WidgetTester tester) async {
       await tester.pumpWidget(createSubject());
       await tester.pumpAndSettle();
@@ -106,10 +109,10 @@ void main() {
       expect(find.text('Matches'), findsOneWidget);
       expect(find.text('Total'), findsOneWidget);
 
-      // Streak
-      expect(find.text('14'), findsOneWidget);
-      expect(find.text('Streak'), findsOneWidget);
-      expect(find.text('Best: 14'), findsOneWidget);
+      // Prediction Points
+      expect(find.text('140'), findsOneWidget);
+      expect(find.text('PP'), findsOneWidget);
+      expect(find.text('DIV 8'), findsWidgets);
     });
 
     testWidgets('Renders Spotlight Tournament Card and Hub Paired Cards',

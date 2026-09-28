@@ -40,7 +40,7 @@ final class CurrentUserProfileProvider
 }
 
 String _$currentUserProfileHash() =>
-    r'ad08c033281c108ecfe49cd0c3c02c57062cb606';
+    r'd7ce1601b622ead0c9e13eb911b69520d29848d1';
 
 /// Riverpod provider for the current user's profile.
 /// Watches [authProvider] and queries [profileRepositoryProvider].

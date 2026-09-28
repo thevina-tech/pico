@@ -7,7 +7,9 @@ import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/profile/domain/user_profile.dart';
 import 'package:pico/features/profile/presentation/user_profile_provider.dart';
+import 'package:pico/features/profile/presentation/widgets/division_ladder_sheet.dart';
 import 'package:pico/l10n/app_localizations.dart';
+import 'package:pico/shared/components/division_badge.dart';
 import 'package:pico/shared/components/game_exit_dialog.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 
@@ -143,7 +145,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _buildHeaderSection(UserProfile profile, AppLocalizations? l10n) {
     final displayName = profile.username ?? 'Alex';
     final kickerTitle = l10n?.profileTitleKicker ?? 'Matchday Prophet';
-    final levelText = l10n?.levelPill(profile.level) ?? 'LVL ${profile.level}';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 6.0),
@@ -310,65 +311,115 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           const SizedBox(height: 16.0),
 
-          // Level & XP Indicator Bar
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                levelText,
-                style: PicoTypography.statCounterSm.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 12.0,
-                  letterSpacing: 0.8,
+          // Division Tier & Progress Bar (Tapping opens DivisionLadderSheet)
+          GestureDetector(
+            onTap: () => DivisionLadderSheet.show(context, profile),
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+              decoration: BoxDecoration(
+                color: const Color(0x66081A13),
+                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(
+                  color: profile.division.borderColor.withValues(alpha: 0.35),
+                  width: 1.0,
                 ),
               ),
-              const SizedBox(width: 10.0),
-              Expanded(
-                child: Container(
-                  height: 8.0,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF081A13),
-                    borderRadius: BorderRadius.circular(999.0),
-                    border: Border.all(
-                      color: const Color(0x3310B981),
-                      width: 1.0,
-                    ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      DivisionBadge(
+                        tier: profile.division,
+                        size: DivisionBadgeSize.small,
+                      ),
+                      const SizedBox(width: 8.0),
+                      Expanded(
+                        child: Text(
+                          l10n != null ? profile.division.localizedTitle(l10n) : profile.division.defaultTitle,
+                          style: PicoTypography.statCounterSm.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 13.0,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        profile.division.nextTier != null
+                            ? '${profile.formattedTotalPoints} / ${profile.division.nextTier!.minPoints} PP'
+                            : '${profile.formattedTotalPoints} PP',
+                        style: PicoTypography.bodySm.copyWith(
+                          color: profile.division.accentColor,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 12.0,
+                        ),
+                      ),
+                      const SizedBox(width: 4.0),
+                      const Icon(
+                        Icons.chevron_right_rounded,
+                        size: 16.0,
+                        color: Color(0xFF6EE7B7),
+                      ),
+                    ],
                   ),
-                  child: FractionallySizedBox(
-                    alignment: Alignment.centerLeft,
-                    widthFactor: profile.xpProgressRatio,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [
-                            Color(0xFF34D399),
-                            Color(0xFF5EEAD4),
+                  const SizedBox(height: 8.0),
+                  Container(
+                    height: 8.0,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF04120C),
+                      borderRadius: BorderRadius.circular(999.0),
+                      border: Border.all(
+                        color: profile.division.borderColor.withValues(alpha: 0.3),
+                        width: 1.0,
+                      ),
+                    ),
+                    child: FractionallySizedBox(
+                      alignment: Alignment.centerLeft,
+                      widthFactor: profile.divisionProgressRatio,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              profile.division.primaryColor,
+                              profile.division.accentColor,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(999.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: profile.division.accentColor.withValues(alpha: 0.5),
+                              blurRadius: 6.0,
+                              spreadRadius: 0.5,
+                            ),
                           ],
                         ),
-                        borderRadius: BorderRadius.circular(999.0),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x8014B8A6),
-                            blurRadius: 8.0,
-                            spreadRadius: 0.5,
-                          ),
-                        ],
                       ),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 4.0),
+                  Text(
+                    profile.division.nextTier != null
+                        ? (l10n != null
+                            ? l10n.pointsToNextDivision(
+                                profile.pointsToNextDivision.toString(),
+                                profile.division.nextTier!.localizedTitle(l10n),
+                              )
+                            : '${profile.pointsToNextDivision} pts to ${profile.division.nextTier!.defaultTitle}')
+                        : (l10n != null
+                            ? l10n.eliteDivisionStatus(profile.formattedTotalPoints)
+                            : '${profile.formattedTotalPoints} pts (Elite Division)'),
+                    style: PicoTypography.bodySm.copyWith(
+                      color: const Color(0xB3A7F3D0),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11.0,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 10.0),
-              Text(
-                '${UserProfileXpX.formatNumberWithCommas(profile.xpInLevel)} / ${UserProfileXpX.formatNumberWithCommas(profile.targetXpForLevel)} XP',
-                style: PicoTypography.bodySm.copyWith(
-                  color: const Color(0xB3A7F3D0),
-                  fontWeight: FontWeight.w600,
-                  fontSize: 11.0,
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),
@@ -381,9 +432,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _buildQuickStatsGrid(UserProfile profile, AppLocalizations? l10n) {
     final hitRateLabel = l10n?.hitRateLabel ?? 'Hit Rate';
     final matchesLabel = l10n?.matchesLabel ?? 'Matches';
-    final streakText = profile.streak.toString();
-    final bestStreakLabel = l10n?.bestStreak(profile.streak > 0 ? profile.streak : 6) ??
-        'Best: ${profile.streak > 0 ? profile.streak : 6}';
     final totalSub = l10n?.matchesTotalSub ?? 'Total';
     final trendText = l10n?.hitRateTrendUp(4) ?? '↑ +4%';
 
@@ -475,28 +523,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         const SizedBox(width: 8.0),
 
-        // Card 3: Streak
+        // Card 3: Prediction Points & Division
         Expanded(
           child: _TactileCard(
+            onTap: () => DivisionLadderSheet.show(context, profile),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  '🔥',
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    shadows: [
-                      Shadow(
-                        color: Color(0x80F97316),
-                        offset: Offset(0, 2),
-                        blurRadius: 6.0,
-                      ),
-                    ],
-                  ),
+                Icon(
+                  Icons.military_tech_rounded,
+                  color: profile.division.accentColor,
+                  size: 22.0,
                 ),
                 const SizedBox(height: 6.0),
                 Text(
-                  streakText,
+                  profile.formattedTotalPoints,
                   style: PicoTypography.headlineLg.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w900,
@@ -504,7 +545,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
                 Text(
-                  l10n?.streakPill(profile.streak).split(' ').last ?? 'Streak',
+                  l10n?.predictionPointsAbbr ?? 'PP',
                   style: PicoTypography.bodySm.copyWith(
                     color: const Color(0xFFCBD5E1),
                     fontSize: 10.5,
@@ -513,9 +554,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 const SizedBox(height: 4.0),
                 Text(
-                  bestStreakLabel,
+                  profile.division.badgeLabel,
                   style: PicoTypography.bodySm.copyWith(
-                    color: const Color(0xFFFBBF24),
+                    color: profile.division.accentColor,
                     fontSize: 9.5,
                     fontWeight: FontWeight.w700,
                   ),

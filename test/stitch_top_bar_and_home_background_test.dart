@@ -39,6 +39,8 @@ void main() {
     xp: 720,
     streak: 4,
     coins: 2450,
+    totalPoints: 140,
+    currentDivisionKey: 'div_8',
   );
 
   final testMatch = PicoMatch(
@@ -58,7 +60,6 @@ void main() {
         (WidgetTester tester) async {
       bool levelTapped = false;
       bool coinsTapped = false;
-      bool streakTapped = false;
 
       await tester.pumpWidget(
         ProviderScope(
@@ -71,8 +72,7 @@ void main() {
             home: Scaffold(
               appBar: PicoAppBar(
                 onProfileTap: () => levelTapped = true,
-                onCoinsTap: () => coinsTapped = true,
-                onStreakTap: () => streakTapped = true,
+                onPointsTap: () => coinsTapped = true,
               ),
               body: const SizedBox.shrink(),
             ),
@@ -81,25 +81,20 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // 1. Verify Level Section
-      expect(find.text('LVL 7'), findsOneWidget);
-      await tester.tap(find.byKey(const Key('pico_app_bar_level_section')));
+      // 1. Verify Division Section
+      expect(find.text('DIV 8'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('pico_app_bar_division_section')));
       expect(levelTapped, isTrue);
 
-      // 2. Verify XP Label
-      expect(find.text('720 / 1,000 XP'), findsOneWidget);
+      // 2. Verify PP Progress Label
+      expect(find.text('140 / 220 PP'), findsOneWidget);
 
-      // 3. Verify Coins Section
-      expect(find.text('2,450'), findsOneWidget);
-      await tester.tap(find.byKey(const Key('pico_app_bar_coins_section')));
+      // 3. Verify Points Section
+      expect(find.text('140 PP'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('pico_app_bar_points_section')));
       expect(coinsTapped, isTrue);
 
-      // 4. Verify Streak Section
-      expect(find.text('4'), findsOneWidget);
-      await tester.tap(find.byKey(const Key('pico_app_bar_streak_section')));
-      expect(streakTapped, isTrue);
-
-      // 5. Verify back button is hidden by default
+      // 4. Verify back button is hidden by default
       expect(find.byKey(const Key('pico_app_bar_back_button')), findsNothing);
     });
 
@@ -159,9 +154,8 @@ void main() {
 
       // No overflow exception should be thrown
       expect(tester.takeException(), isNull);
-      expect(find.text('LVL 7'), findsOneWidget);
-      expect(find.text('2,450'), findsOneWidget);
-      expect(find.text('4'), findsOneWidget);
+      expect(find.text('DIV 8'), findsOneWidget);
+      expect(find.text('140 PP'), findsOneWidget);
     });
 
     testWidgets('HomeScreen renders full-bleed stadium pitch background asset with top alignment',

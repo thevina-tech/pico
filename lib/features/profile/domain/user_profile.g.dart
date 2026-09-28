@@ -15,6 +15,8 @@ _UserProfile _$UserProfileFromJson(Map<String, dynamic> json) => _UserProfile(
   xp: (json['xp'] as num?)?.toInt() ?? 0,
   streak: (json['streak'] as num?)?.toInt() ?? 0,
   coins: (json['coins'] as num?)?.toInt() ?? 0,
+  totalPoints: (json['total_points'] as num?)?.toInt() ?? 0,
+  currentDivisionKey: json['current_division_key'] as String?,
   privateLeaguesCreated:
       (json['private_leagues_created'] as num?)?.toInt() ?? 0,
   favoriteTeamId: json['favorite_team_id'] as String?,
@@ -43,6 +45,8 @@ Map<String, dynamic> _$UserProfileToJson(_UserProfile instance) =>
       'xp': instance.xp,
       'streak': instance.streak,
       'coins': instance.coins,
+      'total_points': instance.totalPoints,
+      'current_division_key': instance.currentDivisionKey,
       'private_leagues_created': instance.privateLeaguesCreated,
       'favorite_team_id': instance.favoriteTeamId,
       'favorite_team_ids': instance.favoriteTeamIds,

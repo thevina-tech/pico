@@ -35,11 +35,23 @@ extension PredictionSettlement on Prediction {
     return false;
   }
 
-  /// Calculates Pico Points outcome for this prediction against actual score.
-  /// Rule 13: Exact score = 5 total, Correct winner = 3 total, Wrong = 0.
+  /// Returns true if the predicted goal difference matches the actual goal difference.
+  bool isCorrectGoalDifference(int actualHome, int actualAway) =>
+      (homeScore - awayScore) == (actualHome - actualAway);
+
+  /// Calculates Prediction Points (PP) outcome for this prediction against actual score.
+  /// Sprint 7 Tiered Division System rules:
+  /// - Exact score: 5 PP
+  /// - Correct outcome + correct goal difference: 3 PP
+  /// - Correct outcome only: 1 PP
+  /// - Miss: 0 PP
   int calculatePoints(int actualHome, int actualAway) {
     if (isExactScore(actualHome, actualAway)) return 5;
-    if (isCorrectWinner(actualHome, actualAway)) return 3;
+    final winnerMatches = isCorrectWinner(actualHome, actualAway);
+    if (winnerMatches && isCorrectGoalDifference(actualHome, actualAway)) {
+      return 3;
+    }
+    if (winnerMatches) return 1;
     return 0;
   }
 }

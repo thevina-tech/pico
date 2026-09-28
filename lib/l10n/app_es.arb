@@ -243,7 +243,29 @@
   "accountSettingsAria": "Ajustes de Cuenta",
   "signOutButton": "Cerrar Sesión",
   "picoRulesTitle": "Reglas del Juego y Puntuación",
-  "picoRulesSubtitle": "Juego limpio, cierres en servidor y puntuación transparente"
+  "picoRulesSubtitle": "Juego limpio, cierres en servidor y puntuación transparente",
+  "division10Title": "División 10",
+  "division9Title": "División 9",
+  "division8Title": "División 8",
+  "division7Title": "División 7",
+  "division6Title": "División 6",
+  "division5Title": "División 5",
+  "division4Title": "División 4",
+  "division3Title": "División 3",
+  "division2Title": "División 2",
+  "division1Title": "División 1",
+  "divisionEliteTitle": "División Élite",
+  "predictionPointsLabel": "Puntos de Predicción",
+  "predictionPointsAbbr": "PP",
+  "currentDivisionLabel": "División Actual",
+  "divisionLadderTitle": "Escalera de Divisiones",
+  "divisionLadderSubtitle": "Asciende divisiones con predicciones acertadas",
+  "pointsToNextDivisionThreshold": "{current} / {target} pts para {nextDivision}",
+  "pointsToNextDivision": "{points} pts para {nextDivision}",
+  "eliteDivisionStatus": "{points} pts (División Élite)",
+  "pointsOutcomeGoalDiff": "+3 Puntos",
+  "pointsOutcomeOne": "+1 Punto",
+  "scoringRuleBannerSprint7": "Exacto = +5 PP · Signo + Dif = +3 PP · Signo = +1 PP"
 }
 
 

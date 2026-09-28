@@ -15,6 +15,7 @@ import 'package:pico/features/tournaments/domain/tournament.dart';
 import 'package:pico/shared/components/match_card.dart';
 import 'package:pico/shared/components/prediction_bottom_sheet.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
+import 'package:pico/shared/components/division_badge.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
 /// Detail screen for official Public Tournaments.
@@ -518,6 +519,13 @@ class _PublicTournamentScreenState
                       ],
                     ),
                   ),
+
+                  // Division Badge
+                  DivisionBadge.fromPoints(
+                    points: participant.picoPoints,
+                    size: DivisionBadgeSize.small,
+                  ),
+                  const SizedBox(width: 8.0),
 
                   // Points Pill
                   Container(

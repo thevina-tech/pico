@@ -841,4 +841,82 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get picoRulesSubtitle =>
       'Juego limpio, cierres en servidor y puntuación transparente';
+
+  @override
+  String get division10Title => 'División 10';
+
+  @override
+  String get division9Title => 'División 9';
+
+  @override
+  String get division8Title => 'División 8';
+
+  @override
+  String get division7Title => 'División 7';
+
+  @override
+  String get division6Title => 'División 6';
+
+  @override
+  String get division5Title => 'División 5';
+
+  @override
+  String get division4Title => 'División 4';
+
+  @override
+  String get division3Title => 'División 3';
+
+  @override
+  String get division2Title => 'División 2';
+
+  @override
+  String get division1Title => 'División 1';
+
+  @override
+  String get divisionEliteTitle => 'División Élite';
+
+  @override
+  String get predictionPointsLabel => 'Puntos de Predicción';
+
+  @override
+  String get predictionPointsAbbr => 'PP';
+
+  @override
+  String get currentDivisionLabel => 'División Actual';
+
+  @override
+  String get divisionLadderTitle => 'Escalera de Divisiones';
+
+  @override
+  String get divisionLadderSubtitle =>
+      'Asciende divisiones con predicciones acertadas';
+
+  @override
+  String pointsToNextDivisionThreshold(
+    String current,
+    String target,
+    String nextDivision,
+  ) {
+    return '$current / $target pts para $nextDivision';
+  }
+
+  @override
+  String pointsToNextDivision(String points, String nextDivision) {
+    return '$points pts para $nextDivision';
+  }
+
+  @override
+  String eliteDivisionStatus(String points) {
+    return '$points pts (División Élite)';
+  }
+
+  @override
+  String get pointsOutcomeGoalDiff => '+3 Puntos';
+
+  @override
+  String get pointsOutcomeOne => '+1 Punto';
+
+  @override
+  String get scoringRuleBannerSprint7 =>
+      'Exacto = +5 PP · Signo + Dif = +3 PP · Signo = +1 PP';
 }

@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'division.dart';
 
 part 'user_profile.freezed.dart';
 part 'user_profile.g.dart';
@@ -15,6 +16,8 @@ abstract class UserProfile with _$UserProfile {
     @Default(0) int xp,
     @Default(0) int streak,
     @Default(0) int coins,
+    @JsonKey(name: 'total_points') @Default(0) int totalPoints,
+    @JsonKey(name: 'current_division_key') String? currentDivisionKey,
     @JsonKey(name: 'private_leagues_created')
     @Default(0)
     int privateLeaguesCreated,
@@ -57,4 +60,22 @@ extension UserProfileXpX on UserProfile {
     final reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
     return str.replaceAllMapped(reg, (Match m) => '${m[1]},');
   }
+}
+
+extension UserProfileDivisionX on UserProfile {
+  /// The user's current division tier calculated from their division key or total points.
+  DivisionTier get division =>
+      currentDivisionKey != null
+          ? DivisionTier.fromKey(currentDivisionKey)
+          : DivisionTier.fromPoints(totalPoints);
+
+  /// Progress ratio (0.0 to 1.0) towards the next division.
+  double get divisionProgressRatio => division.progressRatio(totalPoints);
+
+  /// Prediction points needed to reach the next division tier.
+  int get pointsToNextDivision => division.pointsToNext(totalPoints);
+
+  /// Formatted total prediction points with thousands separator (e.g. "1,250").
+  String get formattedTotalPoints =>
+      UserProfileXpX.formatNumberWithCommas(totalPoints);
 }

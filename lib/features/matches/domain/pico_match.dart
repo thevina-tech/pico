@@ -146,8 +146,12 @@ abstract class PicoMatch with _$PicoMatch {
     }
   }
 
-  /// Calculates Pico Points outcome for this match given predicted scores.
-  /// Rule 13: Exact score = 5 total, Correct winner = 3 total, Wrong = 0.
+  /// Calculates Prediction Points (PP) outcome for this match given predicted scores.
+  /// Sprint 7 Tiered Division System rules:
+  /// - Exact score: 5 PP
+  /// - Correct outcome + correct goal difference: 3 PP
+  /// - Correct outcome only: 1 PP
+  /// - Miss: 0 PP
   int? calculateSettlementPoints(int? predHome, int? predAway) {
     if (status != MatchStatus.finished || homeScore == null || awayScore == null) {
       return null;
@@ -165,7 +169,12 @@ abstract class PicoMatch with _$PicoMatch {
         ? 'home'
         : (predAway > predHome ? 'away' : 'draw');
     if (actualWinner == predWinner) {
-      return 3;
+      final actualDiff = homeScore! - awayScore!;
+      final predDiff = predHome - predAway;
+      if (actualDiff == predDiff) {
+        return 3;
+      }
+      return 1;
     }
     return 0;
   }

@@ -1543,6 +1543,142 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fair play, server-side locks & transparent scoring'**
   String get picoRulesSubtitle;
+
+  /// Title for Division 10 (0-49 PP)
+  ///
+  /// In en, this message translates to:
+  /// **'Division 10'**
+  String get division10Title;
+
+  /// Title for Division 9 (50-119 PP)
+  ///
+  /// In en, this message translates to:
+  /// **'Division 9'**
+  String get division9Title;
+
+  /// Title for Division 8 (120-219 PP)
+  ///
+  /// In en, this message translates to:
+  /// **'Division 8'**
+  String get division8Title;
+
+  /// Title for Division 7 (220-349 PP)
+  ///
+  /// In en, this message translates to:
+  /// **'Division 7'**
+  String get division7Title;
+
+  /// Title for Division 6 (350-499 PP)
+  ///
+  /// In en, this message translates to:
+  /// **'Division 6'**
+  String get division6Title;
+
+  /// Title for Division 5 (500-699 PP)
+  ///
+  /// In en, this message translates to:
+  /// **'Division 5'**
+  String get division5Title;
+
+  /// Title for Division 4 (700-949 PP)
+  ///
+  /// In en, this message translates to:
+  /// **'Division 4'**
+  String get division4Title;
+
+  /// Title for Division 3 (950-1249 PP)
+  ///
+  /// In en, this message translates to:
+  /// **'Division 3'**
+  String get division3Title;
+
+  /// Title for Division 2 (1250-1599 PP)
+  ///
+  /// In en, this message translates to:
+  /// **'Division 2'**
+  String get division2Title;
+
+  /// Title for Division 1 (1600-1999 PP)
+  ///
+  /// In en, this message translates to:
+  /// **'Division 1'**
+  String get division1Title;
+
+  /// Title for Elite Division (2000+ PP)
+  ///
+  /// In en, this message translates to:
+  /// **'Elite Division'**
+  String get divisionEliteTitle;
+
+  /// Label for unified Prediction Points currency
+  ///
+  /// In en, this message translates to:
+  /// **'Prediction Points'**
+  String get predictionPointsLabel;
+
+  /// Abbreviation for Prediction Points
+  ///
+  /// In en, this message translates to:
+  /// **'PP'**
+  String get predictionPointsAbbr;
+
+  /// Label for current division tier
+  ///
+  /// In en, this message translates to:
+  /// **'Current Division'**
+  String get currentDivisionLabel;
+
+  /// Title for division ladder section or view
+  ///
+  /// In en, this message translates to:
+  /// **'Division Ladder'**
+  String get divisionLadderTitle;
+
+  /// Subtitle describing the division ladder system
+  ///
+  /// In en, this message translates to:
+  /// **'Climb tiers with accurate match predictions'**
+  String get divisionLadderSubtitle;
+
+  /// Progress towards the next division
+  ///
+  /// In en, this message translates to:
+  /// **'{current} / {target} pts to {nextDivision}'**
+  String pointsToNextDivisionThreshold(
+    String current,
+    String target,
+    String nextDivision,
+  );
+
+  /// Remaining points needed for next division
+  ///
+  /// In en, this message translates to:
+  /// **'{points} pts to {nextDivision}'**
+  String pointsToNextDivision(String points, String nextDivision);
+
+  /// Display text when user has achieved Elite Division
+  ///
+  /// In en, this message translates to:
+  /// **'{points} pts (Elite Division)'**
+  String eliteDivisionStatus(String points);
+
+  /// Points outcome badge for correct winner and goal difference
+  ///
+  /// In en, this message translates to:
+  /// **'+3 Points'**
+  String get pointsOutcomeGoalDiff;
+
+  /// Points outcome badge for correct winner only
+  ///
+  /// In en, this message translates to:
+  /// **'+1 Point'**
+  String get pointsOutcomeOne;
+
+  /// Compact scoring rules explanation
+  ///
+  /// In en, this message translates to:
+  /// **'Exact = +5 PP · Outcome + Diff = +3 PP · Outcome = +1 PP'**
+  String get scoringRuleBannerSprint7;
 }
 
 class _AppLocalizationsDelegate

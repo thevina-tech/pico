@@ -91,7 +91,7 @@ final class AuthNotifierProvider
   }
 }
 
-String _$authNotifierHash() => r'3921ab9fbab33274f515a5cc5f720a0cca97f129';
+String _$authNotifierHash() => r'0c9d1b079910699e91f780625fb3d168461b0476';
 
 /// Central Riverpod AuthNotifier managing authentication state,
 /// anonymous login, and personalization tracking.

@@ -11,6 +11,7 @@ import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/tournaments/data/tournament_repository.dart';
 import 'package:pico/features/tournaments/domain/private_league.dart';
 import 'package:pico/features/tournaments/domain/private_league_member.dart';
+import 'package:pico/shared/components/division_badge.dart';
 
 /// Modal bottom sheet displaying League details, invite code,
 /// live standings leaderboard, admin kick controls, and leave league action.
@@ -477,7 +478,12 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
             ),
           ),
 
-          // Points
+          // Division Badge & Points
+          DivisionBadge.fromPoints(
+            points: member.picoPoints,
+            size: DivisionBadgeSize.small,
+          ),
+          const SizedBox(width: 8.0),
           Text(
             '${member.picoPoints} PTS',
             style: PicoTypography.labelPill.copyWith(
