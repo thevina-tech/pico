@@ -143,7 +143,7 @@ void main() {
       expect(find.byKey(const Key('profile_history_card')), findsOneWidget);
     });
 
-    testWidgets('Renders Achievements showcase with 4 Hexagon Badges',
+    testWidgets('Achievements and Settings are removed from ProfileScreen',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(800, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -152,23 +152,12 @@ void main() {
       await tester.pumpWidget(createSubject());
       await tester.pumpAndSettle();
 
-      expect(find.text('Achievements'), findsOneWidget);
-      expect(find.text('See all'), findsOneWidget);
-
-      expect(find.text('On Fire'), findsOneWidget);
-      expect(find.text('14 streak'), findsOneWidget);
-
-      expect(find.text('Sharpshooter'), findsOneWidget);
-      expect(find.text('70% hit rate'), findsOneWidget);
-
-      expect(find.text('Podium'), findsOneWidget);
-      expect(find.text('3 podiums'), findsOneWidget);
-
-      expect(find.text('10 Streak'), findsOneWidget);
-      expect(find.text('Locked'), findsOneWidget);
+      expect(find.text('Achievements'), findsNothing);
+      expect(find.text('See all'), findsNothing);
+      expect(find.byKey(const Key('profile_settings_action')), findsNothing);
     });
 
-    testWidgets('Quick Actions: Help & Support opens game rules modal',
+    testWidgets('Quick Actions: Rate App and Help & Support are displayed',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(800, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -176,24 +165,17 @@ void main() {
 
       await tester.pumpWidget(createSubject());
       await tester.pumpAndSettle();
+
+      final rateAction = find.byKey(const Key('profile_rate_app_action'));
+      expect(rateAction, findsOneWidget);
+      expect(find.text('Rate App'), findsOneWidget);
 
       final helpAction = find.byKey(const Key('profile_help_action'));
       expect(helpAction, findsOneWidget);
-
-      await tester.tap(helpAction);
-      await tester.pumpAndSettle();
-
-      expect(find.text('Game Rules & Scoring'), findsOneWidget);
-      expect(find.text('Scoring Pico Points'), findsOneWidget);
-      expect(find.text('Prediction Lock Window'), findsOneWidget);
-
-      // Dismiss modal
-      await tester.tap(find.text('Done'));
-      await tester.pumpAndSettle();
-      expect(find.text('Game Rules & Scoring'), findsNothing);
+      expect(find.text('Help & Support'), findsOneWidget);
     });
 
-    testWidgets('Quick Actions: Settings opens settings modal and Sign Out triggers auth signOut',
+    testWidgets('Sign Out button is prominently displayed and triggers auth signOut',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(800, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -203,17 +185,9 @@ void main() {
       await tester.pumpWidget(createSubject(authNotifier: spyAuth));
       await tester.pumpAndSettle();
 
-      final settingsAction = find.byKey(const Key('profile_settings_action'));
-      expect(settingsAction, findsOneWidget);
-
-      await tester.tap(settingsAction);
-      await tester.pumpAndSettle();
-
-      expect(find.text('Push Notifications'), findsOneWidget);
-      expect(find.text('Matchday Haptics'), findsOneWidget);
-
       final signOutFinder = find.byKey(const Key('profile_sign_out_button'));
       expect(signOutFinder, findsOneWidget);
+      expect(find.text('Sign Out'), findsOneWidget);
 
       await tester.tap(signOutFinder);
       await tester.pumpAndSettle();

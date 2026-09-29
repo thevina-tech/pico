@@ -28,6 +28,7 @@ import 'package:pico/shared/components/prediction_bottom_sheet.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/shared/components/division_badge.dart';
 import 'package:pico/shared/components/pico_confirmation_modal.dart';
+import 'package:pico/shared/components/pico_button.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
 /// Unified Clan Dashboard for Private Leagues.
@@ -1675,25 +1676,16 @@ class _PrivateLeagueDashboardScreenState
               ),
             ],
           ),
-          ElevatedButton.icon(
+          PicoButton.red(
+            text: l10n?.deleteLeagueButton ?? 'Delete League',
+            icon: const Icon(Icons.delete_forever_rounded, size: 14.0, color: Colors.white),
+            isFullWidth: false,
+            height: 34.0,
+            bevelHeight: 3.0,
+            borderRadius: 10.0,
+            fontSize: 11.0,
+            isLoading: _isProcessing,
             onPressed: _isProcessing ? null : () => _confirmDeleteLeague(league, l10n),
-            icon: const Icon(Icons.delete_forever_rounded, size: 14.0),
-            label: Text(
-              l10n?.deleteLeagueButton ?? 'Delete League',
-              style: PicoTypography.labelPillSm.copyWith(
-                fontWeight: FontWeight.w800,
-                fontSize: 11.0,
-              ),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: PicoColors.accentCoral,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-            ),
           ),
         ],
       ),

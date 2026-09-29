@@ -30,7 +30,7 @@ class MatchesScreen extends ConsumerStatefulWidget {
   const MatchesScreen({
     super.key,
     this.showBottomNavBar = true,
-    this.currentNavIndex = 1,
+    this.currentNavIndex = 0,
     this.onNavTap,
     this.onPredictMatch,
     this.onModifyMatch,
@@ -104,17 +104,14 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
                         widget.onNavTap?.call(idx);
                         switch (idx) {
                           case 0:
-                            context.go('/shop');
                             break;
                           case 1:
-                            break;
-                          case 2:
                             context.go('/home');
                             break;
-                          case 3:
+                          case 2:
                             context.go('/tournaments');
                             break;
-                          case 4:
+                          case 3:
                             context.go('/profile');
                             break;
                         }

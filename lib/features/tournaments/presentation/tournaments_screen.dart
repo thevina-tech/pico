@@ -16,6 +16,7 @@ import 'package:pico/features/tournaments/presentation/tournaments_controller.da
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/game_exit_dialog.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
+import 'package:pico/shared/components/pico_button.dart';
 import 'package:pico/shared/components/pico_confirmation_modal.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 
@@ -442,7 +443,13 @@ class TournamentsScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  ElevatedButton(
+                  PicoButton.dark(
+                    text: 'Standings',
+                    isFullWidth: false,
+                    height: 34.0,
+                    bevelHeight: 3.0,
+                    borderRadius: 10.0,
+                    fontSize: 12.0,
                     onPressed: () {
                       if (onViewLeaderboard != null) {
                         onViewLeaderboard?.call(league.name);
@@ -450,22 +457,6 @@ class TournamentsScreen extends ConsumerWidget {
                         context.push('/tournaments/private/${league.id}', extra: league);
                       }
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF152B20),
-                      foregroundColor: PicoColors.textWhite,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                    child: Text(
-                      'Standings',
-                      style: PicoTypography.bodySm.copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12.0,
-                      ),
-                    ),
                   ),
                 ],
               ),
@@ -545,7 +536,13 @@ class TournamentsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              ElevatedButton(
+              PicoButton.primary(
+                text: 'View Table',
+                isFullWidth: false,
+                height: 36.0,
+                bevelHeight: 3.0,
+                borderRadius: 10.0,
+                fontSize: 12.0,
                 onPressed: () {
                   if (onViewLeaderboard != null) {
                     onViewLeaderboard?.call(tournament.name);
@@ -553,22 +550,6 @@ class TournamentsScreen extends ConsumerWidget {
                     context.push('/tournaments/public/${tournament.id}', extra: tournament);
                   }
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: PicoColors.primary,
-                  foregroundColor: PicoColors.textWhite,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                ),
-                child: Text(
-                  'View Table',
-                  style: PicoTypography.bodySm.copyWith(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12.0,
-                  ),
-                ),
               ),
             ],
           ),
@@ -664,7 +645,13 @@ class TournamentsScreen extends ConsumerWidget {
                 ),
               ),
               if (!isEnrolled) ...[
-                ElevatedButton(
+                PicoButton.primary(
+                  text: l10n.joinAction,
+                  isFullWidth: false,
+                  height: 36.0,
+                  bevelHeight: 3.0,
+                  borderRadius: 10.0,
+                  fontSize: 12.0,
                   onPressed: () async {
                     final authState = ref.read(authProvider);
                     if (authState is! PicoAuthAuthenticated || authState.user == null) {
@@ -736,26 +723,15 @@ class TournamentsScreen extends ConsumerWidget {
                       }
                     }
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: PicoColors.primary,
-                    foregroundColor: PicoColors.pitchBackground,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                  ),
-                  child: Text(
-                    l10n.joinAction,
-                    style: PicoTypography.bodySm.copyWith(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 12.0,
-                      color: PicoColors.pitchBackground,
-                    ),
-                  ),
                 ),
               ] else ...[
-                ElevatedButton(
+                PicoButton.dark(
+                  text: 'View Table',
+                  isFullWidth: false,
+                  height: 36.0,
+                  bevelHeight: 3.0,
+                  borderRadius: 10.0,
+                  fontSize: 12.0,
                   onPressed: () {
                     if (onViewLeaderboard != null) {
                       onViewLeaderboard?.call(tournament.name);
@@ -763,23 +739,6 @@ class TournamentsScreen extends ConsumerWidget {
                       context.push('/tournaments/public/${tournament.id}', extra: tournament);
                     }
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF26332A),
-                    foregroundColor: PicoColors.textWhite,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-                    ),
-                  ),
-                  child: Text(
-                    'View Table',
-                    style: PicoTypography.bodySm.copyWith(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12.0,
-                    ),
-                  ),
                 ),
               ],
             ],
@@ -872,19 +831,13 @@ class TournamentsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16.0),
-          ElevatedButton.icon(
+          PicoButton.gold(
+            text: l10n.createPrivateLeagueTitle,
+            icon: const Icon(Icons.add_rounded, size: 18.0, color: Color(0xFF261700)),
+            isFullWidth: false,
+            height: 44.0,
+            borderRadius: 14.0,
             onPressed: () => context.push('/tournaments/create'),
-            icon: const Icon(Icons.add_rounded, size: 18.0),
-            label: Text(l10n.createPrivateLeagueTitle),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: PicoColors.gold,
-              foregroundColor: const Color(0xFF261A00),
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 10.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-            ),
           ),
         ],
       ),
@@ -912,18 +865,15 @@ class TournamentsScreen extends ConsumerWidget {
               color: PicoColors.textWhiteMuted,
             ),
           ),
-          const SizedBox(height: 10.0),
-          OutlinedButton(
+          const SizedBox(height: 12.0),
+          PicoButton.primary(
+            text: 'Go to Discover',
+            isFullWidth: false,
+            height: 38.0,
+            borderRadius: 12.0,
+            fontSize: 13.0,
             onPressed: () =>
                 ref.read(tournamentsControllerProvider.notifier).setTab(1),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: PicoColors.primary,
-              side: BorderSide(color: PicoColors.primary),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-            ),
-            child: const Text('Go to Discover'),
           ),
         ],
       ),

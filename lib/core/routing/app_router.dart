@@ -8,8 +8,10 @@ import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/auth/presentation/onboarding_screen.dart';
 import 'package:pico/features/home/presentation/home_screen.dart';
 import 'package:pico/features/matches/presentation/matches_screen.dart';
+import 'package:pico/features/profile/presentation/help_support_screen.dart';
 import 'package:pico/features/profile/presentation/personalization_screen.dart';
 import 'package:pico/features/profile/presentation/profile_screen.dart';
+import 'package:pico/shared/components/in_app_web_browser_screen.dart';
 import 'package:pico/features/shop/presentation/shop_screen.dart';
 import 'package:pico/features/tournaments/domain/tournament.dart';
 import 'package:pico/features/tournaments/domain/private_league.dart';
@@ -226,6 +228,41 @@ class AppRouter {
             );
           },
         ),
+        GoRoute(
+          parentNavigatorKey: rootNavigatorKey,
+          path: '/shop',
+          pageBuilder: (context, state) => const MaterialPage(
+            child: ShopScreen(
+              showBottomNavBar: false,
+            ),
+          ),
+        ),
+        GoRoute(
+          parentNavigatorKey: rootNavigatorKey,
+          path: '/help-support',
+          pageBuilder: (context, state) => const MaterialPage(
+            child: HelpSupportScreen(),
+          ),
+        ),
+        GoRoute(
+          parentNavigatorKey: rootNavigatorKey,
+          path: '/in-app-browser',
+          pageBuilder: (context, state) {
+            final extra = state.extra as Map<String, String>?;
+            final title = extra?['title'] ??
+                state.uri.queryParameters['title'] ??
+                'Browser';
+            final url = extra?['url'] ??
+                state.uri.queryParameters['url'] ??
+                '';
+            return MaterialPage(
+              child: InAppWebBrowserScreen(
+                title: title,
+                url: url,
+              ),
+            );
+          },
+        ),
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) {
             return PicoGameExitScope(
@@ -251,21 +288,7 @@ class AppRouter {
             );
           },
           branches: [
-            // Branch 0: Shop (Far Left)
-            StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: '/shop',
-                  pageBuilder: (context, state) => const NoTransitionPage(
-                    child: ShopScreen(
-                      showBottomNavBar: false,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            // Branch 1: Matches
+            // Branch 0: Matches
             StatefulShellBranch(
               routes: [
                 GoRoute(
@@ -279,7 +302,7 @@ class AppRouter {
               ],
             ),
 
-            // Branch 2: Home (Center)
+            // Branch 1: Home
             StatefulShellBranch(
               routes: [
                 GoRoute(
@@ -293,7 +316,7 @@ class AppRouter {
               ],
             ),
 
-            // Branch 3: Tournaments
+            // Branch 2: Tournaments
             StatefulShellBranch(
               routes: [
                 GoRoute(
@@ -305,7 +328,7 @@ class AppRouter {
               ],
             ),
 
-            // Branch 4: Profile (Far Right)
+            // Branch 3: Profile
             StatefulShellBranch(
               routes: [
                 GoRoute(
@@ -313,6 +336,15 @@ class AppRouter {
                   pageBuilder: (context, state) => const NoTransitionPage(
                     child: ProfileScreen(),
                   ),
+                  routes: [
+                    GoRoute(
+                      parentNavigatorKey: rootNavigatorKey,
+                      path: 'help-support',
+                      pageBuilder: (context, state) => const MaterialPage(
+                        child: HelpSupportScreen(),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

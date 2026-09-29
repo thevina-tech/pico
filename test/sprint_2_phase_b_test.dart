@@ -17,7 +17,6 @@ import 'package:pico/features/tournaments/presentation/tournaments_screen.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/main.dart';
 import 'package:pico/shared/components/game_exit_dialog.dart';
-import 'package:pico/shared/components/match_card.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 

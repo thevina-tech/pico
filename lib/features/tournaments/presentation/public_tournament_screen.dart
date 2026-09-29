@@ -17,6 +17,7 @@ import 'package:pico/shared/components/prediction_bottom_sheet.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/shared/components/division_badge.dart';
 import 'package:pico/shared/components/pico_confirmation_modal.dart';
+import 'package:pico/shared/components/pico_button.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
 /// Detail screen for official Public Tournaments.
@@ -703,39 +704,13 @@ class _PublicTournamentScreenState
             ),
           ),
           const SizedBox(height: 12.0),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: _isJoining ? null : () => _handleJoinTournament(tournament, l10n),
-              icon: _isJoining
-                  ? const SizedBox(
-                      width: 16.0,
-                      height: 16.0,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.0,
-                        color: PicoColors.pitchBackground,
-                      ),
-                    )
-                  : const Icon(Icons.sports_soccer_rounded, size: 18.0),
-              label: Text(
-                _isJoining ? '...' : l10n.joinTournamentAction,
-                style: PicoTypography.labelPillSm.copyWith(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 13.0,
-                  letterSpacing: 0.8,
-                  color: PicoColors.pitchBackground,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: PicoColors.primary,
-                foregroundColor: PicoColors.pitchBackground,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 11.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-              ),
-            ),
+          PicoButton.primary(
+            text: l10n.joinTournamentAction,
+            icon: const Icon(Icons.sports_soccer_rounded, size: 18.0, color: Colors.white),
+            isLoading: _isJoining,
+            height: 48.0,
+            borderRadius: 14.0,
+            onPressed: _isJoining ? null : () => _handleJoinTournament(tournament, l10n),
           ),
         ],
       ),

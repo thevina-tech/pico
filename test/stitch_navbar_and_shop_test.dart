@@ -7,10 +7,10 @@ import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
 
 void main() {
-  group('Stitch 5-Tab PicoBottomNavBar Tests', () {
-    testWidgets('renders 5 tabs with Shop far-left, Home centered, and Profile far-right',
+  group('Stitch 4-Tab PicoBottomNavBar Tests', () {
+    testWidgets('renders 4 tabs with Matches far-left, Home, Tournaments, and Profile far-right',
         (WidgetTester tester) async {
-      int selectedIndex = 2; // Home active by default
+      int selectedIndex = 1; // Home active by default
 
       await tester.pumpWidget(
         MaterialApp(
@@ -37,62 +37,56 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Verify all 5 tab labels are visible
-      expect(find.text('Shop'), findsOneWidget);
+      // Verify Shop is completely scrapped
+      expect(find.text('Shop'), findsNothing);
+      expect(find.byKey(const ValueKey('nav_shop')), findsNothing);
+
+      // Verify all 4 tab labels are visible
       expect(find.text('Matches'), findsOneWidget);
       expect(find.text('Home'), findsOneWidget);
       expect(find.text('Tournaments'), findsOneWidget);
       expect(find.text('Profile'), findsOneWidget);
 
       // Verify semantic keys and ordering
-      final shopKey = find.byKey(const ValueKey('nav_shop'));
       final matchesKey = find.byKey(const ValueKey('nav_matches'));
       final homeKey = find.byKey(const ValueKey('nav_home'));
       final tournamentsKey = find.byKey(const ValueKey('nav_tournaments'));
       final profileKey = find.byKey(const ValueKey('nav_profile'));
 
-      expect(shopKey, findsOneWidget);
       expect(matchesKey, findsOneWidget);
       expect(homeKey, findsOneWidget);
       expect(tournamentsKey, findsOneWidget);
       expect(profileKey, findsOneWidget);
 
-      // Check horizontal ordering: shop < matches < home < tournaments < profile
-      final shopOffset = tester.getCenter(shopKey);
+      // Check horizontal ordering: matches < home < tournaments < profile
       final matchesOffset = tester.getCenter(matchesKey);
       final homeOffset = tester.getCenter(homeKey);
       final tournamentsOffset = tester.getCenter(tournamentsKey);
       final profileOffset = tester.getCenter(profileKey);
 
-      expect(shopOffset.dx < matchesOffset.dx, isTrue);
       expect(matchesOffset.dx < homeOffset.dx, isTrue);
       expect(homeOffset.dx < tournamentsOffset.dx, isTrue);
       expect(tournamentsOffset.dx < profileOffset.dx, isTrue);
 
-      // Tap on Shop (index 0)
-      await tester.tap(shopKey);
+      // Tap on Matches (index 0)
+      await tester.tap(matchesKey);
       await tester.pumpAndSettle();
       expect(selectedIndex, 0);
 
-      // Tap on Matches (index 1)
-      await tester.tap(matchesKey);
+      // Tap on Home (index 1)
+      await tester.tap(homeKey);
       await tester.pumpAndSettle();
       expect(selectedIndex, 1);
 
-      // Tap on Home (index 2 - center)
-      await tester.tap(homeKey);
+      // Tap on Tournaments (index 2)
+      await tester.tap(tournamentsKey);
       await tester.pumpAndSettle();
       expect(selectedIndex, 2);
 
-      // Tap on Tournaments (index 3)
-      await tester.tap(tournamentsKey);
-      await tester.pumpAndSettle();
-      expect(selectedIndex, 3);
-
-      // Tap on Profile (index 4)
+      // Tap on Profile (index 3)
       await tester.tap(profileKey);
       await tester.pumpAndSettle();
-      expect(selectedIndex, 4);
+      expect(selectedIndex, 3);
     });
 
     testWidgets('renders localized Spanish tab labels correctly',
@@ -109,7 +103,7 @@ void main() {
           supportedLocales: [Locale('en'), Locale('es')],
           home: Scaffold(
             bottomNavigationBar: PicoBottomNavBar(
-              currentIndex: 2,
+              currentIndex: 1,
               onTap: _noOp,
             ),
           ),
@@ -117,7 +111,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Tienda'), findsOneWidget);
+      expect(find.text('Tienda'), findsNothing);
       expect(find.text('Partidos'), findsOneWidget);
       expect(find.text('Inicio'), findsOneWidget);
       expect(find.text('Torneos'), findsOneWidget);
@@ -137,7 +131,7 @@ void main() {
           supportedLocales: const [Locale('en'), Locale('es')],
           home: Scaffold(
             bottomNavigationBar: PicoBottomNavBar(
-              currentIndex: 2, // Home active
+              currentIndex: 1, // Home active
               onTap: _noOp,
             ),
           ),
@@ -154,16 +148,16 @@ void main() {
       );
       expect(containerFinder, findsWidgets);
 
-      // 2. Verify all 5 tab icons are rendered at 44x44 without opacity dimming
-      expect(find.byType(Image), findsNWidgets(5));
+      // 2. Verify all 4 tab icons are rendered at 40x40 without opacity dimming
+      expect(find.byType(Image), findsNWidgets(4));
       expect(find.byType(AnimatedOpacity), findsNothing);
 
       // 3. Verify text colors (active is crisp white, inactive is soft meadow mint)
       final homeText = tester.widget<Text>(find.text('Home'));
       expect(homeText.style?.color, Colors.white);
 
-      final shopText = tester.widget<Text>(find.text('Shop'));
-      expect(shopText.style?.color, const Color(0xFFA7D1BC));
+      final matchesText = tester.widget<Text>(find.text('Matches'));
+      expect(matchesText.style?.color, const Color(0xFFA7D1BC));
 
       // 4. Verify gold pill indicator (#FCCB2B)
       final goldPillFinder = find.byWidgetPredicate(

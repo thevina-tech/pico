@@ -7,6 +7,7 @@ import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/core/utils/input_sanitizer.dart';
 import 'package:pico/features/tournaments/domain/private_league_exceptions.dart';
 import 'package:pico/features/tournaments/presentation/private_league_controller.dart';
+import 'package:pico/shared/components/pico_button.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
@@ -336,36 +337,25 @@ class _JoinPrivateLeagueScreenState
                       ? null
                       : _handleJoin,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PicoColors.gold,
-                    foregroundColor: const Color(0xFF261A00),
-                    disabledBackgroundColor:
-                        PicoColors.gold.withValues(alpha: 0.3),
-                    disabledForegroundColor:
-                        const Color(0xFF261A00).withValues(alpha: 0.4),
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    surfaceTintColor: Colors.transparent,
                     elevation: 0,
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(double.infinity, 52.0),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16.0),
                     ),
                   ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 22.0,
-                          width: 22.0,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            valueColor:
-                                AlwaysStoppedAnimation(Color(0xFF261A00)),
-                          ),
-                        )
-                      : Text(
-                          l10n.joinLeagueButton,
-                          style: PicoTypography.titleCard.copyWith(
-                            color: const Color(0xFF261A00),
-                            fontWeight: FontWeight.w800,
-                            fontSize: 16.0,
-                          ),
-                        ),
+                  child: PicoButton.gold(
+                    text: l10n.joinLeagueButton,
+                    isLoading: _isLoading,
+                    height: 52.0,
+                    borderRadius: 16.0,
+                    onPressed: _isLoading || currentCode.length != 6
+                        ? null
+                        : _handleJoin,
+                  ),
                 ),
               ],
             ),

@@ -61,6 +61,8 @@ dependencies:
   google_mobile_ads: ^9.1.0
   purchases_flutter: 10.2.0
   google_sign_in: ^6.2.2
+  url_launcher: ^6.3.2
+  webview_flutter: ^4.14.1
 
 dev_dependencies:
   flutter_test:

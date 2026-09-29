@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../core/theme/pico_colors.dart';
 import '../../core/theme/pico_typography.dart';
 
-enum PicoButtonVariant { primary, secondary, gold }
+enum PicoButtonVariant { primary, secondary, gold, blue, red, dark }
 
-/// A physical, tactile 3D push button with a mechanical extrusion bevel that
-/// translates downwards when pressed, matching the Stitch design system.
+/// A physical, tactile 3D game button with mechanical extrusion bevel,
+/// rich multi-stop gradients, glass rim highlight, and physical press feedback
+/// matching the Stitch confirmation modal style.
 class PicoButton extends StatefulWidget {
   const PicoButton({
     super.key,
@@ -13,10 +15,14 @@ class PicoButton extends StatefulWidget {
     required this.onPressed,
     this.variant = PicoButtonVariant.primary,
     this.icon,
+    this.child,
     this.isFullWidth = true,
-    this.height = 52.0,
+    this.height = 48.0,
     this.bevelHeight = 4.0,
-    this.borderRadius = 14.0,
+    this.borderRadius = 16.0,
+    this.fontSize,
+    this.isLoading = false,
+    this.textStyle,
   });
 
   const PicoButton.primary({
@@ -24,10 +30,14 @@ class PicoButton extends StatefulWidget {
     required this.text,
     required this.onPressed,
     this.icon,
+    this.child,
     this.isFullWidth = true,
-    this.height = 52.0,
+    this.height = 48.0,
     this.bevelHeight = 4.0,
-    this.borderRadius = 14.0,
+    this.borderRadius = 16.0,
+    this.fontSize,
+    this.isLoading = false,
+    this.textStyle,
   }) : variant = PicoButtonVariant.primary;
 
   const PicoButton.secondary({
@@ -35,10 +45,14 @@ class PicoButton extends StatefulWidget {
     required this.text,
     required this.onPressed,
     this.icon,
+    this.child,
     this.isFullWidth = true,
-    this.height = 52.0,
+    this.height = 48.0,
     this.bevelHeight = 4.0,
-    this.borderRadius = 14.0,
+    this.borderRadius = 16.0,
+    this.fontSize,
+    this.isLoading = false,
+    this.textStyle,
   }) : variant = PicoButtonVariant.secondary;
 
   const PicoButton.gold({
@@ -46,20 +60,73 @@ class PicoButton extends StatefulWidget {
     required this.text,
     required this.onPressed,
     this.icon,
+    this.child,
     this.isFullWidth = true,
-    this.height = 52.0,
+    this.height = 48.0,
     this.bevelHeight = 4.0,
-    this.borderRadius = 14.0,
+    this.borderRadius = 16.0,
+    this.fontSize,
+    this.isLoading = false,
+    this.textStyle,
   }) : variant = PicoButtonVariant.gold;
+
+  const PicoButton.blue({
+    super.key,
+    required this.text,
+    required this.onPressed,
+    this.icon,
+    this.child,
+    this.isFullWidth = true,
+    this.height = 48.0,
+    this.bevelHeight = 4.0,
+    this.borderRadius = 16.0,
+    this.fontSize,
+    this.isLoading = false,
+    this.textStyle,
+  }) : variant = PicoButtonVariant.blue;
+
+  const PicoButton.red({
+    super.key,
+    required this.text,
+    required this.onPressed,
+    this.icon,
+    this.child,
+    this.isFullWidth = true,
+    this.height = 48.0,
+    this.bevelHeight = 4.0,
+    this.borderRadius = 16.0,
+    this.fontSize,
+    this.isLoading = false,
+    this.textStyle,
+  }) : variant = PicoButtonVariant.red;
+
+  const PicoButton.dark({
+    super.key,
+    required this.text,
+    required this.onPressed,
+    this.icon,
+    this.child,
+    this.isFullWidth = true,
+    this.height = 48.0,
+    this.bevelHeight = 4.0,
+    this.borderRadius = 16.0,
+    this.fontSize,
+    this.isLoading = false,
+    this.textStyle,
+  }) : variant = PicoButtonVariant.dark;
 
   final String text;
   final VoidCallback? onPressed;
   final PicoButtonVariant variant;
   final Widget? icon;
+  final Widget? child;
   final bool isFullWidth;
   final double height;
   final double bevelHeight;
   final double borderRadius;
+  final double? fontSize;
+  final bool isLoading;
+  final TextStyle? textStyle;
 
   @override
   State<PicoButton> createState() => _PicoButtonState();
@@ -68,101 +135,192 @@ class PicoButton extends StatefulWidget {
 class _PicoButtonState extends State<PicoButton> {
   bool _isPressed = false;
 
-  Color get _surfaceColor {
-    switch (widget.variant) {
+  _ButtonColorTokens _getTokens(PicoButtonVariant variant) {
+    switch (variant) {
       case PicoButtonVariant.primary:
-        return PicoColors.primary;
-      case PicoButtonVariant.secondary:
-        return PicoColors.cardBevel;
+        return const _ButtonColorTokens(
+          gradientColors: [Color(0xFF22C55E), Color(0xFF16A34A), Color(0xFF15803D)],
+          bevelColor: Color(0xFF14532D),
+          shadowColor: Color(0xFF16A34A),
+          textColor: Colors.white,
+          borderColor: Color(0x66FFFFFF),
+        );
       case PicoButtonVariant.gold:
-        return PicoColors.gold;
-    }
-  }
-
-  Color get _bevelColor {
-    switch (widget.variant) {
-      case PicoButtonVariant.primary:
-        return PicoColors.primaryBevel;
+        return const _ButtonColorTokens(
+          gradientColors: [Color(0xFFFFEA75), Color(0xFFFFD41D), Color(0xFFFFB800)],
+          bevelColor: Color(0xFF9E6500),
+          shadowColor: Color(0x40FFD41D),
+          textColor: Color(0xFF261700),
+          borderColor: Color(0xFFFFF7C2),
+        );
       case PicoButtonVariant.secondary:
-        return PicoColors.cardBevelDark;
-      case PicoButtonVariant.gold:
-        return PicoColors.goldBevel;
-    }
-  }
-
-  Color get _textColor {
-    switch (widget.variant) {
-      case PicoButtonVariant.primary:
-        return PicoColors.textWhite;
-      case PicoButtonVariant.secondary:
-      case PicoButtonVariant.gold:
-        return PicoColors.textPitchInk;
+        return const _ButtonColorTokens(
+          gradientColors: [Color(0xFFFFFFFF), Color(0xFFF6F3EB), Color(0xFFEDE8DD)],
+          bevelColor: Color(0xFFD8D1C3),
+          shadowColor: Color(0x33000000),
+          textColor: Color(0xFF13211B),
+          borderColor: Color(0xFFFFFFFF),
+        );
+      case PicoButtonVariant.blue:
+        return const _ButtonColorTokens(
+          gradientColors: [Color(0xFF38BDF8), Color(0xFF0095FF), Color(0xFF006CE6)],
+          bevelColor: Color(0xFF004BA3),
+          shadowColor: Color(0xFF0095FF),
+          textColor: Colors.white,
+          borderColor: Color(0x66FFFFFF),
+        );
+      case PicoButtonVariant.red:
+        return const _ButtonColorTokens(
+          gradientColors: [Color(0xFFFF5757), Color(0xFFFF2B44), Color(0xFFE0112B)],
+          bevelColor: Color(0xFF9F071A),
+          shadowColor: Color(0xFFE0112B),
+          textColor: Colors.white,
+          borderColor: Color(0x66FFFFFF),
+        );
+      case PicoButtonVariant.dark:
+        return const _ButtonColorTokens(
+          gradientColors: [Color(0xFF233B2E), Color(0xFF162A1F), Color(0xFF0F1E16)],
+          bevelColor: Color(0xFF08120C),
+          shadowColor: Color(0x40000000),
+          textColor: Colors.white,
+          borderColor: Color(0x26FFFFFF),
+        );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isEnabled = widget.onPressed != null;
-    final double currentBevel = _isPressed && isEnabled ? 0.0 : widget.bevelHeight;
-    final double translationY = _isPressed && isEnabled ? widget.bevelHeight : 0.0;
+    final bool isEnabled = widget.onPressed != null && !widget.isLoading;
+    final tokens = _getTokens(widget.variant);
+    final double currentBevel = _isPressed && isEnabled ? widget.bevelHeight * 0.35 : widget.bevelHeight;
+    final double translationY = _isPressed && isEnabled ? widget.bevelHeight * 0.65 : 0.0;
 
-    return GestureDetector(
-      onTapDown: isEnabled ? (_) => setState(() => _isPressed = true) : null,
-      onTapUp: isEnabled
-          ? (_) {
-              setState(() => _isPressed = false);
-              widget.onPressed?.call();
-            }
-          : null,
-      onTapCancel: isEnabled ? () => setState(() => _isPressed = false) : null,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 60),
-        curve: Curves.easeInOut,
-        transform: Matrix4.translationValues(0.0, translationY, 0.0),
-        child: Container(
-          height: widget.height,
-          width: widget.isFullWidth ? double.infinity : null,
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          decoration: BoxDecoration(
-            color: isEnabled ? _surfaceColor : _surfaceColor.withValues(alpha: 0.4),
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-            boxShadow: [
-              if (currentBevel > 0.0 && isEnabled)
-                BoxShadow(
-                  color: _bevelColor,
-                  offset: Offset(0, currentBevel),
-                  blurRadius: 0,
-                  spreadRadius: 0,
-                ),
-            ],
+    return Semantics(
+      button: true,
+      enabled: isEnabled,
+      label: widget.text,
+      child: GestureDetector(
+        onTapDown: isEnabled
+            ? (_) {
+                HapticFeedback.lightImpact();
+                setState(() => _isPressed = true);
+              }
+            : null,
+        onTapUp: isEnabled
+            ? (_) {
+                setState(() => _isPressed = false);
+                widget.onPressed?.call();
+              }
+            : null,
+        onTapCancel: isEnabled ? () => setState(() => _isPressed = false) : null,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 60),
+          curve: Curves.easeInOut,
+          margin: EdgeInsets.only(
+            top: translationY,
+            bottom: isEnabled ? (widget.bevelHeight - translationY) : 0.0,
           ),
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisSize: widget.isFullWidth ? MainAxisSize.max : MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (widget.icon != null) ...[
-                widget.icon!,
-                const SizedBox(width: 8.0),
-              ],
-              Flexible(
-                child: Text(
-                  widget.text,
-                  style: PicoTypography.titleCard.copyWith(
-                    color: isEnabled ? _textColor : _textColor.withValues(alpha: 0.5),
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16.0,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
+          child: Container(
+            height: widget.height,
+            width: widget.isFullWidth ? double.infinity : null,
+            padding: const EdgeInsets.symmetric(horizontal: 18.0),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: isEnabled
+                    ? tokens.gradientColors
+                    : tokens.gradientColors
+                        .map((c) => c.withValues(alpha: 0.4))
+                        .toList(),
               ),
-            ],
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              border: Border.all(
+                color: isEnabled
+                    ? tokens.borderColor
+                    : tokens.borderColor.withValues(alpha: 0.2),
+                width: 1.0,
+              ),
+              boxShadow: [
+                if (currentBevel > 0.0 && isEnabled) ...[
+                  // Solid 3D Bevel Lip
+                  BoxShadow(
+                    color: tokens.bevelColor,
+                    offset: Offset(0, currentBevel),
+                    blurRadius: 0,
+                    spreadRadius: 0,
+                  ),
+                  // Ambient soft glow / drop shadow
+                  BoxShadow(
+                    color: tokens.shadowColor.withValues(alpha: _isPressed ? 0.20 : 0.35),
+                    offset: Offset(0, _isPressed ? 2.5 : currentBevel + 2.0),
+                    blurRadius: _isPressed ? 4.0 : 12.0,
+                    spreadRadius: 0,
+                  ),
+                ],
+              ],
+            ),
+            alignment: Alignment.center,
+            child: widget.isLoading
+                ? SizedBox(
+                    width: 20.0,
+                    height: 20.0,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.2,
+                      valueColor: AlwaysStoppedAnimation<Color>(tokens.textColor),
+                    ),
+                  )
+                : (widget.child ??
+                    Row(
+                      mainAxisSize: widget.isFullWidth ? MainAxisSize.max : MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (widget.icon != null) ...[
+                          widget.icon!,
+                          const SizedBox(width: 8.0),
+                        ],
+                        Flexible(
+                          child: Text(
+                            widget.text,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: widget.textStyle ??
+                                TextStyle(
+                                  fontFamily: 'Rubik',
+                                  fontSize: widget.fontSize ?? 15.0,
+                                  fontWeight: FontWeight.w800,
+                                  color: isEnabled
+                                      ? tokens.textColor
+                                      : tokens.textColor.withValues(alpha: 0.5),
+                                  letterSpacing: 0.2,
+                                ),
+                          ),
+                        ),
+                      ],
+                    )),
           ),
         ),
       ),
     );
   }
+}
+
+class _ButtonColorTokens {
+  const _ButtonColorTokens({
+    required this.gradientColors,
+    required this.bevelColor,
+    required this.shadowColor,
+    required this.textColor,
+    required this.borderColor,
+  });
+
+  final List<Color> gradientColors;
+  final Color bevelColor;
+  final Color shadowColor;
+  final Color textColor;
+  final Color borderColor;
 }
 
 /// A compact 3D tactile icon button used for back navigation and quick actions.

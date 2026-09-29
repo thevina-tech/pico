@@ -9,6 +9,7 @@ import 'package:pico/features/matches/domain/competition.dart';
 import 'package:pico/features/tournaments/data/tournament_repository.dart';
 import 'package:pico/features/tournaments/domain/private_league.dart';
 import 'package:pico/features/tournaments/presentation/private_league_controller.dart';
+import 'package:pico/shared/components/pico_button.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/services/revenuecat_ad_service.dart';
@@ -251,7 +252,11 @@ class _CreatePrivateLeagueScreenState
                       children: [
                         // Copy Code Button
                         Expanded(
-                          child: OutlinedButton.icon(
+                          child: PicoButton.dark(
+                            text: l10n.copyCodeButton,
+                            icon: const Icon(Icons.copy_rounded, size: 18.0, color: Colors.white),
+                            height: 48.0,
+                            borderRadius: 14.0,
                             onPressed: () {
                               Clipboard.setData(ClipboardData(text: league.inviteCode));
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -262,44 +267,21 @@ class _CreatePrivateLeagueScreenState
                                 ),
                               );
                             },
-                            icon: const Icon(Icons.copy_rounded, size: 18.0),
-                            label: Text(l10n.copyCodeButton),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: PicoColors.textWhite,
-                              side: const BorderSide(color: Color(0x33FFFFFF)),
-                              padding: const EdgeInsets.symmetric(vertical: 14.0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14.0),
-                              ),
-                            ),
                           ),
                         ),
                         const SizedBox(width: 12.0),
                         // Done Button
                         Expanded(
-                          child: ElevatedButton(
+                          child: PicoButton.gold(
+                            text: l10n.doneButton,
+                            height: 48.0,
+                            borderRadius: 14.0,
                             onPressed: () {
                               Navigator.of(ctx).pop();
                               if (Navigator.of(context).canPop()) {
                                 Navigator.of(context).pop();
                               }
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: PicoColors.gold,
-                              foregroundColor: const Color(0xFF261A00),
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(vertical: 14.0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14.0),
-                              ),
-                            ),
-                            child: Text(
-                              l10n.doneButton,
-                              style: PicoTypography.titleCard.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: const Color(0xFF261A00),
-                              ),
-                            ),
                           ),
                         ),
                       ],

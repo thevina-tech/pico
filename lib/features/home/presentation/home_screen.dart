@@ -28,13 +28,13 @@ import 'package:pico/widgets/ads/banner_ad_widget.dart';
 /// 3. How to Play section:
 ///    - Gamified 3-step walkthrough (Choose a match -> Make your prediction -> Earn points).
 /// 4. Bottom navigation bar:
-///    - Preserved [PicoBottomNavBar] integration with 5 game tabs.
+///    - Preserved [PicoBottomNavBar] integration with 4 game tabs.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({
     super.key,
     this.heroMatch,
     this.showBottomNavBar = true,
-    this.currentNavIndex = 2,
+    this.currentNavIndex = 1,
     this.onNavTap,
     this.onNavigateShop,
     this.onNavigateMatches,
@@ -75,14 +75,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.currentNavIndex != widget.currentNavIndex) {
       _currentNavIndex = widget.currentNavIndex;
-    }
-  }
-
-  void _navigateToShop() {
-    if (widget.onNavigateShop != null) {
-      widget.onNavigateShop!();
-    } else {
-      context.go('/shop');
     }
   }
 
@@ -210,18 +202,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               widget.onNavTap?.call(idx);
                               switch (idx) {
                                 case 0:
-                                  _navigateToShop();
-                                  break;
-                                case 1:
                                   _navigateToMatches();
                                   break;
-                                case 2:
+                                case 1:
                                   // Already Home
                                   break;
-                                case 3:
+                                case 2:
                                   _navigateToTournaments();
                                   break;
-                                case 4:
+                                case 3:
                                   _navigateToProfile();
                                   break;
                               }
@@ -285,7 +274,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildTopBar(BuildContext context, UserProfile profile) {
     final l10n = AppLocalizations.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16.0, 2.0, 16.0, 4.0),
+      padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 10.0),
       child: Row(
         children: [
           // Left: User Profile Pill (55% of available width)
@@ -294,7 +283,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: _buildProfilePill(profile),
           ),
 
-          const SizedBox(width: 10.0),
+          const SizedBox(width: 12.0),
 
           // Right: Division Pill (45% of available width)
           Expanded(
@@ -491,7 +480,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         : null;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 10.0),
+      padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 10.0),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(22.0),

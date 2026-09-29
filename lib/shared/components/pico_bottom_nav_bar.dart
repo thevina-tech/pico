@@ -3,19 +3,18 @@ import 'package:flutter/services.dart';
 import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
-/// Navigation destinations in the order specified by the Stitch "Friendly Football World" navbar:
-/// 1. Shop (far left)
-/// 2. Matches
-/// 3. Home (centered)
-/// 4. Tournaments
-/// 5. Profile (far right)
-enum PicoNavDestination { shop, matches, home, tournaments, profile }
+/// Navigation destinations in the order requested:
+/// 1. Matches
+/// 2. Home
+/// 3. Tournaments
+/// 4. Profile
+enum PicoNavDestination { matches, home, tournaments, profile }
 
-/// The docked bottom navigation bar directly matching the Stitch navbar example.
+/// The docked bottom navigation bar directly matching the Stitch navbar style.
 ///
 /// Features:
-/// - 5 destinations: Shop (far left), Matches, Home (center), Tournaments, Profile (far right).
-/// - 3D illustrated icons directly from Stitch with tactile state changes.
+/// - 4 destinations: Matches, Home, Tournaments, Profile.
+/// - 3D illustrated icons directly with tactile state changes.
 /// - Tactile Warm Game Gold pill indicator (`#FCCB2B`) beneath the active tab label.
 /// - Dark stadium pitch surface with elevated shadow and crisp edge border.
 class PicoBottomNavBar extends StatelessWidget {
@@ -35,34 +34,27 @@ class PicoBottomNavBar extends StatelessWidget {
     final List<_NavItemData> navItems = [
       _NavItemData(
         index: 0,
-        label: l10n?.navShop ?? 'Shop',
-        assetPath: 'assets/images/nav_shop.png',
-        fallbackIcon: Icons.storefront_rounded,
-        keyName: 'nav_shop',
-      ),
-      _NavItemData(
-        index: 1,
         label: l10n?.navMatches ?? 'Matches',
         assetPath: 'assets/images/nav_matches.png',
         fallbackIcon: Icons.event_note_rounded,
         keyName: 'nav_matches',
       ),
       _NavItemData(
-        index: 2,
+        index: 1,
         label: l10n?.navHome ?? 'Home',
         assetPath: 'assets/images/nav_home.png',
         fallbackIcon: Icons.sports_soccer_rounded,
         keyName: 'nav_home',
       ),
       _NavItemData(
-        index: 3,
+        index: 2,
         label: l10n?.navTournaments ?? 'Tournaments',
         assetPath: 'assets/images/nav_tournaments.png',
         fallbackIcon: Icons.emoji_events_rounded,
         keyName: 'nav_tournaments',
       ),
       _NavItemData(
-        index: 4,
+        index: 3,
         label: l10n?.navProfile ?? 'Profile',
         assetPath: 'assets/images/nav_profile.png',
         fallbackIcon: Icons.person_rounded,

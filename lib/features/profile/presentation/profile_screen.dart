@@ -11,14 +11,14 @@ import 'package:pico/features/profile/presentation/widgets/division_ladder_sheet
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/division_badge.dart';
 import 'package:pico/shared/components/game_exit_dialog.dart';
+import 'package:pico/shared/components/pico_button.dart';
+import 'package:pico/features/profile/presentation/help_support_screen.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// The official Profile screen displaying user stats, streak, level, XP progress,
-/// tournaments banner, following & history hubs, achievements showcase,
-/// quick actions (Settings & Help), and a tactile Share Matchday Card button.
-///
-/// Faithfully reproduces Stitch screen `aac8792902f14a659466c52c586d920d`
-/// (Dark Stadium Gamer Hub).
+/// tournaments banner, following & history hubs, quick actions (Rate App & Help),
+/// and a tactile Share Matchday Card button.
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
@@ -27,9 +27,6 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
-  // Local preferences for settings sheet
-  bool _pushNotifications = true;
-  bool _matchdayHaptics = true;
 
   @override
   Widget build(BuildContext context) {
@@ -71,17 +68,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ),
                           ),
                           const SizedBox(height: 16.0),
-                          ElevatedButton(
+                          PicoButton.primary(
+                            text: l10n?.retryButton ?? 'Retry',
+                            isFullWidth: false,
+                            height: 42.0,
+                            borderRadius: 12.0,
                             onPressed: () {
                               ref
                                   .read(currentUserProfileProvider.notifier)
                                   .refresh();
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF10B981),
-                              foregroundColor: PicoColors.textWhite,
-                            ),
-                            child: Text(l10n?.retryButton ?? 'Retry'),
                           ),
                         ],
                       ),
@@ -117,12 +113,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         _buildHubPairedCards(profile, l10n),
                         const SizedBox(height: 16.0),
 
-                        // 5. Achievements Showcase (4 Hexagon Badges)
-                        _buildAchievementsSection(profile, l10n),
+                        // 5. Quick Actions (Rate App & Help/Support)
+                        _buildQuickActionsSection(profile, l10n),
                         const SizedBox(height: 16.0),
 
-                        // 6. Quick Actions (Settings & Help/Support)
-                        _buildQuickActionsSection(profile, l10n),
+                        // 6. Sign Out Action
+                        _buildSignOutSection(l10n),
                         const SizedBox(height: 20.0),
 
                         // 7. Tactile Gold Share Button
@@ -221,43 +217,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ),
                           ),
                         ],
-                      ),
-                    ),
-                  ),
-
-                  // Small Settings Gear Button Pip on Avatar
-                  Positioned(
-                    top: -4.0,
-                    right: -4.0,
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () => _showSettingsModal(context, profile, l10n),
-                        borderRadius: BorderRadius.circular(12.0),
-                        child: Container(
-                          width: 22.0,
-                          height: 22.0,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0A2C20),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: const Color(0x8034D399),
-                              width: 1.0,
-                            ),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0xFF020B06),
-                                offset: Offset(0, 2),
-                                blurRadius: 0,
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.settings_rounded,
-                            size: 13.0,
-                            color: Color(0xFF6EE7B7),
-                          ),
-                        ),
                       ),
                     ),
                   ),
@@ -880,155 +839,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // 5. ACHIEVEMENTS SECTION (4 HEXAGON BADGES)
-  // ---------------------------------------------------------------------------
-  Widget _buildAchievementsSection(UserProfile profile, AppLocalizations? l10n) {
-    final title = l10n?.achievementsTitle ?? 'Achievements';
-    final seeAllLabel = l10n?.seeAll ?? 'See all';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: PicoTypography.headlineMd.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-                fontSize: 15.0,
-              ),
-            ),
-            TextButton(
-              onPressed: () => _showAchievementsModal(context, profile, l10n),
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(
-                seeAllLabel,
-                style: PicoTypography.bodySm.copyWith(
-                  color: const Color(0xFF34D399),
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12.0,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10.0),
-
-        Row(
-          children: [
-            // Badge 1: On Fire
-            Expanded(
-              child: _HexagonBadgeCard(
-                onTap: () => _showAchievementsModal(context, profile, l10n),
-                borderGradient: const [
-                  Color(0x80FBBF24),
-                  Color(0x66F97316),
-                ],
-                innerColor: const Color(0xFF161F14),
-                title: l10n?.achievementOnFireTitle ?? 'On Fire',
-                subtitle: l10n?.achievementOnFireDesc(
-                      profile.streak > 0 ? profile.streak : 4,
-                    ) ??
-                    '${profile.streak > 0 ? profile.streak : 4} streak',
-                child: const Text(
-                  '🔥',
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    shadows: [
-                      Shadow(
-                        color: Color(0x99F97316),
-                        blurRadius: 6.0,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8.0),
-
-            // Badge 2: Sharpshooter
-            Expanded(
-              child: _HexagonBadgeCard(
-                onTap: () => _showAchievementsModal(context, profile, l10n),
-                borderGradient: const [
-                  Color(0x8038BDF8),
-                  Color(0x6606B6D4),
-                ],
-                innerColor: const Color(0xFF0A1F26),
-                title: l10n?.achievementSharpshooterTitle ?? 'Sharpshooter',
-                subtitle:
-                    l10n?.achievementSharpshooterDesc(70) ?? '70% hit rate',
-                child: const Icon(
-                  Icons.track_changes_rounded,
-                  color: Color(0xFF22D3EE),
-                  size: 20.0,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8.0),
-
-            // Badge 3: Podium
-            Expanded(
-              child: _HexagonBadgeCard(
-                onTap: () => _showAchievementsModal(context, profile, l10n),
-                borderGradient: const [
-                  Color(0x80FDE047),
-                  Color(0x66CA8A04),
-                ],
-                innerColor: const Color(0xFF1B1C10),
-                title: l10n?.achievementPodiumTitle ?? 'Podium',
-                subtitle: l10n?.achievementPodiumDesc(3) ?? '3 podiums',
-                child: const Icon(
-                  Icons.emoji_events_rounded,
-                  color: Color(0xFFFBBF24),
-                  size: 20.0,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8.0),
-
-            // Badge 4: 10 Streak (Locked)
-            Expanded(
-              child: _HexagonBadgeCard(
-                onTap: () => _showAchievementsModal(context, profile, l10n),
-                borderGradient: const [
-                  Color(0x4D64748B),
-                  Color(0x33475569),
-                ],
-                innerColor: const Color(0xFF111915),
-                isLocked: true,
-                title: l10n?.achievementStreak10Title ?? '10 Streak',
-                subtitle: l10n?.achievementLockedLabel ?? 'Locked',
-                child: const Icon(
-                  Icons.lock_rounded,
-                  color: Color(0xFF94A3B8),
-                  size: 19.0,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // ---------------------------------------------------------------------------
-  // 6. QUICK ACTIONS SECTION (SETTINGS & HELP)
+  // 5. QUICK ACTIONS SECTION (RATE APP & HELP/SUPPORT)
   // ---------------------------------------------------------------------------
   Widget _buildQuickActionsSection(UserProfile profile, AppLocalizations? l10n) {
     return Column(
       children: [
-        // Action 1: Settings
+        // Action 1: Rate App
         _TactileCard(
-          key: const Key('profile_settings_action'),
-          onTap: () => _showSettingsModal(context, profile, l10n),
+          key: const Key('profile_rate_app_action'),
+          onTap: _handleRateApp,
           padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
           child: Row(
             children: [
@@ -1036,17 +855,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 width: 38.0,
                 height: 38.0,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
+                  color: const Color(0x26F59E0B),
                   borderRadius: BorderRadius.circular(10.0),
                   border: Border.all(
-                    color: const Color(0xFF334155),
+                    color: const Color(0x4DF59E0B),
                     width: 1.0,
                   ),
                 ),
                 child: const Icon(
-                  Icons.settings_rounded,
-                  color: Color(0xFFCBD5E1),
-                  size: 20.0,
+                  Icons.star_rounded,
+                  color: Color(0xFFFBBF24),
+                  size: 22.0,
                 ),
               ),
               const SizedBox(width: 12.0),
@@ -1055,7 +874,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      l10n?.settingsAccordionTitle ?? 'Settings',
+                      'Rate App',
                       style: PicoTypography.headlineMd.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,
@@ -1064,8 +883,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     const SizedBox(height: 2.0),
                     Text(
-                      l10n?.settingsAccordionSubtitle ??
-                          'Preferences, sound & notifications',
+                      'Enjoying Pico? Leave us a review on the store',
                       style: PicoTypography.bodySm.copyWith(
                         color: const Color(0xFFCBD5E1),
                         fontSize: 11.0,
@@ -1084,10 +902,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         const SizedBox(height: 10.0),
 
-        // Action 2: Help & Support
+        // Action 2: Help & Support (Navigates to HelpSupportScreen)
         _TactileCard(
           key: const Key('profile_help_action'),
-          onTap: () => _showHelpAndSupportModal(context, l10n),
+          onTap: () {
+            HapticFeedback.lightImpact();
+            try {
+              context.push('/help-support');
+            } catch (_) {
+              Navigator.of(context, rootNavigator: true).push(
+                MaterialPageRoute(
+                  builder: (_) => const HelpSupportScreen(),
+                ),
+              );
+            }
+          },
           padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
           child: Row(
             children: [
@@ -1146,6 +975,62 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   // ---------------------------------------------------------------------------
+  // 6. SIGN OUT BUTTON (TACTILE RED)
+  // ---------------------------------------------------------------------------
+  Widget _buildSignOutSection(AppLocalizations? l10n) {
+    return PicoButton.red(
+      key: const Key('profile_sign_out_button'),
+      text: l10n?.signOutButton ?? 'Sign Out',
+      icon: const Icon(Icons.logout_rounded, size: 18.0, color: Colors.white),
+      height: 48.0,
+      borderRadius: 14.0,
+      onPressed: () async {
+        await ref.read(authProvider.notifier).signOut();
+      },
+    );
+  }
+
+  Future<void> _handleRateApp() async {
+    HapticFeedback.lightImpact();
+    // Hardcoded external store link for testing purposes right now.
+    // REMINDER: Change this to the official Pico package name before launch!
+    const String storeUrl =
+        'https://play.google.com/store/apps/details?id=com.devdaumienebi.yonunca';
+
+    final uri = Uri.parse(storeUrl);
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Color(0xFF0F2B20),
+            content: Text(
+              'Could not open store link.',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('[ProfileScreen] Store link launch error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Color(0xFF0F2B20),
+            content: Text(
+              'Could not open store link.',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // 7. SHARE BUTTON (TACTILE GOLD)
   // ---------------------------------------------------------------------------
   Widget _buildShareButton(UserProfile profile, AppLocalizations? l10n) {
@@ -1186,307 +1071,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   // ---------------------------------------------------------------------------
   // MODALS & BOTTOM SHEETS
   // ---------------------------------------------------------------------------
-
-  /// Settings bottom sheet
-  void _showSettingsModal(
-    BuildContext context,
-    UserProfile profile,
-    AppLocalizations? l10n,
-  ) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (sheetContext) {
-        return StatefulBuilder(
-          builder: (modalContext, setModalState) {
-            return Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFF091F17),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
-                border: Border.fromBorderSide(
-                  BorderSide(color: Color(0x3310B981), width: 1.0),
-                ),
-              ),
-              padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 32.0),
-              child: Material(
-                color: Colors.transparent,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                  Center(
-                    child: Container(
-                      width: 40.0,
-                      height: 4.0,
-                      decoration: BoxDecoration(
-                        color: Colors.white24,
-                        borderRadius: BorderRadius.circular(2.0),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16.0),
-
-                  Text(
-                    l10n?.settingsAccordionTitle ?? 'Settings',
-                    style: PicoTypography.headlineMd.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 18.0,
-                    ),
-                  ),
-                  const SizedBox(height: 4.0),
-                  Text(
-                    profile.email ?? profile.username ?? 'Account Settings',
-                    style: PicoTypography.bodySm.copyWith(
-                      color: const Color(0xFF6EE7B7),
-                      fontSize: 12.0,
-                    ),
-                  ),
-                  const SizedBox(height: 20.0),
-
-                  // Push Notifications toggle
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    activeThumbColor: const Color(0xFF34D399),
-                    activeTrackColor: const Color(0xFF065F46),
-                    inactiveThumbColor: const Color(0xFF94A3B8),
-                    inactiveTrackColor: const Color(0xFF1E293B),
-                    title: Text(
-                      l10n?.pushNotificationsTitle ?? 'Push Notifications',
-                      style: PicoTypography.bodyMd.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    subtitle: Text(
-                      'Match kickoff & score alerts',
-                      style: PicoTypography.bodySm.copyWith(
-                        color: const Color(0xFF94A3B8),
-                        fontSize: 11.0,
-                      ),
-                    ),
-                    value: _pushNotifications,
-                    onChanged: (val) {
-                      setModalState(() => _pushNotifications = val);
-                      setState(() => _pushNotifications = val);
-                    },
-                  ),
-
-                  // Matchday Haptics toggle
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    activeThumbColor: const Color(0xFF34D399),
-                    activeTrackColor: const Color(0xFF065F46),
-                    inactiveThumbColor: const Color(0xFF94A3B8),
-                    inactiveTrackColor: const Color(0xFF1E293B),
-                    title: Text(
-                      l10n?.matchdayHapticsTitle ?? 'Matchday Haptics',
-                      style: PicoTypography.bodyMd.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    subtitle: Text(
-                      'Tactile vibrations on predictions & locks',
-                      style: PicoTypography.bodySm.copyWith(
-                        color: const Color(0xFF94A3B8),
-                        fontSize: 11.0,
-                      ),
-                    ),
-                    value: _matchdayHaptics,
-                    onChanged: (val) {
-                      setModalState(() => _matchdayHaptics = val);
-                      setState(() => _matchdayHaptics = val);
-                    },
-                  ),
-                  const SizedBox(height: 20.0),
-
-                  // Sign Out Button
-                  ElevatedButton.icon(
-                    key: const Key('profile_sign_out_button'),
-                    onPressed: () async {
-                      Navigator.of(sheetContext).pop();
-                      await ref.read(authProvider.notifier).signOut();
-                    },
-                    icon: const Icon(Icons.logout_rounded, size: 18.0),
-                    label: Text(
-                      l10n?.signOutButton ?? 'Sign Out',
-                      style: PicoTypography.headlineMd.copyWith(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 14.0,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7F1D1D),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14.0),
-                      ),
-                    ),
-                  ),
-                ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  /// Help & Support / Rules modal
-  void _showHelpAndSupportModal(BuildContext context, AppLocalizations? l10n) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (sheetContext) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF091F17),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
-            border: Border.fromBorderSide(
-              BorderSide(color: Color(0x3310B981), width: 1.0),
-            ),
-          ),
-          padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 32.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 40.0,
-                  height: 4.0,
-                  decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius: BorderRadius.circular(2.0),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16.0),
-
-              Text(
-                l10n?.picoRulesTitle ?? 'Game Rules & Scoring',
-                style: PicoTypography.headlineMd.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 18.0,
-                ),
-              ),
-              const SizedBox(height: 4.0),
-              Text(
-                l10n?.picoRulesSubtitle ??
-                    'Fair play, server-side locks & transparent scoring',
-                style: PicoTypography.bodySm.copyWith(
-                  color: const Color(0xFF94A3B8),
-                  fontSize: 12.0,
-                ),
-              ),
-              const SizedBox(height: 20.0),
-
-              // Rule 1: Scoring breakdown
-              _buildRuleTile(
-                icon: Icons.sports_score_rounded,
-                title: 'Scoring Pico Points',
-                description:
-                    '• Exact score: +5 Total Points\n• Correct winner or draw: +3 Points\n• Incorrect call: 0 Points',
-              ),
-              const SizedBox(height: 12.0),
-
-              // Rule 2: Server-side Lock
-              _buildRuleTile(
-                icon: Icons.timer_outlined,
-                title: 'Prediction Lock Window',
-                description:
-                    'Predictions lock exactly 10 minutes before scheduled kickoff. No edits are allowed after lock.',
-              ),
-              const SizedBox(height: 12.0),
-
-              // Rule 3: XP & Progression
-              _buildRuleTile(
-                icon: Icons.bolt_rounded,
-                title: 'XP Progression',
-                description:
-                    '+10 XP per prediction submitted, +5 XP per match finished, +5 XP for winner, +10 XP for exact score (+30 XP total).',
-              ),
-              const SizedBox(height: 20.0),
-
-              ElevatedButton(
-                onPressed: () => Navigator.of(sheetContext).pop(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF10B981),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.0),
-                  ),
-                ),
-                child: Text(
-                  l10n?.doneButton ?? 'Done',
-                  style: PicoTypography.headlineMd.copyWith(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14.0,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildRuleTile({
-    required IconData icon,
-    required String title,
-    required String description,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0E271F),
-        borderRadius: BorderRadius.circular(14.0),
-        border: Border.all(
-          color: const Color(0x3310B981),
-          width: 1.0,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: const Color(0xFF34D399), size: 22.0),
-          const SizedBox(width: 10.0),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: PicoTypography.bodyMd.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 13.0,
-                  ),
-                ),
-                const SizedBox(height: 4.0),
-                Text(
-                  description,
-                  style: PicoTypography.bodySm.copyWith(
-                    color: const Color(0xFFCBD5E1),
-                    fontSize: 11.5,
-                    height: 1.35,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   /// History modal
   void _showHistoryModal(
@@ -1571,23 +1155,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               const SizedBox(height: 20.0),
 
-              ElevatedButton(
+              PicoButton.primary(
+                text: l10n?.doneButton ?? 'Done',
+                height: 48.0,
+                borderRadius: 14.0,
                 onPressed: () => Navigator.of(sheetContext).pop(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF10B981),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.0),
-                  ),
-                ),
-                child: Text(
-                  l10n?.doneButton ?? 'Done',
-                  style: PicoTypography.headlineMd.copyWith(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14.0,
-                  ),
-                ),
               ),
             ],
           ),
@@ -1613,175 +1185,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           fontWeight: FontWeight.w900,
           fontSize: 11.0,
         ),
-      ),
-    );
-  }
-
-  /// Achievements modal
-  void _showAchievementsModal(
-    BuildContext context,
-    UserProfile profile,
-    AppLocalizations? l10n,
-  ) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (sheetContext) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF091F17),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
-            border: Border.fromBorderSide(
-              BorderSide(color: Color(0x3310B981), width: 1.0),
-            ),
-          ),
-          padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 32.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 40.0,
-                  height: 4.0,
-                  decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius: BorderRadius.circular(2.0),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16.0),
-
-              Text(
-                l10n?.achievementsTitle ?? 'Achievements',
-                style: PicoTypography.headlineMd.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 18.0,
-                ),
-              ),
-              const SizedBox(height: 16.0),
-
-              _buildAchievementDetailRow(
-                iconEmoji: '🔥',
-                title: 'On Fire',
-                subtitle: 'Achieve a 4-match winning streak',
-                unlocked: true,
-              ),
-              const SizedBox(height: 10.0),
-              _buildAchievementDetailRow(
-                iconData: Icons.track_changes_rounded,
-                iconColor: const Color(0xFF22D3EE),
-                title: 'Sharpshooter',
-                subtitle: 'Maintain a 70% or higher hit rate',
-                unlocked: true,
-              ),
-              const SizedBox(height: 10.0),
-              _buildAchievementDetailRow(
-                iconData: Icons.emoji_events_rounded,
-                iconColor: const Color(0xFFFBBF24),
-                title: 'Podium Finisher',
-                subtitle: 'Finish in the top 3 in 3 tournaments',
-                unlocked: true,
-              ),
-              const SizedBox(height: 10.0),
-              _buildAchievementDetailRow(
-                iconData: Icons.lock_rounded,
-                iconColor: const Color(0xFF94A3B8),
-                title: '10 Streak Champion',
-                subtitle: 'Reach a streak of 10 correct calls',
-                unlocked: false,
-              ),
-              const SizedBox(height: 20.0),
-
-              ElevatedButton(
-                onPressed: () => Navigator.of(sheetContext).pop(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF10B981),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.0),
-                  ),
-                ),
-                child: Text(
-                  l10n?.doneButton ?? 'Done',
-                  style: PicoTypography.headlineMd.copyWith(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14.0,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildAchievementDetailRow({
-    String? iconEmoji,
-    IconData? iconData,
-    Color? iconColor,
-    required String title,
-    required String subtitle,
-    required bool unlocked,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0E271F),
-        borderRadius: BorderRadius.circular(14.0),
-        border: Border.all(
-          color: unlocked ? const Color(0x3310B981) : const Color(0x2664748B),
-          width: 1.0,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40.0,
-            height: 40.0,
-            decoration: BoxDecoration(
-              color: unlocked ? const Color(0x2610B981) : const Color(0x1A64748B),
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            alignment: Alignment.center,
-            child: iconEmoji != null
-                ? Text(iconEmoji, style: const TextStyle(fontSize: 20.0))
-                : Icon(iconData, color: iconColor, size: 22.0),
-          ),
-          const SizedBox(width: 12.0),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: PicoTypography.bodyMd.copyWith(
-                    color: unlocked ? Colors.white : const Color(0xFF94A3B8),
-                    fontWeight: FontWeight.w800,
-                    fontSize: 13.0,
-                  ),
-                ),
-                const SizedBox(height: 2.0),
-                Text(
-                  subtitle,
-                  style: PicoTypography.bodySm.copyWith(
-                    color: const Color(0xFFCBD5E1),
-                    fontSize: 11.0,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Icon(
-            unlocked ? Icons.check_circle_rounded : Icons.lock_outline_rounded,
-            color: unlocked ? const Color(0xFF10B981) : const Color(0xFF64748B),
-            size: 20.0,
-          ),
-        ],
       ),
     );
   }
@@ -1921,44 +1324,29 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               const SizedBox(height: 20.0),
 
               // Action Button: Copy Summary
-              SizedBox(
-                width: double.infinity,
+              PicoButton.gold(
+                key: const Key('copy_card_summary_button'),
+                text: l10n?.copyProfileSummary ?? 'Copy Card Summary',
+                icon: const Icon(Icons.copy_rounded, size: 18.0, color: Color(0xFF261700)),
                 height: 48.0,
-                child: ElevatedButton.icon(
-                  key: const Key('copy_card_summary_button'),
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: cardSummary));
-                    Navigator.of(sheetContext).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          l10n?.profileSummaryCopied ??
-                              'Profile summary copied to clipboard!',
-                        ),
-                        backgroundColor: const Color(0xFF10B981),
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
+                borderRadius: 14.0,
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: cardSummary));
+                  Navigator.of(sheetContext).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        l10n?.profileSummaryCopied ??
+                            'Profile summary copied to clipboard!',
                       ),
-                    );
-                  },
-                  icon: const Icon(Icons.copy_rounded, size: 18.0),
-                  label: Text(
-                    l10n?.copyProfileSummary ?? 'Copy Card Summary',
-                    style: PicoTypography.headlineMd.copyWith(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14.0,
+                      backgroundColor: PicoColors.primary,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
                     ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF10B981),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.0),
-                    ),
-                  ),
-                ),
+                  );
+                },
               ),
             ],
           ),
@@ -2083,115 +1471,4 @@ class _TactileButtonState extends State<_TactileButton> {
       ),
     );
   }
-}
-
-/// Hexagon badge card matching the Stitch design
-class _HexagonBadgeCard extends StatelessWidget {
-  const _HexagonBadgeCard({
-    required this.child,
-    required this.title,
-    required this.subtitle,
-    required this.borderGradient,
-    required this.innerColor,
-    this.isLocked = false,
-    this.onTap,
-  });
-
-  final Widget child;
-  final String title;
-  final String subtitle;
-  final List<Color> borderGradient;
-  final Color innerColor;
-  final bool isLocked;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return _TactileCard(
-      onTap: onTap,
-      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 4.0),
-      child: Opacity(
-        opacity: isLocked ? 0.75 : 1.0,
-        child: Column(
-          children: [
-            // Hexagon icon wrapper
-            SizedBox(
-              width: 44.0,
-              height: 44.0,
-              child: ClipPath(
-                clipper: const _HexagonClipper(),
-                child: Container(
-                  padding: const EdgeInsets.all(2.0),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: borderGradient,
-                    ),
-                  ),
-                  child: ClipPath(
-                    clipper: const _HexagonClipper(),
-                    child: Container(
-                      color: innerColor,
-                      alignment: Alignment.center,
-                      child: child,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 6.0),
-            Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: PicoTypography.labelPillSm.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-                fontSize: 10.5,
-              ),
-            ),
-            const SizedBox(height: 1.5),
-            Text(
-              subtitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: PicoTypography.bodySm.copyWith(
-                color: isLocked
-                    ? const Color(0xFF64748B)
-                    : const Color(0xFF94A3B8),
-                fontSize: 9.0,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Hexagon polygon clipper matching:
-/// clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
-class _HexagonClipper extends CustomClipper<Path> {
-  const _HexagonClipper();
-
-  @override
-  Path getClip(Size size) {
-    final w = size.width;
-    final h = size.height;
-    return Path()
-      ..moveTo(w * 0.50, 0.0)
-      ..lineTo(w * 0.93, h * 0.25)
-      ..lineTo(w * 0.93, h * 0.75)
-      ..lineTo(w * 0.50, h * 1.00)
-      ..lineTo(w * 0.07, h * 0.75)
-      ..lineTo(w * 0.07, h * 0.25)
-      ..close();
-  }
-
-  @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }

@@ -53,6 +53,14 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: PicoAppBar(
+            showBackButton: true,
+            onBackPressed: () {
+              if (Navigator.of(context).canPop()) {
+                context.pop();
+              } else {
+                context.go('/matches');
+              }
+            },
             onProfileTap: () => context.go('/profile'),
           ),
           bottomNavigationBar: widget.showBottomNavBar
@@ -67,17 +75,15 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                         widget.onNavTap?.call(idx);
                         switch (idx) {
                           case 0:
-                            break;
-                          case 1:
                             context.go('/matches');
                             break;
-                          case 2:
+                          case 1:
                             context.go('/home');
                             break;
-                          case 3:
+                          case 2:
                             context.go('/tournaments');
                             break;
-                          case 4:
+                          case 3:
                             context.go('/profile');
                             break;
                         }

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:pico/shared/components/pico_button.dart';
 
 /// Style variants for 3D tactile buttons inside [PicoConfirmationModal].
 enum PicoDialogButtonStyle {
@@ -298,7 +299,7 @@ class _PicoWordmarkLogo extends StatelessWidget {
 }
 
 /// 3D tactile button with mechanical press feedback and thick bottom bevel.
-class _TactileModalButton extends StatefulWidget {
+class _TactileModalButton extends StatelessWidget {
   const _TactileModalButton({
     super.key,
     required this.label,
@@ -311,127 +312,34 @@ class _TactileModalButton extends StatefulWidget {
   final VoidCallback onPressed;
 
   @override
-  State<_TactileModalButton> createState() => _TactileModalButtonState();
-}
-
-class _TactileModalButtonState extends State<_TactileModalButton> {
-  bool _isPressed = false;
-
-  @override
   Widget build(BuildContext context) {
-    final colors = _getColors(widget.style);
-
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
-      onTapUp: (_) {
-        setState(() => _isPressed = false);
-        widget.onPressed();
-      },
-      onTapCancel: () => setState(() => _isPressed = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 60),
-        height: 48.0,
-        margin: EdgeInsets.only(
-          top: _isPressed ? 3.0 : 0.0,
-          bottom: _isPressed ? 0.0 : 3.0,
-        ),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: colors.gradientColors,
-          ),
-          borderRadius: BorderRadius.circular(18.0),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.35),
-            width: 1.0,
-          ),
-          boxShadow: [
-            // Solid 3D Bevel Lip
-            BoxShadow(
-              color: colors.bevelColor,
-              offset: Offset(0, _isPressed ? 1.5 : 4.0),
-              blurRadius: 0,
-            ),
-            // Ambient soft glow/drop shadow
-            BoxShadow(
-              color: colors.shadowColor.withValues(alpha: _isPressed ? 0.20 : 0.35),
-              offset: Offset(0, _isPressed ? 2.5 : 6.0),
-              blurRadius: _isPressed ? 4.0 : 12.0,
-            ),
-          ],
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          widget.label,
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontFamily: 'Rubik',
-            fontSize: 15.0,
-            fontWeight: FontWeight.w800,
-            color: colors.textColor,
-            letterSpacing: 0.2,
-          ),
-        ),
-      ),
-    );
-  }
-
-  _ButtonColorConfig _getColors(PicoDialogButtonStyle style) {
+    PicoButtonVariant variant;
     switch (style) {
       case PicoDialogButtonStyle.red:
-        return const _ButtonColorConfig(
-          gradientColors: [Color(0xFFFF5757), Color(0xFFFF2B44), Color(0xFFE0112B)],
-          bevelColor: Color(0xFF9F071A),
-          shadowColor: Color(0xFFE0112B),
-          textColor: Colors.white,
-        );
+        variant = PicoButtonVariant.red;
+        break;
       case PicoDialogButtonStyle.blue:
-        return const _ButtonColorConfig(
-          gradientColors: [Color(0xFF38BDF8), Color(0xFF0095FF), Color(0xFF006CE6)],
-          bevelColor: Color(0xFF004BA3),
-          shadowColor: Color(0xFF0095FF),
-          textColor: Colors.white,
-        );
+        variant = PicoButtonVariant.blue;
+        break;
       case PicoDialogButtonStyle.green:
-        return const _ButtonColorConfig(
-          gradientColors: [Color(0xFF22C55E), Color(0xFF16A34A), Color(0xFF15803D)],
-          bevelColor: Color(0xFF14532D),
-          shadowColor: Color(0xFF16A34A),
-          textColor: Colors.white,
-        );
+        variant = PicoButtonVariant.primary;
+        break;
       case PicoDialogButtonStyle.gold:
-        return const _ButtonColorConfig(
-          gradientColors: [Color(0xFFFFDFA0), Color(0xFFE2C384), Color(0xFFCCA45E)],
-          bevelColor: Color(0xFF8C6621),
-          shadowColor: Color(0xFFCCA45E),
-          textColor: Color(0xFF261A00),
-        );
+        variant = PicoButtonVariant.gold;
+        break;
       case PicoDialogButtonStyle.neutral:
-        return const _ButtonColorConfig(
-          gradientColors: [Color(0xFFF8FAFC), Color(0xFFE2E8F0)],
-          bevelColor: Color(0xFFCBD5E1),
-          shadowColor: Color(0xFF64748B),
-          textColor: Color(0xFF334155),
-        );
+        variant = PicoButtonVariant.secondary;
+        break;
     }
+
+    return PicoButton(
+      text: label,
+      variant: variant,
+      height: 48.0,
+      borderRadius: 18.0,
+      onPressed: onPressed,
+    );
   }
-}
-
-class _ButtonColorConfig {
-  const _ButtonColorConfig({
-    required this.gradientColors,
-    required this.bevelColor,
-    required this.shadowColor,
-    required this.textColor,
-  });
-
-  final List<Color> gradientColors;
-  final Color bevelColor;
-  final Color shadowColor;
-  final Color textColor;
 }
 
 /// Faint soccer ball watermark pattern.
