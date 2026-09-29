@@ -6,7 +6,7 @@ import '../../core/theme/pico_typography.dart';
 enum PicoButtonVariant { primary, secondary, gold, blue, red, dark }
 
 /// A physical, tactile 3D game button with mechanical extrusion bevel,
-/// rich multi-stop gradients, glass rim highlight, and physical press feedback
+/// crisp solid surfaces, clean borders, and physical press feedback
 /// matching the Stitch confirmation modal style.
 class PicoButton extends StatefulWidget {
   const PicoButton({
@@ -139,47 +139,47 @@ class _PicoButtonState extends State<PicoButton> {
     switch (variant) {
       case PicoButtonVariant.primary:
         return const _ButtonColorTokens(
-          gradientColors: [Color(0xFF22C55E), Color(0xFF16A34A), Color(0xFF15803D)],
+          backgroundColor: Color(0xFF16A34A),
           bevelColor: Color(0xFF14532D),
           shadowColor: Color(0xFF16A34A),
           textColor: Colors.white,
-          borderColor: Color(0x66FFFFFF),
+          borderColor: Color(0x4DFFFFFF),
         );
       case PicoButtonVariant.gold:
         return const _ButtonColorTokens(
-          gradientColors: [Color(0xFFFFEA75), Color(0xFFFFD41D), Color(0xFFFFB800)],
+          backgroundColor: Color(0xFFFFD41D),
           bevelColor: Color(0xFF9E6500),
-          shadowColor: Color(0x40FFD41D),
+          shadowColor: Color(0x33FFD41D),
           textColor: Color(0xFF261700),
           borderColor: Color(0xFFFFF7C2),
         );
       case PicoButtonVariant.secondary:
         return const _ButtonColorTokens(
-          gradientColors: [Color(0xFFFFFFFF), Color(0xFFF6F3EB), Color(0xFFEDE8DD)],
+          backgroundColor: PicoColors.cardFace,
           bevelColor: Color(0xFFD8D1C3),
-          shadowColor: Color(0x33000000),
+          shadowColor: Color(0x20000000),
           textColor: Color(0xFF13211B),
-          borderColor: Color(0xFFFFFFFF),
+          borderColor: Color(0xFFECE7DC),
         );
       case PicoButtonVariant.blue:
         return const _ButtonColorTokens(
-          gradientColors: [Color(0xFF38BDF8), Color(0xFF0095FF), Color(0xFF006CE6)],
+          backgroundColor: Color(0xFF0085FF),
           bevelColor: Color(0xFF004BA3),
-          shadowColor: Color(0xFF0095FF),
+          shadowColor: Color(0xFF0085FF),
           textColor: Colors.white,
-          borderColor: Color(0x66FFFFFF),
+          borderColor: Color(0x4DFFFFFF),
         );
       case PicoButtonVariant.red:
         return const _ButtonColorTokens(
-          gradientColors: [Color(0xFFFF5757), Color(0xFFFF2B44), Color(0xFFE0112B)],
+          backgroundColor: Color(0xFFE0112B),
           bevelColor: Color(0xFF9F071A),
           shadowColor: Color(0xFFE0112B),
           textColor: Colors.white,
-          borderColor: Color(0x66FFFFFF),
+          borderColor: Color(0x4DFFFFFF),
         );
       case PicoButtonVariant.dark:
         return const _ButtonColorTokens(
-          gradientColors: [Color(0xFF233B2E), Color(0xFF162A1F), Color(0xFF0F1E16)],
+          backgroundColor: Color(0xFF162A1F),
           bevelColor: Color(0xFF08120C),
           shadowColor: Color(0x40000000),
           textColor: Colors.white,
@@ -226,15 +226,9 @@ class _PicoButtonState extends State<PicoButton> {
             width: widget.isFullWidth ? double.infinity : null,
             padding: const EdgeInsets.symmetric(horizontal: 18.0),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: isEnabled
-                    ? tokens.gradientColors
-                    : tokens.gradientColors
-                        .map((c) => c.withValues(alpha: 0.4))
-                        .toList(),
-              ),
+              color: isEnabled
+                  ? tokens.backgroundColor
+                  : tokens.backgroundColor.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(widget.borderRadius),
               border: Border.all(
                 color: isEnabled
@@ -309,14 +303,14 @@ class _PicoButtonState extends State<PicoButton> {
 
 class _ButtonColorTokens {
   const _ButtonColorTokens({
-    required this.gradientColors,
+    required this.backgroundColor,
     required this.bevelColor,
     required this.shadowColor,
     required this.textColor,
     required this.borderColor,
   });
 
-  final List<Color> gradientColors;
+  final Color backgroundColor;
   final Color bevelColor;
   final Color shadowColor;
   final Color textColor;

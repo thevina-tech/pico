@@ -10,6 +10,7 @@ import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
 import 'package:pico/features/predictions/presentation/prediction_controller.dart';
 import 'package:pico/features/profile/domain/user_profile.dart';
 import 'package:pico/features/profile/presentation/user_profile_provider.dart';
+import 'package:pico/features/profile/presentation/widgets/division_ladder_sheet.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/game_exit_dialog.dart';
 import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
@@ -34,7 +35,7 @@ class HomeScreen extends ConsumerStatefulWidget {
     super.key,
     this.heroMatch,
     this.showBottomNavBar = true,
-    this.currentNavIndex = 1,
+    this.currentNavIndex = 0,
     this.onNavTap,
     this.onNavigateMatches,
     this.onNavigateTournaments,
@@ -114,11 +115,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final profile = profileAsync.value ??
         const UserProfile(
           id: 'guest',
-          username: 'Alex',
-          level: 7,
-          xp: 720,
-          streak: 4,
-          coins: 1450,
+          username: null,
+          level: 1,
+          xp: 0,
+          streak: 0,
+          coins: 0,
+          totalPoints: 0,
         );
 
     final matchesAsync = ref.watch(matchesFeedProvider);
@@ -200,10 +202,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               widget.onNavTap?.call(idx);
                               switch (idx) {
                                 case 0:
-                                  _navigateToMatches();
+                                  // Already Home
                                   break;
                                 case 1:
-                                  // Already Home
+                                  _navigateToMatches();
                                   break;
                                 case 2:
                                   _navigateToTournaments();
@@ -275,17 +277,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 10.0),
       child: Row(
         children: [
-          // Left: User Profile Pill (55% of available width)
+          // Left: User Profile Pill (50% of available width)
           Expanded(
-            flex: 55,
             child: _buildProfilePill(profile),
           ),
 
-          const SizedBox(width: 12.0),
+          const SizedBox(width: 10.0),
 
-          // Right: Division Pill (45% of available width)
+          // Right: Division Pill (50% of available width)
           Expanded(
-            flex: 45,
             child: _buildDivisionPill(profile, l10n),
           ),
         ],
@@ -297,7 +297,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildProfilePill(UserProfile profile) {
     final username = profile.username != null && profile.username!.isNotEmpty
         ? profile.username!
-        : 'Dev';
+        : 'Player';
 
     return GestureDetector(
       key: const Key('home_screen_profile_pill'),
@@ -313,14 +313,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         height: 56.0,
         padding: const EdgeInsets.fromLTRB(8.0, 6.0, 12.0, 6.0),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFE2B76E),
-              Color(0xFFC79848),
-            ],
-          ),
+          color: const Color(0xFFD4A759),
           borderRadius: BorderRadius.circular(16.0),
           border: Border.all(color: const Color(0xFF8E6325), width: 1.5),
           boxShadow: const [
@@ -373,7 +366,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// Division Pill (Tactile dark green container, shield icon, translated division title)
+  /// Division Pill: shows only user's division with a shield icon in the division color
   Widget _buildDivisionPill(UserProfile profile, AppLocalizations? l10n) {
     final divisionTitle = l10n != null
         ? profile.division.localizedTitle(l10n)
@@ -381,14 +374,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return GestureDetector(
       key: const Key('home_screen_division_pill'),
-      onTap: _navigateToTournaments,
+      onTap: () => DivisionLadderSheet.show(context, profile),
       child: Container(
         height: 56.0,
-        padding: const EdgeInsets.fromLTRB(8.0, 5.0, 10.0, 5.0),
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
         decoration: BoxDecoration(
           color: const Color(0xFF092013),
           borderRadius: BorderRadius.circular(16.0),
-          border: Border.all(color: const Color(0xFF1E432F), width: 1.5),
+          border: Border.all(
+            color: profile.division.borderColor.withValues(alpha: 0.6),
+            width: 1.5,
+          ),
           boxShadow: const [
             BoxShadow(
               color: Color(0xFF040E08),
@@ -399,57 +395,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         child: Row(
           children: [
-            // Division Shield Icon Box
+            // Shield showing the division level color
             Container(
-              width: 36.0,
-              height: 36.0,
+              width: 38.0,
+              height: 38.0,
               decoration: BoxDecoration(
                 color: const Color(0xFF13281C),
-                borderRadius: BorderRadius.circular(10.0),
-                border: Border.all(color: const Color(0xFF224B33), width: 1.2),
+                borderRadius: BorderRadius.circular(11.0),
+                border: Border.all(
+                  color: profile.division.borderColor.withValues(alpha: 0.5),
+                  width: 1.2,
+                ),
               ),
               child: Center(
                 child: Icon(
                   Icons.shield_rounded,
                   color: profile.division.primaryColor,
-                  size: 22.0,
+                  size: 24.0,
                 ),
               ),
             ),
             const SizedBox(width: 8.0),
 
-            // Translated Division Name & PP Subtitle (matching Profile page)
+            // User's Division
             Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    divisionTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: 'Rubik',
-                      fontSize: 13.0,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      letterSpacing: 0.2,
-                    ),
-                  ),
-                  const SizedBox(height: 2.0),
-                  Text(
-                    '${profile.formattedTotalPoints} PP',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: 'Rubik',
-                      fontSize: 11.0,
-                      fontWeight: FontWeight.w700,
-                      color: profile.division.accentColor,
-                    ),
-                  ),
-                ],
+              child: Text(
+                divisionTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: 'Rubik',
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  letterSpacing: 0.1,
+                ),
               ),
             ),
           ],
@@ -708,14 +688,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         width: double.infinity,
                         height: 42.0,
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Color(0xFF22C55E),
-                              Color(0xFF16A34A),
-                            ],
-                          ),
+                          color: const Color(0xFF16A34A),
                           borderRadius: BorderRadius.circular(12.0),
                           border: Border.all(
                             color: const Color(0xFF14532D),
@@ -1094,7 +1067,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              profile.username ?? 'Alex',
+                              profile.username ?? 'Player',
                               style: PicoTypography.headlineMd.copyWith(
                                 color: PicoColors.textWhite,
                                 fontSize: 15.0,
@@ -1128,8 +1101,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
                     onTap: () async {
+                      final authNotifier = ref.read(authProvider.notifier);
                       Navigator.of(ctx).pop();
-                      await ref.read(authProvider.notifier).signOut();
+                      await authNotifier.signOut();
                     },
                   ),
                 ),

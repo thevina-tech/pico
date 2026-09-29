@@ -30,7 +30,7 @@ class MatchesScreen extends ConsumerStatefulWidget {
   const MatchesScreen({
     super.key,
     this.showBottomNavBar = true,
-    this.currentNavIndex = 0,
+    this.currentNavIndex = 1,
     this.onNavTap,
     this.onPredictMatch,
     this.onModifyMatch,
@@ -90,6 +90,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
           backgroundColor: Colors.transparent,
           appBar: PicoAppBar(
             title: l10n?.navMatches ?? 'Matches',
+            isTransparent: true,
           ),
           bottomNavigationBar: widget.showBottomNavBar
               ? Center(
@@ -103,9 +104,10 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
                         widget.onNavTap?.call(idx);
                         switch (idx) {
                           case 0:
+                            context.go('/home');
                             break;
                           case 1:
-                            context.go('/home');
+                            // Already in Matches
                             break;
                           case 2:
                             context.go('/tournaments');

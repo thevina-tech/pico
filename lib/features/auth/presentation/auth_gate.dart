@@ -53,7 +53,7 @@ class AuthGate extends ConsumerStatefulWidget {
 class _AuthGateState extends ConsumerState<AuthGate> {
   StreamSubscription<supa.AuthState>? _authSubscription;
   _AuthDestination _destination = _AuthDestination.loading;
-  int _onboardingStep = 1;
+  int _onboardingStep = 0;
   bool _isLoading = true;
 
   @override
@@ -102,8 +102,8 @@ class _AuthGateState extends ConsumerState<AuthGate> {
       final user = client.auth.currentUser;
 
       if (user == null) {
-        // User not logged in: Show the "How it works" screen (Start of Auth flow)
-        _routeToOnboarding(step: 1);
+        // User not logged in: Show the "Welcome" screen (Step 1 of Onboarding)
+        _routeToOnboarding(step: 0);
         return;
       }
 
@@ -141,7 +141,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
         _routeToOnboarding(step: 2);
       }
     } else {
-      _routeToOnboarding(step: 1);
+      _routeToOnboarding(step: 0);
     }
   }
 
@@ -158,7 +158,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     }
   }
 
-  void _routeToOnboarding({int step = 1}) {
+  void _routeToOnboarding({int step = 0}) {
     if (!mounted) return;
 
     setState(() {

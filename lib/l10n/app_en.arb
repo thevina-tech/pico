@@ -284,10 +284,6 @@
       }
     }
   },
-  "profileTitleKicker": "Matchday Prophet",
-  "@profileTitleKicker": {
-    "description": "Tactical rank title under username in profile trading card"
-  },
   "hitRateLabel": "Hit Rate",
   "@hitRateLabel": {
     "description": "Label for accuracy stat in profile"
@@ -332,64 +328,6 @@
       }
     }
   },
-  "followingAccordionTitle": "Following",
-  "@followingAccordionTitle": {
-    "description": "Title of the Following accordion section"
-  },
-  "followingAccordionSubtitle": "Clubs, leagues & alerts",
-  "@followingAccordionSubtitle": {
-    "description": "Subtitle of the Following accordion section"
-  },
-  "followingPinnedCount": "{count} Pinned",
-  "@followingPinnedCount": {
-    "description": "Badge showing pinned items count",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "4"
-      }
-    }
-  },
-  "historyAccordionTitle": "History",
-  "@historyAccordionTitle": {
-    "description": "Title of the History accordion section"
-  },
-  "historyAccordionSubtitle": "Predictions, archive & past trophies",
-  "@historyAccordionSubtitle": {
-    "description": "Subtitle of the History accordion section"
-  },
-  "historySummary": "{count} Matches · {rate}%",
-  "@historySummary": {
-    "description": "Badge in history accordion header",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "84"
-      },
-      "rate": {
-        "type": "int",
-        "example": "70"
-      }
-    }
-  },
-  "recentFormTitle": "Recent Form (Last 10 Matches)",
-  "@recentFormTitle": {
-    "description": "Header for recent prediction form strip"
-  },
-  "recentFormSummary": "{wins} Wins · {exact} Exact",
-  "@recentFormSummary": {
-    "description": "Sub-header summary for recent form",
-    "placeholders": {
-      "wins": {
-        "type": "int",
-        "example": "7"
-      },
-      "exact": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "settingsAccordionTitle": "Settings",
   "@settingsAccordionTitle": {
     "description": "Title of Settings accordion section"
@@ -413,26 +351,6 @@
   "onPill": "On",
   "@onPill": {
     "description": "On status pill"
-  },
-  "shareMatchdayCard": "Share Matchday Card",
-  "@shareMatchdayCard": {
-    "description": "CTA button label to share profile card"
-  },
-  "shareCardModalTitle": "Matchday Trading Card",
-  "@shareCardModalTitle": {
-    "description": "Title of the share trading card bottom sheet"
-  },
-  "shareCardPrompt": "Share your Pico profile card and stats with friends!",
-  "@shareCardPrompt": {
-    "description": "Prompt text in the share card sheet"
-  },
-  "copyProfileSummary": "Copy Card Summary",
-  "@copyProfileSummary": {
-    "description": "Button to copy trading card summary"
-  },
-  "profileSummaryCopied": "Profile summary copied to clipboard!",
-  "@profileSummaryCopied": {
-    "description": "Snackbar feedback after copying summary"
   },
   "standingsButton": "Standings",
   "@standingsButton": {
@@ -1267,8 +1185,65 @@
   "scoringRuleBannerSprint7": "Exact = +5 PP · Outcome + Diff = +3 PP · Outcome = +1 PP",
   "@scoringRuleBannerSprint7": {
     "description": "Compact scoring rules explanation"
+  },
+  "signOutButton": "Sign Out",
+  "@signOutButton": {
+    "description": "Sign out button label"
+  },
+  "signOutSubtitle": "Log out of your Pico session",
+  "@signOutSubtitle": {
+    "description": "Subtitle describing the sign out option"
+  },
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Title for the settings screen and profile menu option"
+  },
+  "settingsSubtitle": "Account, sign out & preferences",
+  "@settingsSubtitle": {
+    "description": "Subtitle for the settings option on profile screen"
+  },
+  "shareTheAppButton": "Share the App",
+  "@shareTheAppButton": {
+    "description": "Label for the share the app button on profile screen"
+  },
+  "shareAppMessage": "Join me on Pico to predict football matches! https://play.google.com/store/apps/details?id=com.devdaumienebi.yonunca",
+  "@shareAppMessage": {
+    "description": "Default text shared when user taps Share the App"
+  },
+  "deleteAccountOption": "Delete Account",
+  "@deleteAccountOption": {
+    "description": "Menu title for deleting the user's account"
+  },
+  "deleteAccountSubtitle": "Permanently remove your account and data",
+  "@deleteAccountSubtitle": {
+    "description": "Subtitle describing the destructive nature of delete account"
+  },
+  "deleteAccountConfirmTitle": "Delete Account?",
+  "@deleteAccountConfirmTitle": {
+    "description": "Title for the destructive account deletion confirmation dialog"
+  },
+  "deleteAccountConfirmBody": "Are you sure? This will permanently delete your predictions, league memberships, and account data. This cannot be undone.",
+  "@deleteAccountConfirmBody": {
+    "description": "Body message for the destructive account deletion confirmation dialog"
+  },
+  "deleteAccountAction": "Delete Account",
+  "@deleteAccountAction": {
+    "description": "Button label to confirm account deletion"
+  },
+  "deleteAccountError": "Failed to delete account. Please try again.",
+  "@deleteAccountError": {
+    "description": "Error message when account deletion fails"
+  },
+  "accountDeletedToast": "Your account has been deleted.",
+  "@accountDeletedToast": {
+    "description": "Toast message confirming account deletion"
+  },
+  "cancelButton": "Cancel",
+  "@cancelButton": {
+    "description": "Generic cancel button text"
   }
 }
+
 
 
 

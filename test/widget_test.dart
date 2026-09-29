@@ -29,14 +29,21 @@ class _FakeAuthenticatedNotifier extends AuthNotifier {
 }
 
 void main() {
-  testWidgets('PicoApp unauthenticated - boots and redirects to OnboardingScreen',
+  testWidgets('PicoApp unauthenticated - boots to Welcome Step and navigates to How Pico Works',
       (WidgetTester tester) async {
     await tester.pumpWidget(const ProviderScope(child: PicoApp()));
     await tester.pumpAndSettle();
 
-    // Verify OnboardingScreen is rendered at "How Pico Works" (start of Auth flow)
+    // Verify OnboardingScreen is rendered at Step 1 (Welcome Step)
     expect(find.byType(OnboardingScreen), findsOneWidget);
-    expect(find.textContaining('Pico'), findsWidgets);
+    expect(find.text('Predict Football.\nCompete with Friends.'), findsOneWidget);
+    expect(find.text('Get Started'), findsOneWidget);
+
+    // Tap "Get Started" to advance to Step 2 (How Pico Works)
+    await tester.ensureVisible(find.text('Get Started'));
+    await tester.tap(find.text('Get Started'));
+    await tester.pumpAndSettle();
+
     expect(find.text('How Pico Works'), findsOneWidget);
     expect(find.text('Continue with Google'), findsOneWidget);
   });

@@ -434,7 +434,7 @@ abstract class AppLocalizations {
   /// **'Settings & Menu'**
   String get homeMenuTitle;
 
-  /// Button to sign out of user account
+  /// Sign out button label
   ///
   /// In en, this message translates to:
   /// **'Sign Out'**
@@ -481,12 +481,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'+{count} more fixtures in Matches'**
   String moreMatchesAvailable(int count);
-
-  /// Tactical rank title under username in profile trading card
-  ///
-  /// In en, this message translates to:
-  /// **'Matchday Prophet'**
-  String get profileTitleKicker;
 
   /// Label for accuracy stat in profile
   ///
@@ -536,54 +530,6 @@ abstract class AppLocalizations {
   /// **'{count} Active'**
   String tournamentsActiveCount(int count);
 
-  /// Title of the Following accordion section
-  ///
-  /// In en, this message translates to:
-  /// **'Following'**
-  String get followingAccordionTitle;
-
-  /// Subtitle of the Following accordion section
-  ///
-  /// In en, this message translates to:
-  /// **'Clubs, leagues & alerts'**
-  String get followingAccordionSubtitle;
-
-  /// Badge showing pinned items count
-  ///
-  /// In en, this message translates to:
-  /// **'{count} Pinned'**
-  String followingPinnedCount(int count);
-
-  /// Title of the History accordion section
-  ///
-  /// In en, this message translates to:
-  /// **'History'**
-  String get historyAccordionTitle;
-
-  /// Subtitle of the History accordion section
-  ///
-  /// In en, this message translates to:
-  /// **'Predictions, archive & past trophies'**
-  String get historyAccordionSubtitle;
-
-  /// Badge in history accordion header
-  ///
-  /// In en, this message translates to:
-  /// **'{count} Matches · {rate}%'**
-  String historySummary(int count, int rate);
-
-  /// Header for recent prediction form strip
-  ///
-  /// In en, this message translates to:
-  /// **'Recent Form (Last 10 Matches)'**
-  String get recentFormTitle;
-
-  /// Sub-header summary for recent form
-  ///
-  /// In en, this message translates to:
-  /// **'{wins} Wins · {exact} Exact'**
-  String recentFormSummary(int wins, int exact);
-
   /// Title of Settings accordion section
   ///
   /// In en, this message translates to:
@@ -619,36 +565,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'On'**
   String get onPill;
-
-  /// CTA button label to share profile card
-  ///
-  /// In en, this message translates to:
-  /// **'Share Matchday Card'**
-  String get shareMatchdayCard;
-
-  /// Title of the share trading card bottom sheet
-  ///
-  /// In en, this message translates to:
-  /// **'Matchday Trading Card'**
-  String get shareCardModalTitle;
-
-  /// Prompt text in the share card sheet
-  ///
-  /// In en, this message translates to:
-  /// **'Share your Pico profile card and stats with friends!'**
-  String get shareCardPrompt;
-
-  /// Button to copy trading card summary
-  ///
-  /// In en, this message translates to:
-  /// **'Copy Card Summary'**
-  String get copyProfileSummary;
-
-  /// Snackbar feedback after copying summary
-  ///
-  /// In en, this message translates to:
-  /// **'Profile summary copied to clipboard!'**
-  String get profileSummaryCopied;
 
   /// Standings link button label
   ///
@@ -1202,7 +1118,7 @@ abstract class AppLocalizations {
   /// **'MEMBER'**
   String get memberBadge;
 
-  /// General cancel button
+  /// Generic cancel button text
   ///
   /// In en, this message translates to:
   /// **'Cancel'**
@@ -1673,6 +1589,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Exact = +5 PP · Outcome + Diff = +3 PP · Outcome = +1 PP'**
   String get scoringRuleBannerSprint7;
+
+  /// Subtitle describing the sign out option
+  ///
+  /// In en, this message translates to:
+  /// **'Log out of your Pico session'**
+  String get signOutSubtitle;
+
+  /// Title for the settings screen and profile menu option
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// Subtitle for the settings option on profile screen
+  ///
+  /// In en, this message translates to:
+  /// **'Account, sign out & preferences'**
+  String get settingsSubtitle;
+
+  /// Label for the share the app button on profile screen
+  ///
+  /// In en, this message translates to:
+  /// **'Share the App'**
+  String get shareTheAppButton;
+
+  /// Default text shared when user taps Share the App
+  ///
+  /// In en, this message translates to:
+  /// **'Join me on Pico to predict football matches! https://play.google.com/store/apps/details?id=com.devdaumienebi.yonunca'**
+  String get shareAppMessage;
+
+  /// Menu title for deleting the user's account
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccountOption;
+
+  /// Subtitle describing the destructive nature of delete account
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently remove your account and data'**
+  String get deleteAccountSubtitle;
+
+  /// Title for the destructive account deletion confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account?'**
+  String get deleteAccountConfirmTitle;
+
+  /// Body message for the destructive account deletion confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure? This will permanently delete your predictions, league memberships, and account data. This cannot be undone.'**
+  String get deleteAccountConfirmBody;
+
+  /// Button label to confirm account deletion
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccountAction;
+
+  /// Error message when account deletion fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete account. Please try again.'**
+  String get deleteAccountError;
+
+  /// Toast message confirming account deletion
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has been deleted.'**
+  String get accountDeletedToast;
 }
 
 class _AppLocalizationsDelegate

@@ -1138,15 +1138,7 @@ class _TactileSubmitButtonState extends State<_TactileSubmitButton> {
           width: double.infinity,
           height: 54.0,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFFFFEA75),
-                Color(0xFFFFD41D),
-                Color(0xFFFFB800),
-              ],
-            ),
+            color: const Color(0xFFFFD41D),
             borderRadius: BorderRadius.circular(16.0),
             border: Border.all(
               color: const Color(0xFFFFF7C2),

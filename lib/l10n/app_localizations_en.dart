@@ -222,9 +222,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get profileTitleKicker => 'Matchday Prophet';
-
-  @override
   String get hitRateLabel => 'Hit Rate';
 
   @override
@@ -253,36 +250,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get followingAccordionTitle => 'Following';
-
-  @override
-  String get followingAccordionSubtitle => 'Clubs, leagues & alerts';
-
-  @override
-  String followingPinnedCount(int count) {
-    return '$count Pinned';
-  }
-
-  @override
-  String get historyAccordionTitle => 'History';
-
-  @override
-  String get historyAccordionSubtitle => 'Predictions, archive & past trophies';
-
-  @override
-  String historySummary(int count, int rate) {
-    return '$count Matches · $rate%';
-  }
-
-  @override
-  String get recentFormTitle => 'Recent Form (Last 10 Matches)';
-
-  @override
-  String recentFormSummary(int wins, int exact) {
-    return '$wins Wins · $exact Exact';
-  }
-
-  @override
   String get settingsAccordionTitle => 'Settings';
 
   @override
@@ -299,22 +266,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onPill => 'On';
-
-  @override
-  String get shareMatchdayCard => 'Share Matchday Card';
-
-  @override
-  String get shareCardModalTitle => 'Matchday Trading Card';
-
-  @override
-  String get shareCardPrompt =>
-      'Share your Pico profile card and stats with friends!';
-
-  @override
-  String get copyProfileSummary => 'Copy Card Summary';
-
-  @override
-  String get profileSummaryCopied => 'Profile summary copied to clipboard!';
 
   @override
   String get standingsButton => 'Standings';
@@ -905,4 +856,44 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get scoringRuleBannerSprint7 =>
       'Exact = +5 PP · Outcome + Diff = +3 PP · Outcome = +1 PP';
+
+  @override
+  String get signOutSubtitle => 'Log out of your Pico session';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsSubtitle => 'Account, sign out & preferences';
+
+  @override
+  String get shareTheAppButton => 'Share the App';
+
+  @override
+  String get shareAppMessage =>
+      'Join me on Pico to predict football matches! https://play.google.com/store/apps/details?id=com.devdaumienebi.yonunca';
+
+  @override
+  String get deleteAccountOption => 'Delete Account';
+
+  @override
+  String get deleteAccountSubtitle =>
+      'Permanently remove your account and data';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Delete Account?';
+
+  @override
+  String get deleteAccountConfirmBody =>
+      'Are you sure? This will permanently delete your predictions, league memberships, and account data. This cannot be undone.';
+
+  @override
+  String get deleteAccountAction => 'Delete Account';
+
+  @override
+  String get deleteAccountError =>
+      'Failed to delete account. Please try again.';
+
+  @override
+  String get accountDeletedToast => 'Your account has been deleted.';
 }

@@ -79,14 +79,14 @@ void main() {
   }
 
   group('ProfileScreen - Dark Stadium Gamer Hub Design & Authenticated User', () {
-    testWidgets('Renders dynamic profile identity: username, Matchday Prophet, Division, and PP progress',
+    testWidgets('Renders dynamic profile identity: username, Division, and PP progress',
         (WidgetTester tester) async {
       await tester.pumpWidget(createSubject());
       await tester.pumpAndSettle();
 
       // Username & Level title
       expect(find.text('CR7_Predictor'), findsOneWidget);
-      expect(find.text('Matchday Prophet'), findsOneWidget);
+      expect(find.text('Matchday Prophet'), findsNothing);
 
       // Division badge & progress
       expect(find.text('DIV 8'), findsWidgets);
@@ -115,7 +115,7 @@ void main() {
       expect(find.text('DIV 8'), findsWidgets);
     });
 
-    testWidgets('Renders Spotlight Tournament Card and Hub Paired Cards',
+    testWidgets('Renders Spotlight Tournament Card and removes Following/History cards',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(800, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -130,17 +130,11 @@ void main() {
       expect(find.text('2 Active'), findsOneWidget);
       expect(find.byKey(const Key('profile_tournaments_card')), findsOneWidget);
 
-      // Following Hub Card
-      expect(find.text('Following'), findsOneWidget);
-      expect(find.text('Clubs, leagues & alerts'), findsOneWidget);
-      expect(find.text('4 Pinned'), findsOneWidget);
-      expect(find.byKey(const Key('profile_following_card')), findsOneWidget);
-
-      // History Hub Card
-      expect(find.text('History'), findsOneWidget);
-      expect(find.text('Predictions, archive & past trophies'), findsOneWidget);
-      expect(find.text('84 Matches · 70%'), findsOneWidget);
-      expect(find.byKey(const Key('profile_history_card')), findsOneWidget);
+      // Following and History Hub Cards are removed
+      expect(find.byKey(const Key('profile_following_card')), findsNothing);
+      expect(find.byKey(const Key('profile_history_card')), findsNothing);
+      expect(find.text('Following'), findsNothing);
+      expect(find.text('History'), findsNothing);
     });
 
     testWidgets('Achievements and Settings are removed from ProfileScreen',
@@ -154,10 +148,11 @@ void main() {
 
       expect(find.text('Achievements'), findsNothing);
       expect(find.text('See all'), findsNothing);
-      expect(find.byKey(const Key('profile_settings_action')), findsNothing);
+      expect(find.byKey(const Key('profile_settings_action')), findsOneWidget);
+      expect(find.text('Settings'), findsOneWidget);
     });
 
-    testWidgets('Quick Actions: Rate App and Help & Support are displayed',
+    testWidgets('Quick Actions: Rate App, Help & Support, and Settings are displayed',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(800, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -173,29 +168,26 @@ void main() {
       final helpAction = find.byKey(const Key('profile_help_action'));
       expect(helpAction, findsOneWidget);
       expect(find.text('Help & Support'), findsOneWidget);
+
+      final settingsAction = find.byKey(const Key('profile_settings_action'));
+      expect(settingsAction, findsOneWidget);
+      expect(find.text('Settings'), findsOneWidget);
     });
 
-    testWidgets('Sign Out button is prominently displayed and triggers auth signOut',
+    testWidgets('Standalone Sign Out button is removed from ProfileScreen',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(800, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
-      final spyAuth = _SpyAuthNotifier();
-      await tester.pumpWidget(createSubject(authNotifier: spyAuth));
+      await tester.pumpWidget(createSubject());
       await tester.pumpAndSettle();
 
       final signOutFinder = find.byKey(const Key('profile_sign_out_button'));
-      expect(signOutFinder, findsOneWidget);
-      expect(find.text('Sign Out'), findsOneWidget);
-
-      await tester.tap(signOutFinder);
-      await tester.pumpAndSettle();
-
-      expect(spyAuth.signOutCalled, isTrue);
+      expect(signOutFinder, findsNothing);
     });
 
-    testWidgets('Floating "Share Matchday Card" CTA opens modal and copies summary',
+    testWidgets('Tactile "Share the App" button is displayed and triggers share',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(800, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -206,22 +198,10 @@ void main() {
 
       final shareButtonFinder = find.byKey(const Key('profile_share_card_button'));
       expect(shareButtonFinder, findsOneWidget);
+      expect(find.text('Share the App'), findsOneWidget);
 
       await tester.tap(shareButtonFinder);
-      await tester.pumpAndSettle();
-
-      // Modal bottom sheet appears
-      expect(find.text('Matchday Trading Card'), findsOneWidget);
-      expect(find.text('Copy Card Summary'), findsOneWidget);
-      expect(find.byKey(const Key('copy_card_summary_button')), findsOneWidget);
-
-      // Tap copy summary button to dismiss modal
-      await tester.tap(find.byKey(const Key('copy_card_summary_button')));
-      await tester.pumpAndSettle();
-
-      // Modal dismissed and snackbar shown
-      expect(find.text('Matchday Trading Card'), findsNothing);
-      expect(find.text('Profile summary copied to clipboard!'), findsOneWidget);
+      await tester.pump();
     });
   });
 }

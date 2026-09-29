@@ -8,6 +8,7 @@ import 'package:pico/features/profile/domain/user_profile.dart';
 import 'package:pico/features/profile/presentation/user_profile_provider.dart';
 import 'package:pico/features/home/presentation/home_screen.dart';
 import 'package:pico/features/profile/presentation/profile_screen.dart';
+import 'package:pico/features/profile/presentation/widgets/division_ladder_sheet.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
@@ -224,6 +225,41 @@ void main() {
       expect(scaffoldFinder, findsOneWidget);
       final scaffold = tester.widget<Scaffold>(scaffoldFinder);
       expect(scaffold.backgroundColor, Colors.transparent);
+    });
+
+    testWidgets('HomeScreen division section shows brief details and opens DivisionLadderSheet on tap',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            currentUserProfileProvider.overrideWith(
+              () => _FakeCurrentUserProfile(testProfile),
+            ),
+            matchesFeedProvider.overrideWith(
+              () => _FakeMatchesFeed([testMatch]),
+            ),
+          ],
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: HomeScreen(showBottomNavBar: false),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // 1. Verify Division title and division shield icon within the division pill
+      final pillFinder = find.byKey(const Key('home_screen_division_pill'));
+      expect(find.descendant(of: pillFinder, matching: find.text('Division 8')), findsOneWidget);
+      expect(find.descendant(of: pillFinder, matching: find.byIcon(Icons.shield_rounded)), findsOneWidget);
+
+      // 2. Tap on division pill to open DivisionLadderSheet
+      await tester.tap(find.byKey(const Key('home_screen_division_pill')));
+      await tester.pumpAndSettle();
+
+      // 3. Verify DivisionLadderSheet is presented
+      expect(find.byType(DivisionLadderSheet), findsOneWidget);
+      expect(find.text('Division Ladder'), findsOneWidget);
     });
   });
 }

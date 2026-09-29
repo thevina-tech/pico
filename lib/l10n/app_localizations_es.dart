@@ -228,9 +228,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get profileTitleKicker => 'Profeta del Partido';
-
-  @override
   String get hitRateLabel => 'Acierto';
 
   @override
@@ -259,36 +256,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get followingAccordionTitle => 'Siguiendo';
-
-  @override
-  String get followingAccordionSubtitle => 'Clubes, ligas y alertas clave';
-
-  @override
-  String followingPinnedCount(int count) {
-    return '$count Fijados';
-  }
-
-  @override
-  String get historyAccordionTitle => 'Historial';
-
-  @override
-  String get historyAccordionSubtitle => 'Archivo de pronósticos y trofeos';
-
-  @override
-  String historySummary(int count, int rate) {
-    return '$count Partidos · $rate%';
-  }
-
-  @override
-  String get recentFormTitle => 'Forma Reciente (Últimos 10 Partidos)';
-
-  @override
-  String recentFormSummary(int wins, int exact) {
-    return '$wins Victorias · $exact Exactos';
-  }
-
-  @override
   String get settingsAccordionTitle => 'Ajustes';
 
   @override
@@ -306,23 +273,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get onPill => 'Sí';
-
-  @override
-  String get shareMatchdayCard => 'Compartir Ficha del Día';
-
-  @override
-  String get shareCardModalTitle => 'Ficha Coleccionable de Partido';
-
-  @override
-  String get shareCardPrompt =>
-      '¡Comparte tu ficha de Pico y estadísticas con tus amigos!';
-
-  @override
-  String get copyProfileSummary => 'Copiar Resumen de Ficha';
-
-  @override
-  String get profileSummaryCopied =>
-      '¡Resumen de perfil copiado al portapapeles!';
 
   @override
   String get standingsButton => 'Clasificación';
@@ -915,4 +865,44 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get scoringRuleBannerSprint7 =>
       'Exacto = +5 PP · Signo + Dif = +3 PP · Signo = +1 PP';
+
+  @override
+  String get signOutSubtitle => 'Cerrar sesión en Pico';
+
+  @override
+  String get settingsTitle => 'Ajustes';
+
+  @override
+  String get settingsSubtitle => 'Cuenta, cerrar sesión y preferencias';
+
+  @override
+  String get shareTheAppButton => 'Compartir la App';
+
+  @override
+  String get shareAppMessage =>
+      '¡Únete a mí en Pico para predecir partidos de fútbol! https://play.google.com/store/apps/details?id=com.devdaumienebi.yonunca';
+
+  @override
+  String get deleteAccountOption => 'Eliminar Cuenta';
+
+  @override
+  String get deleteAccountSubtitle =>
+      'Elimina permanentemente tu cuenta y datos';
+
+  @override
+  String get deleteAccountConfirmTitle => '¿Eliminar Cuenta?';
+
+  @override
+  String get deleteAccountConfirmBody =>
+      '¿Estás seguro? Esto eliminará permanentemente tus predicciones, membresías de ligas y datos de la cuenta. Esta acción no se puede deshacer.';
+
+  @override
+  String get deleteAccountAction => 'Eliminar Cuenta';
+
+  @override
+  String get deleteAccountError =>
+      'Error al eliminar la cuenta. Inténtalo de nuevo.';
+
+  @override
+  String get accountDeletedToast => 'Tu cuenta ha sido eliminada.';
 }

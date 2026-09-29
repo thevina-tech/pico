@@ -9,6 +9,7 @@ import 'package:pico/features/auth/presentation/onboarding_screen.dart';
 import 'package:pico/features/home/presentation/home_screen.dart';
 import 'package:pico/features/matches/presentation/matches_screen.dart';
 import 'package:pico/features/profile/presentation/help_support_screen.dart';
+import 'package:pico/features/profile/presentation/settings_screen.dart';
 import 'package:pico/features/profile/presentation/personalization_screen.dart';
 import 'package:pico/features/profile/presentation/profile_screen.dart';
 import 'package:pico/shared/components/in_app_web_browser_screen.dart';
@@ -128,7 +129,7 @@ class AppRouter {
           path: '/onboarding',
           pageBuilder: (context, state) {
             final stepStr = state.uri.queryParameters['step'];
-            final initialPage = int.tryParse(stepStr ?? '') ?? 1;
+            final initialPage = int.tryParse(stepStr ?? '') ?? 0;
             return NoTransitionPage(
               child: OnboardingScreen(initialPage: initialPage),
             );
@@ -236,6 +237,13 @@ class AppRouter {
         ),
         GoRoute(
           parentNavigatorKey: rootNavigatorKey,
+          path: '/settings',
+          pageBuilder: (context, state) => const MaterialPage(
+            child: SettingsScreen(),
+          ),
+        ),
+        GoRoute(
+          parentNavigatorKey: rootNavigatorKey,
           path: '/in-app-browser',
           pageBuilder: (context, state) {
             final extra = state.extra as Map<String, String>?;
@@ -278,13 +286,13 @@ class AppRouter {
             );
           },
           branches: [
-            // Branch 0: Matches
+            // Branch 0: Home
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                  path: '/matches',
+                  path: '/home',
                   pageBuilder: (context, state) => const NoTransitionPage(
-                    child: MatchesScreen(
+                    child: HomeScreen(
                       showBottomNavBar: false,
                     ),
                   ),
@@ -292,13 +300,13 @@ class AppRouter {
               ],
             ),
 
-            // Branch 1: Home
+            // Branch 1: Matches
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                  path: '/home',
+                  path: '/matches',
                   pageBuilder: (context, state) => const NoTransitionPage(
-                    child: HomeScreen(
+                    child: MatchesScreen(
                       showBottomNavBar: false,
                     ),
                   ),
@@ -332,6 +340,13 @@ class AppRouter {
                       path: 'help-support',
                       pageBuilder: (context, state) => const MaterialPage(
                         child: HelpSupportScreen(),
+                      ),
+                    ),
+                    GoRoute(
+                      parentNavigatorKey: rootNavigatorKey,
+                      path: 'settings',
+                      pageBuilder: (context, state) => const MaterialPage(
+                        child: SettingsScreen(),
                       ),
                     ),
                   ],

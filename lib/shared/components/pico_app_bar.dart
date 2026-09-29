@@ -19,6 +19,7 @@ class PicoAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onBack,
     this.actions,
     this.backgroundColor,
+    this.isTransparent = false,
     // Legacy callbacks kept optional for backwards compatibility
     this.onProfileTap,
     this.onPointsTap,
@@ -48,6 +49,9 @@ class PicoAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// Optional override for the background color.
   final Color? backgroundColor;
 
+  /// Whether the app bar should be completely transparent, allowing background textures to show through.
+  final bool isTransparent;
+
   /// Legacy callback kept for backwards compatibility.
   final VoidCallback? onProfileTap;
 
@@ -66,39 +70,46 @@ class PicoAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final bool canPop = showBackButton ?? Navigator.of(context).canPop();
+    final bool transparent = isTransparent || backgroundColor == Colors.transparent;
 
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor,
-        gradient: backgroundColor == null
-            ? const LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xF20F3A30), // Rich stadium turf dark emerald
-                  Color(0xF208241D),
-                  Color(0xFA041410), // Deep ground base
-                ],
-              )
-            : null,
-        border: const Border(
-          bottom: BorderSide(
-            color: Color(0x5534D399), // Neon stadium turf line
-            width: 1.5,
-          ),
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x66000000),
-            offset: Offset(0, 4),
-            blurRadius: 10,
-          ),
-          BoxShadow(
-            color: Color(0x1A10B981), // Ambient neon stadium glow
-            offset: Offset(0, 2),
-            blurRadius: 16,
-          ),
-        ],
+        color: transparent ? Colors.transparent : backgroundColor,
+        gradient: transparent
+            ? null
+            : (backgroundColor == null
+                ? const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xF20F3A30), // Rich stadium turf dark emerald
+                      Color(0xF208241D),
+                      Color(0xFA041410), // Deep ground base
+                    ],
+                  )
+                : null),
+        border: transparent
+            ? null
+            : const Border(
+                bottom: BorderSide(
+                  color: Color(0x5534D399), // Neon stadium turf line
+                  width: 1.5,
+                ),
+              ),
+        boxShadow: transparent
+            ? null
+            : const [
+                BoxShadow(
+                  color: Color(0x66000000),
+                  offset: Offset(0, 4),
+                  blurRadius: 10,
+                ),
+                BoxShadow(
+                  color: Color(0x1A10B981), // Ambient neon stadium glow
+                  offset: Offset(0, 2),
+                  blurRadius: 16,
+                ),
+              ],
       ),
       child: SafeArea(
         bottom: false,
@@ -107,34 +118,36 @@ class PicoAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // 1. Subtle Stadium Floodlight Center Glow
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: RadialGradient(
-                        center: Alignment.center,
-                        radius: 1.2,
-                        colors: [
-                          const Color(0x2E10B981), // Center turf glow
-                          Colors.transparent,
-                        ],
+              // 1. Subtle Stadium Floodlight Center Glow (Omitted if transparent)
+              if (!transparent)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          center: Alignment.center,
+                          radius: 1.2,
+                          colors: [
+                            const Color(0x2E10B981), // Center turf glow
+                            Colors.transparent,
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
 
-              // 2. Top Rim Subtle 3D Bevel Line
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 1.0,
-                child: Container(
-                  color: const Color(0x2634D399),
+              // 2. Top Rim Subtle 3D Bevel Line (Omitted if transparent)
+              if (!transparent)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 1.0,
+                  child: Container(
+                    color: const Color(0x2634D399),
+                  ),
                 ),
-              ),
 
               // 3. Centered Title
               Center(
@@ -148,23 +161,24 @@ class PicoAppBar extends StatelessWidget implements PreferredSizeWidget {
                               textAlign: TextAlign.center,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Rubik',
                                 fontSize: 19.0,
                                 fontWeight: FontWeight.w900,
                                 color: Colors.white,
                                 letterSpacing: 1.4,
                                 shadows: [
-                                  Shadow(
+                                  const Shadow(
                                     color: Color(0xB3000000),
                                     offset: Offset(0, 2),
                                     blurRadius: 4.0,
                                   ),
-                                  Shadow(
-                                    color: Color(0x4034D399),
-                                    offset: Offset(0, 0),
-                                    blurRadius: 8.0,
-                                  ),
+                                  if (!transparent)
+                                    const Shadow(
+                                      color: Color(0x4034D399),
+                                      offset: Offset(0, 0),
+                                      blurRadius: 8.0,
+                                    ),
                                 ],
                               ),
                             )
@@ -211,14 +225,7 @@ class PicoAppBar extends StatelessWidget implements PreferredSizeWidget {
         width: 38.0,
         height: 38.0,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF144D3F),
-              Color(0xFF0A2E25),
-            ],
-          ),
+          color: const Color(0xFF0F382B),
           borderRadius: BorderRadius.circular(10.0),
           border: Border.all(
             color: const Color(0xFF34D399).withValues(alpha: 0.6),

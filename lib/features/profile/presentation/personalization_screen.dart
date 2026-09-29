@@ -871,83 +871,57 @@ class _TactileGoldContinueButtonState
         width: double.infinity,
         height: 54.0,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFFFDFA0), Color(0xFFF1CB7A), Color(0xFFE2C384)],
-          ),
+          color: const Color(0xFFFFD41D),
           borderRadius: BorderRadius.circular(16.0),
+          border: Border.all(
+            color: const Color(0xFFFFF7C2),
+            width: 1.5,
+          ),
           boxShadow: _isPressed
               ? []
               : const [
                   BoxShadow(
-                    color: Color(0xFF775F2A),
+                    color: Color(0xFF9E6500),
                     offset: Offset(0, bevelHeight),
                   ),
                   BoxShadow(
-                    color: Color(0x59000000),
+                    color: Color(0x33000000),
                     offset: Offset(0, 8),
                     blurRadius: 16,
                   ),
                 ],
         ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Top Gloss Highlight
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 20.0,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(16.0)),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.35),
-                      Colors.transparent,
-                    ],
+        child: Center(
+          child: widget.isLoading
+              ? const SizedBox(
+                  width: 22.0,
+                  height: 22.0,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF261A00)),
                   ),
-                ),
-              ),
-            ),
-
-            if (widget.isLoading)
-              const SizedBox(
-                width: 22.0,
-                height: 22.0,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF261A00)),
-                ),
-              )
-            else
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    widget.text,
-                    style: const TextStyle(
-                      fontFamily: 'Rubik',
-                      fontSize: 17.0,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF261A00),
-                      letterSpacing: 0.2,
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      widget.text,
+                      style: const TextStyle(
+                        fontFamily: 'Rubik',
+                        fontSize: 17.0,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF261A00),
+                        letterSpacing: 0.2,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8.0),
-                  const Icon(
-                    Icons.arrow_forward,
-                    size: 20.0,
-                    color: Color(0xFF261A00),
-                  ),
-                ],
-              ),
-          ],
+                    const SizedBox(width: 8.0),
+                    const Icon(
+                      Icons.arrow_forward,
+                      size: 20.0,
+                      color: Color(0xFF261A00),
+                    ),
+                  ],
+                ),
         ),
       ),
     );

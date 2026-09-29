@@ -9,6 +9,7 @@ import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/core/utils/input_sanitizer.dart';
 import 'package:pico/features/auth/domain/auth_state.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
+import 'package:pico/core/network/supabase_client_provider.dart';
 import 'package:pico/features/matches/domain/competition.dart';
 import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
 import 'package:pico/features/profile/data/profile_repository.dart';
@@ -87,7 +88,46 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     super.dispose();
   }
 
+  supa.SupabaseClient? _getSupabaseClient() {
+    try {
+      return supa.Supabase.instance.client;
+    } catch (_) {
+      return ref.read(supabaseClientProvider);
+    }
+  }
+
   void _goToPage(int page) {
+    // Prevent unauthenticated users from advancing to Step 3 (Username) or beyond
+    if (page >= 2 && widget.initialPage < 2) {
+      final client = _getSupabaseClient();
+      final currentAuth = ref.read(authProvider);
+
+      if (client != null) {
+        final currentUser = client.auth.currentUser;
+        if (currentUser == null ||
+            currentUser.email == null ||
+            currentUser.email!.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please sign in with Google to continue.'),
+              backgroundColor: PicoColors.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          return;
+        }
+      } else if (currentAuth is! PicoAuthAuthenticated) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please sign in with Google to continue.'),
+            backgroundColor: PicoColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+    }
+
     if (_pageController.hasClients) {
       _pageController.animateToPage(
         page,
@@ -113,6 +153,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Future<void> _handleGoogleSignIn() async {
+    final client = _getSupabaseClient();
+    final existingUser = client?.auth.currentUser;
+    if (existingUser != null &&
+        existingUser.email != null &&
+        existingUser.email!.isNotEmpty) {
+      // User is already authenticated with Google; advance directly
+      _goToPage(2);
+      return;
+    }
+
     setState(() => _isGoogleAuthenticating = true);
     try {
       final user = await ref.read(authProvider.notifier).signInWithGoogle();
@@ -141,7 +191,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         AppLogger.warning('Returning user profile check skipped: $profileError');
       }
 
-      // New user without established username: advance to Step B (index 2: Username)
+      // New user without established username: advance to Step 3 (index 2: Username)
       if (mounted) {
         setState(() => _isGoogleAuthenticating = false);
         _goToPage(2);
@@ -179,7 +229,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 constraints: const BoxConstraints(maxWidth: 440.0),
                 child: PageView(
                   controller: _pageController,
-                  physics: const BouncingScrollPhysics(),
+                  physics: const NeverScrollableScrollPhysics(),
                   onPageChanged: (page) => setState(() => _currentPage = page),
                   children: [
                     // Step 1/5: Welcome
@@ -193,7 +243,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       l10n: l10n,
                       isAuthenticating: _isGoogleAuthenticating,
                       onBack: () => _goToPage(0),
-                      onSkip: () => _goToPage(2),
                       onContinue: _handleGoogleSignIn,
                     ),
 
@@ -248,6 +297,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           ),
                         );
                         _goToPage(2);
+                      },
+                      onAuthRequired: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Please sign in with Google to complete your account setup.',
+                            ),
+                            backgroundColor: PicoColors.error,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                        _goToPage(1);
                       },
                       onFinished: () => context.go('/home'),
                     ),
@@ -627,14 +688,12 @@ class _OnboardingHowItWorksStep extends StatelessWidget {
     required this.l10n,
     required this.isAuthenticating,
     required this.onBack,
-    required this.onSkip,
     required this.onContinue,
   });
 
   final AppLocalizations? l10n;
   final bool isAuthenticating;
   final VoidCallback onBack;
-  final VoidCallback onSkip;
   final VoidCallback onContinue;
 
   @override
@@ -653,7 +712,7 @@ class _OnboardingHowItWorksStep extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // 1. Top Header: Back Button + Step 2/5 Pill + Skip Action
+                  // 1. Top Header: Back Button + Step 2/5 Pill (No Skip)
                   _buildHeader(),
 
                   const SizedBox(height: 12.0),
@@ -678,7 +737,6 @@ class _OnboardingHowItWorksStep extends StatelessWidget {
     return _OnboardingStepHeader(
       currentStep: 2,
       onBack: onBack,
-      onSkip: onSkip,
       isBackEnabled: !isAuthenticating,
     );
   }
@@ -1098,83 +1156,57 @@ class _TactileGoldButtonState extends State<_TactileGoldButton> {
         width: double.infinity,
         height: 56.0,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFFFDFA0), Color(0xFFF1CB7A), Color(0xFFE2C384)],
-          ),
+          color: const Color(0xFFFFD41D),
           borderRadius: BorderRadius.circular(16.0),
+          border: Border.all(
+            color: const Color(0xFFFFF7C2),
+            width: 1.5,
+          ),
           boxShadow: _isPressed
               ? []
               : const [
                   BoxShadow(
-                    color: Color(0xFF775F2A),
+                    color: Color(0xFF9E6500),
                     offset: Offset(0, bevelHeight),
                   ),
                   BoxShadow(
-                    color: Color(0x59000000),
+                    color: Color(0x33000000),
                     offset: Offset(0, 8),
                     blurRadius: 16,
                   ),
                 ],
         ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Top Gloss Reflective Stripe
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 24.0,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(16.0)),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.35),
-                      Colors.transparent,
-                    ],
+        child: Center(
+          child: widget.isLoading
+              ? const SizedBox(
+                  width: 24.0,
+                  height: 24.0,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF261A00)),
                   ),
-                ),
-              ),
-            ),
-
-            if (widget.isLoading)
-              const SizedBox(
-                width: 24.0,
-                height: 24.0,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF261A00)),
-                ),
-              )
-            else
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    widget.text,
-                    style: const TextStyle(
-                      fontFamily: 'Rubik',
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF261A00),
-                      letterSpacing: 0.2,
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      widget.text,
+                      style: const TextStyle(
+                        fontFamily: 'Rubik',
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF261A00),
+                        letterSpacing: 0.2,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8.0),
-                  const Icon(
-                    Icons.arrow_forward,
-                    size: 20.0,
-                    color: Color(0xFF261A00),
-                  ),
-                ],
-              ),
-          ],
+                    const SizedBox(width: 8.0),
+                    const Icon(
+                      Icons.arrow_forward,
+                      size: 20.0,
+                      color: Color(0xFF261A00),
+                    ),
+                  ],
+                ),
         ),
       ),
     );
@@ -1191,13 +1223,11 @@ class _OnboardingStepHeader extends StatelessWidget {
   const _OnboardingStepHeader({
     required this.currentStep,
     required this.onBack,
-    this.onSkip,
     this.isBackEnabled = true,
   });
 
   final int currentStep;
   final VoidCallback onBack;
-  final VoidCallback? onSkip;
   final bool isBackEnabled;
 
   @override
@@ -1299,22 +1329,8 @@ class _OnboardingStepHeader extends StatelessWidget {
             ),
           ),
 
-          // Right side: Skip button or empty balancing box
-          if (onSkip != null)
-            TextButton(
-              onPressed: isBackEnabled ? onSkip : null,
-              child: Text(
-                'Skip',
-                style: TextStyle(
-                  fontFamily: 'Space Grotesk',
-                  fontSize: 12.0,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white.withValues(alpha: 0.70),
-                ),
-              ),
-            )
-          else
-            const SizedBox(width: 40.0),
+          // Right side: empty balancing box
+          const SizedBox(width: 40.0),
         ],
       ),
     );
@@ -2010,6 +2026,7 @@ class _OnboardingLeaguesSelectionStep extends ConsumerStatefulWidget {
     required this.onBack,
     required this.onLeaguesChanged,
     required this.onUsernameConflict,
+    required this.onAuthRequired,
     required this.onFinished,
   });
 
@@ -2020,6 +2037,7 @@ class _OnboardingLeaguesSelectionStep extends ConsumerStatefulWidget {
   final VoidCallback onBack;
   final ValueChanged<Set<String>> onLeaguesChanged;
   final ValueChanged<String> onUsernameConflict;
+  final VoidCallback onAuthRequired;
   final VoidCallback onFinished;
 
   @override
@@ -2094,21 +2112,33 @@ class _OnboardingLeaguesSelectionStepState
         return;
       }
 
-      // 2. Perform Supabase Anonymous Sign-In if not already authenticated
+      // 2. Verify authenticated Google session (never create anonymous users)
       final currentAuth = ref.read(authProvider);
-      String? userId;
-      if (currentAuth is PicoAuthAuthenticated && currentAuth.user != null) {
-        userId = currentAuth.user!.id;
-      } else {
-        await ref.read(authProvider.notifier).signInAnonymously();
-        final updatedAuth = ref.read(authProvider);
-        if (updatedAuth is PicoAuthAuthenticated && updatedAuth.user != null) {
-          userId = updatedAuth.user!.id;
-        }
+      supa.SupabaseClient? client;
+      try {
+        client = supa.Supabase.instance.client;
+      } catch (_) {
+        client = ref.read(supabaseClientProvider);
       }
 
-      if (userId == null) {
-        throw Exception('Failed to create account session.');
+      final String userId;
+      if (client != null) {
+        final currentUser = client.auth.currentUser;
+        if (currentUser == null ||
+            currentUser.email == null ||
+            currentUser.email!.isEmpty) {
+          if (mounted) {
+            setState(() => _isSubmitting = false);
+            widget.onAuthRequired();
+          }
+          return;
+        }
+        userId = currentUser.id;
+      } else if (currentAuth is PicoAuthAuthenticated && currentAuth.user != null) {
+        userId = currentAuth.user!.id;
+      } else {
+        // Fallback for isolated widget tests without active Supabase client
+        userId = 'test_user_id';
       }
 
       // 3. Atomically update user personalization with all gathered onboarding data

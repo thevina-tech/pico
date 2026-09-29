@@ -43,6 +43,7 @@ class TournamentsScreen extends ConsumerWidget {
           backgroundColor: Colors.transparent,
           appBar: PicoAppBar(
             title: l10n.tournamentsTitle,
+            isTransparent: true,
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
           floatingActionButton: _buildFloatingCreateOrJoinButton(context, l10n),
@@ -888,15 +889,7 @@ class TournamentsScreen extends ConsumerWidget {
       builder: (ctx) {
         return Container(
           decoration: const BoxDecoration(
-            color: Color(0xFF0F261B),
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF143B29), // Rich emerald turf highlight matching prediction bottom bar
-                Color(0xFF0B2117), // Deep solid grass ground
-              ],
-            ),
+            color: Color(0xFF144D34), // Brighter crisp pitch background without AI gradient
             borderRadius: BorderRadius.vertical(top: Radius.circular(28.0)),
             border: Border.fromBorderSide(
               BorderSide(
@@ -935,13 +928,7 @@ class TournamentsScreen extends ConsumerWidget {
                     title: l10n.createPrivateLeagueTitle,
                     subtitle: 'Set up a private group for your friends',
                     icon: Icons.add_circle_rounded,
-                    accentColor: PicoColors.gold,
-                    gradientColors: const [
-                      Color(0xFF235C3A),
-                      Color(0xFF174229),
-                      Color(0xFF10331F),
-                    ],
-                    bevelColor: const Color(0xFF07190F),
+                    accentColor: const Color(0xFF16A34A),
                     onTap: () {
                       Navigator.of(ctx).pop();
                       context.push('/tournaments/create');
@@ -954,13 +941,7 @@ class TournamentsScreen extends ConsumerWidget {
                     title: l10n.joinPrivateLeagueTitle,
                     subtitle: 'Enter a 6-character code from an invite',
                     icon: Icons.vpn_key_rounded,
-                    accentColor: PicoColors.electricMint,
-                    gradientColors: const [
-                      Color(0xFF1C5235),
-                      Color(0xFF143D27),
-                      Color(0xFF0D2C1B),
-                    ],
-                    bevelColor: const Color(0xFF06170E),
+                    accentColor: const Color(0xFF0284C7),
                     onTap: () {
                       Navigator.of(ctx).pop();
                       context.push('/tournaments/join');
@@ -977,14 +958,13 @@ class TournamentsScreen extends ConsumerWidget {
 }
 
 /// Tactile 2.5D/3D menu card button with physical bevel and press-down dynamics.
+/// Features prediction sheet cream-white card surface with 3D bottom bevel shelf.
 class _TactileMenuButton extends StatefulWidget {
   const _TactileMenuButton({
     required this.title,
     required this.subtitle,
     required this.icon,
     required this.accentColor,
-    required this.gradientColors,
-    required this.bevelColor,
     required this.onTap,
   });
 
@@ -992,8 +972,6 @@ class _TactileMenuButton extends StatefulWidget {
   final String subtitle;
   final IconData icon;
   final Color accentColor;
-  final List<Color> gradientColors;
-  final Color bevelColor;
   final VoidCallback onTap;
 
   @override
@@ -1022,26 +1000,22 @@ class _TactileMenuButtonState extends State<_TactileMenuButton> {
         transform: Matrix4.translationValues(0.0, translationY, 0.0),
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: widget.gradientColors,
-          ),
-          borderRadius: BorderRadius.circular(18.0),
+          color: PicoColors.cardFace,
+          borderRadius: BorderRadius.circular(16.0),
           border: Border.all(
-            color: Colors.white.withValues(alpha: 0.20),
-            width: 1.2,
+            color: const Color(0xFFECE7DC),
+            width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: widget.bevelColor,
+              color: PicoColors.cardBevelDark,
               offset: Offset(0, currentBevel),
               blurRadius: 0,
             ),
             BoxShadow(
-              color: const Color(0x40000000),
-              offset: Offset(0, currentBevel + 4),
-              blurRadius: 10,
+              color: const Color(0x1F000000),
+              offset: Offset(0, currentBevel + 2.0),
+              blurRadius: 8.0,
             ),
           ],
         ),
@@ -1051,18 +1025,12 @@ class _TactileMenuButtonState extends State<_TactileMenuButton> {
               width: 48.0,
               height: 48.0,
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.25),
+                color: widget.accentColor.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(14.0),
                 border: Border.all(
-                  color: widget.accentColor.withValues(alpha: 0.6),
+                  color: widget.accentColor.withValues(alpha: 0.35),
                   width: 1.5,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: widget.accentColor.withValues(alpha: 0.2),
-                    blurRadius: 8,
-                  ),
-                ],
               ),
               child: Icon(
                 widget.icon,
@@ -1079,9 +1047,9 @@ class _TactileMenuButtonState extends State<_TactileMenuButton> {
                     widget.title,
                     style: const TextStyle(
                       fontFamily: 'Rubik',
-                      color: PicoColors.textWhite,
+                      color: PicoColors.textPitchInk,
                       fontWeight: FontWeight.w800,
-                      fontSize: 15.5,
+                      fontSize: 16.0,
                       letterSpacing: -0.2,
                     ),
                   ),
@@ -1090,8 +1058,8 @@ class _TactileMenuButtonState extends State<_TactileMenuButton> {
                     widget.subtitle,
                     style: const TextStyle(
                       fontFamily: 'Plus Jakarta Sans',
-                      color: Color(0xFFD1FAE5),
-                      fontSize: 12.0,
+                      color: PicoColors.textTactileMuted,
+                      fontSize: 12.5,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -1102,17 +1070,17 @@ class _TactileMenuButtonState extends State<_TactileMenuButton> {
               width: 30.0,
               height: 30.0,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.12),
+                color: const Color(0xFFF3EFE6),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.25),
+                  color: const Color(0xFFE2DCD0),
                   width: 1.0,
                 ),
               ),
               child: const Icon(
                 Icons.arrow_forward_ios_rounded,
-                size: 13.0,
-                color: Colors.white,
+                size: 12.0,
+                color: PicoColors.textTactileMuted,
               ),
             ),
           ],
@@ -1157,16 +1125,8 @@ class _TactileFloatingButtonState extends State<_TactileFloatingButton> {
           transform: Matrix4.translationValues(0.0, translationY, 0.0),
           padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 12.0),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFFFFEA75),
-                Color(0xFFFFD41D),
-                Color(0xFFFFB800),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(999.0),
+            color: const Color(0xFFFFD41D),
+            borderRadius: BorderRadius.circular(16.0),
             border: Border.all(
               color: const Color(0xFFFFF7C2),
               width: 1.5,
@@ -1197,7 +1157,7 @@ class _TactileFloatingButtonState extends State<_TactileFloatingButton> {
                 height: 24.0,
                 decoration: BoxDecoration(
                   color: const Color(0xFF261700).withValues(alpha: 0.14),
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
                 alignment: Alignment.center,
                 child: const Icon(
@@ -1350,15 +1310,6 @@ class _PicoBattleButtonState extends State<PicoBattleButton> {
         height: widget.height,
         decoration: BoxDecoration(
           color: const Color(0xFFFFD41D),
-          gradient: const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFFFEA75),
-              Color(0xFFFFD41D),
-              Color(0xFFFFB800),
-            ],
-          ),
           borderRadius: BorderRadius.circular(16.0),
           border: Border.all(
             color: const Color(0xFFFFF6B0),

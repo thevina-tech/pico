@@ -6,9 +6,9 @@ import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
 
 void main() {
   group('Stitch 4-Tab PicoBottomNavBar Tests', () {
-    testWidgets('renders 4 tabs with Matches far-left, Home, Tournaments, and Profile far-right',
+    testWidgets('renders 4 tabs with Home far-left, Matches, Tournaments, and Profile far-right',
         (WidgetTester tester) async {
-      int selectedIndex = 1; // Home active by default
+      int selectedIndex = 0; // Home active by default
 
       await tester.pumpWidget(
         MaterialApp(
@@ -40,39 +40,39 @@ void main() {
       expect(find.byKey(const ValueKey('nav_shop')), findsNothing);
 
       // Verify all 4 tab labels are visible
-      expect(find.text('Matches'), findsOneWidget);
       expect(find.text('Home'), findsOneWidget);
+      expect(find.text('Matches'), findsOneWidget);
       expect(find.text('Tournaments'), findsOneWidget);
       expect(find.text('Profile'), findsOneWidget);
 
       // Verify semantic keys and ordering
-      final matchesKey = find.byKey(const ValueKey('nav_matches'));
       final homeKey = find.byKey(const ValueKey('nav_home'));
+      final matchesKey = find.byKey(const ValueKey('nav_matches'));
       final tournamentsKey = find.byKey(const ValueKey('nav_tournaments'));
       final profileKey = find.byKey(const ValueKey('nav_profile'));
 
-      expect(matchesKey, findsOneWidget);
       expect(homeKey, findsOneWidget);
+      expect(matchesKey, findsOneWidget);
       expect(tournamentsKey, findsOneWidget);
       expect(profileKey, findsOneWidget);
 
-      // Check horizontal ordering: matches < home < tournaments < profile
-      final matchesOffset = tester.getCenter(matchesKey);
+      // Check horizontal ordering: home < matches < tournaments < profile
       final homeOffset = tester.getCenter(homeKey);
+      final matchesOffset = tester.getCenter(matchesKey);
       final tournamentsOffset = tester.getCenter(tournamentsKey);
       final profileOffset = tester.getCenter(profileKey);
 
-      expect(matchesOffset.dx < homeOffset.dx, isTrue);
-      expect(homeOffset.dx < tournamentsOffset.dx, isTrue);
+      expect(homeOffset.dx < matchesOffset.dx, isTrue);
+      expect(matchesOffset.dx < tournamentsOffset.dx, isTrue);
       expect(tournamentsOffset.dx < profileOffset.dx, isTrue);
 
-      // Tap on Matches (index 0)
-      await tester.tap(matchesKey);
+      // Tap on Home (index 0)
+      await tester.tap(homeKey);
       await tester.pumpAndSettle();
       expect(selectedIndex, 0);
 
-      // Tap on Home (index 1)
-      await tester.tap(homeKey);
+      // Tap on Matches (index 1)
+      await tester.tap(matchesKey);
       await tester.pumpAndSettle();
       expect(selectedIndex, 1);
 
@@ -101,7 +101,7 @@ void main() {
           supportedLocales: [Locale('en'), Locale('es')],
           home: Scaffold(
             bottomNavigationBar: PicoBottomNavBar(
-              currentIndex: 1,
+              currentIndex: 0,
               onTap: _noOp,
             ),
           ),
@@ -110,8 +110,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Tienda'), findsNothing);
-      expect(find.text('Partidos'), findsOneWidget);
       expect(find.text('Inicio'), findsOneWidget);
+      expect(find.text('Partidos'), findsOneWidget);
       expect(find.text('Torneos'), findsOneWidget);
       expect(find.text('Perfil'), findsOneWidget);
     });
@@ -129,7 +129,7 @@ void main() {
           supportedLocales: const [Locale('en'), Locale('es')],
           home: Scaffold(
             bottomNavigationBar: PicoBottomNavBar(
-              currentIndex: 1, // Home active
+              currentIndex: 0, // Home active
               onTap: _noOp,
             ),
           ),

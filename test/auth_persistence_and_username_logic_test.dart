@@ -100,7 +100,7 @@ void main() {
   });
 
   group('HOTFIX 2: Auth State Persistence & Auto-Login Routing', () {
-    testWidgets('Unauthenticated startup routes to Step 1 (How it works screen)', (WidgetTester tester) async {
+    testWidgets('Unauthenticated startup routes to Step 1 (Welcome screen)', (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -120,10 +120,10 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       await tester.pumpAndSettle();
 
-      // Resolved: unauthenticated user lands on How Pico Works (Step 2/5, page index 1)
+      // Resolved: unauthenticated user lands on Welcome screen (Step 1/5, page index 0)
       expect(find.byType(OnboardingScreen), findsOneWidget);
-      expect(find.text('How Pico Works'), findsOneWidget);
-      expect(find.text('Continue with Google'), findsOneWidget);
+      expect(find.text('Predict Football.\nCompete with Friends.'), findsOneWidget);
+      expect(find.text('Get Started'), findsOneWidget);
     });
 
     testWidgets('Returning User with completed username routes directly to Main Dashboard', (WidgetTester tester) async {

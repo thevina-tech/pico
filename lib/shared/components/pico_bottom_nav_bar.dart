@@ -4,16 +4,16 @@ import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
 /// Navigation destinations in the order requested:
-/// 1. Matches
-/// 2. Home
+/// 1. Home
+/// 2. Matches
 /// 3. Tournaments
 /// 4. Profile
-enum PicoNavDestination { matches, home, tournaments, profile }
+enum PicoNavDestination { home, matches, tournaments, profile }
 
 /// The docked bottom navigation bar directly matching the Stitch navbar style.
 ///
 /// Features:
-/// - 4 destinations: Matches, Home, Tournaments, Profile.
+/// - 4 destinations: Home, Matches, Tournaments, Profile.
 /// - 3D illustrated icons directly with tactile state changes.
 /// - Tactile Warm Game Gold pill indicator (`#FCCB2B`) beneath the active tab label.
 /// - Dark stadium pitch surface with elevated shadow and crisp edge border.
@@ -34,17 +34,17 @@ class PicoBottomNavBar extends StatelessWidget {
     final List<_NavItemData> navItems = [
       _NavItemData(
         index: 0,
-        label: l10n?.navMatches ?? 'Matches',
-        assetPath: 'assets/images/nav_matches.png',
-        fallbackIcon: Icons.event_note_rounded,
-        keyName: 'nav_matches',
-      ),
-      _NavItemData(
-        index: 1,
         label: l10n?.navHome ?? 'Home',
         assetPath: 'assets/images/nav_home.png',
         fallbackIcon: Icons.sports_soccer_rounded,
         keyName: 'nav_home',
+      ),
+      _NavItemData(
+        index: 1,
+        label: l10n?.navMatches ?? 'Matches',
+        assetPath: 'assets/images/nav_matches.png',
+        fallbackIcon: Icons.event_note_rounded,
+        keyName: 'nav_matches',
       ),
       _NavItemData(
         index: 2,

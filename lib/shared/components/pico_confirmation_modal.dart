@@ -29,8 +29,8 @@ class PicoConfirmationModal extends StatelessWidget {
     this.confirmStyle = PicoDialogButtonStyle.blue,
     this.cancelStyle = PicoDialogButtonStyle.red,
     this.customIcon,
-    this.showLogo = true,
-    this.showWatermark = true,
+    this.showLogo = false,
+    this.showWatermark = false,
     this.confirmKey,
     this.cancelKey,
     this.onConfirm,
@@ -109,7 +109,7 @@ class PicoConfirmationModal extends StatelessWidget {
                   Padding(
                     padding: EdgeInsets.fromLTRB(
                       24.0,
-                      (customIcon != null || showLogo) ? 28.0 : 26.0,
+                      customIcon != null ? 28.0 : 26.0,
                       24.0,
                       24.0,
                     ),
@@ -117,16 +117,11 @@ class PicoConfirmationModal extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // Top Brand Wordmark or Custom Icon
+                        // Custom Icon (if provided)
                         if (customIcon != null)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 14.0),
                             child: customIcon!,
-                          )
-                        else if (showLogo)
-                          const Padding(
-                            padding: EdgeInsets.only(bottom: 14.0),
-                            child: _PicoWordmarkLogo(),
                           ),
 
                         // Title
@@ -222,8 +217,8 @@ Future<bool?> showPicoConfirmationModal({
   PicoDialogButtonStyle confirmStyle = PicoDialogButtonStyle.blue,
   PicoDialogButtonStyle cancelStyle = PicoDialogButtonStyle.red,
   Widget? customIcon,
-  bool showLogo = true,
-  bool showWatermark = true,
+  bool showLogo = false,
+  bool showWatermark = false,
   Key? confirmKey,
   Key? cancelKey,
   bool barrierDismissible = true,
@@ -250,53 +245,6 @@ Future<bool?> showPicoConfirmationModal({
   );
 }
 
-/// Official Pico stylized wordmark logo: "pic" + circular football target 'o'.
-class _PicoWordmarkLogo extends StatelessWidget {
-  const _PicoWordmarkLogo();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const Text(
-          'pic',
-          style: TextStyle(
-            fontFamily: 'Rubik',
-            fontSize: 32.0,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -1.0,
-            color: Color(0xFF12944B),
-            height: 1.0,
-          ),
-        ),
-        const SizedBox(width: 1.5),
-        Container(
-          width: 25.0,
-          height: 25.0,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: const Color(0xFF12944B),
-              width: 3.5,
-            ),
-          ),
-          child: Center(
-            child: Container(
-              width: 6.5,
-              height: 6.5,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFF12944B),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 /// 3D tactile button with mechanical press feedback and thick bottom bevel.
 class _TactileModalButton extends StatelessWidget {
@@ -336,7 +284,7 @@ class _TactileModalButton extends StatelessWidget {
       text: label,
       variant: variant,
       height: 48.0,
-      borderRadius: 18.0,
+      borderRadius: 16.0,
       onPressed: onPressed,
     );
   }

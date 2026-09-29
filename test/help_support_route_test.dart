@@ -47,6 +47,10 @@ void main() {
 
   testWidgets('GoRouter navigates to /help-support from profile screen',
       (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
     final container = ProviderContainer(
       overrides: [
         authProvider.overrideWith(() => _FakeAuthNotifier()),
