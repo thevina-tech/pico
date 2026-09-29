@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pico/core/logging/app_logger.dart';
 import 'package:pico/core/network/supabase_client_provider.dart';
@@ -28,7 +26,7 @@ import 'package:pico/shared/components/prediction_bottom_sheet.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/shared/components/division_badge.dart';
 import 'package:pico/shared/components/pico_confirmation_modal.dart';
-import 'package:pico/shared/components/pico_button.dart';
+import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
 /// Unified Clan Dashboard for Private Leagues.
@@ -237,8 +235,12 @@ class _PrivateLeagueDashboardScreenState
     final currentUserId = authState is PicoAuthAuthenticated ? authState.user?.id : null;
     final isOwner = currentLeague != null && currentUserId != null && currentLeague.ownerId == currentUserId;
 
+    final screenBackground = _selectedTabIndex == 0
+        ? 'assets/images/league_chat_background.png'
+        : 'assets/images/main_background.png';
+
     return PicoPitchBackground(
-      imageAsset: 'assets/images/tournament_and_matches_bg.png',
+      imageAsset: screenBackground,
       child: Scaffold(
         backgroundColor: Colors.transparent,
         resizeToAvoidBottomInset: true,
@@ -314,70 +316,47 @@ class _PrivateLeagueDashboardScreenState
     required AppLocalizations? l10n,
   }) {
     final leagueName = currentLeague?.name ?? 'Private League';
-    final memberCount = members.isNotEmpty
-        ? members.length
-        : (currentLeague?.memberCount ?? 1);
 
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(
-          Icons.arrow_back_ios_new_rounded,
-          color: PicoColors.textWhite,
-          size: 20.0,
-        ),
-        onPressed: () => context.pop(),
-      ),
-      centerTitle: true,
-      title: InkWell(
+    return PicoAppBar(
+      showBackButton: true,
+      onBack: () => context.pop(),
+      titleWidget: InkWell(
         borderRadius: BorderRadius.circular(12.0),
         onTap: () {
           if (currentLeague != null) {
-            _openDetailsSheet(currentLeague, members);
+            _openDetailsSheet(currentLeague, members, competition);
           }
         },
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildCrestIcon(competition),
-              const SizedBox(width: 10.0),
+              const SizedBox(width: 8.0),
               Flexible(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      leagueName,
-                      style: PicoTypography.headlineMd.copyWith(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w800,
-                        color: PicoColors.textWhite,
+                child: Text(
+                  leagueName,
+                  style: const TextStyle(
+                    fontFamily: 'Rubik',
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.6,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        color: Color(0x99000000),
+                        offset: Offset(0, 2),
+                        blurRadius: 4.0,
                       ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '$memberCount Active Members',
-                          style: PicoTypography.bodySm.copyWith(
-                            fontSize: 11.5,
-                            color: PicoColors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(width: 2.0),
-                        const Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          size: 16.0,
-                          color: PicoColors.primary,
-                        ),
-                      ],
-                    ),
-                  ],
+                      Shadow(
+                        color: Color(0x6610B981),
+                        offset: Offset(0, 1),
+                        blurRadius: 8.0,
+                      ),
+                    ],
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -385,24 +364,18 @@ class _PrivateLeagueDashboardScreenState
         ),
       ),
       actions: [
-        // Switch to Standings tab
-        IconButton(
-          icon: const Icon(
-            Icons.leaderboard_rounded,
-            color: Color(0xFFFFD41D),
-            size: 22.0,
-          ),
-          tooltip: l10n?.leaderboardTab ?? 'Standings',
-          onPressed: () {
-            setState(() => _selectedTabIndex = 2);
-          },
-        ),
-        // Leave League icon if NOT the owner
-        if (currentLeague != null && !isOwner)
+        if (currentLeague != null)
           IconButton(
-            icon: const Icon(Icons.logout_rounded, color: PicoColors.accentCoral),
-            tooltip: l10n?.leaveLeagueButton ?? 'Leave League',
-            onPressed: () => _confirmLeaveLeague(currentLeague, l10n),
+            key: const Key('league_settings_button'),
+            icon: const Icon(
+              Icons.settings_rounded,
+              color: PicoColors.textWhite,
+              size: 22.0,
+            ),
+            tooltip: 'Settings & Info',
+            onPressed: () {
+              _openDetailsSheet(currentLeague, members, competition);
+            },
           ),
       ],
     );
@@ -459,11 +432,16 @@ class _PrivateLeagueDashboardScreenState
     );
   }
 
-  void _openDetailsSheet(PrivateLeague league, List<PrivateLeagueMember> members) {
+  void _openDetailsSheet(
+    PrivateLeague league,
+    List<PrivateLeagueMember> members, [
+    Competition? competition,
+  ]) {
     LeagueDetailsSheet.show(
       context,
       league: league,
       initialMembers: members,
+      competition: competition,
     );
   }
 
@@ -600,32 +578,54 @@ class _PrivateLeagueDashboardScreenState
   // ==========================================
 
   Widget _buildChatTab(PrivateLeague league, String? currentUserId) {
-    return Column(
+    return Stack(
       children: [
-        Expanded(
-          child: _isLoadingMessages
-              ? const Center(
-                  child: CircularProgressIndicator(color: PicoColors.primary),
-                )
-              : _messages.isEmpty
-                  ? _buildEmptyChatState(league)
-                  : ListView.builder(
-                      controller: _scrollController,
-                      reverse: true,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 12.0,
-                      ),
-                      itemCount: _messages.length,
-                      itemBuilder: (context, index) {
-                        final message = _messages[index];
-                        final isCurrentUser =
-                            currentUserId != null && message.userId == currentUserId;
-                        return _buildChatBubble(message, isCurrentUser);
-                      },
-                    ),
+        // Chat Wallpaper Background (Normal/Crisp)
+        Positioned.fill(
+          child: Image.asset(
+            'assets/images/league_chat_background.png',
+            fit: BoxFit.cover,
+            alignment: Alignment.center,
+            errorBuilder: (context, error, stackTrace) =>
+                const SizedBox.shrink(),
+          ),
         ),
-        _buildMessageInputBar(),
+        // Subtle dark scrim so messages pop crisply
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.15),
+            ),
+          ),
+        ),
+        Column(
+          children: [
+            Expanded(
+              child: _isLoadingMessages
+                  ? const Center(
+                      child: CircularProgressIndicator(color: PicoColors.primary),
+                    )
+                  : _messages.isEmpty
+                      ? _buildEmptyChatState(league)
+                      : ListView.builder(
+                          controller: _scrollController,
+                          reverse: true,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0,
+                            vertical: 12.0,
+                          ),
+                          itemCount: _messages.length,
+                          itemBuilder: (context, index) {
+                            final message = _messages[index];
+                            final isCurrentUser =
+                                currentUserId != null && message.userId == currentUserId;
+                            return _buildChatBubble(message, isCurrentUser);
+                          },
+                        ),
+            ),
+            _buildMessageInputBar(),
+          ],
+        ),
       ],
     );
   }
@@ -713,22 +713,44 @@ class _PrivateLeagueDashboardScreenState
               children: [
                 if (!isCurrentUser && message.username != null)
                   Padding(
-                    padding: const EdgeInsets.only(left: 4.0, bottom: 3.0),
+                    padding: const EdgeInsets.only(left: 4.0, bottom: 4.0),
                     child: Text(
                       message.username!,
-                      style: PicoTypography.bodySm.copyWith(
-                        color: PicoColors.textWhiteMuted,
-                        fontSize: 11.0,
-                        fontWeight: FontWeight.w600,
+                      style: const TextStyle(
+                        color: Color(0xFF34D399),
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.3,
+                        shadows: [
+                          Shadow(
+                            color: Color(0x99000000),
+                            offset: Offset(0, 1),
+                            blurRadius: 2.0,
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14.0,
+                    vertical: 10.0,
+                  ),
                   decoration: BoxDecoration(
-                    color: isCurrentUser
-                        ? PicoColors.primary
-                        : const Color(0xFF182534),
+                    // Game-like off-white (not harsh/sharp pure white)
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: isCurrentUser
+                          ? const [
+                              Color(0xFFE8F7EE), // Soft game mint-white
+                              Color(0xFFDCF4E5),
+                            ]
+                          : const [
+                              Color(0xFFF3F6F9), // Soft pearl off-white
+                              Color(0xFFE5EBF1),
+                            ],
+                    ),
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(16.0),
                       topRight: const Radius.circular(16.0),
@@ -737,28 +759,54 @@ class _PrivateLeagueDashboardScreenState
                     ),
                     border: Border.all(
                       color: isCurrentUser
-                          ? Colors.transparent
-                          : Colors.white.withValues(alpha: 0.05),
+                          ? const Color(0xFFA7F3D0)
+                          : const Color(0xFFCBD5E1),
+                      width: 1.2,
                     ),
+                    boxShadow: [
+                      // Tactile 3D bottom bevel
+                      BoxShadow(
+                        color: isCurrentUser
+                            ? const Color(0xFF059669)
+                            : const Color(0xFF94A3B8),
+                        offset: const Offset(0, 2.5),
+                        blurRadius: 0,
+                      ),
+                      // Soft ambient drop shadow
+                      const BoxShadow(
+                        color: Color(0x2E000000),
+                        offset: Offset(0, 4),
+                        blurRadius: 6,
+                      ),
+                    ],
                   ),
                   child: Text(
                     message.message,
-                    style: PicoTypography.bodyMd.copyWith(
+                    style: TextStyle(
                       color: isCurrentUser
-                          ? PicoColors.pitchBackground
-                          : PicoColors.textWhite,
-                      fontWeight: isCurrentUser ? FontWeight.w700 : FontWeight.w500,
+                          ? const Color(0xFF064E3B) // High-contrast deep game green
+                          : const Color(0xFF0F172A), // High-contrast deep slate
+                      fontWeight: isCurrentUser ? FontWeight.w700 : FontWeight.w600,
                       fontSize: 14.0,
+                      height: 1.3,
                     ),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 3.0, left: 4.0, right: 4.0),
+                  padding: const EdgeInsets.only(top: 4.0, left: 4.0, right: 4.0),
                   child: Text(
                     timeStr,
-                    style: PicoTypography.bodySm.copyWith(
-                      color: PicoColors.textWhiteMuted.withValues(alpha: 0.6),
-                      fontSize: 10.0,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.65),
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w600,
+                      shadows: const [
+                        Shadow(
+                          color: Color(0x99000000),
+                          offset: Offset(0, 1),
+                          blurRadius: 2.0,
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -1207,22 +1255,8 @@ class _PrivateLeagueDashboardScreenState
     final membersAsync = ref.watch(privateLeagueMembersProvider(league.id));
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 24.0),
+      padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 24.0),
       children: [
-        // 1. Prominent 6-Character Invite Code Banner
-        _buildInviteCodeBanner(league, l10n),
-        const SizedBox(height: 10.0),
-
-        // 2. Atmosphere Header Card
-        _buildHeaderCard(league, competition, isOwner, l10n),
-
-        // 3. Admin Controls Section (Owner ONLY)
-        if (isOwner) ...[
-          const SizedBox(height: 10.0),
-          _buildAdminControlsCard(league, l10n),
-        ],
-
-        const SizedBox(height: 16.0),
 
         // 4. Standings Section Title
         Text(
@@ -1431,266 +1465,7 @@ class _PrivateLeagueDashboardScreenState
     );
   }
 
-  Widget _buildInviteCodeBanner(PrivateLeague league, AppLocalizations? l10n) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0D1B13),
-        borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(
-          color: PicoColors.gold.withValues(alpha: 0.6),
-          width: 1.5,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x33000000),
-            blurRadius: 6.0,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.key_rounded,
-                      size: 13.0,
-                      color: PicoColors.gold,
-                    ),
-                    const SizedBox(width: 4.0),
-                    Text(
-                      l10n?.inviteCodeBannerTitle ?? 'LEAGUE INVITE CODE',
-                      style: PicoTypography.labelPillSm.copyWith(
-                        color: PicoColors.gold,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 10.0,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4.0),
-                Text(
-                  league.inviteCode,
-                  style: const TextStyle(
-                    color: PicoColors.gold,
-                    fontFamily: 'monospace',
-                    fontWeight: FontWeight.w900,
-                    fontSize: 22.0,
-                    letterSpacing: 4.0,
-                  ),
-                ),
-              ],
-            ),
-          ),
 
-          IconButton(
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: league.inviteCode));
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(l10n?.codeCopiedToast ?? 'Invite code copied to clipboard!'),
-                  backgroundColor: PicoColors.primary,
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            },
-            icon: const Icon(Icons.copy_rounded, color: PicoColors.gold, size: 20.0),
-            tooltip: 'Copy Code',
-            style: IconButton.styleFrom(
-              backgroundColor: const Color(0xFF1F3524),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-            ),
-          ),
-          const SizedBox(width: 8.0),
-
-          IconButton(
-            onPressed: () {
-              SharePlus.instance.share(
-                ShareParams(
-                  text: l10n?.shareInviteCodeMessage(league.name, league.inviteCode) ??
-                      'Join my prediction league "${league.name}" on Pico! Use invite code: ${league.inviteCode}',
-                ),
-              );
-            },
-            icon: const Icon(Icons.share_rounded, color: PicoColors.textWhite, size: 20.0),
-            tooltip: 'Share Invite',
-            style: IconButton.styleFrom(
-              backgroundColor: PicoColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeaderCard(
-    PrivateLeague league,
-    Competition? comp,
-    bool isOwner,
-    AppLocalizations? l10n,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(14.0),
-      decoration: BoxDecoration(
-        color: PicoColors.darkTray,
-        borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-      ),
-      child: Row(
-        children: [
-          _buildCompEmblem(comp),
-          const SizedBox(width: 14.0),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
-                      decoration: BoxDecoration(
-                        color: isOwner
-                            ? PicoColors.gold.withValues(alpha: 0.2)
-                            : PicoColors.primary.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(4.0),
-                      ),
-                      child: Text(
-                        isOwner ? (l10n?.creatorBadge ?? 'CREATOR') : (l10n?.memberBadge ?? 'MEMBER'),
-                        style: PicoTypography.labelPillSm.copyWith(
-                          color: isOwner ? PicoColors.gold : PicoColors.primary,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 9.5,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 6.0),
-                    Text(
-                      '· ${league.memberCount} ${league.memberCount == 1 ? "Member" : "Members"}',
-                      style: PicoTypography.bodySm.copyWith(
-                        color: PicoColors.textWhiteMuted,
-                        fontSize: 11.5,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 3.0),
-                Text(
-                  league.name,
-                  style: PicoTypography.headlineMd.copyWith(
-                    color: PicoColors.textWhite,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16.5,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  comp?.name ?? 'Top-Tier Competition',
-                  style: PicoTypography.bodySm.copyWith(
-                    color: PicoColors.textWhiteMuted,
-                    fontSize: 12.0,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCompEmblem(Competition? comp) {
-    return Container(
-      width: 48.0,
-      height: 48.0,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4.0,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(4.0),
-      alignment: Alignment.center,
-      child: comp?.emblemUrl != null && comp!.emblemUrl!.isNotEmpty
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: CachedNetworkImage(
-                imageUrl: comp.emblemUrl!,
-                width: 32.0,
-                height: 32.0,
-                fit: BoxFit.contain,
-                errorWidget: (context, url, error) => Text(
-                  comp.flag,
-                  style: const TextStyle(fontSize: 22.0),
-                ),
-              ),
-            )
-          : Text(
-              comp?.flag ?? '⚽',
-              style: const TextStyle(fontSize: 22.0),
-            ),
-    );
-  }
-
-  Widget _buildAdminControlsCard(PrivateLeague league, AppLocalizations? l10n) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1417),
-        borderRadius: BorderRadius.circular(14.0),
-        border: Border.all(color: PicoColors.accentCoral.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.admin_panel_settings_rounded,
-                color: PicoColors.accentCoral,
-                size: 18.0,
-              ),
-              const SizedBox(width: 8.0),
-              Text(
-                l10n?.adminControlsTitle ?? 'ADMIN CONTROLS',
-                style: PicoTypography.labelPillSm.copyWith(
-                  color: PicoColors.accentCoral,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 10.5,
-                  letterSpacing: 0.8,
-                ),
-              ),
-            ],
-          ),
-          PicoButton.red(
-            text: l10n?.deleteLeagueButton ?? 'Delete League',
-            icon: const Icon(Icons.delete_forever_rounded, size: 14.0, color: Colors.white),
-            isFullWidth: false,
-            height: 34.0,
-            bevelHeight: 3.0,
-            borderRadius: 10.0,
-            fontSize: 11.0,
-            isLoading: _isProcessing,
-            onPressed: _isProcessing ? null : () => _confirmDeleteLeague(league, l10n),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildRankBadge(int rank) {
     Color badgeColor;
@@ -1733,44 +1508,7 @@ class _PrivateLeagueDashboardScreenState
   // CONFIRMATION DIALOGS & ACTIONS
   // ==========================================
 
-  Future<void> _confirmDeleteLeague(PrivateLeague league, AppLocalizations? l10n) async {
-    final confirmed = await showPicoConfirmationModal(
-      context: context,
-      title: l10n?.deleteLeagueConfirmTitle ?? 'Delete League',
-      message: l10n?.deleteLeagueConfirmBody ??
-          'Are you sure you want to delete this league? This action cannot be undone.',
-      cancelText: l10n?.cancelButton ?? 'Cancel',
-      confirmText: l10n?.deleteLeagueAction ?? 'Delete',
-      confirmStyle: PicoDialogButtonStyle.red,
-      cancelStyle: PicoDialogButtonStyle.neutral,
-    );
 
-    if (confirmed != true || !mounted) return;
-
-    setState(() => _isProcessing = true);
-    try {
-      await ref.read(privateLeagueControllerProvider.notifier).deleteLeague(league.id);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n?.leagueDeletedToast ?? 'League deleted successfully'),
-          backgroundColor: PicoColors.primary,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      context.pop();
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _isProcessing = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString().replaceFirst('Exception: ', '')),
-          backgroundColor: PicoColors.accentCoral,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
 
   Future<void> _confirmRemoveMember(
     String leagueId,
@@ -1818,42 +1556,5 @@ class _PrivateLeagueDashboardScreenState
     }
   }
 
-  Future<void> _confirmLeaveLeague(PrivateLeague league, AppLocalizations? l10n) async {
-    final confirmed = await showPicoConfirmationModal(
-      context: context,
-      title: l10n?.leaveLeagueConfirmTitle ?? 'Leave League',
-      message: l10n?.leaveLeagueConfirmBody(league.name) ??
-          'Are you sure you want to leave ${league.name}?',
-      cancelText: l10n?.cancelButton ?? 'Cancel',
-      confirmText: l10n?.leaveLeagueAction ?? 'Leave',
-      confirmStyle: PicoDialogButtonStyle.red,
-      cancelStyle: PicoDialogButtonStyle.neutral,
-    );
 
-    if (confirmed != true || !mounted) return;
-
-    setState(() => _isProcessing = true);
-    try {
-      await ref.read(privateLeagueControllerProvider.notifier).leaveLeague(league.id);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n?.leftLeagueToast ?? 'You left the league'),
-          backgroundColor: PicoColors.primary,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      context.pop();
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _isProcessing = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString().replaceFirst('Exception: ', '')),
-          backgroundColor: PicoColors.accentCoral,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
 }

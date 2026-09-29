@@ -36,7 +36,6 @@ class HomeScreen extends ConsumerStatefulWidget {
     this.showBottomNavBar = true,
     this.currentNavIndex = 1,
     this.onNavTap,
-    this.onNavigateShop,
     this.onNavigateMatches,
     this.onNavigateTournaments,
     this.onNavigateProfile,
@@ -49,7 +48,6 @@ class HomeScreen extends ConsumerStatefulWidget {
   final bool showBottomNavBar;
   final int currentNavIndex;
   final ValueChanged<int>? onNavTap;
-  final VoidCallback? onNavigateShop;
   final VoidCallback? onNavigateMatches;
   final VoidCallback? onNavigateTournaments;
   final VoidCallback? onNavigateProfile;
@@ -142,7 +140,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: Transform.scale(
                 scale: 1.02,
                 child: Image.asset(
-                  'assets/images/home_pitch_background.png',
+                  'assets/images/main_background.png',
                   fit: BoxFit.cover,
                   alignment: Alignment.topCenter,
                   errorBuilder: (context, error, stackTrace) => Container(

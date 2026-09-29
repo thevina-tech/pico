@@ -7,7 +7,6 @@ import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
 import 'package:pico/features/profile/domain/user_profile.dart';
 import 'package:pico/features/profile/presentation/user_profile_provider.dart';
 import 'package:pico/features/home/presentation/home_screen.dart';
-import 'package:pico/features/shop/presentation/shop_screen.dart';
 import 'package:pico/features/profile/presentation/profile_screen.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/l10n/app_localizations.dart';
@@ -56,11 +55,8 @@ void main() {
   );
 
   group('Stitch Top Bar & Home Pitch Sky Background Tests', () {
-    testWidgets('PicoAppBar renders unified Stitch capsule with LVL, XP, Coins, and Streak',
+    testWidgets('PicoAppBar renders stylized centered title and hides back button by default',
         (WidgetTester tester) async {
-      bool levelTapped = false;
-      bool coinsTapped = false;
-
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -68,33 +64,23 @@ void main() {
               () => _FakeCurrentUserProfile(testProfile),
             ),
           ],
-          child: MaterialApp(
+          child: const MaterialApp(
             home: Scaffold(
               appBar: PicoAppBar(
-                onProfileTap: () => levelTapped = true,
-                onPointsTap: () => coinsTapped = true,
+                title: 'TORNEOS',
               ),
-              body: const SizedBox.shrink(),
+              body: SizedBox.shrink(),
             ),
           ),
         ),
       );
       await tester.pumpAndSettle();
 
-      // 1. Verify Division Section
-      expect(find.text('DIV 8'), findsOneWidget);
-      await tester.tap(find.byKey(const Key('pico_app_bar_division_section')));
-      expect(levelTapped, isTrue);
+      // 1. Verify Centered Title
+      expect(find.text('TORNEOS'), findsOneWidget);
+      expect(find.byKey(const Key('pico_app_bar_title')), findsOneWidget);
 
-      // 2. Verify PP Progress Label
-      expect(find.text('140 / 220 PP'), findsOneWidget);
-
-      // 3. Verify Points Section
-      expect(find.text('140 PP'), findsOneWidget);
-      await tester.tap(find.byKey(const Key('pico_app_bar_points_section')));
-      expect(coinsTapped, isTrue);
-
-      // 4. Verify back button is hidden by default
+      // 2. Verify back button is hidden by default
       expect(find.byKey(const Key('pico_app_bar_back_button')), findsNothing);
     });
 
@@ -144,7 +130,10 @@ void main() {
           ],
           child: const MaterialApp(
             home: Scaffold(
-              appBar: PicoAppBar(showBackButton: true),
+              appBar: PicoAppBar(
+                title: 'EVENTOS',
+                showBackButton: true,
+              ),
               body: SizedBox.shrink(),
             ),
           ),
@@ -154,8 +143,8 @@ void main() {
 
       // No overflow exception should be thrown
       expect(tester.takeException(), isNull);
-      expect(find.text('DIV 8'), findsOneWidget);
-      expect(find.text('140 PP'), findsOneWidget);
+      expect(find.text('EVENTOS'), findsOneWidget);
+      expect(find.byKey(const Key('pico_app_bar_back_button')), findsOneWidget);
     });
 
     testWidgets('HomeScreen renders full-bleed stadium pitch background asset with top alignment',
@@ -179,13 +168,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // 1. Verify the background Image widget with home_pitch_background.png
+      // 1. Verify the background Image widget with main_background.png
       final imageFinder = find.byWidgetPredicate(
         (widget) =>
             widget is Image &&
             widget.image is AssetImage &&
             (widget.image as AssetImage).assetName ==
-                'assets/images/home_pitch_background.png' &&
+                'assets/images/main_background.png' &&
             widget.fit == BoxFit.cover &&
             widget.alignment == Alignment.topCenter,
       );
@@ -207,30 +196,6 @@ void main() {
       expect(find.text('Barcelona'), findsOneWidget);
     });
 
-    testWidgets('ShopScreen renders with PicoPitchBackground and transparent Scaffold',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            currentUserProfileProvider.overrideWith(
-              () => _FakeCurrentUserProfile(testProfile),
-            ),
-          ],
-          child: const MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: ShopScreen(showBottomNavBar: false),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byType(PicoPitchBackground), findsOneWidget);
-      final scaffoldFinder = find.byType(Scaffold);
-      expect(scaffoldFinder, findsOneWidget);
-      final scaffold = tester.widget<Scaffold>(scaffoldFinder);
-      expect(scaffold.backgroundColor, Colors.transparent);
-    });
 
     testWidgets('ProfileScreen renders with PicoPitchBackground and transparent Scaffold',
         (WidgetTester tester) async {
@@ -250,7 +215,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(PicoPitchBackground), findsOneWidget);
+      final pitchBackgroundFinder = find.byType(PicoPitchBackground);
+      expect(pitchBackgroundFinder, findsOneWidget);
+      final pitchBackground = tester.widget<PicoPitchBackground>(pitchBackgroundFinder);
+      expect(pitchBackground.imageAsset, 'assets/images/main_background.png');
+
       final scaffoldFinder = find.byType(Scaffold);
       expect(scaffoldFinder, findsOneWidget);
       final scaffold = tester.widget<Scaffold>(scaffoldFinder);

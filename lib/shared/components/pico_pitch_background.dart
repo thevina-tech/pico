@@ -13,7 +13,7 @@ class PicoPitchBackground extends StatelessWidget {
   const PicoPitchBackground({
     super.key,
     required this.child,
-    this.imageAsset = 'assets/images/home_pitch_background.png',
+    this.imageAsset = 'assets/images/main_background.png',
     this.blurSigma = 2.0,
     this.showVignette = true,
     this.showContours = false,

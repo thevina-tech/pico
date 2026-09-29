@@ -99,6 +99,7 @@ CREATE TABLE public.private_leagues (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   creator_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   name text NOT NULL,
+  description text DEFAULT '',
   invite_code text UNIQUE NOT NULL,
   created_at timestamptz DEFAULT now()
 );

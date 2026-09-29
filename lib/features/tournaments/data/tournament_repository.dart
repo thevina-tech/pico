@@ -153,6 +153,7 @@ abstract class TournamentRepository {
     required String name,
     required String competitionId,
     required String userId,
+    String description = '',
   });
   Future<PrivateLeague> joinPrivateLeagueByCode({
     required String inviteCode,
@@ -543,6 +544,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
             league:private_leagues(
               id,
               name,
+              description,
               owner_id,
               competition_id,
               invite_code,
@@ -611,6 +613,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
     required String name,
     required String competitionId,
     required String userId,
+    String description = '',
   }) async {
     final cleanName = InputSanitizer.sanitizeLeagueName(name);
     if (!InputSanitizer.isValidLeagueName(cleanName)) {
@@ -628,6 +631,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
       final newLeague = PrivateLeague(
         id: mockId,
         name: cleanName,
+        description: description.trim(),
         ownerId: userId,
         competitionId: resolvedCompId,
         inviteCode: mockCode,
@@ -643,6 +647,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
     try {
       final insertData = {
         'name': cleanName,
+        'description': description.trim(),
         'owner_id': userId,
         'competition_id': resolvedCompId,
       };
@@ -653,6 +658,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
           .select('''
             id,
             name,
+            description,
             owner_id,
             competition_id,
             invite_code,
@@ -834,6 +840,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
           .select('''
             id,
             name,
+            description,
             owner_id,
             competition_id,
             invite_code,

@@ -16,9 +16,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get predictButton => 'Predict';
 
   @override
-  String get navShop => 'Shop';
-
-  @override
   String get navHome => 'Home';
 
   @override

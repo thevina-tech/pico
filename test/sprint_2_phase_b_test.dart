@@ -140,31 +140,21 @@ void main() {
   });
 
   group('Sprint 2 - Phase B: PicoAppBar Component', () {
-    testWidgets('Renders level shield, XP label, coins pill, and streak pill',
+    testWidgets('Renders centered screen title and hides back button when canPop is false',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            currentUserProfileProvider.overrideWith(
-              () => _FakeCurrentUserProfile(testProfile),
-            ),
-          ],
-          child: const MaterialApp(
-            home: Scaffold(
-              appBar: PicoAppBar(),
-              body: SizedBox.shrink(),
-            ),
+        const MaterialApp(
+          home: Scaffold(
+            appBar: PicoAppBar(title: 'Matches'),
+            body: SizedBox.shrink(),
           ),
         ),
       );
       await tester.pumpAndSettle();
 
-      // Check Division badge & PP progress
-      expect(find.text('DIV 8'), findsOneWidget);
-      expect(find.text('140 / 220 PP'), findsOneWidget);
-      expect(find.text('140 PP'), findsOneWidget);
-      expect(find.byKey(const Key('pico_app_bar_division_section')), findsOneWidget);
-      expect(find.byKey(const Key('pico_app_bar_points_section')), findsOneWidget);
+      // Check centered title
+      expect(find.text('Matches'), findsOneWidget);
+      expect(find.byKey(const Key('pico_app_bar_title')), findsOneWidget);
 
       // Back button should NOT be rendered when canPop is false
       expect(find.byKey(const Key('pico_app_bar_back_button')), findsNothing);
@@ -447,7 +437,7 @@ void main() {
       expect(find.byType(PicoAppBar), findsOneWidget);
       // No top back button on game tab pages (Clash Royale feel)
       expect(find.byKey(const Key('pico_app_bar_back_button')), findsNothing);
-      expect(find.text('140 PP'), findsOneWidget);
+      expect(find.byKey(const Key('pico_app_bar_title')), findsOneWidget);
     });
 
     testWidgets('TournamentsScreen renders PicoAppBar without top back button',
@@ -471,7 +461,7 @@ void main() {
       expect(find.byType(PicoAppBar), findsOneWidget);
       // No top back button on game tab pages (Clash Royale feel)
       expect(find.byKey(const Key('pico_app_bar_back_button')), findsNothing);
-      expect(find.text('140 PP'), findsOneWidget);
+      expect(find.byKey(const Key('pico_app_bar_title')), findsOneWidget);
     });
 
     testWidgets('ProfileScreen does NOT render PicoAppBar',

@@ -79,6 +79,7 @@ class _FakeTournamentRepo implements TournamentRepository {
     required String name,
     required String competitionId,
     required String userId,
+    String description = '',
   }) async =>
       throw UnimplementedError();
 
@@ -387,7 +388,7 @@ void main() {
       expect(find.text('Man City'), findsOneWidget);
     });
 
-    testWidgets('Switches to Standings tab: Displays Invite Code banner, Header card, and Leaderboard', (tester) async {
+    testWidgets('Switches to Standings tab: Strictly displays the Leaderboard standings', (tester) async {
       await tester.pumpWidget(
         _buildTestHarness(
           child: PrivateLeagueDashboardScreen(
@@ -404,20 +405,79 @@ void main() {
       await tester.tap(find.text('Standings'));
       await tester.pumpAndSettle();
 
-      // Verify 6-character invite code banner
-      expect(find.text('INVINC'), findsOneWidget);
-      expect(find.text('LEAGUE INVITE CODE'), findsOneWidget);
+      // Verify Standings title is present
+      expect(find.text('STANDINGS'), findsOneWidget);
 
-      // Verify Owner Admin Controls
-      expect(find.text('ADMIN CONTROLS'), findsOneWidget);
-      expect(find.text('Delete League'), findsOneWidget);
+      // Verify Invite code banner and Admin controls card are NOT in the Standings tab
+      expect(find.text('LEAGUE INVITE CODE'), findsNothing);
 
-      // Verify Members Leaderboard
+      // Verify Members Leaderboard is displayed
       expect(find.text('PicoCaptain'), findsOneWidget);
       expect(find.text('GunnerMate'), findsOneWidget);
       expect(find.text('85 PTS'), findsOneWidget);
       expect(find.text('60 PTS'), findsOneWidget);
       expect(find.text('CREATOR'), findsWidgets);
+    });
+
+    testWidgets('Top right button is a settings icon and opens LeagueDetailsSheet with admin controls', (tester) async {
+      await tester.pumpWidget(
+        _buildTestHarness(
+          child: PrivateLeagueDashboardScreen(
+            leagueId: premierLeagueGroup.id,
+            initialLeague: premierLeagueGroup,
+          ),
+          tournamentRepo: tournamentRepo,
+          predictionRepo: predictionRepo,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Top right settings button exists with Icons.settings_rounded
+      final settingsBtn = find.byKey(const Key('league_settings_button'));
+      expect(settingsBtn, findsOneWidget);
+      expect(find.descendant(of: settingsBtn, matching: find.byIcon(Icons.settings_rounded)), findsOneWidget);
+
+      // App bar does NOT display "x Active Members"
+      expect(find.textContaining('Active Members'), findsNothing);
+
+      // Tap settings button opens sheet
+      await tester.tap(settingsBtn);
+      await tester.pumpAndSettle();
+
+      // In LeagueDetailsSheet:
+      // Verify Invite code box
+      expect(find.text('INVINC'), findsOneWidget);
+      expect(find.text('INVITE CODE'), findsOneWidget);
+
+      // Verify Admin Controls (owner is user_owner_123)
+      expect(find.text('ADMIN CONTROLS'), findsOneWidget);
+      expect(find.text('Delete League'), findsOneWidget);
+
+      // Verify base league is displayed
+      expect(find.textContaining('Base: Premier League'), findsOneWidget);
+    });
+
+    testWidgets('Tapping league title in app bar also opens LeagueDetailsSheet', (tester) async {
+      await tester.pumpWidget(
+        _buildTestHarness(
+          child: PrivateLeagueDashboardScreen(
+            leagueId: premierLeagueGroup.id,
+            initialLeague: premierLeagueGroup,
+          ),
+          tournamentRepo: tournamentRepo,
+          predictionRepo: predictionRepo,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap the league name
+      await tester.tap(find.text('The Invincibles'));
+      await tester.pumpAndSettle();
+
+      // Sheet is opened
+      expect(find.text('INVINC'), findsOneWidget);
+      expect(find.text('INVITE CODE'), findsOneWidget);
+      expect(find.text('ADMIN CONTROLS'), findsOneWidget);
     });
 
     testWidgets('Tactile 3D Tab Buttons render with Column stacking Icon over Text and responsive 3D styling', (tester) async {

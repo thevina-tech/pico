@@ -13,6 +13,8 @@ import 'package:pico/features/tournaments/domain/private_league.dart';
 import 'package:pico/features/tournaments/domain/private_league_member.dart';
 import 'package:pico/shared/components/division_badge.dart';
 import 'package:pico/shared/components/pico_confirmation_modal.dart';
+import 'package:pico/features/matches/domain/competition.dart';
+import 'package:pico/features/tournaments/presentation/private_league_controller.dart';
 
 /// Modal bottom sheet displaying League details, invite code,
 /// live standings leaderboard, admin kick controls, and leave league action.
@@ -21,15 +23,18 @@ class LeagueDetailsSheet extends ConsumerStatefulWidget {
     super.key,
     required this.league,
     required this.initialMembers,
+    this.competition,
   });
 
   final PrivateLeague league;
   final List<PrivateLeagueMember> initialMembers;
+  final Competition? competition;
 
   static Future<void> show(
     BuildContext context, {
     required PrivateLeague league,
     required List<PrivateLeagueMember> initialMembers,
+    Competition? competition,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -38,6 +43,7 @@ class LeagueDetailsSheet extends ConsumerStatefulWidget {
       builder: (context) => LeagueDetailsSheet(
         league: league,
         initialMembers: initialMembers,
+        competition: competition,
       ),
     );
   }
@@ -63,6 +69,9 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
     final currentUserId = authState is PicoAuthAuthenticated ? authState.user?.id : null;
     final isAdmin = currentUserId != null &&
         (widget.league.effectiveAdminId == currentUserId || widget.league.ownerId == currentUserId);
+
+    final compsMap = ref.watch(competitionsMapProvider).value ?? {};
+    final comp = widget.competition ?? compsMap[widget.league.competitionId];
 
     return Container(
       constraints: BoxConstraints(
@@ -99,16 +108,19 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 children: [
-                  // 1. Header (Name, Crest, Description, Admin Badge)
-                  _buildHeader(isAdmin),
+                  // 1. Header (Name, Crest, Description, Base League, Admin Badge)
+                  _buildHeader(isAdmin, comp),
                   const SizedBox(height: 16.0),
 
                   // 2. 6-Character Invite Code & Share
                   _buildInviteCodeBox(context),
                   const SizedBox(height: 16.0),
 
-                  // 3. Leave League Action Button
-                  _buildLeaveLeagueButton(context, currentUserId, isAdmin),
+                  // 3. Admin Controls (for Admin) or Leave League (for Non-Admin)
+                  if (isAdmin)
+                    _buildAdminControls(context)
+                  else
+                    _buildLeaveLeagueButton(context, currentUserId, isAdmin),
                   const SizedBox(height: 24.0),
 
                   // 4. Leaderboard Section Header
@@ -173,13 +185,9 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
     );
   }
 
-  /// League Header with crest, title, and description
-  Widget _buildHeader(bool isAdmin) {
-    final descriptionText = widget.league.description.isNotEmpty
-        ? widget.league.description
-        : (widget.league.competitionName.isNotEmpty
-            ? 'Climb the leaderboards or compete with friends in ${widget.league.competitionName}'
-            : 'Climb the leaderboards or compete with friends');
+  /// League Header with crest, title, description, and base league
+  Widget _buildHeader(bool isAdmin, Competition? comp) {
+    final hasDescription = widget.league.description.trim().isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -235,15 +243,49 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
             ],
           ],
         ),
-        const SizedBox(height: 6.0),
-        Text(
-          descriptionText,
-          style: PicoTypography.bodySm.copyWith(
-            color: PicoColors.textWhiteMuted,
-            fontSize: 13.0,
+        if (hasDescription) ...[
+          const SizedBox(height: 6.0),
+          Text(
+            widget.league.description.trim(),
+            style: PicoTypography.bodySm.copyWith(
+              color: PicoColors.textWhiteMuted,
+              fontSize: 13.0,
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
-        ),
+        ],
+        // Base league info
+        if (comp != null || widget.league.competitionName.isNotEmpty) ...[
+          const SizedBox(height: 8.0),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(999.0),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.12),
+                width: 1.0,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (comp?.flag != null) ...[
+                  Text(comp!.flag, style: const TextStyle(fontSize: 13.0)),
+                  const SizedBox(width: 5.0),
+                ],
+                Text(
+                  'Base: ${comp?.name ?? widget.league.competitionName}',
+                  style: PicoTypography.bodySm.copyWith(
+                    color: PicoColors.textWhiteMuted,
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -324,6 +366,64 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
               size: 20.0,
             ),
             tooltip: 'Share Invite Code',
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Admin controls container with Delete League action (Admin Only)
+  Widget _buildAdminControls(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1417),
+        borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: PicoColors.accentCoral.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.admin_panel_settings_rounded,
+                color: PicoColors.accentCoral,
+                size: 20.0,
+              ),
+              const SizedBox(width: 8.0),
+              Text(
+                'ADMIN CONTROLS',
+                style: PicoTypography.labelPillSm.copyWith(
+                  color: PicoColors.accentCoral,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 11.0,
+                  letterSpacing: 0.8,
+                ),
+              ),
+            ],
+          ),
+          OutlinedButton.icon(
+            onPressed: _isProcessing ? null : () => _confirmDeleteLeague(context),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Color(0x66EF4444), width: 1.2),
+              backgroundColor: const Color(0x1AEF4444),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            ),
+            icon: const Icon(
+              Icons.delete_forever_rounded,
+              color: PicoColors.accentCoral,
+              size: 16.0,
+            ),
+            label: Text(
+              'Delete League',
+              style: PicoTypography.bodySm.copyWith(
+                color: PicoColors.accentCoral,
+                fontWeight: FontWeight.w700,
+                fontSize: 12.0,
+              ),
+            ),
           ),
         ],
       ),
@@ -510,6 +610,39 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
         ],
       ),
     );
+  }
+
+  /// Confirmation dialog for Deleting League (Admin Only)
+  Future<void> _confirmDeleteLeague(BuildContext context) async {
+    final confirmed = await showPicoConfirmationModal(
+      context: context,
+      title: 'Delete League?',
+      message:
+          'Are you sure you want to delete "${widget.league.name}"? This action cannot be undone and will remove all members.',
+      cancelText: 'Cancel',
+      confirmText: 'Delete',
+      confirmStyle: PicoDialogButtonStyle.red,
+      cancelStyle: PicoDialogButtonStyle.neutral,
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _isProcessing = true);
+    try {
+      await ref.read(privateLeagueControllerProvider.notifier).deleteLeague(widget.league.id);
+      if (!mounted) return;
+      Navigator.of(this.context).pop(); // Close bottom sheet
+      this.context.go('/tournaments'); // Navigate back to Tournaments screen
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isProcessing = false);
+      ScaffoldMessenger.of(this.context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete league: $e'),
+          backgroundColor: PicoColors.accentCoral,
+        ),
+      );
+    }
   }
 
   /// Confirmation dialog for Leaving League

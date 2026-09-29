@@ -10,6 +10,7 @@ import 'package:pico/features/tournaments/data/tournament_repository.dart';
 import 'package:pico/features/tournaments/domain/private_league.dart';
 import 'package:pico/features/tournaments/presentation/private_league_controller.dart';
 import 'package:pico/shared/components/pico_button.dart';
+import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/services/revenuecat_ad_service.dart';
@@ -27,6 +28,7 @@ class CreatePrivateLeagueScreen extends ConsumerStatefulWidget {
 class _CreatePrivateLeagueScreenState
     extends ConsumerState<CreatePrivateLeagueScreen> {
   final _nameController = TextEditingController();
+  final _descriptionController = TextEditingController();
   late String _selectedCompetitionId;
   bool _isLoading = false;
   String? _errorMessage;
@@ -44,6 +46,7 @@ class _CreatePrivateLeagueScreenState
   @override
   void dispose() {
     _nameController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -77,6 +80,7 @@ class _CreatePrivateLeagueScreenState
           .createLeague(
             name: name,
             competitionId: _selectedCompetitionId,
+            description: _descriptionController.text.trim(),
           );
 
       if (!mounted) return;
@@ -363,29 +367,17 @@ class _CreatePrivateLeagueScreenState
     return PicoPitchBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: PicoColors.textWhite),
-          onPressed: () => Navigator.of(context).pop(),
+        appBar: PicoAppBar(
+          title: l10n.createPrivateLeagueTitle,
+          showBackButton: true,
+          onBack: () => Navigator.of(context).pop(),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.close_rounded, color: PicoColors.textWhiteMuted),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
         ),
-        title: Text(
-          l10n.createPrivateLeagueTitle,
-          style: PicoTypography.headlineMd.copyWith(
-            color: PicoColors.textWhite,
-            fontWeight: FontWeight.w700,
-            fontSize: 18.0,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close_rounded, color: PicoColors.textWhiteMuted),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -433,6 +425,7 @@ class _CreatePrivateLeagueScreenState
                           ),
                         ),
                         child: TextField(
+                          key: const Key('league_name_field'),
                           controller: _nameController,
                           inputFormatters: InputSanitizer.leagueNameFormatters,
                           style: PicoTypography.bodyLg.copyWith(
@@ -469,6 +462,64 @@ class _CreatePrivateLeagueScreenState
                             ),
                           ),
                           onChanged: (_) => setState(() {}),
+                        ),
+                      ),
+                      const SizedBox(height: 18.0),
+
+                      // League Description Label
+                      Text(
+                        'LEAGUE DESCRIPTION (OPTIONAL)',
+                        style: PicoTypography.labelPillSm.copyWith(
+                          color: PicoColors.textWhiteMuted,
+                          letterSpacing: 1.1,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
+
+                      // League Description Input Tray
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0D1B13),
+                          borderRadius: BorderRadius.circular(14.0),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.12),
+                            width: 1.0,
+                          ),
+                        ),
+                        child: TextField(
+                          key: const Key('league_description_field'),
+                          controller: _descriptionController,
+                          maxLines: 3,
+                          minLines: 2,
+                          maxLength: 150,
+                          style: PicoTypography.bodyMd.copyWith(
+                            color: PicoColors.textWhite,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'e.g., Compete with friends and crown the champion',
+                            hintStyle: PicoTypography.bodyMd.copyWith(
+                              color: PicoColors.textWhiteMuted.withValues(alpha: 0.5),
+                            ),
+                            counterStyle: PicoTypography.bodySm.copyWith(
+                              fontSize: 11.0,
+                              color: PicoColors.textWhiteMuted.withValues(alpha: 0.5),
+                            ),
+                            prefixIcon: const Padding(
+                              padding: EdgeInsets.only(bottom: 24.0),
+                              child: Icon(
+                                Icons.notes_rounded,
+                                color: PicoColors.primary,
+                                size: 20.0,
+                              ),
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14.0,
+                              vertical: 12.0,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 20.0),

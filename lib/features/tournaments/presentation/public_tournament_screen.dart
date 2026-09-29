@@ -18,6 +18,7 @@ import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/shared/components/division_badge.dart';
 import 'package:pico/shared/components/pico_confirmation_modal.dart';
 import 'package:pico/shared/components/pico_button.dart';
+import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
 /// Detail screen for official Public Tournaments.
@@ -152,26 +153,14 @@ class _PublicTournamentScreenState
         enrolledTournaments.any((t) => t.id == currentTournament.id);
 
     return PicoPitchBackground(
-      imageAsset: 'assets/images/tournament_and_matches_bg.png',
+      imageAsset: 'assets/images/main_background.png',
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: PicoColors.textWhite),
-          onPressed: () => context.pop(),
+        appBar: PicoAppBar(
+          title: l10n.tournamentDetailsTitle,
+          showBackButton: true,
+          onBack: () => context.pop(),
         ),
-        title: Text(
-          l10n.tournamentDetailsTitle,
-          style: PicoTypography.headlineMd.copyWith(
-            color: PicoColors.textWhite,
-            fontWeight: FontWeight.w700,
-            fontSize: 18.0,
-          ),
-        ),
-        centerTitle: true,
-      ),
       body: currentTournament == null
           ? const Center(
               child: CircularProgressIndicator(color: PicoColors.primary),

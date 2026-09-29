@@ -18,6 +18,7 @@ class PrivateLeagueController extends _$PrivateLeagueController {
   Future<PrivateLeague> createLeague({
     required String name,
     required String competitionId,
+    String description = '',
   }) async {
     state = const AsyncLoading();
 
@@ -45,6 +46,7 @@ class PrivateLeagueController extends _$PrivateLeagueController {
         name: trimmedName,
         competitionId: competitionId,
         userId: userId,
+        description: description,
       );
 
       // Invalidate user private leagues list so it reloads

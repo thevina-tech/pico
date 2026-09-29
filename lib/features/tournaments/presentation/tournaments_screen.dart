@@ -38,11 +38,11 @@ class TournamentsScreen extends ConsumerWidget {
 
     return PicoGameExitScope(
       child: PicoPitchBackground(
-        imageAsset: 'assets/images/tournament_and_matches_bg.png',
+        imageAsset: 'assets/images/main_background.png',
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: PicoAppBar(
-            onCoinsTap: () => context.go('/shop'),
+            title: l10n.tournamentsTitle,
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
           floatingActionButton: _buildFloatingCreateOrJoinButton(context, l10n),
@@ -93,30 +93,16 @@ class TournamentsScreen extends ConsumerWidget {
   }
 
   Widget _buildHeader(BuildContext context, AppLocalizations l10n) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const SizedBox(height: 6.0),
-        Text(
-          l10n.tournamentsTitle,
-          textAlign: TextAlign.center,
-          style: PicoTypography.headlineLgMobile.copyWith(
-            color: PicoColors.textWhite,
-            fontWeight: FontWeight.w900,
-            fontSize: 28.0,
-            letterSpacing: -0.5,
-          ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Text(
+        l10n.tournamentsSubtitle,
+        textAlign: TextAlign.center,
+        style: PicoTypography.bodySm.copyWith(
+          color: PicoColors.textWhiteMuted,
+          fontSize: 13.0,
         ),
-        const SizedBox(height: 4.0),
-        Text(
-          l10n.tournamentsSubtitle,
-          textAlign: TextAlign.center,
-          style: PicoTypography.bodySm.copyWith(
-            color: PicoColors.textWhiteMuted,
-            fontSize: 13.0,
-          ),
-        ),
-      ],
+      ),
     );
   }
 

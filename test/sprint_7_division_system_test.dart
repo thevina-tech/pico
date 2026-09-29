@@ -1,24 +1,13 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
 import 'package:pico/features/predictions/domain/prediction.dart';
 import 'package:pico/features/profile/domain/division.dart';
 import 'package:pico/features/profile/domain/user_profile.dart';
-import 'package:pico/features/profile/presentation/user_profile_provider.dart';
 import 'package:pico/features/profile/presentation/widgets/division_ladder_sheet.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/division_badge.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
-
-class _FakeCurrentUserProfile extends CurrentUserProfile {
-  _FakeCurrentUserProfile(this._profile);
-  final UserProfile _profile;
-
-  @override
-  FutureOr<UserProfile> build() => _profile;
-}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -262,39 +251,24 @@ void main() {
       expect(find.text('ELITE'), findsOneWidget);
     });
 
-    testWidgets('PicoAppBar renders Division Badge and Prediction Points counter',
+    testWidgets('PicoAppBar renders stylized centered game-like title',
         (WidgetTester tester) async {
-      const profile = UserProfile(
-        id: 'u1',
-        username: 'Alex',
-        totalPoints: 140,
-        currentDivisionKey: 'div_8',
-      );
-
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            currentUserProfileProvider.overrideWith(
-              () => _FakeCurrentUserProfile(profile),
+        const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            appBar: PicoAppBar(
+              title: 'Torneos',
             ),
-          ],
-          child: const MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: Scaffold(
-              appBar: PicoAppBar(),
-              body: SizedBox.shrink(),
-            ),
+            body: SizedBox.shrink(),
           ),
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('DIV 8'), findsOneWidget);
-      expect(find.text('140 / 220 PP'), findsOneWidget);
-      expect(find.text('140 PP'), findsOneWidget);
-      expect(find.byKey(const Key('pico_app_bar_division_section')), findsOneWidget);
-      expect(find.byKey(const Key('pico_app_bar_points_section')), findsOneWidget);
+      expect(find.text('Torneos'), findsOneWidget);
+      expect(find.byKey(const Key('pico_app_bar_title')), findsOneWidget);
     });
 
     testWidgets('DivisionLadderSheet displays all 11 tiers and user current badge',

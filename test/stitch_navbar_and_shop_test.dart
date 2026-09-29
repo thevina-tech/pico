@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pico/features/shop/presentation/shop_screen.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
 
@@ -177,66 +175,31 @@ void main() {
     });
   });
 
-  group('ShopScreen Tests', () {
-    testWidgets('renders club shop header and clean reward ad option',
+  group('Shop Removal Verification Tests', () {
+    testWidgets('confirms shop tab and shop route are absent from app',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            localizationsDelegates: [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: [Locale('en'), Locale('es')],
-            home: ShopScreen(showBottomNavBar: false),
+        MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en'), Locale('es')],
+          home: Scaffold(
+            bottomNavigationBar: PicoBottomNavBar(
+              currentIndex: 0,
+              onTap: (_) {},
+            ),
           ),
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('CLUB SHOP'), findsOneWidget);
-      expect(find.text('REWARD ADS'), findsOneWidget);
-      expect(find.text('Free Coins Refill'), findsOneWidget);
-      expect(find.text('WATCH VIDEO (+50 COINS)'), findsOneWidget);
-      expect(find.text('COMING SOON'), findsNothing);
-    });
-
-    testWidgets('tapping watch video ad opens simulated sponsor dialog and awards +50 coins',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            localizationsDelegates: [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: [Locale('en'), Locale('es')],
-            home: ShopScreen(showBottomNavBar: false),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      // Tap Watch Video
-      await tester.tap(find.text('WATCH VIDEO (+50 COINS)'));
-      await tester.pumpAndSettle();
-
-      // Verify dialog is presented
-      expect(find.text('SPONSOR PREVIEW'), findsOneWidget);
-      expect(find.text('Video Ad Completed!'), findsOneWidget);
-      expect(find.text('CLAIM +50 COINS'), findsOneWidget);
-
-      // Tap Claim
-      await tester.tap(find.text('CLAIM +50 COINS'));
-      await tester.pumpAndSettle();
-
-      // Verify dialog dismissed and SnackBar shown
-      expect(find.text('SPONSOR PREVIEW'), findsNothing);
-      expect(find.textContaining('+50 Pico Coins'), findsOneWidget);
+      expect(find.text('Shop'), findsNothing);
+      expect(find.text('Tienda'), findsNothing);
+      expect(find.byKey(const ValueKey('nav_shop')), findsNothing);
     });
   });
 }

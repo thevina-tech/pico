@@ -110,12 +110,6 @@ abstract class AppLocalizations {
   /// **'Predict'**
   String get predictButton;
 
-  /// Bottom navigation Shop tab label
-  ///
-  /// In en, this message translates to:
-  /// **'Shop'**
-  String get navShop;
-
   /// Bottom navigation Home tab label
   ///
   /// In en, this message translates to:

@@ -8,6 +8,7 @@ import 'package:pico/core/utils/input_sanitizer.dart';
 import 'package:pico/features/tournaments/domain/private_league_exceptions.dart';
 import 'package:pico/features/tournaments/presentation/private_league_controller.dart';
 import 'package:pico/shared/components/pico_button.dart';
+import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
@@ -147,29 +148,17 @@ class _JoinPrivateLeagueScreenState
     return PicoPitchBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: PicoColors.textWhite),
-          onPressed: () => Navigator.of(context).pop(),
+        appBar: PicoAppBar(
+          title: l10n.joinPrivateLeagueTitle,
+          showBackButton: true,
+          onBack: () => Navigator.of(context).pop(),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.close_rounded, color: PicoColors.textWhiteMuted),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
         ),
-        title: Text(
-          l10n.joinPrivateLeagueTitle,
-          style: PicoTypography.headlineMd.copyWith(
-            color: PicoColors.textWhite,
-            fontWeight: FontWeight.w700,
-            fontSize: 18.0,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close_rounded, color: PicoColors.textWhiteMuted),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(

@@ -12,7 +12,6 @@ import 'package:pico/features/profile/presentation/help_support_screen.dart';
 import 'package:pico/features/profile/presentation/personalization_screen.dart';
 import 'package:pico/features/profile/presentation/profile_screen.dart';
 import 'package:pico/shared/components/in_app_web_browser_screen.dart';
-import 'package:pico/features/shop/presentation/shop_screen.dart';
 import 'package:pico/features/tournaments/domain/tournament.dart';
 import 'package:pico/features/tournaments/domain/private_league.dart';
 import 'package:pico/features/tournaments/presentation/create_private_league_screen.dart';
@@ -227,15 +226,6 @@ class AppRouter {
               ),
             );
           },
-        ),
-        GoRoute(
-          parentNavigatorKey: rootNavigatorKey,
-          path: '/shop',
-          pageBuilder: (context, state) => const MaterialPage(
-            child: ShopScreen(
-              showBottomNavBar: false,
-            ),
-          ),
         ),
         GoRoute(
           parentNavigatorKey: rootNavigatorKey,

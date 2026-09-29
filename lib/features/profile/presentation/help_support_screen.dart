@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/in_app_web_browser_screen.dart';
+import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -80,25 +81,10 @@ class HelpSupportScreen extends StatelessWidget {
     return PicoPitchBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_rounded,
-              color: Colors.white,
-            ),
-            onPressed: () => Navigator.of(context).maybePop(),
-          ),
-          title: Text(
-            titleText,
-            style: PicoTypography.headlineMd.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-              fontSize: 18.0,
-            ),
-          ),
-          centerTitle: true,
+        appBar: PicoAppBar(
+          title: titleText,
+          showBackButton: true,
+          onBack: () => Navigator.of(context).maybePop(),
         ),
         body: SafeArea(
           bottom: false,

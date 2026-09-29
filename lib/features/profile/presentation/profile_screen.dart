@@ -35,6 +35,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     return PicoGameExitScope(
       child: PicoPitchBackground(
+        imageAsset: 'assets/images/main_background.png',
         child: Scaffold(
           backgroundColor: Colors.transparent,
           body: SafeArea(

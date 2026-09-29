@@ -73,6 +73,7 @@ class _FakeLeagueChatTournamentRepository implements TournamentRepository {
     required String name,
     required String competitionId,
     required String userId,
+    String description = '',
   }) async {
     final league = PrivateLeague(
       id: 'pl_test',
@@ -297,8 +298,8 @@ void main() {
       // Verify League title in AppBar
       expect(find.text('Clash Prediction League'), findsOneWidget);
 
-      // Verify Active Members count
-      expect(find.text('2 Active Members'), findsOneWidget);
+      // Verify Active Members count is removed from AppBar
+      expect(find.textContaining('Active Members'), findsNothing);
 
       // Verify message input field
       expect(find.byType(TextField), findsOneWidget);
@@ -427,12 +428,12 @@ void main() {
       await tester.tap(find.text('Trigger Tap League'));
       await tester.pumpAndSettle();
 
-      // Verify LeagueDetailsSheet is displayed
+      // Verify LeagueDetailsSheet is displayed with Admin controls (for admin)
       expect(find.byType(LeagueDetailsSheet), findsOneWidget);
       expect(find.text('INVITE CODE'), findsOneWidget);
       expect(find.text('TRG999'), findsOneWidget);
       expect(find.text('LEADERBOARD'), findsOneWidget);
-      expect(find.text('Leave League'), findsOneWidget);
+      expect(find.text('ADMIN CONTROLS'), findsOneWidget);
     });
   });
 
@@ -630,8 +631,8 @@ void main() {
       final league = PrivateLeague(
         id: 'pl_leave_test',
         name: 'Leave Test League',
-        ownerId: 'user_member_1',
-        adminId: 'user_member_1',
+        ownerId: 'user_owner_other',
+        adminId: 'user_owner_other',
         inviteCode: 'LVE001',
         createdAt: DateTime.now(),
       );

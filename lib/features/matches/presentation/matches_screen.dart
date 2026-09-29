@@ -85,12 +85,11 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
 
     return PicoGameExitScope(
       child: PicoPitchBackground(
-        imageAsset: 'assets/images/tournament_and_matches_bg.png',
+        imageAsset: 'assets/images/main_background.png',
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: PicoAppBar(
-            onProfileTap: () => context.go('/profile'),
-            onCoinsTap: () => context.go('/shop'),
+            title: l10n?.navMatches ?? 'Matches',
           ),
           bottomNavigationBar: widget.showBottomNavBar
               ? Center(
@@ -129,11 +128,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // 1. Page Header (Always visible)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 0),
-                    child: _buildHeader(),
-                  ),
+                  const SizedBox(height: 8.0),
                   const SizedBox(height: 12.0),
 
                   // 2. Categorized Tabs Bar ("Live", "Upcoming", "Finished")
@@ -302,20 +297,6 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
 }
 
   /// Header with page title
-  Widget _buildHeader() {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        'Matches',
-        style: PicoTypography.headlineLgMobile.copyWith(
-          color: PicoColors.textWhite,
-          fontWeight: FontWeight.w800,
-          fontSize: 26.0,
-          letterSpacing: -0.5,
-        ),
-      ),
-    );
-  }
 
   /// Horizontal scrolling filter chips bar populated dynamically from [MatchesViewModel]
   Widget _buildFilterBar(

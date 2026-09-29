@@ -84,6 +84,7 @@ class _FakeTournamentRepository implements TournamentRepository {
     required String name,
     required String competitionId,
     required String userId,
+    String description = '',
   }) async {
     final allowedIds = competitions.map((c) => c.id).toSet();
     if (!allowedIds.contains(competitionId)) {
@@ -606,6 +607,14 @@ void main() {
       // Selected competition defaults to Primera División (La Liga)
       expect(find.text('Primera División (La Liga)'), findsOneWidget);
 
+      // Scroll until the competition picker is visible
+      await tester.scrollUntilVisible(
+        find.text('Primera División (La Liga)'),
+        50.0,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
       // Open the competition picker modal
       await tester.tap(find.text('Primera División (La Liga)'));
       await tester.pumpAndSettle();
@@ -641,7 +650,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Enter league name
-      await tester.enterText(find.byType(TextField), 'Champions League of Friends');
+      await tester.enterText(find.byKey(const Key('league_name_field')), 'Champions League of Friends');
       await tester.pumpAndSettle();
 
       // Drag ListView down to reveal the submit button
@@ -681,7 +690,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.enterText(find.byType(TextField), 'Test SnackBar League');
+      await tester.enterText(find.byKey(const Key('league_name_field')), 'Test SnackBar League');
       await tester.pumpAndSettle();
 
       await tester.drag(find.byType(ListView), const Offset(0, -500));
@@ -858,19 +867,25 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Verify Invite Code Banner
-      expect(find.text('LEAGUE INVITE CODE'), findsOneWidget);
-      expect(find.text('K9X2P1'), findsOneWidget);
-
-      // Verify Admin Controls are visible
-      expect(find.text('ADMIN CONTROLS'), findsOneWidget);
-      expect(find.text('Delete League'), findsOneWidget);
+      // Verify Standings tab strictly displays standings
+      expect(find.text('STANDINGS'), findsOneWidget);
+      expect(find.text('Delete League'), findsNothing);
 
       // Verify Remove Member button is available for other members
       expect(find.byIcon(Icons.remove_circle_outline_rounded), findsOneWidget);
 
-      // Verify Leave League is NOT shown for the owner
+      // Verify Leave League is NOT shown in app bar
       expect(find.byIcon(Icons.logout_rounded), findsNothing);
+
+      // Tap settings button to open LeagueDetailsSheet
+      await tester.tap(find.byKey(const Key('league_settings_button')));
+      await tester.pumpAndSettle();
+
+      // Inside LeagueDetailsSheet:
+      expect(find.text('INVITE CODE'), findsOneWidget);
+      expect(find.text('K9X2P1'), findsOneWidget);
+      expect(find.text('ADMIN CONTROLS'), findsOneWidget);
+      expect(find.text('Delete League'), findsOneWidget);
     });
 
     testWidgets('PrivateTournamentScreen hides Admin Controls when isOwner is false', (tester) async {
@@ -914,15 +929,23 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Verify Admin Controls are NOT rendered
+      // Verify Admin Controls are NOT rendered on standings
       expect(find.text('ADMIN CONTROLS'), findsNothing);
       expect(find.text('Delete League'), findsNothing);
 
       // Verify Remove Member button is NOT rendered
       expect(find.byIcon(Icons.remove_circle_outline_rounded), findsNothing);
 
-      // Verify Leave League button IS rendered for members
-      expect(find.byIcon(Icons.logout_rounded), findsOneWidget);
+      // Verify logout icon is NOT in app bar
+      expect(find.byIcon(Icons.logout_rounded), findsNothing);
+
+      // Tap settings button to open LeagueDetailsSheet
+      await tester.tap(find.byKey(const Key('league_settings_button')));
+      await tester.pumpAndSettle();
+
+      // Verify Leave League button IS rendered in sheet for members
+      expect(find.text('Leave League'), findsOneWidget);
+      expect(find.text('ADMIN CONTROLS'), findsNothing);
     });
 
     testWidgets('PublicTournamentScreen renders accented Primera División, standings, and Join CTA when not joined', (tester) async {
