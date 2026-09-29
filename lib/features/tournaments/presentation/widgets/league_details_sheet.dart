@@ -11,10 +11,12 @@ import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/tournaments/data/tournament_repository.dart';
 import 'package:pico/features/tournaments/domain/private_league.dart';
 import 'package:pico/features/tournaments/domain/private_league_member.dart';
-import 'package:pico/shared/components/division_badge.dart';
+import 'package:pico/features/tournaments/presentation/widgets/tactile_leaderboard_card.dart';
 import 'package:pico/shared/components/pico_confirmation_modal.dart';
 import 'package:pico/features/matches/domain/competition.dart';
 import 'package:pico/features/tournaments/presentation/private_league_controller.dart';
+import 'package:pico/l10n/app_localizations.dart';
+import 'package:pico/shared/components/pico_snackbar.dart';
 
 /// Modal bottom sheet displaying League details, invite code,
 /// live standings leaderboard, admin kick controls, and leave league action.
@@ -165,13 +167,24 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
                       final isCurrent = currentUserId != null && member.userId == currentUserId;
                       final isMemberAdmin = member.userId == widget.league.effectiveAdminId;
 
-                      return _buildLeaderboardTile(
+                      return TactileLeaderboardCard(
                         rank: index + 1,
-                        member: member,
-                        isCurrent: isCurrent,
+                        username: member.username,
+                        avatarUrl: member.avatarUrl,
+                        picoPoints: member.picoPoints,
+                        isCurrentUser: isCurrent,
                         isMemberAdmin: isMemberAdmin,
-                        canKick: isAdmin && !isCurrent,
-                        onKick: () => _confirmKickMember(context, member),
+                        trailing: (isAdmin && !isCurrent)
+                            ? IconButton(
+                                icon: const Icon(
+                                  Icons.person_remove_rounded,
+                                  color: PicoColors.accentCoral,
+                                  size: 18.0,
+                                ),
+                                tooltip: 'Kick from League',
+                                onPressed: () => _confirmKickMember(context, member),
+                              )
+                            : null,
                       );
                     }),
 
@@ -333,12 +346,11 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
               await Clipboard.setData(ClipboardData(text: widget.league.inviteCode));
               if (!context.mounted) return;
               setState(() => _hasCopiedCode = true);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Invite code copied to clipboard!'),
-                  duration: Duration(seconds: 2),
-                  backgroundColor: Color(0xFF1E2D3D),
-                ),
+              final l10n = AppLocalizations.of(context);
+              PicoSnackBar.showSuccess(
+                context,
+                l10n?.codeCopiedToast ?? 'Invite code copied to clipboard!',
+                duration: const Duration(seconds: 2),
               );
               Future.delayed(const Duration(seconds: 2), () {
                 if (mounted) setState(() => _hasCopiedCode = false);
@@ -461,156 +473,7 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
     );
   }
 
-  /// Single Leaderboard Tile
-  Widget _buildLeaderboardTile({
-    required int rank,
-    required PrivateLeagueMember member,
-    required bool isCurrent,
-    required bool isMemberAdmin,
-    required bool canKick,
-    required VoidCallback onKick,
-  }) {
-    Color rankColor;
-    if (rank == 1) {
-      rankColor = const Color(0xFFFFD41D); // Gold
-    } else if (rank == 2) {
-      rankColor = const Color(0xFFCFD8DC); // Silver
-    } else if (rank == 3) {
-      rankColor = const Color(0xFFCD7F32); // Bronze
-    } else {
-      rankColor = PicoColors.textWhiteMuted;
-    }
 
-    final displayName = member.username != null && member.username!.isNotEmpty
-        ? member.username!
-        : 'Player';
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8.0),
-      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
-      decoration: BoxDecoration(
-        color: isCurrent ? const Color(0xFF1A2B20) : const Color(0xFF0F1722),
-        borderRadius: BorderRadius.circular(14.0),
-        border: Border.all(
-          color: isCurrent ? PicoColors.primary : Colors.white.withValues(alpha: 0.06),
-          width: isCurrent ? 1.5 : 1.0,
-        ),
-      ),
-      child: Row(
-        children: [
-          // Rank Badge
-          SizedBox(
-            width: 26.0,
-            child: Text(
-              '#$rank',
-              style: PicoTypography.labelPill.copyWith(
-                color: rankColor,
-                fontWeight: FontWeight.w900,
-                fontSize: 14.0,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8.0),
-
-          // User Avatar
-          CircleAvatar(
-            radius: 18.0,
-            backgroundColor: const Color(0xFF1E2D3D),
-            backgroundImage: member.avatarUrl != null && member.avatarUrl!.isNotEmpty
-                ? CachedNetworkImageProvider(member.avatarUrl!)
-                : null,
-            child: member.avatarUrl == null || member.avatarUrl!.isEmpty
-                ? Text(
-                    displayName.substring(0, 1).toUpperCase(),
-                    style: PicoTypography.bodySm.copyWith(
-                      color: PicoColors.textWhite,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  )
-                : null,
-          ),
-          const SizedBox(width: 12.0),
-
-          // Username & Tags
-          Expanded(
-            child: Row(
-              children: [
-                Flexible(
-                  child: Text(
-                    displayName,
-                    style: PicoTypography.bodyMd.copyWith(
-                      color: isCurrent ? PicoColors.primary : PicoColors.textWhite,
-                      fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
-                      fontSize: 14.0,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (isCurrent) ...[
-                  const SizedBox(width: 6.0),
-                  Text(
-                    '(You)',
-                    style: PicoTypography.bodySm.copyWith(
-                      color: PicoColors.primary,
-                      fontSize: 11.0,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-                if (isMemberAdmin) ...[
-                  const SizedBox(width: 6.0),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 1.5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFD41D).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(4.0),
-                    ),
-                    child: Text(
-                      'ADMIN',
-                      style: PicoTypography.bodySm.copyWith(
-                        color: const Color(0xFFFFD41D),
-                        fontSize: 9.0,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-
-          // Division Badge & Points
-          DivisionBadge.fromPoints(
-            points: member.picoPoints,
-            size: DivisionBadgeSize.small,
-          ),
-          const SizedBox(width: 8.0),
-          Text(
-            '${member.picoPoints} PTS',
-            style: PicoTypography.labelPill.copyWith(
-              color: PicoColors.textWhite,
-              fontWeight: FontWeight.w800,
-              fontSize: 13.0,
-            ),
-          ),
-
-          // Admin Kick Control
-          if (canKick) ...[
-            const SizedBox(width: 4.0),
-            IconButton(
-              icon: const Icon(
-                Icons.person_remove_rounded,
-                color: PicoColors.accentCoral,
-                size: 18.0,
-              ),
-              tooltip: 'Kick from League',
-              onPressed: onKick,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
 
   /// Confirmation dialog for Deleting League (Admin Only)
   Future<void> _confirmDeleteLeague(BuildContext context) async {
@@ -636,11 +499,10 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _isProcessing = false);
-      ScaffoldMessenger.of(this.context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to delete league: $e'),
-          backgroundColor: PicoColors.accentCoral,
-        ),
+      final l10n = AppLocalizations.of(this.context);
+      PicoSnackBar.showError(
+        this.context,
+        l10n?.failedToDeleteLeague(e.toString()) ?? 'Failed to delete league: $e',
       );
     }
   }
@@ -687,11 +549,10 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _isProcessing = false);
-      ScaffoldMessenger.of(this.context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to leave league: $e'),
-          backgroundColor: PicoColors.accentCoral,
-        ),
+      final l10n = AppLocalizations.of(this.context);
+      PicoSnackBar.showError(
+        this.context,
+        l10n?.failedToLeaveLeague(e.toString()) ?? 'Failed to leave league: $e',
       );
     }
   }
@@ -731,19 +592,17 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
       ref.invalidate(privateLeagueMembersProvider(widget.league.id));
 
       if (!mounted) return;
-      ScaffoldMessenger.of(this.context).showSnackBar(
-        SnackBar(
-          content: Text('$memberName has been removed from the league.'),
-          backgroundColor: const Color(0xFF1E2D3D),
-        ),
+      final l10n = AppLocalizations.of(this.context);
+      PicoSnackBar.showSuccess(
+        this.context,
+        l10n?.memberRemovedFromLeague(memberName) ?? '$memberName has been removed from the league.',
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(this.context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to kick member: $e'),
-          backgroundColor: PicoColors.accentCoral,
-        ),
+      final l10n = AppLocalizations.of(this.context);
+      PicoSnackBar.showError(
+        this.context,
+        l10n?.failedToKickMember(e.toString()) ?? 'Failed to remove member: $e',
       );
     }
   }

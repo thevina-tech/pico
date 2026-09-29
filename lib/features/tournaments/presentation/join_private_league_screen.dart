@@ -10,6 +10,7 @@ import 'package:pico/features/tournaments/presentation/private_league_controller
 import 'package:pico/shared/components/pico_button.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
+import 'package:pico/shared/components/pico_snackbar.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
 /// Screen allowing users to join an existing Private League via a 6-character code.
@@ -82,14 +83,9 @@ class _JoinPrivateLeagueScreenState
       if (!mounted) return;
       setState(() => _isLoading = false);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.leagueJoinedSuccessSubtitle(joinedLeague.name),
-          ),
-          backgroundColor: PicoColors.primary,
-          behavior: SnackBarBehavior.floating,
-        ),
+      PicoSnackBar.showSuccess(
+        context,
+        l10n.leagueJoinedSuccessSubtitle(joinedLeague.name),
       );
 
       // Navigate back to Tournaments
@@ -101,13 +97,10 @@ class _JoinPrivateLeagueScreenState
           e.toString().toLowerCase().contains('capacity') ||
           e.toString().toLowerCase().contains('league is full') ||
           e.toString().toLowerCase().contains('full')) {
-        errorDisplay = 'This league is full (Max 25 members).';
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('This league is full (Max 25 members).'),
-            backgroundColor: PicoColors.accentCoral,
-            behavior: SnackBarBehavior.floating,
-          ),
+        errorDisplay = l10n.leagueCapacityReachedError;
+        PicoSnackBar.showError(
+          context,
+          l10n.leagueCapacityReachedError,
         );
       } else if (e is LeagueNotFoundException) {
         errorDisplay = l10n.invalidLeagueCodeError;
@@ -150,6 +143,7 @@ class _JoinPrivateLeagueScreenState
         backgroundColor: Colors.transparent,
         appBar: PicoAppBar(
           title: l10n.joinPrivateLeagueTitle,
+          isTransparent: true,
           showBackButton: true,
           onBack: () => Navigator.of(context).pop(),
           actions: [
@@ -291,10 +285,11 @@ class _JoinPrivateLeagueScreenState
                       vertical: 10.0,
                     ),
                     decoration: BoxDecoration(
-                      color: PicoColors.error.withValues(alpha: 0.15),
+                      color: PicoColors.errorContainer,
                       borderRadius: BorderRadius.circular(12.0),
                       border: Border.all(
-                        color: PicoColors.error.withValues(alpha: 0.3),
+                        color: PicoColors.errorBorder,
+                        width: 1.0,
                       ),
                     ),
                     child: Row(
@@ -309,7 +304,7 @@ class _JoinPrivateLeagueScreenState
                           child: Text(
                             _errorMessage!,
                             style: PicoTypography.bodySm.copyWith(
-                              color: PicoColors.error,
+                              color: PicoColors.errorText,
                               fontWeight: FontWeight.w600,
                             ),
                           ),

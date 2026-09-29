@@ -261,5 +261,49 @@ void main() {
       expect(find.byType(DivisionLadderSheet), findsOneWidget);
       expect(find.text('Division Ladder'), findsOneWidget);
     });
+
+    testWidgets('HomeScreen renders greeting section with menu button and yellow game-like profile card',
+        (WidgetTester tester) async {
+      bool menuTapped = false;
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            currentUserProfileProvider.overrideWith(
+              () => _FakeCurrentUserProfile(testProfile),
+            ),
+            matchesFeedProvider.overrideWith(
+              () => _FakeMatchesFeed([testMatch]),
+            ),
+          ],
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: HomeScreen(
+              showBottomNavBar: false,
+              onMenuTap: () => menuTapped = true,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // 1. Verify greeting header and subtitle
+      expect(find.text('Hey GoldenBoot! 👋'), findsOneWidget);
+      expect(find.text('Ready to predict today\'s biggest clash?'), findsOneWidget);
+
+      // 2. Verify 3D tactile menu button and tapping it
+      final menuBtn = find.byKey(const Key('home_screen_menu_button'));
+      expect(menuBtn, findsOneWidget);
+      expect(find.descendant(of: menuBtn, matching: find.byIcon(Icons.menu_rounded)), findsOneWidget);
+      await tester.tap(menuBtn);
+      expect(menuTapped, isTrue);
+
+      // 3. Verify user profile card renders username and level
+      final profilePill = find.byKey(const Key('home_screen_profile_pill'));
+      expect(profilePill, findsOneWidget);
+      expect(find.descendant(of: profilePill, matching: find.text('GoldenBoot')), findsOneWidget);
+      expect(find.descendant(of: profilePill, matching: find.text('LVL 7')), findsOneWidget);
+    });
   });
 }

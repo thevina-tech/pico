@@ -6,6 +6,7 @@ import 'package:pico/services/ad_consent_service.dart';
 import 'package:pico/shared/components/in_app_web_browser_screen.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
+import 'package:pico/shared/components/pico_snackbar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Help & Support Hub featuring gamified options for:
@@ -69,26 +70,20 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
         mode: LaunchMode.externalApplication,
       );
       if (!launched && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Color(0xFF0F2B20),
-            content: Text(
+        final l10n = AppLocalizations.of(context);
+        PicoSnackBar.showError(
+          context,
+          l10n?.couldNotOpenEmailClient(HelpSupportScreen.contactEmail) ??
               'Could not open email client. Contact: ${HelpSupportScreen.contactEmail}',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
         );
       }
     } catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Color(0xFF0F2B20),
-            content: Text(
+        final l10n = AppLocalizations.of(context);
+        PicoSnackBar.showError(
+          context,
+          l10n?.couldNotOpenEmailClient(HelpSupportScreen.contactEmail) ??
               'Could not open email client. Contact: ${HelpSupportScreen.contactEmail}',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
         );
       }
     }
@@ -114,6 +109,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
         appBar: PicoAppBar(
           title: titleText,
           showBackButton: true,
+          isTransparent: true,
           onBack: () => Navigator.of(context).maybePop(),
         ),
         body: SafeArea(

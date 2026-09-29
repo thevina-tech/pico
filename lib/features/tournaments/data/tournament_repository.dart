@@ -806,10 +806,11 @@ class SupabaseTournamentRepository implements TournamentRepository {
             user_id,
             pico_points,
             joined_at,
-            profile:profiles(username, avatar_url)
+            profile:profiles(username)
           ''')
           .eq('tournament_id', tournamentId)
-          .order('pico_points', ascending: false);
+          .order('pico_points', ascending: false)
+          .limit(100);
 
       return (response as List<dynamic>).map((row) {
         final rowMap = row as Map<String, dynamic>;
@@ -817,7 +818,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
         return TournamentParticipant.fromJson({
           ...rowMap,
           'username': profile?['username'] ?? 'Player',
-          'avatar_url': profile?['avatar_url'],
+          'avatar_url': null,
         });
       }).toList();
     } catch (e, st) {
@@ -900,7 +901,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
             user_id,
             pico_points,
             joined_at,
-            profile:profiles(username, avatar_url)
+            profile:profiles(username)
           ''')
           .eq('private_league_id', leagueId)
           .order('pico_points', ascending: false);
@@ -911,7 +912,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
         return PrivateLeagueMember.fromJson({
           ...rowMap,
           'username': profile?['username'] ?? 'Player',
-          'avatar_url': profile?['avatar_url'],
+          'avatar_url': null,
         });
       }).toList();
     } catch (e, st) {
@@ -1042,7 +1043,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
             user_id,
             message,
             created_at,
-            profile:profiles(username, avatar_url)
+            profile:profiles(username)
           ''')
           .eq('league_id', leagueId)
           .order('created_at', ascending: false)
@@ -1054,7 +1055,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
         return LeagueMessage.fromJson({
           ...rowMap,
           'username': profile?['username'] ?? 'Player',
-          'avatar_url': profile?['avatar_url'],
+          'avatar_url': null,
         });
       }).toList();
     } catch (e, st) {
@@ -1104,7 +1105,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
             user_id,
             message,
             created_at,
-            profile:profiles(username, avatar_url)
+            profile:profiles(username)
           ''')
           .single();
 
@@ -1113,7 +1114,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
       return LeagueMessage.fromJson({
         ...rowMap,
         'username': profile?['username'] ?? username ?? 'Player',
-        'avatar_url': profile?['avatar_url'] ?? avatarUrl,
+        'avatar_url': null,
       });
     } catch (e, st) {
       AppLogger.error('Failed to send league message', e, st);

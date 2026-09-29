@@ -15,11 +15,12 @@ import 'package:pico/features/tournaments/domain/tournament.dart';
 import 'package:pico/shared/components/match_card.dart';
 import 'package:pico/shared/components/prediction_bottom_sheet.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
-import 'package:pico/shared/components/division_badge.dart';
 import 'package:pico/shared/components/pico_confirmation_modal.dart';
 import 'package:pico/shared/components/pico_button.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
+import 'package:pico/shared/components/pico_snackbar.dart';
 import 'package:pico/l10n/app_localizations.dart';
+import 'package:pico/features/tournaments/presentation/widgets/tactile_leaderboard_card.dart';
 
 /// Detail screen for official Public Tournaments.
 /// Displays tournament header, live leaderboard standings, and competition match feed.
@@ -47,13 +48,7 @@ class _PublicTournamentScreenState
   Future<bool> _handleJoinTournament(Tournament tournament, AppLocalizations l10n) async {
     final authState = ref.read(authProvider);
     if (authState is! PicoAuthAuthenticated || authState.user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.signInToJoinTournament),
-          backgroundColor: PicoColors.accentCoral,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      PicoSnackBar.showError(context, l10n.signInToJoinTournament);
       return false;
     }
 
@@ -98,24 +93,15 @@ class _PublicTournamentScreenState
       ref.invalidate(matchesFeedProvider);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.joinTournamentSuccessToast(tournament.name)),
-            backgroundColor: PicoColors.primary,
-            behavior: SnackBarBehavior.floating,
-          ),
+        PicoSnackBar.showSuccess(
+          context,
+          l10n.joinTournamentSuccessToast(tournament.name),
         );
       }
       return true;
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: PicoColors.accentCoral,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        PicoSnackBar.showError(context, e.toString());
       }
       return false;
     } finally {
@@ -158,6 +144,7 @@ class _PublicTournamentScreenState
         backgroundColor: Colors.transparent,
         appBar: PicoAppBar(
           title: l10n.tournamentDetailsTitle,
+          isTransparent: true,
           showBackButton: true,
           onBack: () => context.pop(),
         ),
@@ -439,7 +426,10 @@ class _PublicTournamentScreenState
         ),
       ),
       data: (participants) {
-        if (participants.isEmpty) {
+        // Enforce top 100 limit for public tournaments
+        final displayedParticipants = participants.take(100).toList();
+
+        if (displayedParticipants.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -456,161 +446,58 @@ class _PublicTournamentScreenState
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 24.0),
-          itemCount: participants.length,
+          padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 32.0),
+          itemCount: displayedParticipants.length + 1,
           itemBuilder: (context, index) {
-            final participant = participants[index];
-            final rank = index + 1;
+            if (index == 0) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12.0, left: 4.0, right: 4.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      l10n.top100LeaderboardHeader,
+                      style: PicoTypography.labelPillSm.copyWith(
+                        color: PicoColors.textWhiteMuted,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.0,
+                        fontSize: 11.0,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      child: Text(
+                        '${displayedParticipants.length} / 100',
+                        style: const TextStyle(
+                          color: PicoColors.textWhiteMuted,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10.0,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            final participant = displayedParticipants[index - 1];
+            final rank = index;
             final isCurrentUser = participant.userId == currentUserId;
 
-            return Container(
-              margin: const EdgeInsets.only(bottom: 8.0),
-              padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
-              decoration: BoxDecoration(
-                color: isCurrentUser
-                    ? const Color(0xFF143322)
-                    : PicoColors.darkTray,
-                borderRadius: BorderRadius.circular(14.0),
-                border: Border.all(
-                  color: isCurrentUser
-                      ? PicoColors.primary
-                      : Colors.white.withValues(alpha: 0.06),
-                  width: isCurrentUser ? 1.5 : 1.0,
-                ),
-              ),
-              child: Row(
-                children: [
-                  // Rank badge
-                  _buildRankBadge(rank),
-                  const SizedBox(width: 12.0),
-
-                  // Avatar
-                  CircleAvatar(
-                    radius: 18.0,
-                    backgroundColor: const Color(0xFF1B3828),
-                    backgroundImage: participant.avatarUrl != null && participant.avatarUrl!.isNotEmpty
-                        ? CachedNetworkImageProvider(participant.avatarUrl!)
-                        : null,
-                    child: (participant.avatarUrl == null || participant.avatarUrl!.isEmpty)
-                        ? Text(
-                            (participant.username ?? 'P').characters.first.toUpperCase(),
-                            style: const TextStyle(
-                              color: PicoColors.primary,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 14.0,
-                            ),
-                          )
-                        : null,
-                  ),
-                  const SizedBox(width: 12.0),
-
-                  // Username + You pill
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            participant.username ?? 'Player',
-                            style: PicoTypography.titleCard.copyWith(
-                              color: PicoColors.textWhite,
-                              fontWeight: isCurrentUser ? FontWeight.w800 : FontWeight.w600,
-                              fontSize: 14.5,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (isCurrentUser) ...[
-                          const SizedBox(width: 6.0),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 1.5),
-                            decoration: BoxDecoration(
-                              color: PicoColors.primary,
-                              borderRadius: BorderRadius.circular(4.0),
-                            ),
-                            child: const Text(
-                              'YOU',
-                              style: TextStyle(
-                                color: PicoColors.pitchBackground,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 9.0,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-
-                  // Division Badge
-                  DivisionBadge.fromPoints(
-                    points: participant.picoPoints,
-                    size: DivisionBadgeSize.small,
-                  ),
-                  const SizedBox(width: 8.0),
-
-                  // Points Pill
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0D1B13),
-                      borderRadius: BorderRadius.circular(8.0),
-                      border: Border.all(
-                        color: rank <= 3 ? PicoColors.gold : Colors.white.withValues(alpha: 0.1),
-                        width: 1.0,
-                      ),
-                    ),
-                    child: Text(
-                      '${participant.picoPoints} ${l10n.pointsAbbreviation}',
-                      style: PicoTypography.headlineMd.copyWith(
-                        color: rank <= 3 ? PicoColors.gold : PicoColors.primary,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 12.5,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            return TactileLeaderboardCard(
+              rank: rank,
+              username: participant.username,
+              avatarUrl: participant.avatarUrl,
+              picoPoints: participant.picoPoints,
+              isCurrentUser: isCurrentUser,
             );
           },
         );
       },
-    );
-  }
-
-  Widget _buildRankBadge(int rank) {
-    Color badgeColor;
-    Color textColor;
-
-    if (rank == 1) {
-      badgeColor = PicoColors.gold;
-      textColor = const Color(0xFF261A00);
-    } else if (rank == 2) {
-      badgeColor = const Color(0xFFE2E8F0);
-      textColor = const Color(0xFF1E293B);
-    } else if (rank == 3) {
-      badgeColor = const Color(0xFFCD7F32);
-      textColor = Colors.white;
-    } else {
-      badgeColor = const Color(0xFF1E2922);
-      textColor = PicoColors.textWhiteMuted;
-    }
-
-    return Container(
-      width: 28.0,
-      height: 28.0,
-      decoration: BoxDecoration(
-        color: badgeColor,
-        shape: BoxShape.circle,
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        '$rank',
-        style: TextStyle(
-          color: textColor,
-          fontWeight: FontWeight.w900,
-          fontSize: 12.0,
-        ),
-      ),
     );
   }
 

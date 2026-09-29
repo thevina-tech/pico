@@ -1130,6 +1130,18 @@ abstract class AppLocalizations {
   /// **'PTS'**
   String get pointsAbbreviation;
 
+  /// Header showing top 100 participants in public tournament leaderboard
+  ///
+  /// In en, this message translates to:
+  /// **'TOP 100 PLAYERS'**
+  String get top100LeaderboardHeader;
+
+  /// Label for Pico Points currency in leaderboard
+  ///
+  /// In en, this message translates to:
+  /// **'Pico Points'**
+  String get picoPointsLabel;
+
   /// Header for rank column
   ///
   /// In en, this message translates to:
@@ -1673,6 +1685,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Review or change your ad personalization consent'**
   String get adChoicesSubtitle;
+
+  /// Header title for Pico scoring rules breakdown
+  ///
+  /// In en, this message translates to:
+  /// **'PICO SCORING RULES'**
+  String get picoScoringRules;
+
+  /// Label for exact score prediction outcome
+  ///
+  /// In en, this message translates to:
+  /// **'Exact Score'**
+  String get scoringRuleExactTitle;
+
+  /// Description for exact score outcome
+  ///
+  /// In en, this message translates to:
+  /// **'Predict the exact final scoreline'**
+  String get scoringRuleExactDesc;
+
+  /// Label for outcome plus goal difference prediction
+  ///
+  /// In en, this message translates to:
+  /// **'Winner + Goal Diff'**
+  String get scoringRuleGoalDiffTitle;
+
+  /// Description for outcome plus goal difference
+  ///
+  /// In en, this message translates to:
+  /// **'Correct winner and goal margin'**
+  String get scoringRuleGoalDiffDesc;
+
+  /// Label for correct winner outcome
+  ///
+  /// In en, this message translates to:
+  /// **'Correct Winner'**
+  String get scoringRuleWinnerOnlyTitle;
+
+  /// Description for correct winner outcome
+  ///
+  /// In en, this message translates to:
+  /// **'Correct winner, other scoreline'**
+  String get scoringRuleWinnerOnlyDesc;
+
+  /// Error message when private league has reached member limit
+  ///
+  /// In en, this message translates to:
+  /// **'This league is full (Max 25 members).'**
+  String get leagueCapacityReachedError;
+
+  /// Error validation for private league name length
+  ///
+  /// In en, this message translates to:
+  /// **'League name must be between 3 and 30 characters.'**
+  String get leagueNameLengthError;
+
+  /// Success snackbar message when private league is created
+  ///
+  /// In en, this message translates to:
+  /// **'League created successfully!'**
+  String get leagueCreatedSuccessToast;
+
+  /// Validation message when username contains non-alphanumeric characters or spaces
+  ///
+  /// In en, this message translates to:
+  /// **'Username must be alphanumeric with no spaces'**
+  String get usernameAlphanumericError;
+
+  /// Error when store link fails to open
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open store link.'**
+  String get couldNotOpenStoreLink;
+
+  /// Error when email client cannot be opened
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open email client. Contact: {email}'**
+  String couldNotOpenEmailClient(String email);
+
+  /// Snackbar prompt asking user to sign in with Google
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in with Google to continue.'**
+  String get signInWithGooglePrompt;
+
+  /// Snackbar prompt asking user to sign in with Google to finish setup
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in with Google to complete your account setup.'**
+  String get signInWithGoogleSetupPrompt;
+
+  /// Error message when teams list cannot be loaded
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load teams: {error}'**
+  String failedToLoadTeams(String error);
+
+  /// Error message when competitions list cannot be loaded
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load competitions: {error}'**
+  String failedToLoadCompetitions(String error);
+
+  /// Empty state search message for clubs
+  ///
+  /// In en, this message translates to:
+  /// **'No clubs found matching \"{query}\"'**
+  String noClubsFound(String query);
+
+  /// Error when league deletion fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete league: {error}'**
+  String failedToDeleteLeague(String error);
+
+  /// Error when leaving league fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to leave league: {error}'**
+  String failedToLeaveLeague(String error);
+
+  /// Success message when an admin kicks a member
+  ///
+  /// In en, this message translates to:
+  /// **'{username} has been removed from the league.'**
+  String memberRemovedFromLeague(String username);
+
+  /// Error when removing a member fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to remove member: {error}'**
+  String failedToKickMember(String error);
+
+  /// Error message when sending chat message fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send message: {error}'**
+  String failedToSendMessage(String error);
+
+  /// Error message when sign out fails
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out failed: {error}'**
+  String signOutFailed(String error);
+
+  /// Greeting message on home screen
+  ///
+  /// In en, this message translates to:
+  /// **'Hey {username}! 👋'**
+  String homeGreeting(String username);
+
+  /// Call to action message under greeting on home screen
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to predict today\'s biggest clash?'**
+  String get homeReadyToPredict;
 }
 
 class _AppLocalizationsDelegate

@@ -14,6 +14,7 @@ import 'package:pico/shared/components/pico_button.dart';
 import 'package:pico/features/profile/presentation/help_support_screen.dart';
 import 'package:pico/features/profile/presentation/settings_screen.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
+import 'package:pico/shared/components/pico_snackbar.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -835,27 +836,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         mode: LaunchMode.externalApplication,
       );
       if (!launched && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Color(0xFF0F2B20),
-            content: Text(
-              'Could not open store link.',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
+        final l10n = AppLocalizations.of(context);
+        PicoSnackBar.showError(
+          context,
+          l10n?.couldNotOpenStoreLink ?? 'Could not open store link.',
         );
       }
     } catch (e) {
       debugPrint('[ProfileScreen] Store link launch error: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Color(0xFF0F2B20),
-            content: Text(
-              'Could not open store link.',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
+        final l10n = AppLocalizations.of(context);
+        PicoSnackBar.showError(
+          context,
+          l10n?.couldNotOpenStoreLink ?? 'Could not open store link.',
         );
       }
     }

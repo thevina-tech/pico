@@ -12,6 +12,7 @@ import 'package:pico/features/tournaments/presentation/private_league_controller
 import 'package:pico/shared/components/pico_button.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
+import 'package:pico/shared/components/pico_snackbar.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/services/revenuecat_ad_service.dart';
 
@@ -63,7 +64,7 @@ class _CreatePrivateLeagueScreenState
 
     if (!InputSanitizer.isValidLeagueName(name)) {
       setState(() {
-        _errorMessage = 'League name must be between 3 and 30 characters.';
+        _errorMessage = l10n.leagueNameLengthError;
       });
       return;
     }
@@ -87,13 +88,7 @@ class _CreatePrivateLeagueScreenState
       setState(() => _isLoading = false);
 
       // 2. Success Confirmation: Immediately display a success Snackbar.
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('League created successfully!'),
-          backgroundColor: PicoColors.primary,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      PicoSnackBar.showSuccess(context, l10n.leagueCreatedSuccessToast);
 
       // 3. Yield to UI: Add a brief micro-delay so the Flutter framework renders the Snackbar.
       await Future.delayed(const Duration(milliseconds: 300));
@@ -263,13 +258,7 @@ class _CreatePrivateLeagueScreenState
                             borderRadius: 14.0,
                             onPressed: () {
                               Clipboard.setData(ClipboardData(text: league.inviteCode));
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(l10n.codeCopiedToast),
-                                  backgroundColor: PicoColors.primary,
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
+                              PicoSnackBar.showSuccess(context, l10n.codeCopiedToast);
                             },
                           ),
                         ),
@@ -369,6 +358,7 @@ class _CreatePrivateLeagueScreenState
         backgroundColor: Colors.transparent,
         appBar: PicoAppBar(
           title: l10n.createPrivateLeagueTitle,
+          isTransparent: true,
           showBackButton: true,
           onBack: () => Navigator.of(context).pop(),
           actions: [
@@ -577,10 +567,11 @@ class _CreatePrivateLeagueScreenState
                       vertical: 10.0,
                     ),
                     decoration: BoxDecoration(
-                      color: PicoColors.error.withValues(alpha: 0.15),
+                      color: PicoColors.errorContainer,
                       borderRadius: BorderRadius.circular(12.0),
                       border: Border.all(
-                        color: PicoColors.error.withValues(alpha: 0.3),
+                        color: PicoColors.errorBorder,
+                        width: 1.0,
                       ),
                     ),
                     child: Row(
@@ -595,7 +586,7 @@ class _CreatePrivateLeagueScreenState
                           child: Text(
                             _errorMessage!,
                             style: PicoTypography.bodySm.copyWith(
-                              color: PicoColors.error,
+                              color: PicoColors.errorText,
                               fontWeight: FontWeight.w600,
                             ),
                           ),

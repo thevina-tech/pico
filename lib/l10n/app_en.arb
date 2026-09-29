@@ -786,6 +786,14 @@
   "@pointsAbbreviation": {
     "description": "Points abbreviation in leaderboard"
   },
+  "top100LeaderboardHeader": "TOP 100 PLAYERS",
+  "@top100LeaderboardHeader": {
+    "description": "Header showing top 100 participants in public tournament leaderboard"
+  },
+  "picoPointsLabel": "Pico Points",
+  "@picoPointsLabel": {
+    "description": "Label for Pico Points currency in leaderboard"
+  },
   "rankHeader": "RANK",
   "@rankHeader": {
     "description": "Header for rank column"
@@ -1249,6 +1257,143 @@
   "adChoicesSubtitle": "Review or change your ad personalization consent",
   "@adChoicesSubtitle": {
     "description": "Subtitle explaining the user can modify ad personalization preferences"
+  },
+  "picoScoringRules": "PICO SCORING RULES",
+  "@picoScoringRules": {
+    "description": "Header title for Pico scoring rules breakdown"
+  },
+  "scoringRuleExactTitle": "Exact Score",
+  "@scoringRuleExactTitle": {
+    "description": "Label for exact score prediction outcome"
+  },
+  "scoringRuleExactDesc": "Predict the exact final scoreline",
+  "@scoringRuleExactDesc": {
+    "description": "Description for exact score outcome"
+  },
+  "scoringRuleGoalDiffTitle": "Winner + Goal Diff",
+  "@scoringRuleGoalDiffTitle": {
+    "description": "Label for outcome plus goal difference prediction"
+  },
+  "scoringRuleGoalDiffDesc": "Correct winner and goal margin",
+  "@scoringRuleGoalDiffDesc": {
+    "description": "Description for outcome plus goal difference"
+  },
+  "scoringRuleWinnerOnlyTitle": "Correct Winner",
+  "@scoringRuleWinnerOnlyTitle": {
+    "description": "Label for correct winner outcome"
+  },
+  "scoringRuleWinnerOnlyDesc": "Correct winner, other scoreline",
+  "@scoringRuleWinnerOnlyDesc": {
+    "description": "Description for correct winner outcome"
+  },
+  "leagueCapacityReachedError": "This league is full (Max 25 members).",
+  "@leagueCapacityReachedError": {
+    "description": "Error message when private league has reached member limit"
+  },
+  "leagueNameLengthError": "League name must be between 3 and 30 characters.",
+  "@leagueNameLengthError": {
+    "description": "Error validation for private league name length"
+  },
+  "leagueCreatedSuccessToast": "League created successfully!",
+  "@leagueCreatedSuccessToast": {
+    "description": "Success snackbar message when private league is created"
+  },
+  "usernameAlphanumericError": "Username must be alphanumeric with no spaces",
+  "@usernameAlphanumericError": {
+    "description": "Validation message when username contains non-alphanumeric characters or spaces"
+  },
+  "couldNotOpenStoreLink": "Could not open store link.",
+  "@couldNotOpenStoreLink": {
+    "description": "Error when store link fails to open"
+  },
+  "couldNotOpenEmailClient": "Could not open email client. Contact: {email}",
+  "@couldNotOpenEmailClient": {
+    "description": "Error when email client cannot be opened",
+    "placeholders": {
+      "email": { "type": "String", "example": "support@pico.app" }
+    }
+  },
+  "signInWithGooglePrompt": "Please sign in with Google to continue.",
+  "@signInWithGooglePrompt": {
+    "description": "Snackbar prompt asking user to sign in with Google"
+  },
+  "signInWithGoogleSetupPrompt": "Please sign in with Google to complete your account setup.",
+  "@signInWithGoogleSetupPrompt": {
+    "description": "Snackbar prompt asking user to sign in with Google to finish setup"
+  },
+  "failedToLoadTeams": "Failed to load teams: {error}",
+  "@failedToLoadTeams": {
+    "description": "Error message when teams list cannot be loaded",
+    "placeholders": {
+      "error": { "type": "String", "example": "Connection error" }
+    }
+  },
+  "failedToLoadCompetitions": "Failed to load competitions: {error}",
+  "@failedToLoadCompetitions": {
+    "description": "Error message when competitions list cannot be loaded",
+    "placeholders": {
+      "error": { "type": "String", "example": "Connection error" }
+    }
+  },
+  "noClubsFound": "No clubs found matching \"{query}\"",
+  "@noClubsFound": {
+    "description": "Empty state search message for clubs",
+    "placeholders": {
+      "query": { "type": "String", "example": "Madrid" }
+    }
+  },
+  "failedToDeleteLeague": "Failed to delete league: {error}",
+  "@failedToDeleteLeague": {
+    "description": "Error when league deletion fails",
+    "placeholders": {
+      "error": { "type": "String", "example": "Permission denied" }
+    }
+  },
+  "failedToLeaveLeague": "Failed to leave league: {error}",
+  "@failedToLeaveLeague": {
+    "description": "Error when leaving league fails",
+    "placeholders": {
+      "error": { "type": "String", "example": "Network error" }
+    }
+  },
+  "memberRemovedFromLeague": "{username} has been removed from the league.",
+  "@memberRemovedFromLeague": {
+    "description": "Success message when an admin kicks a member",
+    "placeholders": {
+      "username": { "type": "String", "example": "Carlos" }
+    }
+  },
+  "failedToKickMember": "Failed to remove member: {error}",
+  "@failedToKickMember": {
+    "description": "Error when removing a member fails",
+    "placeholders": {
+      "error": { "type": "String", "example": "Permission denied" }
+    }
+  },
+  "failedToSendMessage": "Failed to send message: {error}",
+  "@failedToSendMessage": {
+    "description": "Error message when sending chat message fails",
+    "placeholders": {
+      "error": { "type": "String", "example": "Timeout" }
+    }
+  },
+  "signOutFailed": "Sign out failed: {error}",
+  "@signOutFailed": {
+    "description": "Error message when sign out fails",
+    "placeholders": {
+      "error": { "type": "String", "example": "Network error" }
+    }
+  },
+  "homeGreeting": "Hey {username}! 👋",
+  "@homeGreeting": {
+    "description": "Greeting message on home screen",
+    "placeholders": {
+      "username": { "type": "String", "example": "Alex" }
+    }
+  },
+  "homeReadyToPredict": "Ready to predict today's biggest clash?",
+  "@homeReadyToPredict": {
+    "description": "Call to action message under greeting on home screen"
   }
 }
 

@@ -120,11 +120,29 @@ abstract final class PicoColors {
   // ---------------------------------------------------------------------------
   // 8. Alerts & Feedback
   // ---------------------------------------------------------------------------
-  /// Error red (#BA1A1A).
-  static const Color error = Color(0xFFBA1A1A);
+  /// High-contrast bright error red for dark surfaces and alerts (#FF5252).
+  static const Color error = Color(0xFFFF5252);
 
-  /// Error container (#FFDAD6).
-  static const Color errorContainer = Color(0xFFFFDAD6);
+  /// High-contrast legible error text over dark pitch background (#FFD2CC).
+  static const Color errorText = Color(0xFFFFD2CC);
+
+  /// Error container background fill for alert cards and banners (#33FF5252).
+  static const Color errorContainer = Color(0x33FF5252);
+
+  /// Error border stroke for alert banners on dark pitch (#80FF5252).
+  static const Color errorBorder = Color(0x80FF5252);
+
+  /// Clear light surface for floating snack bars (#FFFFFF).
+  static const Color snackBarSurface = Color(0xFFFFFFFF);
+
+  /// Clear soft rose light surface for error snack bars (#FFF5F5).
+  static const Color snackBarErrorSurface = Color(0xFFFFF5F5);
+
+  /// High-contrast pitch ink for text inside clear snack bars (#13211B).
+  static const Color snackBarText = Color(0xFF13211B);
+
+  /// Deep red text for error snack bars (#991B1B).
+  static const Color snackBarErrorText = Color(0xFF991B1B);
 
   /// Vibrant coral red for destructive actions & admin danger badges (#EF4444).
   static const Color accentCoral = Color(0xFFEF4444);

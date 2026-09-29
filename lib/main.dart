@@ -92,11 +92,27 @@ class PicoApp extends ConsumerWidget {
         colorScheme: const ColorScheme.dark(
           primary: PicoColors.primary,
           surface: PicoColors.pitchSurface,
+          error: PicoColors.error,
         ),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.transparent,
           elevation: 0,
           scrolledUnderElevation: 0,
+        ),
+        snackBarTheme: SnackBarThemeData(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: PicoColors.snackBarSurface,
+          contentTextStyle: const TextStyle(
+            color: PicoColors.snackBarText,
+            fontWeight: FontWeight.w600,
+            fontSize: 14.0,
+            fontFamily: 'Rubik',
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+            side: const BorderSide(color: Color(0xFFE2DDD2), width: 1.5),
+          ),
+          elevation: 8.0,
         ),
       ),
     );

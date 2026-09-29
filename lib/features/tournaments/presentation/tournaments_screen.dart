@@ -19,6 +19,7 @@ import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_button.dart';
 import 'package:pico/shared/components/pico_confirmation_modal.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
+import 'package:pico/shared/components/pico_snackbar.dart';
 
 /// Central Tournaments Screen featuring "My Leagues" and "Discover" tabs.
 class TournamentsScreen extends ConsumerWidget {
@@ -367,13 +368,7 @@ class TournamentsScreen extends ConsumerWidget {
                   InkWell(
                     onTap: () {
                       Clipboard.setData(ClipboardData(text: league.inviteCode));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(l10n.codeCopiedToast),
-                          backgroundColor: PicoColors.primary,
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
+                      PicoSnackBar.showSuccess(context, l10n.codeCopiedToast);
                     },
                     borderRadius: BorderRadius.circular(8.0),
                     child: Container(
@@ -642,13 +637,7 @@ class TournamentsScreen extends ConsumerWidget {
                   onPressed: () async {
                     final authState = ref.read(authProvider);
                     if (authState is! PicoAuthAuthenticated || authState.user == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(l10n.signInToJoinTournament),
-                          backgroundColor: PicoColors.accentCoral,
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
+                      PicoSnackBar.showError(context, l10n.signInToJoinTournament);
                       return;
                     }
 
@@ -690,23 +679,14 @@ class TournamentsScreen extends ConsumerWidget {
                       ref.invalidate(tournamentLeaderboardProvider(tournament.id));
                       ref.invalidate(matchesFeedProvider);
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(l10n.joinTournamentSuccessToast(tournament.name)),
-                            backgroundColor: PicoColors.primary,
-                            behavior: SnackBarBehavior.floating,
-                          ),
+                        PicoSnackBar.showSuccess(
+                          context,
+                          l10n.joinTournamentSuccessToast(tournament.name),
                         );
                       }
                     } catch (e) {
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(e.toString()),
-                            backgroundColor: PicoColors.accentCoral,
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
+                        PicoSnackBar.showError(context, e.toString());
                       }
                     }
                   },
@@ -871,12 +851,16 @@ class TournamentsScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(14.0),
       decoration: BoxDecoration(
-        color: PicoColors.error.withValues(alpha: 0.15),
+        color: PicoColors.errorContainer,
         borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(color: PicoColors.errorBorder, width: 1.0),
       ),
       child: Text(
         error,
-        style: PicoTypography.bodySm.copyWith(color: PicoColors.error),
+        style: PicoTypography.bodySm.copyWith(
+          color: PicoColors.errorText,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -888,23 +872,7 @@ class TournamentsScreen extends ConsumerWidget {
       isScrollControlled: true,
       builder: (ctx) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF144D34), // Brighter crisp pitch background without AI gradient
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28.0)),
-            border: Border.fromBorderSide(
-              BorderSide(
-                color: Color(0x4D4ADE80), // Soft pitch line green
-                width: 1.5,
-              ),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x99000000),
-                offset: Offset(0, -8),
-                blurRadius: 24,
-              ),
-            ],
-          ),
+          color: Colors.transparent,
           child: SafeArea(
             top: false,
             child: Padding(

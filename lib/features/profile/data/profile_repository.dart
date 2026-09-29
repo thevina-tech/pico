@@ -200,11 +200,6 @@ class SupabaseProfileRepository implements ProfileRepository {
           if (currentUser.email != null) {
             payload['email'] = currentUser.email;
           }
-          final avatar = currentUser.userMetadata?['avatar_url'] ??
-              currentUser.userMetadata?['picture'];
-          if (avatar != null) {
-            payload['avatar_url'] = avatar.toString();
-          }
         }
 
         await _supabase.from('profiles').upsert(payload, onConflict: 'id');

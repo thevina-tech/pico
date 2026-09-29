@@ -8,6 +8,7 @@ import 'package:pico/features/matches/presentation/matches_controller.dart';
 import 'package:pico/features/predictions/presentation/prediction_controller.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/pico_button.dart';
+import 'package:pico/shared/components/pico_snackbar.dart';
 import 'package:pico/shared/components/prediction_controls.dart';
 
 /// Shows the standardized tactile prediction bottom sheet for [match].
@@ -334,32 +335,21 @@ Future<void> showPicoPredictionBottomSheet({
                           );
 
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).clearSnackBars();
                         if (success) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                l10n?.predictionLockedSuccessToast ??
-                                    'Prediction locked in! (+10 XP) ⚽',
-                              ),
-                              backgroundColor: PicoColors.primary,
-                              behavior: SnackBarBehavior.floating,
-                            ),
+                          PicoSnackBar.showSuccess(
+                            context,
+                            l10n?.predictionLockedSuccessToast ??
+                                'Prediction locked in! (+10 XP) ⚽',
                           );
                           onPredictionSaved?.call();
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                match.isLocked
-                                    ? (l10n?.predictionWindowClosed ??
-                                        'Predictions are closed for this match')
-                                    : (l10n?.predictionSaveFailed ??
-                                        'Failed to save prediction. Please try again.'),
-                              ),
-                              backgroundColor: Colors.redAccent,
-                              behavior: SnackBarBehavior.floating,
-                            ),
+                          PicoSnackBar.showError(
+                            context,
+                            match.isLocked
+                                ? (l10n?.predictionWindowClosed ??
+                                    'Predictions are closed for this match')
+                                : (l10n?.predictionSaveFailed ??
+                                    'Failed to save prediction. Please try again.'),
                           );
                         }
                       }

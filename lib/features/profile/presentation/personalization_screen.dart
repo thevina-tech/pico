@@ -7,6 +7,7 @@ import 'package:pico/core/utils/input_sanitizer.dart';
 import 'package:pico/features/profile/presentation/personalization_controller.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
+import 'package:pico/shared/components/pico_snackbar.dart';
 
 /// The official "Pico — Personalization" screen.
 ///
@@ -109,13 +110,7 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
     } else if (mounted) {
       final error = ref.read(personalizationControllerProvider).errorMessage;
       if (error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error),
-            backgroundColor: PicoColors.error,
-            duration: const Duration(seconds: 4),
-          ),
-        );
+        PicoSnackBar.showError(context, error);
       }
     }
   }
@@ -125,15 +120,10 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
     final currentUsername = _usernameController.text.trim();
     if (currentUsername.isEmpty) {
       ref.read(personalizationControllerProvider.notifier).setUsername('');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n?.usernameErrorEmpty ??
-                'Please introduce a username to continue.',
-          ),
-          backgroundColor: PicoColors.error,
-          duration: const Duration(seconds: 4),
-        ),
+      PicoSnackBar.showError(
+        context,
+        l10n?.usernameErrorEmpty ??
+            'Please introduce a username to continue.',
       );
       return;
     }

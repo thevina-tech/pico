@@ -16,7 +16,6 @@ CREATE TABLE public.profiles (
   id uuid REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
   email text,
   username text UNIQUE,
-  avatar_url text,
   level int NOT NULL DEFAULT 1,
   xp int NOT NULL DEFAULT 0,
   streak int NOT NULL DEFAULT 0,
@@ -29,12 +28,11 @@ CREATE TABLE public.profiles (
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.profiles (id, email, username, avatar_url)
+  INSERT INTO public.profiles (id, email, username)
   VALUES (
     NEW.id,
     NEW.email,
-    NULL, -- Custom username must be explicitly chosen by the user during onboarding
-    NEW.raw_user_meta_data->>'avatar_url'
+    NULL -- Custom username must be explicitly chosen by the user during onboarding
   );
   RETURN NEW;
 END;

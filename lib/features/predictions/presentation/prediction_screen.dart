@@ -8,6 +8,7 @@ import 'package:pico/features/predictions/presentation/prediction_controller.dar
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/pico_button.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
+import 'package:pico/shared/components/pico_snackbar.dart';
 import 'package:pico/shared/components/prediction_controls.dart';
 
 /// Screen: Tactile Match Prediction Board
@@ -149,14 +150,11 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
 
     if (widget.match.isLocked) {
       setState(() => _isLocked = true);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)?.predictionWindowClosed ??
-                'Predictions lock exactly 10 minutes before kickoff.',
-          ),
-          backgroundColor: Colors.redAccent,
-        ),
+      final l10n = AppLocalizations.of(context);
+      PicoSnackBar.showError(
+        context,
+        l10n?.predictionWindowClosed ??
+            'Predictions lock exactly 10 minutes before kickoff.',
       );
       return;
     }
@@ -184,87 +182,24 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
       if (success) {
         widget.onPredictionLocked?.call(_homeScore, _awayScore, _selectedWinner);
         final l10n = AppLocalizations.of(context);
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-            content: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-              decoration: BoxDecoration(
-                color: PicoColors.primary,
-                borderRadius: BorderRadius.circular(16.0),
-                border: Border.all(color: PicoColors.primaryFixed, width: 2.0),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x66000000),
-                    offset: Offset(0, 6),
-                    blurRadius: 16,
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 36.0,
-                    height: 36.0,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.check_circle_rounded,
-                      color: Colors.white,
-                      size: 22.0,
-                    ),
-                  ),
-                  const SizedBox(width: 12.0),
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n?.predictionLockedTitle ?? 'Prediction Locked! ⚽',
-                          style: PicoTypography.titleCard.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15.0,
-                          ),
-                        ),
-                        const SizedBox(height: 2.0),
-                        Text(
-                          '${widget.match.homeTeamName} $_homeScore - $_awayScore ${widget.match.awayTeamName}',
-                          style: PicoTypography.bodySm.copyWith(
-                            color: PicoColors.primaryFixed,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12.0,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        PicoSnackBar.showSuccess(
+          context,
+          l10n?.predictionLockedTitle ?? 'Prediction Locked! ⚽',
+          subtitle:
+              '${widget.match.homeTeamName} $_homeScore - $_awayScore ${widget.match.awayTeamName}',
         );
       } else {
         if (widget.match.isLocked) {
           setState(() => _isLocked = true);
         }
         final l10n = AppLocalizations.of(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.match.isLocked
-                  ? (l10n?.predictionWindowClosed ?? 'Predictions are closed for this match')
-                  : 'Failed to save prediction. Please try again.',
-            ),
-            backgroundColor: Colors.redAccent,
-          ),
+        PicoSnackBar.showError(
+          context,
+          widget.match.isLocked
+              ? (l10n?.predictionWindowClosed ??
+                  'Predictions are closed for this match')
+              : (l10n?.predictionSaveFailed ??
+                  'Failed to save prediction. Please try again.'),
         );
       }
     } finally {
@@ -685,6 +620,7 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
         ? widget.match.calculateSettlementPoints(existing.homeScore, existing.awayScore)
         : null;
 
+    final l10n = AppLocalizations.of(context);
     final String outcomeTitle;
     final String pointsBadge;
     final Color badgeBg;
@@ -692,24 +628,29 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
 
     if (hasPrediction) {
       if (points == 5) {
-        outcomeTitle = 'Exact Score! 🎯';
-        pointsBadge = '+5 PTS';
+        outcomeTitle = '${l10n?.scoringRuleExactTitle ?? 'Exact Score'}! 🎯';
+        pointsBadge = l10n?.pointsOutcomeExact ?? '+5 PTS';
         badgeBg = PicoColors.primary;
         badgeTextColor = Colors.white;
       } else if (points == 3) {
-        outcomeTitle = 'Correct Winner! ⚽';
-        pointsBadge = '+3 PTS';
+        outcomeTitle = '${l10n?.scoringRuleGoalDiffTitle ?? 'Winner + Diff'}! ⚽';
+        pointsBadge = l10n?.pointsOutcomeGoalDiff ?? '+3 PTS';
         badgeBg = const Color(0xFFE6C687);
         badgeTextColor = const Color(0xFF2C1C02);
+      } else if (points == 1) {
+        outcomeTitle = '${l10n?.scoringRuleWinnerOnlyTitle ?? 'Correct Winner'}! ⚽';
+        pointsBadge = l10n?.pointsOutcomeOne ?? '+1 PT';
+        badgeBg = const Color(0xFFBAE6FD);
+        badgeTextColor = const Color(0xFF0369A1);
       } else {
         outcomeTitle = 'Prediction Settled';
-        pointsBadge = '0 PTS';
+        pointsBadge = l10n?.pointsOutcomeIncorrect ?? '0 PTS';
         badgeBg = const Color(0xFFEDE8DD);
         badgeTextColor = PicoColors.textTactileMuted;
       }
     } else {
-      outcomeTitle = 'Match Completed';
-      pointsBadge = 'Not Predicted';
+      outcomeTitle = l10n?.matchFinishedLabel ?? 'Match Finished';
+      pointsBadge = l10n?.pointsOutcomeNone ?? 'Not Predicted';
       badgeBg = const Color(0xFFEDE8DD);
       badgeTextColor = PicoColors.textTactileMuted;
     }
@@ -1087,7 +1028,7 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
       decoration: BoxDecoration(
         color: const Color(0xFFFAF8F2),
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(16.0),
         border: Border.all(color: const Color(0xFFE5DFD0), width: 1.0),
       ),
       child: Column(
@@ -1099,7 +1040,7 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
               Expanded(
                 child: Text(
                   widget.match.status == MatchStatus.finished
-                      ? 'PICO SCORING RULES'
+                      ? (l10n?.picoScoringRules ?? 'PICO SCORING RULES')
                       : (l10n?.potentialPointsHeader.toUpperCase() ?? 'POTENTIAL PICO POINTS'),
                   style: PicoTypography.labelPillSm.copyWith(
                     color: const Color(0xFF5C6B64),
@@ -1112,98 +1053,133 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
                 ),
               ),
               const SizedBox(width: 8.0),
-              Text(
-                '+5 Pts Max',
-                style: PicoTypography.labelPillSm.copyWith(
-                  color: PicoColors.primaryDark,
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w800,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                decoration: BoxDecoration(
+                  color: PicoColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(6.0),
+                ),
+                child: Text(
+                  '+5 Pts Max',
+                  style: PicoTypography.labelPillSm.copyWith(
+                    color: PicoColors.primaryDark,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8.0),
-          Row(
-            children: [
-              Expanded(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('🎯', style: TextStyle(fontSize: 13.0)),
-                    const SizedBox(width: 4.0),
-                    Flexible(
-                      child: Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: '${l10n?.pickWinner ?? 'Winner Pick'}: ',
-                              style: PicoTypography.bodySm.copyWith(
-                                color: const Color(0xFF5C6B64),
-                                fontSize: 11.0,
-                              ),
-                            ),
-                            TextSpan(
-                              text: '+3 pts',
-                              style: PicoTypography.bodySm.copyWith(
-                                color: PicoColors.textPitchInk,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 11.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8.0),
-              Expanded(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('⭐', style: TextStyle(fontSize: 13.0)),
-                    const SizedBox(width: 4.0),
-                    Flexible(
-                      child: Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: '${l10n?.exactScore ?? 'Exact Score'}: ',
-                              style: PicoTypography.bodySm.copyWith(
-                                color: const Color(0xFF5C6B64),
-                                fontSize: 11.0,
-                              ),
-                            ),
-                            TextSpan(
-                              text: '+5 pts',
-                              style: PicoTypography.bodySm.copyWith(
-                                color: PicoColors.textPitchInk,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 11.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          const SizedBox(height: 10.0),
+
+          // Row 1: Exact Score
+          _buildScoringRow(
+            icon: Icons.stars_rounded,
+            iconColor: const Color(0xFFD97706),
+            label: l10n?.scoringRuleExactTitle ?? 'Exact Score',
+            subtitle: l10n?.scoringRuleExactDesc ?? 'Predict the exact final scoreline',
+            pointsBadge: l10n?.pointsOutcomeExact ?? '+5 Points',
+            badgeBg: PicoColors.primary.withValues(alpha: 0.12),
+            badgeColor: PicoColors.primaryDark,
           ),
           const SizedBox(height: 6.0),
-          Text(
-            widget.match.status == MatchStatus.finished
-                ? 'Match is completed · Points have been awarded to leaderboard'
-                : (l10n?.potentialPointsBreakdown ?? 'Wrong picks earn 0 pts · Exact score = 5 pts total'),
-            textAlign: TextAlign.center,
-            style: PicoTypography.labelPillSm.copyWith(
-              color: const Color(0xFF6F7A70),
-              fontSize: 10.0,
-              fontWeight: FontWeight.w500,
+
+          // Row 2: Winner + Goal Diff
+          _buildScoringRow(
+            icon: Icons.sports_soccer_rounded,
+            iconColor: PicoColors.primary,
+            label: l10n?.scoringRuleGoalDiffTitle ?? 'Winner + Goal Diff',
+            subtitle: l10n?.scoringRuleGoalDiffDesc ?? 'Correct winner and goal margin',
+            pointsBadge: l10n?.pointsOutcomeGoalDiff ?? '+3 Points',
+            badgeBg: const Color(0xFFFEF3C7),
+            badgeColor: const Color(0xFF92400E),
+          ),
+          const SizedBox(height: 6.0),
+
+          // Row 3: Correct Winner
+          _buildScoringRow(
+            icon: Icons.check_circle_outline_rounded,
+            iconColor: const Color(0xFF0284C7),
+            label: l10n?.scoringRuleWinnerOnlyTitle ?? 'Correct Winner',
+            subtitle: l10n?.scoringRuleWinnerOnlyDesc ?? 'Correct winner, other scoreline',
+            pointsBadge: l10n?.pointsOutcomeOne ?? '+1 Point',
+            badgeBg: const Color(0xFFE0F2FE),
+            badgeColor: const Color(0xFF0369A1),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScoringRow({
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    required String subtitle,
+    required String pointsBadge,
+    required Color badgeBg,
+    required Color badgeColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10.0),
+        border: Border.all(color: const Color(0xFFECE7DC), width: 1.0),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 28.0,
+            height: 28.0,
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Icon(icon, size: 16.0, color: iconColor),
+          ),
+          const SizedBox(width: 10.0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontFamily: 'Rubik',
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: PicoColors.textPitchInk,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontFamily: 'Plus Jakarta Sans',
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF6F7A70),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8.0),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            decoration: BoxDecoration(
+              color: badgeBg,
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Text(
+              pointsBadge,
+              style: TextStyle(
+                fontFamily: 'Rubik',
+                fontSize: 11.5,
+                fontWeight: FontWeight.w800,
+                color: badgeColor,
+              ),
             ),
           ),
         ],

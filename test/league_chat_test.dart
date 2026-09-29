@@ -14,6 +14,7 @@ import 'package:pico/features/tournaments/domain/tournament.dart';
 import 'package:pico/features/tournaments/domain/tournament_participant.dart';
 import 'package:pico/features/tournaments/presentation/league_chat_screen.dart';
 import 'package:pico/features/tournaments/presentation/widgets/league_details_sheet.dart';
+import 'package:pico/l10n/app_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
 /// Fake implementation of TournamentRepository for League Chat & Room tests
@@ -199,6 +200,8 @@ Widget _buildTestHarness({
       currentUserProfileProvider.overrideWith(() => _FakeCurrentUserProfileNotifier()),
     ],
     child: MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: child,
     ),
   );
@@ -487,21 +490,21 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Verify ranks #1, #2, #3
-      expect(find.text('#1'), findsOneWidget);
-      expect(find.text('#2'), findsOneWidget);
-      expect(find.text('#3'), findsOneWidget);
+      // Verify ranks 1, 2, 3
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
 
       // Verify usernames and points
       expect(find.text('GoldLeader'), findsOneWidget);
-      expect(find.text('90 PTS'), findsOneWidget);
+      expect(find.text('90'), findsOneWidget);
       expect(find.text('SilverPlayer'), findsOneWidget);
-      expect(find.text('35 PTS'), findsOneWidget);
+      expect(find.text('35'), findsOneWidget);
       expect(find.text('BronzePlayer'), findsOneWidget);
-      expect(find.text('15 PTS'), findsOneWidget);
+      expect(find.text('15'), findsOneWidget);
 
-      // Verify (You) tag on current user
-      expect(find.text('(You)'), findsOneWidget);
+      // Verify YOU tag on current user
+      expect(find.text('YOU'), findsOneWidget);
     });
 
     testWidgets('Admin user sees Kick icon next to rivals; non-admin does not', (tester) async {

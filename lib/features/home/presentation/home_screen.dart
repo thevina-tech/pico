@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pico/core/theme/pico_colors.dart';
-import 'package:pico/core/theme/pico_typography.dart';
-import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
 import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
 import 'package:pico/features/predictions/presentation/prediction_controller.dart';
@@ -229,10 +227,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // 1. Pinned Top Bar: Profile Pill | Division Pill
+                      // 1. Top Greeting Section ("Hey {username}! 👋", "Ready to predict...", 3D Menu Button)
+                      _buildGreetingSection(context, profile),
+
+                      // Gap between greeting section and pills
+                      const SizedBox(height: 14.0),
+
+                      // 2. Pinned Top Bar: Profile Pill | Division Pill
                       _buildTopBar(context, profile),
 
-                      // 2. Scrollable Content
+                      // Gap between pills and scrollable content
+                      const SizedBox(height: 12.0),
+
+                      // 3. Scrollable Content
                       Expanded(
                         child: RefreshIndicator(
                           color: PicoColors.primary,
@@ -268,18 +275,140 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// 1. Top Bar: Profile Section (55% width) & Division Section (45% width)
-  /// - Profile Section on Left: person icon + real username
-  /// - Division Section on Right: shield icon + translated division title (matching profile screen)
+  /// Top greeting section: "Hey {username}! 👋", subtitle "Ready to predict...", and 3D Settings Menu Button
+  Widget _buildGreetingSection(BuildContext context, UserProfile profile) {
+    final l10n = AppLocalizations.of(context);
+    final username = profile.username != null && profile.username!.isNotEmpty
+        ? profile.username!
+        : 'Player';
+
+    final greeting = l10n?.homeGreeting(username) ?? 'Hey $username! 👋';
+    final subtitle = l10n?.homeReadyToPredict ?? "Ready to predict today's biggest clash?";
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 0.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Left: Headline + Subtitle (White high-contrast text)
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  greeting,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: 'Rubik',
+                    fontSize: 22.0,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    letterSpacing: -0.3,
+                    shadows: [
+                      Shadow(
+                        color: Color(0x66000000),
+                        offset: Offset(0, 1.5),
+                        blurRadius: 4.0,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 3.0),
+                Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: 'Rubik',
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withValues(alpha: 0.92),
+                    letterSpacing: 0.1,
+                    shadows: const [
+                      Shadow(
+                        color: Color(0x66000000),
+                        offset: Offset(0, 1.0),
+                        blurRadius: 3.0,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12.0),
+
+          // Right: 3D Tactile Menu Button (leads to Settings)
+          GestureDetector(
+            key: const Key('home_screen_menu_button'),
+            onTap: () {
+              if (widget.onMenuTap != null) {
+                widget.onMenuTap!();
+              } else {
+                context.push('/settings');
+              }
+            },
+            child: Container(
+              width: 48.0,
+              height: 48.0,
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F3E26),
+                borderRadius: BorderRadius.circular(14.0),
+                border: Border.all(
+                  color: const Color(0x334ADE80),
+                  width: 1.5,
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0xFF061A0F),
+                    offset: Offset(0, 3.5),
+                    blurRadius: 0,
+                  ),
+                  BoxShadow(
+                    color: Color(0x26000000),
+                    offset: Offset(0, 4),
+                    blurRadius: 6,
+                  ),
+                ],
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.menu_rounded,
+                  color: Colors.white,
+                  size: 26.0,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 1. Top Bar: Profile Section (50% width) & Division Section (50% width)
+  /// - Profile Section on Left: exact tactile design as create/join league button
+  /// - Division Section on Right: shield icon + translated division title
   Widget _buildTopBar(BuildContext context, UserProfile profile) {
     final l10n = AppLocalizations.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 10.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
         children: [
-          // Left: User Profile Pill (50% of available width)
+          // Left: User Profile Pill with same 3D design as create/join button
           Expanded(
-            child: _buildProfilePill(profile),
+            child: _TactileProfilePill(
+              profile: profile,
+              onTap: _navigateToProfile,
+              onLongPress: () {
+                if (widget.onMenuTap != null) {
+                  widget.onMenuTap!();
+                } else {
+                  context.push('/settings');
+                }
+              },
+            ),
           ),
 
           const SizedBox(width: 10.0),
@@ -289,79 +418,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: _buildDivisionPill(profile, l10n),
           ),
         ],
-      ),
-    );
-  }
-
-  /// User Profile Pill (Warm golden-tan 2.5D container, gamer icon, bold real username)
-  Widget _buildProfilePill(UserProfile profile) {
-    final username = profile.username != null && profile.username!.isNotEmpty
-        ? profile.username!
-        : 'Player';
-
-    return GestureDetector(
-      key: const Key('home_screen_profile_pill'),
-      onTap: _navigateToProfile,
-      onLongPress: () {
-        if (widget.onMenuTap != null) {
-          widget.onMenuTap!();
-        } else {
-          _showHomeMenuBottomSheet(context, profile);
-        }
-      },
-      child: Container(
-        height: 56.0,
-        padding: const EdgeInsets.fromLTRB(8.0, 6.0, 12.0, 6.0),
-        decoration: BoxDecoration(
-          color: const Color(0xFFD4A759),
-          borderRadius: BorderRadius.circular(16.0),
-          border: Border.all(color: const Color(0xFF8E6325), width: 1.5),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0xFF6B4815),
-              offset: Offset(0, 3.5),
-              blurRadius: 0,
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Gamer Avatar Icon Box (Tactile squircle with person icon)
-            Container(
-              width: 38.0,
-              height: 38.0,
-              decoration: BoxDecoration(
-                color: const Color(0xFF4A3416),
-                borderRadius: BorderRadius.circular(11.0),
-                border: Border.all(color: const Color(0xFF78511E), width: 1.2),
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.person_rounded,
-                  color: Color(0xFFFAF9F4),
-                  size: 24.0,
-                ),
-              ),
-            ),
-            const SizedBox(width: 10.0),
-
-            // Real Username
-            Expanded(
-              child: Text(
-                username,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontFamily: 'Rubik',
-                  fontSize: 15.0,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF26190B),
-                  letterSpacing: 0.1,
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -978,142 +1034,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
-
-  /// Settings and options bottom sheet triggered by the hamburger icon.
-  void _showHomeMenuBottomSheet(BuildContext context, UserProfile profile) {
-    final l10n = AppLocalizations.of(context);
-    final menuTitle = l10n?.homeMenuTitle ?? 'Settings & Menu';
-    final signOutText = l10n?.signOutButton ?? 'Sign Out';
-
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (ctx) {
-        return Container(
-          padding: const EdgeInsets.fromLTRB(20.0, 14.0, 20.0, 28.0),
-          decoration: const BoxDecoration(
-            color: Color(0xFF0F2417),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
-            border: Border.fromBorderSide(
-              BorderSide(color: Color(0xFF1E432F), width: 1.5),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black54,
-                offset: Offset(0, -4),
-                blurRadius: 16,
-              ),
-            ],
-          ),
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 36.0,
-                    height: 4.0,
-                    decoration: BoxDecoration(
-                      color: PicoColors.textWhiteMuted.withValues(alpha: 0.4),
-                      borderRadius: BorderRadius.circular(2.0),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 18.0),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.tune_rounded,
-                      color: PicoColors.electricMint,
-                      size: 22.0,
-                    ),
-                    const SizedBox(width: 8.0),
-                    Text(
-                      menuTitle,
-                      style: PicoTypography.headlineMd.copyWith(
-                        color: PicoColors.textWhite,
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16.0),
-                Container(
-                  padding: const EdgeInsets.all(12.0),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF13281C),
-                    borderRadius: BorderRadius.circular(12.0),
-                    border: Border.all(color: const Color(0xFF224B33), width: 1.0),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 38.0,
-                        height: 38.0,
-                        decoration: BoxDecoration(
-                          color: PicoColors.primary,
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        child: const Center(
-                          child: Icon(Icons.person_rounded, color: Colors.white, size: 22.0),
-                        ),
-                      ),
-                      const SizedBox(width: 12.0),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              profile.username ?? 'Player',
-                              style: PicoTypography.headlineMd.copyWith(
-                                color: PicoColors.textWhite,
-                                fontSize: 15.0,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            Text(
-                              'LVL ${profile.level} · ${profile.formattedCoins} Coins · ${profile.streak} Streak',
-                              style: PicoTypography.labelPillSm.copyWith(
-                                color: PicoColors.primaryFixed,
-                                fontSize: 11.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 14.0),
-                Material(
-                  color: Colors.transparent,
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.logout_rounded, color: Colors.redAccent),
-                    title: Text(
-                      signOutText,
-                      style: const TextStyle(
-                        color: Colors.redAccent,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    onTap: () async {
-                      final authNotifier = ref.read(authProvider.notifier);
-                      Navigator.of(ctx).pop();
-                      await authNotifier.signOut();
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
 }
 
 /// Tactile score digit card inside "HOW TO PLAY"
@@ -1140,6 +1060,137 @@ class _ScoreTile extends StatelessWidget {
             fontWeight: FontWeight.w900,
             color: Color(0xFF1E3A2B),
             height: 1.0,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Tactile 2.5D profile pill with the same physical design and press-down dynamics as the create/join button.
+class _TactileProfilePill extends StatefulWidget {
+  const _TactileProfilePill({
+    required this.profile,
+    required this.onTap,
+    this.onLongPress,
+  });
+
+  final UserProfile profile;
+  final VoidCallback onTap;
+  final VoidCallback? onLongPress;
+
+  @override
+  State<_TactileProfilePill> createState() => _TactileProfilePillState();
+}
+
+class _TactileProfilePillState extends State<_TactileProfilePill> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    const double bevel = 3.5;
+    final double translationY = _isPressed ? bevel : 0.0;
+    final double currentBevel = _isPressed ? 0.5 : bevel;
+
+    final username = widget.profile.username != null && widget.profile.username!.isNotEmpty
+        ? widget.profile.username!
+        : 'Player';
+
+    return Listener(
+      onPointerDown: (_) => setState(() => _isPressed = true),
+      onPointerUp: (_) => setState(() => _isPressed = false),
+      onPointerCancel: (_) => setState(() => _isPressed = false),
+      child: GestureDetector(
+        key: const Key('home_screen_profile_pill'),
+        onTap: widget.onTap,
+        onLongPress: widget.onLongPress,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 60),
+          curve: Curves.easeOut,
+          transform: Matrix4.translationValues(0.0, translationY, 0.0),
+          height: 56.0,
+          padding: const EdgeInsets.fromLTRB(10.0, 6.0, 12.0, 6.0),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFD41D),
+            borderRadius: BorderRadius.circular(16.0),
+            border: Border.all(
+              color: const Color(0xFFFFF7C2),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF9E6500),
+                offset: Offset(0, currentBevel),
+                blurRadius: 0,
+              ),
+              BoxShadow(
+                color: const Color(0x66FFD41D),
+                offset: Offset(0, currentBevel + 2),
+                blurRadius: 10,
+              ),
+              const BoxShadow(
+                color: Color(0x40000000),
+                offset: Offset(0, 5),
+                blurRadius: 12,
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              // Icon container with exact same translucent tint as create/join button
+              Container(
+                width: 36.0,
+                height: 36.0,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF261700).withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.person_rounded,
+                  size: 22.0,
+                  color: Color(0xFF261700),
+                ),
+              ),
+              const SizedBox(width: 10.0),
+
+              // Username + Level
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      username,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: 'Rubik',
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF261700),
+                        letterSpacing: 0.2,
+                        height: 1.1,
+                      ),
+                    ),
+                    const SizedBox(height: 2.0),
+                    Text(
+                      'LVL ${widget.profile.level}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Rubik',
+                        fontSize: 11.0,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF261700).withValues(alpha: 0.7),
+                        letterSpacing: 0.2,
+                        height: 1.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

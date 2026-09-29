@@ -588,6 +588,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pointsAbbreviation => 'PTS';
 
   @override
+  String get top100LeaderboardHeader => 'TOP 100 PLAYERS';
+
+  @override
+  String get picoPointsLabel => 'Pico Points';
+
+  @override
   String get rankHeader => 'RANK';
 
   @override
@@ -903,4 +909,109 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get adChoicesSubtitle =>
       'Review or change your ad personalization consent';
+
+  @override
+  String get picoScoringRules => 'PICO SCORING RULES';
+
+  @override
+  String get scoringRuleExactTitle => 'Exact Score';
+
+  @override
+  String get scoringRuleExactDesc => 'Predict the exact final scoreline';
+
+  @override
+  String get scoringRuleGoalDiffTitle => 'Winner + Goal Diff';
+
+  @override
+  String get scoringRuleGoalDiffDesc => 'Correct winner and goal margin';
+
+  @override
+  String get scoringRuleWinnerOnlyTitle => 'Correct Winner';
+
+  @override
+  String get scoringRuleWinnerOnlyDesc => 'Correct winner, other scoreline';
+
+  @override
+  String get leagueCapacityReachedError =>
+      'This league is full (Max 25 members).';
+
+  @override
+  String get leagueNameLengthError =>
+      'League name must be between 3 and 30 characters.';
+
+  @override
+  String get leagueCreatedSuccessToast => 'League created successfully!';
+
+  @override
+  String get usernameAlphanumericError =>
+      'Username must be alphanumeric with no spaces';
+
+  @override
+  String get couldNotOpenStoreLink => 'Could not open store link.';
+
+  @override
+  String couldNotOpenEmailClient(String email) {
+    return 'Could not open email client. Contact: $email';
+  }
+
+  @override
+  String get signInWithGooglePrompt =>
+      'Please sign in with Google to continue.';
+
+  @override
+  String get signInWithGoogleSetupPrompt =>
+      'Please sign in with Google to complete your account setup.';
+
+  @override
+  String failedToLoadTeams(String error) {
+    return 'Failed to load teams: $error';
+  }
+
+  @override
+  String failedToLoadCompetitions(String error) {
+    return 'Failed to load competitions: $error';
+  }
+
+  @override
+  String noClubsFound(String query) {
+    return 'No clubs found matching \"$query\"';
+  }
+
+  @override
+  String failedToDeleteLeague(String error) {
+    return 'Failed to delete league: $error';
+  }
+
+  @override
+  String failedToLeaveLeague(String error) {
+    return 'Failed to leave league: $error';
+  }
+
+  @override
+  String memberRemovedFromLeague(String username) {
+    return '$username has been removed from the league.';
+  }
+
+  @override
+  String failedToKickMember(String error) {
+    return 'Failed to remove member: $error';
+  }
+
+  @override
+  String failedToSendMessage(String error) {
+    return 'Failed to send message: $error';
+  }
+
+  @override
+  String signOutFailed(String error) {
+    return 'Sign out failed: $error';
+  }
+
+  @override
+  String homeGreeting(String username) {
+    return 'Hey $username! 👋';
+  }
+
+  @override
+  String get homeReadyToPredict => 'Ready to predict today\'s biggest clash?';
 }

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pico/core/logging/app_logger.dart';
 import 'package:pico/core/network/supabase_client_provider.dart';
-import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/l10n/app_localizations.dart';
@@ -12,6 +11,7 @@ import 'package:pico/services/ad_consent_service.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_confirmation_modal.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
+import 'package:pico/shared/components/pico_snackbar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Settings Hub offering user controls for:
@@ -66,14 +66,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     } catch (e, st) {
       AppLogger.error('Failed to sign out', e, st);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: PicoColors.error,
-            content: Text(
-              'Sign out failed: $e',
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
+        final l10n = AppLocalizations.of(context);
+        PicoSnackBar.showError(
+          context,
+          l10n?.signOutFailed(e.toString()) ?? 'Sign out failed: $e',
         );
       }
     } finally {
@@ -139,14 +135,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       await authNotifier.signOut();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: const Color(0xFF0F2B20),
-            content: Text(
-              l10n?.accountDeletedToast ?? 'Your account has been deleted.',
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
+        PicoSnackBar.showSuccess(
+          context,
+          l10n?.accountDeletedToast ?? 'Your account has been deleted.',
         );
         try {
           context.go('/onboarding');
@@ -157,14 +148,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     } catch (e, st) {
       AppLogger.error('Failed to execute account deletion', e, st);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: PicoColors.error,
-            content: Text(
-              l10n?.deleteAccountError ?? 'Failed to delete account. Please try again.',
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
+        PicoSnackBar.showError(
+          context,
+          l10n?.deleteAccountError ?? 'Failed to delete account. Please try again.',
         );
       }
     } finally {
@@ -186,6 +172,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         appBar: PicoAppBar(
           title: titleText,
           showBackButton: true,
+          isTransparent: true,
           onBack: () => Navigator.of(context).maybePop(),
         ),
         body: Stack(

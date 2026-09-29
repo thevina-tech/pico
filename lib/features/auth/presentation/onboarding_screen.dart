@@ -19,6 +19,7 @@ import 'package:pico/features/profile/presentation/user_profile_provider.dart';
 import 'package:pico/features/tournaments/data/tournament_repository.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
+import 'package:pico/shared/components/pico_snackbar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
 /// The official Pico Onboarding Funnel screen.
@@ -97,32 +98,28 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _goToPage(int page) {
-    // Prevent unauthenticated users from advancing to Step 3 (Username) or beyond
     if (page >= 2 && widget.initialPage < 2) {
       final client = _getSupabaseClient();
       final currentAuth = ref.read(authProvider);
+      final l10n = AppLocalizations.of(context);
 
       if (client != null) {
         final currentUser = client.auth.currentUser;
         if (currentUser == null ||
             currentUser.email == null ||
             currentUser.email!.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please sign in with Google to continue.'),
-              backgroundColor: PicoColors.error,
-              behavior: SnackBarBehavior.floating,
-            ),
+          PicoSnackBar.showError(
+            context,
+            l10n?.signInWithGooglePrompt ??
+                'Please sign in with Google to continue.',
           );
           return;
         }
       } else if (currentAuth is! PicoAuthAuthenticated) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please sign in with Google to continue.'),
-            backgroundColor: PicoColors.error,
-            behavior: SnackBarBehavior.floating,
-          ),
+        PicoSnackBar.showError(
+          context,
+          l10n?.signInWithGooglePrompt ??
+              'Please sign in with Google to continue.',
         );
         return;
       }
@@ -200,11 +197,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       AppLogger.error('Google sign-in error in onboarding', e, st);
       if (mounted) {
         setState(() => _isGoogleAuthenticating = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to sign in with Google: $e'),
-            backgroundColor: PicoColors.error,
-          ),
+        PicoSnackBar.showError(
+          context,
+          'Failed to sign in with Google: $e',
         );
       }
     }
@@ -289,24 +284,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         setState(() {
                           _step3ErrorMessage = error;
                         });
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(error),
-                            backgroundColor: PicoColors.error,
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
+                        PicoSnackBar.showError(context, error);
                         _goToPage(2);
                       },
                       onAuthRequired: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
+                        PicoSnackBar.showError(
+                          context,
+                          l10n?.signInWithGoogleSetupPrompt ??
                               'Please sign in with Google to complete your account setup.',
-                            ),
-                            backgroundColor: PicoColors.error,
-                            behavior: SnackBarBehavior.floating,
-                          ),
                         );
                         _goToPage(1);
                       },
@@ -1411,7 +1396,8 @@ class _OnboardingAuthStepState extends ConsumerState<_OnboardingAuthStep> {
 
     if (raw.contains(' ') || !InputSanitizer.isValidUsername(username)) {
       setState(() {
-        _errorMessage = 'Username must be alphanumeric with no spaces';
+        _errorMessage = l10n?.usernameAlphanumericError ??
+            'Username must be alphanumeric with no spaces';
       });
       return;
     }
@@ -1808,8 +1794,12 @@ class _OnboardingTeamSelectionStepState
               ),
               error: (err, _) => Center(
                 child: Text(
-                  'Failed to load teams: $err',
-                  style: const TextStyle(color: PicoColors.error),
+                  widget.l10n?.failedToLoadTeams(err.toString()) ??
+                      'Failed to load teams: $err',
+                  style: const TextStyle(
+                    color: PicoColors.error,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               data: (allTeams) {
@@ -1827,7 +1817,8 @@ class _OnboardingTeamSelectionStepState
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 30.0),
                       child: Text(
-                        'No clubs found matching "$_searchQuery"',
+                        widget.l10n?.noClubsFound(_searchQuery) ??
+                            'No clubs found matching "$_searchQuery"',
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.6),
                           fontSize: 13.5,
@@ -2073,14 +2064,10 @@ class _OnboardingLeaguesSelectionStepState
         _selectedLeagueIds.length > 2 ||
         _isSubmitting) {
       if (_selectedLeagueIds.isEmpty && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              l10n?.twoLeaguesRequired ??
-                  'Please select 1 or 2 leagues to continue.',
-            ),
-            backgroundColor: PicoColors.error,
-          ),
+        PicoSnackBar.showError(
+          context,
+          l10n?.twoLeaguesRequired ??
+              'Please select 1 or 2 leagues to continue.',
         );
       }
       return;
@@ -2195,11 +2182,9 @@ class _OnboardingLeaguesSelectionStepState
                 'This username is already taken. Please choose another one.',
           );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Database error: ${e.message}'),
-              backgroundColor: PicoColors.error,
-            ),
+          PicoSnackBar.showError(
+            context,
+            'Database error: ${e.message}',
           );
         }
       }
@@ -2216,11 +2201,9 @@ class _OnboardingLeaguesSelectionStepState
           );
           return;
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to complete onboarding: $e'),
-            backgroundColor: PicoColors.error,
-          ),
+        PicoSnackBar.showError(
+          context,
+          'Failed to complete onboarding: $e',
         );
       }
     }
@@ -2275,8 +2258,12 @@ class _OnboardingLeaguesSelectionStepState
               ),
               error: (err, _) => Center(
                 child: Text(
-                  'Failed to load competitions: $err',
-                  style: const TextStyle(color: PicoColors.error),
+                  l10n?.failedToLoadCompetitions(err.toString()) ??
+                      'Failed to load competitions: $err',
+                  style: const TextStyle(
+                    color: PicoColors.error,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               data: (competitions) {
@@ -2305,17 +2292,11 @@ class _OnboardingLeaguesSelectionStepState
                             if (_selectedLeagueIds.length < 2) {
                               _selectedLeagueIds.add(comp.id);
                             } else {
-                              ScaffoldMessenger.of(context).clearSnackBars();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    l10n?.maxLeaguesReached ??
-                                        'You can select up to 2 leagues.',
-                                  ),
-                                  backgroundColor: PicoColors.error,
-                                  duration: const Duration(seconds: 2),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
+                              PicoSnackBar.showInfo(
+                                context,
+                                l10n?.maxLeaguesReached ??
+                                    'You can select up to 2 leagues.',
+                                duration: const Duration(seconds: 2),
                               );
                             }
                           }

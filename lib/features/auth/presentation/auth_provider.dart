@@ -227,12 +227,9 @@ class AuthNotifier extends _$AuthNotifier {
     final supabase = ref.read(supabaseClientProvider);
     if (supabase == null) return;
     try {
-      final avatarUrl = user.userMetadata?['avatar_url'] ??
-          user.userMetadata?['picture'];
       await supabase.from('profiles').upsert({
         'id': user.id,
         'email': user.email,
-        'avatar_url': avatarUrl?.toString(),
       }, onConflict: 'id', ignoreDuplicates: true);
       AppLogger.info('Base profile record verified/created for user ${user.id}');
     } catch (e) {
