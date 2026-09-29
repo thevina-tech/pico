@@ -1241,6 +1241,14 @@
   "cancelButton": "Cancel",
   "@cancelButton": {
     "description": "Generic cancel button text"
+  },
+  "adChoicesTitle": "Ad Choices & Privacy",
+  "@adChoicesTitle": {
+    "description": "Menu title for GDPR/CPRA ad choices and consent management"
+  },
+  "adChoicesSubtitle": "Review or change your ad personalization consent",
+  "@adChoicesSubtitle": {
+    "description": "Subtitle explaining the user can modify ad personalization preferences"
   }
 }
 

@@ -8,6 +8,7 @@ import 'package:pico/core/logging/app_logger.dart';
 import 'package:pico/core/routing/app_router.dart';
 import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/l10n/app_localizations.dart';
+import 'package:pico/services/ad_consent_service.dart';
 import 'package:pico/services/revenuecat_ad_service.dart';
 
 Future<void> main() async {
@@ -33,7 +34,14 @@ Future<void> main() async {
     AppLogger.warning('Supabase credentials missing in $envFile');
   }
 
-  // Initialize RevenueCat & Google Mobile Ads AdTracker Service
+  // 1. Gather GDPR/CPRA Ad Consent via Google UMP SDK
+  try {
+    await AdConsentService.instance.gatherConsent();
+  } catch (e) {
+    AppLogger.warning('AdConsentService initialization skipped: $e');
+  }
+
+  // 2. Initialize RevenueCat & Google Mobile Ads AdTracker Service
   try {
     final currentUserId = Supabase.instance.client.auth.currentUser?.id;
     await RevenueCatAdService.instance.initialize(initialUserId: currentUserId);

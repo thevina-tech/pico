@@ -263,7 +263,9 @@
   "deleteAccountAction": "Eliminar Cuenta",
   "deleteAccountError": "Error al eliminar la cuenta. Inténtalo de nuevo.",
   "accountDeletedToast": "Tu cuenta ha sido eliminada.",
-  "cancelButton": "Cancelar"
+  "cancelButton": "Cancelar",
+  "adChoicesTitle": "Preferencias de Publicidad",
+  "adChoicesSubtitle": "Revisa o cambia tu consentimiento de anuncios personalizados"
 }
 
 

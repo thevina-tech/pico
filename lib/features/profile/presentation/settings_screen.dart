@@ -8,6 +8,7 @@ import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/l10n/app_localizations.dart';
+import 'package:pico/services/ad_consent_service.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_confirmation_modal.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
@@ -16,6 +17,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// Settings Hub offering user controls for:
 /// 1. Sign Out (terminates session & routes to login/onboarding)
 /// 2. Delete Account (destructive confirmation & secure backend RPC user deletion)
+/// 3. Ad Choices & Privacy (Google UMP GDPR/CPRA consent management when required)
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
@@ -25,6 +27,28 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _isProcessing = false;
+  bool _isPrivacyOptionsRequired = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkPrivacyOptionsStatus();
+  }
+
+  Future<void> _checkPrivacyOptionsStatus() async {
+    final isRequired = await AdConsentService.instance.isPrivacyOptionsRequired();
+    if (mounted) {
+      setState(() => _isPrivacyOptionsRequired = isRequired);
+    }
+  }
+
+  Future<void> _handleAdChoices() async {
+    HapticFeedback.lightImpact();
+    await AdConsentService.instance.showPrivacyOptionsForm();
+    if (mounted) {
+      _checkPrivacyOptionsStatus();
+    }
+  }
 
   Future<void> _handleSignOut() async {
     HapticFeedback.lightImpact();
@@ -219,6 +243,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         titleColor: const Color(0xFFFCA5A5),
                         onTap: _isProcessing ? null : () => _handleDeleteAccount(l10n),
                       ),
+
+                      // Option 3 (GDPR/CPRA Conditional): Ad Choices & Privacy
+                      if (_isPrivacyOptionsRequired) ...[
+                        const SizedBox(height: 14.0),
+                        _SettingsOptionCard(
+                          key: const Key('settings_ad_choices_tile'),
+                          title: l10n?.adChoicesTitle ?? 'Ad Choices & Privacy',
+                          subtitle: l10n?.adChoicesSubtitle ??
+                              'Review or change your ad personalization consent',
+                          icon: Icons.tune_rounded,
+                          iconColor: const Color(0xFF38BDF8),
+                          badgeBgColor: const Color(0x260284C7),
+                          badgeBorderColor: const Color(0x4D38BDF8),
+                          onTap: _isProcessing ? null : _handleAdChoices,
+                        ),
+                      ],
                     ],
                   ),
                 ),

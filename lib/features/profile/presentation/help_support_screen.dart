@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/l10n/app_localizations.dart';
+import 'package:pico/services/ad_consent_service.dart';
 import 'package:pico/shared/components/in_app_web_browser_screen.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
@@ -11,8 +12,9 @@ import 'package:url_launcher/url_launcher.dart';
 /// 1. How to Play (In-App Browser)
 /// 2. Terms & Conditions (In-App Browser)
 /// 3. Privacy Policy (In-App Browser)
-/// 4. Contact Us (Direct mailto: launcher)
-class HelpSupportScreen extends StatelessWidget {
+/// 4. Ad Choices & Privacy (Google UMP GDPR/CPRA consent management when required)
+/// 5. Contact Us (Direct mailto: launcher)
+class HelpSupportScreen extends StatefulWidget {
   const HelpSupportScreen({super.key});
 
   static const String contactEmail = 'thevinatech.contact@gmail.com';
@@ -23,13 +25,41 @@ class HelpSupportScreen extends StatelessWidget {
   static const String termsUrl = 'https://example.com/terms';
   static const String privacyUrl = 'https://example.com/privacy';
 
+  @override
+  State<HelpSupportScreen> createState() => _HelpSupportScreenState();
+}
+
+class _HelpSupportScreenState extends State<HelpSupportScreen> {
+  bool _isPrivacyOptionsRequired = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkPrivacyOptionsStatus();
+  }
+
+  Future<void> _checkPrivacyOptionsStatus() async {
+    final isRequired = await AdConsentService.instance.isPrivacyOptionsRequired();
+    if (mounted) {
+      setState(() => _isPrivacyOptionsRequired = isRequired);
+    }
+  }
+
+  Future<void> _handleAdChoices() async {
+    HapticFeedback.lightImpact();
+    await AdConsentService.instance.showPrivacyOptionsForm();
+    if (mounted) {
+      _checkPrivacyOptionsStatus();
+    }
+  }
+
   Future<void> _handleContactUs(BuildContext context) async {
     HapticFeedback.lightImpact();
     final Uri emailUri = Uri(
       scheme: 'mailto',
-      path: contactEmail,
+      path: HelpSupportScreen.contactEmail,
       queryParameters: {
-        'subject': emailSubject,
+        'subject': HelpSupportScreen.emailSubject,
       },
     );
 
@@ -43,7 +73,7 @@ class HelpSupportScreen extends StatelessWidget {
           const SnackBar(
             backgroundColor: Color(0xFF0F2B20),
             content: Text(
-              'Could not open email client. Contact: $contactEmail',
+              'Could not open email client. Contact: ${HelpSupportScreen.contactEmail}',
               style: TextStyle(color: Colors.white),
             ),
           ),
@@ -55,7 +85,7 @@ class HelpSupportScreen extends StatelessWidget {
           const SnackBar(
             backgroundColor: Color(0xFF0F2B20),
             content: Text(
-              'Could not open email client. Contact: $contactEmail',
+              'Could not open email client. Contact: ${HelpSupportScreen.contactEmail}',
               style: TextStyle(color: Colors.white),
             ),
           ),
@@ -108,7 +138,11 @@ class HelpSupportScreen extends StatelessWidget {
                     iconColor: const Color(0xFF34D399),
                     badgeBgColor: const Color(0x2610B981),
                     badgeBorderColor: const Color(0x4D34D399),
-                    onTap: () => _openWebPage(context, 'How to Play', howToPlayUrl),
+                    onTap: () => _openWebPage(
+                      context,
+                      'How to Play',
+                      HelpSupportScreen.howToPlayUrl,
+                    ),
                   ),
                   const SizedBox(height: 12.0),
 
@@ -121,7 +155,11 @@ class HelpSupportScreen extends StatelessWidget {
                     iconColor: const Color(0xFF38BDF8),
                     badgeBgColor: const Color(0x260284C7),
                     badgeBorderColor: const Color(0x4D38BDF8),
-                    onTap: () => _openWebPage(context, 'Terms & Conditions', termsUrl),
+                    onTap: () => _openWebPage(
+                      context,
+                      'Terms & Conditions',
+                      HelpSupportScreen.termsUrl,
+                    ),
                   ),
                   const SizedBox(height: 12.0),
 
@@ -134,15 +172,35 @@ class HelpSupportScreen extends StatelessWidget {
                     iconColor: const Color(0xFFA78BFA),
                     badgeBgColor: const Color(0x267C3AED),
                     badgeBorderColor: const Color(0x4DA78BFA),
-                    onTap: () => _openWebPage(context, 'Privacy Policy', privacyUrl),
+                    onTap: () => _openWebPage(
+                      context,
+                      'Privacy Policy',
+                      HelpSupportScreen.privacyUrl,
+                    ),
                   ),
                   const SizedBox(height: 12.0),
 
-                  // Option 4: Contact Us
+                  // Option 4 (GDPR / CPRA Conditional): Ad Choices & Privacy Settings
+                  if (_isPrivacyOptionsRequired) ...[
+                    _SupportOptionCard(
+                      key: const Key('help_option_ad_choices'),
+                      title: l10n?.adChoicesTitle ?? 'Ad Choices & Privacy',
+                      subtitle: l10n?.adChoicesSubtitle ??
+                          'Review or change your ad personalization consent',
+                      icon: Icons.tune_rounded,
+                      iconColor: const Color(0xFFF43F5E),
+                      badgeBgColor: const Color(0x26F43F5E),
+                      badgeBorderColor: const Color(0x4DF43F5E),
+                      onTap: _handleAdChoices,
+                    ),
+                    const SizedBox(height: 12.0),
+                  ],
+
+                  // Option 5: Contact Us
                   _SupportOptionCard(
                     key: const Key('help_option_contact_us'),
                     title: 'Contact Us',
-                    subtitle: 'Email our team: $contactEmail',
+                    subtitle: 'Email our team: ${HelpSupportScreen.contactEmail}',
                     icon: Icons.mail_rounded,
                     iconColor: const Color(0xFFFBBF24),
                     badgeBgColor: const Color(0x26D97706),

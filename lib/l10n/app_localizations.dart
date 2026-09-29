@@ -1661,6 +1661,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your account has been deleted.'**
   String get accountDeletedToast;
+
+  /// Menu title for GDPR/CPRA ad choices and consent management
+  ///
+  /// In en, this message translates to:
+  /// **'Ad Choices & Privacy'**
+  String get adChoicesTitle;
+
+  /// Subtitle explaining the user can modify ad personalization preferences
+  ///
+  /// In en, this message translates to:
+  /// **'Review or change your ad personalization consent'**
+  String get adChoicesSubtitle;
 }
 
 class _AppLocalizationsDelegate

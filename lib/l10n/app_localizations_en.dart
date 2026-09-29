@@ -896,4 +896,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountDeletedToast => 'Your account has been deleted.';
+
+  @override
+  String get adChoicesTitle => 'Ad Choices & Privacy';
+
+  @override
+  String get adChoicesSubtitle =>
+      'Review or change your ad personalization consent';
 }

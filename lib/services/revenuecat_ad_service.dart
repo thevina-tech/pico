@@ -6,6 +6,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:pico/core/logging/app_logger.dart';
+import 'package:pico/services/ad_consent_service.dart';
 
 /// Singleton service managing Google Mobile Ads and RevenueCat ILRD (Impression-Level Revenue Data).
 ///
@@ -56,12 +57,11 @@ class RevenueCatAdService {
       return;
     }
 
-    // 1. Initialize Google Mobile Ads
+    // 1. Initialize Google Mobile Ads safely after consent verification
     try {
-      await MobileAds.instance.initialize();
-      AppLogger.info('Google Mobile Ads initialized successfully');
+      await AdConsentService.instance.initializeMobileAdsIfAllowed();
     } catch (e) {
-      AppLogger.warning('Failed to initialize Google Mobile Ads (platform channel might not be supported in test): $e');
+      AppLogger.warning('Failed to initialize Google Mobile Ads via AdConsentService: $e');
     }
 
     // 2. Initialize RevenueCat
