@@ -170,4 +170,90 @@ void main() {
       expect(find.text('Player_119'), findsNothing);
     });
   });
+
+  group('Public Tournament Tactile 3D Tab Selector Tests', () {
+    testWidgets('Renders 3D tactile tab buttons with vertical Column icon/text and bright active background', (tester) async {
+      const tournamentId = 'test_tourn_tabs';
+      const tournament = Tournament(
+        id: tournamentId,
+        name: 'Champions League',
+        competitionId: '107',
+      );
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          overrides: [
+            tournamentDetailsProvider(tournamentId).overrideWith((ref) => Future.value(tournament)),
+            tournamentLeaderboardProvider(tournamentId).overrideWith((ref) => Future.value([])),
+            enrolledTournamentsProvider.overrideWith((ref) => Future.value([tournament])),
+          ],
+          child: const PublicTournamentScreen(
+            tournamentId: tournamentId,
+            initialTournament: tournament,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify both tabs exist
+      final standingsText = find.text('Standings');
+      final matchesText = find.text('Matches');
+      expect(standingsText, findsOneWidget);
+      expect(matchesText, findsOneWidget);
+
+      // Verify Column stacking: icon is placed above text
+      final standingsIcon = find.descendant(
+        of: find.ancestor(of: standingsText, matching: find.byType(Column)),
+        matching: find.byIcon(Icons.leaderboard_rounded),
+      );
+      final matchesIcon = find.descendant(
+        of: find.ancestor(of: matchesText, matching: find.byType(Column)),
+        matching: find.byIcon(Icons.sports_soccer_rounded),
+      );
+      expect(standingsIcon, findsOneWidget);
+      expect(matchesIcon, findsOneWidget);
+      expect(tester.getTopLeft(standingsIcon).dy < tester.getTopLeft(standingsText).dy, isTrue);
+      expect(tester.getTopLeft(matchesIcon).dy < tester.getTopLeft(matchesText).dy, isTrue);
+
+      // Verify initial selected state (Standings is selected, inner surface background is bright Color(0xFFF7F4EC))
+      final standingsContainers = tester.widgetList<Container>(
+        find.descendant(
+          of: find.ancestor(of: standingsText, matching: find.byType(AnimatedContainer)),
+          matching: find.byType(Container),
+        ),
+      );
+      final standingsBox = standingsContainers.lastWhere(
+        (c) => c.decoration is BoxDecoration && (c.decoration as BoxDecoration).color != null,
+      );
+      expect((standingsBox.decoration as BoxDecoration).color, const Color(0xFFF7F4EC));
+
+      // Tapping Matches switches active tab
+      await tester.tap(matchesText);
+      await tester.pumpAndSettle();
+
+      // Verify Matches is now active with bright background
+      final matchesContainers = tester.widgetList<Container>(
+        find.descendant(
+          of: find.ancestor(of: matchesText, matching: find.byType(AnimatedContainer)),
+          matching: find.byType(Container),
+        ),
+      );
+      final matchesBox = matchesContainers.lastWhere(
+        (c) => c.decoration is BoxDecoration && (c.decoration as BoxDecoration).color != null,
+      );
+      expect((matchesBox.decoration as BoxDecoration).color, const Color(0xFFF7F4EC));
+
+      // And Standings is now inactive with dark background
+      final inactiveStandingsContainers = tester.widgetList<Container>(
+        find.descendant(
+          of: find.ancestor(of: standingsText, matching: find.byType(AnimatedContainer)),
+          matching: find.byType(Container),
+        ),
+      );
+      final inactiveStandingsBox = inactiveStandingsContainers.lastWhere(
+        (c) => c.decoration is BoxDecoration && (c.decoration as BoxDecoration).color != null,
+      );
+      expect((inactiveStandingsBox.decoration as BoxDecoration).color, const Color(0xFF162534));
+    });
+  });
 }

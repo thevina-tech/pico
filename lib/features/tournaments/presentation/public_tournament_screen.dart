@@ -187,10 +187,10 @@ class _PublicTournamentScreenState
                         SliverPersistentHeader(
                           pinned: true,
                           delegate: _TabSelectorHeaderDelegate(
-                            height: 52.0,
+                            height: 112.0,
                             child: Container(
                               color: PicoColors.pitchBackground,
-                              padding: const EdgeInsets.fromLTRB(16.0, 2.0, 16.0, 6.0),
+                              padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 8.0),
                               child: _buildTabSelector(l10n),
                             ),
                           ),
@@ -342,69 +342,125 @@ class _PublicTournamentScreenState
 
   Widget _buildTabSelector(AppLocalizations l10n) {
     return Container(
-      padding: const EdgeInsets.all(4.0),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
-        color: PicoColors.darkTray,
-        borderRadius: BorderRadius.circular(14.0),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        color: const Color(0xFF0F1A24),
+        borderRadius: BorderRadius.circular(20.0),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.08),
+          width: 1.5,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x66000000),
+            blurRadius: 10.0,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          Expanded(
-            child: _buildTabButton(
-              title: l10n.leaderboardTab,
-              icon: Icons.leaderboard_rounded,
-              isSelected: _selectedTabIndex == 0,
-              onTap: () => setState(() => _selectedTabIndex = 0),
-            ),
+          _buildClashTabButton(
+            title: l10n.leaderboardTab,
+            icon: Icons.leaderboard_rounded,
+            isSelected: _selectedTabIndex == 0,
+            onTap: () => setState(() => _selectedTabIndex = 0),
           ),
-          const SizedBox(width: 4.0),
-          Expanded(
-            child: _buildTabButton(
-              title: l10n.matchesTab,
-              icon: Icons.sports_soccer_rounded,
-              isSelected: _selectedTabIndex == 1,
-              onTap: () => setState(() => _selectedTabIndex = 1),
-            ),
+          const SizedBox(width: 8.0),
+          _buildClashTabButton(
+            title: l10n.matchesTab,
+            icon: Icons.sports_soccer_rounded,
+            isSelected: _selectedTabIndex == 1,
+            onTap: () => setState(() => _selectedTabIndex = 1),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTabButton({
+  Widget _buildClashTabButton({
     required String title,
     required IconData icon,
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10.0),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 9.0),
-        decoration: BoxDecoration(
-          color: isSelected ? PicoColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 15.0,
-              color: isSelected ? PicoColors.textWhite : PicoColors.textWhiteMuted,
-            ),
-            const SizedBox(width: 6.0),
-            Text(
-              title,
-              style: PicoTypography.labelPillSm.copyWith(
-                color: isSelected ? PicoColors.textWhite : PicoColors.textWhiteMuted,
-                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                fontSize: 12.0,
+    const activeColor = Color(0xFFF7F4EC);
+    const activeBorderBottom = Color(0xFFD8D1C3);
+    const activeBorder = Color(0xFFECE7DC);
+    const activeIconColor = Color(0xFF006A3A);
+    const activeTextColor = Color(0xFF13211B);
+
+    const inactiveColor = Color(0xFF162534);
+    const inactiveBorderBottom = Color(0xFF090F16);
+    const inactiveIconColor = Color(0xD9FAF9F4);
+    const inactiveTextColor = Color(0xD9FAF9F4);
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeInOut,
+          margin: EdgeInsets.only(top: isSelected ? 2.0 : 0.0),
+          decoration: BoxDecoration(
+            color: isSelected ? activeBorderBottom : inactiveBorderBottom,
+            borderRadius: BorderRadius.circular(16.0),
+            boxShadow: isSelected
+                ? const [
+                    BoxShadow(
+                      color: Color(0x33000000),
+                      blurRadius: 6.0,
+                      offset: Offset(0, 2),
+                    ),
+                    BoxShadow(
+                      color: Color(0x1A000000),
+                      blurRadius: 1.0,
+                      offset: Offset(0, 1),
+                    ),
+                  ]
+                : const [
+                    BoxShadow(
+                      color: Color(0x33000000),
+                      blurRadius: 4.0,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+          ),
+          padding: EdgeInsets.only(bottom: isSelected ? 2.0 : 4.0),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            decoration: BoxDecoration(
+              color: isSelected ? activeColor : inactiveColor,
+              borderRadius: BorderRadius.circular(14.0),
+              border: Border.all(
+                color: isSelected ? activeBorder : Colors.white.withValues(alpha: 0.08),
+                width: 1.0,
               ),
             ),
-          ],
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 24.0,
+                  color: isSelected ? activeIconColor : inactiveIconColor,
+                ),
+                const SizedBox(height: 4.0),
+                Text(
+                  title,
+                  style: PicoTypography.labelPillSm.copyWith(
+                    color: isSelected ? activeTextColor : inactiveTextColor,
+                    fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+                    fontSize: 12.0,
+                    letterSpacing: 0.2,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

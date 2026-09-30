@@ -420,5 +420,93 @@ void main() {
       expect(find.text('0 Puntos'), findsOneWidget);
       expect(find.text('Sin Predicción'), findsOneWidget);
     });
+
+    testWidgets('MatchesScreen renders 3D tactile tab buttons with vertical icon/text and bright active background',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(430, 932);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authProvider.overrideWith(() => _FakeAuthNotifier()),
+            currentUserProfileProvider.overrideWith(() => _FakeProfileNotifier()),
+            predictionControllerProvider.overrideWith(() => _FakePredictionController(mockUserPredictions)),
+            matchesControllerProvider.overrideWith(
+              () => _TestMatchesController(allTestMatches, initialTab: MatchTab.live),
+            ),
+          ],
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: MatchesScreen(showBottomNavBar: false),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final liveText = find.text('Live');
+      final upcomingText = find.text('Upcoming');
+      final finishedText = find.text('Finished');
+
+      expect(liveText, findsOneWidget);
+      expect(upcomingText, findsOneWidget);
+      expect(finishedText, findsOneWidget);
+
+      // Verify Column layout: Icon is above text
+      final liveIcon = find.descendant(
+        of: find.ancestor(of: liveText, matching: find.byType(Column)),
+        matching: find.byIcon(Icons.sensors_rounded),
+      );
+      final upcomingIcon = find.descendant(
+        of: find.ancestor(of: upcomingText, matching: find.byType(Column)),
+        matching: find.byIcon(Icons.schedule_rounded),
+      );
+      final finishedIcon = find.descendant(
+        of: find.ancestor(of: finishedText, matching: find.byType(Column)),
+        matching: find.byIcon(Icons.task_alt_rounded),
+      );
+
+      expect(liveIcon, findsOneWidget);
+      expect(upcomingIcon, findsOneWidget);
+      expect(finishedIcon, findsOneWidget);
+      expect(tester.getTopLeft(liveIcon).dy < tester.getTopLeft(liveText).dy, isTrue);
+      expect(tester.getTopLeft(upcomingIcon).dy < tester.getTopLeft(upcomingText).dy, isTrue);
+      expect(tester.getTopLeft(finishedIcon).dy < tester.getTopLeft(finishedText).dy, isTrue);
+
+      // Verify Live tab is initially active with bright background Color(0xFFF7F4EC)
+      final liveSurface = tester.widgetList<Container>(
+        find.descendant(
+          of: find.ancestor(of: liveText, matching: find.byType(AnimatedContainer)),
+          matching: find.byType(Container),
+        ),
+      ).elementAt(1);
+      expect((liveSurface.decoration as BoxDecoration).color, const Color(0xFFF7F4EC));
+
+      // Tapping Upcoming switches active tab and sets its background to bright Color(0xFFF7F4EC)
+      await tester.tap(upcomingText);
+      await tester.pumpAndSettle();
+
+      final upcomingSurface = tester.widgetList<Container>(
+        find.descendant(
+          of: find.ancestor(of: upcomingText, matching: find.byType(AnimatedContainer)),
+          matching: find.byType(Container),
+        ),
+      ).elementAt(1);
+      expect((upcomingSurface.decoration as BoxDecoration).color, const Color(0xFFF7F4EC));
+
+      // Live should now be inactive with dark background Color(0xFF162534)
+      final inactiveLiveSurface = tester.widgetList<Container>(
+        find.descendant(
+          of: find.ancestor(of: liveText, matching: find.byType(AnimatedContainer)),
+          matching: find.byType(Container),
+        ),
+      );
+      expect(
+        inactiveLiveSurface.any((c) => (c.decoration as BoxDecoration?)?.color == const Color(0xFF162534)),
+        isTrue,
+      );
+    });
   });
 }

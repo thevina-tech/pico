@@ -407,118 +407,196 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0),
-      padding: const EdgeInsets.all(4.0),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
-        color: const Color(0xFF0D2117),
-        borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        color: const Color(0xFF0F1A24),
+        borderRadius: BorderRadius.circular(20.0),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.08),
+          width: 1.5,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x66000000),
+            blurRadius: 10.0,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          Expanded(
-            child: _buildTabButton(
-              title: l10n?.feedTabLive ?? 'Live',
-              count: state.liveCount,
-              isSelected: activeTab == MatchTab.live,
-              isLive: true,
-              onTap: () => ref
-                  .read(matchesControllerProvider.notifier)
-                  .selectTab(MatchTab.live),
-            ),
+          _buildClashTabButton(
+            title: l10n?.feedTabLive ?? 'Live',
+            count: state.liveCount,
+            icon: Icons.sensors_rounded,
+            isSelected: activeTab == MatchTab.live,
+            isLive: true,
+            onTap: () => ref
+                .read(matchesControllerProvider.notifier)
+                .selectTab(MatchTab.live),
           ),
-          const SizedBox(width: 4.0),
-          Expanded(
-            child: _buildTabButton(
-              title: l10n?.feedTabUpcoming ?? 'Upcoming',
-              count: state.upcomingCount,
-              isSelected: activeTab == MatchTab.upcoming,
-              onTap: () => ref
-                  .read(matchesControllerProvider.notifier)
-                  .selectTab(MatchTab.upcoming),
-            ),
+          const SizedBox(width: 8.0),
+          _buildClashTabButton(
+            title: l10n?.feedTabUpcoming ?? 'Upcoming',
+            count: state.upcomingCount,
+            icon: Icons.schedule_rounded,
+            isSelected: activeTab == MatchTab.upcoming,
+            onTap: () => ref
+                .read(matchesControllerProvider.notifier)
+                .selectTab(MatchTab.upcoming),
           ),
-          const SizedBox(width: 4.0),
-          Expanded(
-            child: _buildTabButton(
-              title: l10n?.feedTabFinished ?? 'Finished',
-              count: state.finishedCount,
-              isSelected: activeTab == MatchTab.finished,
-              onTap: () => ref
-                  .read(matchesControllerProvider.notifier)
-                  .selectTab(MatchTab.finished),
-            ),
+          const SizedBox(width: 8.0),
+          _buildClashTabButton(
+            title: l10n?.feedTabFinished ?? 'Finished',
+            count: state.finishedCount,
+            icon: Icons.task_alt_rounded,
+            isSelected: activeTab == MatchTab.finished,
+            onTap: () => ref
+                .read(matchesControllerProvider.notifier)
+                .selectTab(MatchTab.finished),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTabButton({
+  Widget _buildClashTabButton({
     required String title,
     required int count,
+    required IconData icon,
     required bool isSelected,
     required VoidCallback onTap,
     bool isLive = false,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(vertical: 9.0, horizontal: 4.0),
-        decoration: BoxDecoration(
-          color: isSelected ? PicoColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(12.0),
-          boxShadow: isSelected
-              ? const [
-                  BoxShadow(
-                    color: Color(0xFF004424),
-                    offset: Offset(0, 2),
-                    blurRadius: 0,
-                  ),
-                ]
-              : null,
-        ),
-        alignment: Alignment.center,
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (isLive) ...[
-                Container(
-                  width: 7.0,
-                  height: 7.0,
-                  decoration: BoxDecoration(
-                    color: isSelected ? Colors.white : const Color(0xFFEF4444),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 5.0),
-              ],
-              Text(
-                title,
-                style: PicoTypography.labelPillSm.copyWith(
-                  color: isSelected ? Colors.white : const Color(0xFFA1B3A8),
-                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                  fontSize: 12.5,
-                ),
+    const activeColor = Color(0xFFF7F4EC);
+    const activeBorderBottom = Color(0xFFD8D1C3);
+    const activeBorder = Color(0xFFECE7DC);
+    const activeIconColor = Color(0xFF006A3A);
+    const activeTextColor = Color(0xFF13211B);
+
+    const inactiveColor = Color(0xFF162534);
+    const inactiveBorderBottom = Color(0xFF090F16);
+    const inactiveIconColor = Color(0xD9FAF9F4);
+    const inactiveTextColor = Color(0xD9FAF9F4);
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeInOut,
+          margin: EdgeInsets.only(top: isSelected ? 2.0 : 0.0),
+          decoration: BoxDecoration(
+            color: isSelected ? activeBorderBottom : inactiveBorderBottom,
+            borderRadius: BorderRadius.circular(16.0),
+            boxShadow: isSelected
+                ? const [
+                    BoxShadow(
+                      color: Color(0x33000000),
+                      blurRadius: 6.0,
+                      offset: Offset(0, 2),
+                    ),
+                    BoxShadow(
+                      color: Color(0x1A000000),
+                      blurRadius: 1.0,
+                      offset: Offset(0, 1),
+                    ),
+                  ]
+                : const [
+                    BoxShadow(
+                      color: Color(0x33000000),
+                      blurRadius: 4.0,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+          ),
+          padding: EdgeInsets.only(bottom: isSelected ? 2.0 : 4.0),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 2.0),
+            decoration: BoxDecoration(
+              color: isSelected ? activeColor : inactiveColor,
+              borderRadius: BorderRadius.circular(14.0),
+              border: Border.all(
+                color: isSelected ? activeBorder : Colors.white.withValues(alpha: 0.08),
+                width: 1.0,
               ),
-              if (count > 0) ...[
-                const SizedBox(width: 4.0),
-                Text(
-                  '($count)',
-                  style: TextStyle(
-                    color: isSelected
-                        ? Colors.white.withValues(alpha: 0.85)
-                        : const Color(0xFF6B8074),
-                    fontWeight: FontWeight.w700,
-                    fontSize: 11.0,
-                  ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.center,
+                  children: [
+                    Icon(
+                      icon,
+                      size: 24.0,
+                      color: isLive && count > 0
+                          ? const Color(0xFFEF4444)
+                          : (isSelected ? activeIconColor : inactiveIconColor),
+                    ),
+                    if (isLive && count > 0)
+                      Positioned(
+                        top: -2.0,
+                        right: -4.0,
+                        child: Container(
+                          width: 8.0,
+                          height: 8.0,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEF4444),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isSelected ? activeColor : inactiveColor,
+                              width: 1.5,
+                            ),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x99EF4444),
+                                blurRadius: 4.0,
+                                spreadRadius: 1.0,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 4.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        title,
+                        style: PicoTypography.labelPillSm.copyWith(
+                          color: isSelected ? activeTextColor : inactiveTextColor,
+                          fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+                          fontSize: 12.0,
+                          letterSpacing: 0.2,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (count > 0) ...[
+                      const SizedBox(width: 3.0),
+                      Text(
+                        '($count)',
+                        style: TextStyle(
+                          color: isSelected
+                              ? const Color(0xFF006A3A)
+                              : const Color(0xFF6B8074),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 10.5,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
-            ],
+            ),
           ),
         ),
       ),
