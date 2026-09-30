@@ -7,8 +7,9 @@ import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/features/profile/domain/user_profile.dart';
 import 'package:pico/features/profile/presentation/user_profile_provider.dart';
 import 'package:pico/features/profile/presentation/widgets/division_ladder_sheet.dart';
+import 'package:pico/features/predictions/presentation/prediction_controller.dart';
 import 'package:pico/l10n/app_localizations.dart';
-import 'package:pico/shared/components/division_badge.dart';
+import 'package:pico/shared/components/game_button.dart';
 import 'package:pico/shared/components/game_exit_dialog.dart';
 import 'package:pico/shared/components/pico_button.dart';
 import 'package:pico/features/profile/presentation/help_support_screen.dart';
@@ -34,6 +35,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final profileAsync = ref.watch(currentUserProfileProvider);
+    final predictionsAsync = ref.watch(predictionControllerProvider);
+    final predictedMatchesCount = predictionsAsync.value?.length ?? 0;
 
     return PicoGameExitScope(
       child: PicoPitchBackground(
@@ -89,9 +92,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   data: (profile) => RefreshIndicator(
                     color: const Color(0xFF10B981),
                     backgroundColor: const Color(0xFF0E271F),
-                    onRefresh: () => ref
-                        .read(currentUserProfileProvider.notifier)
-                        .refresh(),
+                    onRefresh: () async {
+                      await Future.wait([
+                        ref.read(currentUserProfileProvider.notifier).refresh(),
+                        ref.refresh(predictionControllerProvider.future),
+                      ]);
+                    },
                     child: ListView(
                       padding: const EdgeInsets.fromLTRB(
                         16.0,
@@ -100,12 +106,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         32.0,
                       ),
                       children: [
-                        // 1. Header Section (Avatar, Name, Level & XP Bar)
+                        // 1. Header Section (Avatar & Name)
                         _buildHeaderSection(profile, l10n),
                         const SizedBox(height: 14.0),
 
-                        // 2. Quick Stats Grid (Hit Rate, Matches, Streak)
-                        _buildQuickStatsGrid(profile, l10n),
+                        // 2. Quick Stats Grid (Matches & Division, 50% each)
+                        _buildQuickStatsGrid(
+                          profile,
+                          l10n,
+                          predictedMatchesCount,
+                        ),
                         const SizedBox(height: 14.0),
 
                         // 3. Spotlight Tournament Card (Navigation -> /tournaments)
@@ -140,216 +150,93 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 6.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Top Profile Row
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          // Crest Avatar with Gear Level Indicator
+          Stack(
+            clipBehavior: Clip.none,
             children: [
-              // Crest Avatar with Gear Level Indicator
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    width: 64.0,
-                    height: 64.0,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16.0),
-                      gradient: const LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Color(0xFF059669),
-                          Color(0xFF0C2219),
-                          Color(0xFF05130D),
-                        ],
-                      ),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0xFF020B06),
-                          offset: Offset(0, 4),
-                          blurRadius: 0,
-                        ),
-                      ],
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        width: 1.0,
-                      ),
-                    ),
-                    padding: const EdgeInsets.all(2.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF071D15),
-                        borderRadius: BorderRadius.circular(14.0),
-                      ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // Golden soccer ball icon
-                          const Icon(
-                            Icons.sports_soccer_rounded,
-                            color: Color(0xFFFBBF24),
-                            size: 34.0,
-                            shadows: [
-                              Shadow(
-                                color: Color(0x66FBBF24),
-                                offset: Offset(0, 2),
-                                blurRadius: 8.0,
-                              ),
-                            ],
-                          ),
-                          // Subtle internal shine
-                          Positioned(
-                            top: 2.0,
-                            right: 2.0,
-                            child: Container(
-                              width: 14.0,
-                              height: 14.0,
-                              decoration: const BoxDecoration(
-                                color: Color(0x2634D399),
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+              Container(
+                width: 64.0,
+                height: 64.0,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16.0),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFF059669),
+                      Color(0xFF0C2219),
+                      Color(0xFF05130D),
+                    ],
                   ),
-                ],
-              ),
-              const SizedBox(width: 14.0),
-
-              // Name and Subtitle
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      displayName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: PicoTypography.headlineLgMobile.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 22.0,
-                        letterSpacing: -0.3,
-                      ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0xFF020B06),
+                      offset: Offset(0, 4),
+                      blurRadius: 0,
                     ),
                   ],
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    width: 1.0,
+                  ),
+                ),
+                padding: const EdgeInsets.all(2.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF071D15),
+                    borderRadius: BorderRadius.circular(14.0),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Golden soccer ball icon
+                      const Icon(
+                        Icons.sports_soccer_rounded,
+                        color: Color(0xFFFBBF24),
+                        size: 34.0,
+                        shadows: [
+                          Shadow(
+                            color: Color(0x66FBBF24),
+                            offset: Offset(0, 2),
+                            blurRadius: 8.0,
+                          ),
+                        ],
+                      ),
+                      // Subtle internal shine
+                      Positioned(
+                        top: 2.0,
+                        right: 2.0,
+                        child: Container(
+                          width: 14.0,
+                          height: 14.0,
+                          decoration: const BoxDecoration(
+                            color: Color(0x2634D399),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16.0),
+          const SizedBox(width: 14.0),
 
-          // Division Tier & Progress Bar (Tapping opens DivisionLadderSheet)
-          GestureDetector(
-            onTap: () => DivisionLadderSheet.show(context, profile),
-            behavior: HitTestBehavior.opaque,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
-              decoration: BoxDecoration(
-                color: const Color(0x66081A13),
-                borderRadius: BorderRadius.circular(12.0),
-                border: Border.all(
-                  color: profile.division.borderColor.withValues(alpha: 0.35),
-                  width: 1.0,
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      DivisionBadge(
-                        tier: profile.division,
-                        size: DivisionBadgeSize.small,
-                      ),
-                      const SizedBox(width: 8.0),
-                      Expanded(
-                        child: Text(
-                          l10n != null ? profile.division.localizedTitle(l10n) : profile.division.defaultTitle,
-                          style: PicoTypography.statCounterSm.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 13.0,
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        profile.division.nextTier != null
-                            ? '${profile.formattedTotalPoints} / ${profile.division.nextTier!.minPoints} PP'
-                            : '${profile.formattedTotalPoints} PP',
-                        style: PicoTypography.bodySm.copyWith(
-                          color: profile.division.accentColor,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 12.0,
-                        ),
-                      ),
-                      const SizedBox(width: 4.0),
-                      const Icon(
-                        Icons.chevron_right_rounded,
-                        size: 16.0,
-                        color: Color(0xFF6EE7B7),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8.0),
-                  Container(
-                    height: 8.0,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF04120C),
-                      borderRadius: BorderRadius.circular(999.0),
-                      border: Border.all(
-                        color: profile.division.borderColor.withValues(alpha: 0.3),
-                        width: 1.0,
-                      ),
-                    ),
-                    child: FractionallySizedBox(
-                      alignment: Alignment.centerLeft,
-                      widthFactor: profile.divisionProgressRatio,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              profile.division.primaryColor,
-                              profile.division.accentColor,
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(999.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: profile.division.accentColor.withValues(alpha: 0.5),
-                              blurRadius: 6.0,
-                              spreadRadius: 0.5,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4.0),
-                  Text(
-                    profile.division.nextTier != null
-                        ? (l10n != null
-                            ? l10n.pointsToNextDivision(
-                                profile.pointsToNextDivision.toString(),
-                                profile.division.nextTier!.localizedTitle(l10n),
-                              )
-                            : '${profile.pointsToNextDivision} pts to ${profile.division.nextTier!.defaultTitle}')
-                        : (l10n != null
-                            ? l10n.eliteDivisionStatus(profile.formattedTotalPoints)
-                            : '${profile.formattedTotalPoints} pts (Elite Division)'),
-                    style: PicoTypography.bodySm.copyWith(
-                      color: const Color(0xB3A7F3D0),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 11.0,
-                    ),
-                  ),
-                ],
+          // Name and Subtitle
+          Expanded(
+            child: Text(
+              displayName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: PicoTypography.headlineLgMobile.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+                fontSize: 22.0,
+                letterSpacing: -0.3,
               ),
             ),
           ),
@@ -359,73 +246,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // 2. QUICK STATS GRID (3 TACTILE CARDS)
+  // 2. QUICK STATS GRID (MATCHES & DIVISION - 50% EACH)
   // ---------------------------------------------------------------------------
-  Widget _buildQuickStatsGrid(UserProfile profile, AppLocalizations? l10n) {
-    final hitRateLabel = l10n?.hitRateLabel ?? 'Hit Rate';
+  Widget _buildQuickStatsGrid(
+    UserProfile profile,
+    AppLocalizations? l10n,
+    int predictedMatchesCount,
+  ) {
     final matchesLabel = l10n?.matchesLabel ?? 'Matches';
     final totalSub = l10n?.matchesTotalSub ?? 'Total';
-    final trendText = l10n?.hitRateTrendUp(4) ?? '↑ +4%';
+    final divisionTitle = l10n != null
+        ? profile.division.localizedTitle(l10n)
+        : profile.division.defaultTitle;
 
     return Row(
       children: [
-        // Card 1: Hit Rate
+        // Card 1: Matches Predicted (50% width)
         Expanded(
           child: _TactileCard(
+            key: const Key('profile_matches_card'),
+            onTap: () => context.go('/matches'),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Icon(
-                  Icons.track_changes_rounded,
-                  color: Color(0xFF34D399),
-                  size: 22.0,
-                ),
-                const SizedBox(height: 6.0),
-                Text(
-                  '70%',
-                  style: PicoTypography.headlineLg.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 19.0,
-                  ),
-                ),
-                Text(
-                  hitRateLabel,
-                  style: PicoTypography.bodySm.copyWith(
-                    color: const Color(0xFFCBD5E1),
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4.0),
-                Text(
-                  trendText,
-                  style: PicoTypography.bodySm.copyWith(
-                    color: const Color(0xFF34D399),
-                    fontSize: 9.5,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 8.0),
-
-        // Card 2: Matches
-        Expanded(
-          child: _TactileCard(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Icon(
-                  Icons.calendar_month_rounded,
+                  Icons.sports_soccer_rounded,
                   color: Color(0xFF22D3EE),
                   size: 22.0,
                 ),
                 const SizedBox(height: 6.0),
                 Text(
-                  '84',
+                  predictedMatchesCount.toString(),
                   style: PicoTypography.headlineLg.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w900,
@@ -444,20 +295,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Text(
                   totalSub,
                   style: PicoTypography.bodySm.copyWith(
-                    color: const Color(0xFF94A3B8),
+                    color: const Color(0xFF22D3EE),
                     fontSize: 9.5,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
             ),
           ),
         ),
-        const SizedBox(width: 8.0),
+        const SizedBox(width: 10.0),
 
-        // Card 3: Prediction Points & Division
+        // Card 2: Division (50% width)
         Expanded(
           child: _TactileCard(
+            key: const Key('profile_division_card'),
             onTap: () => DivisionLadderSheet.show(context, profile),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -469,7 +321,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 const SizedBox(height: 6.0),
                 Text(
-                  profile.formattedTotalPoints,
+                  profile.division.badgeLabel,
                   style: PicoTypography.headlineLg.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w900,
@@ -477,7 +329,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
                 Text(
-                  l10n?.predictionPointsAbbr ?? 'PP',
+                  divisionTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: PicoTypography.bodySm.copyWith(
                     color: const Color(0xFFCBD5E1),
                     fontSize: 10.5,
@@ -486,7 +340,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 const SizedBox(height: 4.0),
                 Text(
-                  profile.division.badgeLabel,
+                  '${profile.formattedTotalPoints} PP',
                   style: PicoTypography.bodySm.copyWith(
                     color: profile.division.accentColor,
                     fontSize: 9.5,
@@ -858,30 +712,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   // 6. SHARE THE APP BUTTON (TACTILE GOLD)
   // ---------------------------------------------------------------------------
   Widget _buildShareButton(UserProfile profile, AppLocalizations? l10n) {
-    return _TactileButton(
+    return GameButton.gold(
       key: const Key('profile_share_card_button'),
-      onPressed: () => _handleShareApp(l10n),
-      color: const Color(0xFFFFD41D),
-      shadowColor: const Color(0xFF9E6500),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.share_rounded,
-            color: Color(0xFF261700),
-            size: 18.0,
-          ),
-          const SizedBox(width: 8.0),
-          Text(
-            l10n?.shareTheAppButton ?? 'Share the App',
-            style: PicoTypography.headlineMd.copyWith(
-              color: const Color(0xFF261700),
-              fontWeight: FontWeight.w900,
-              fontSize: 14.0,
-            ),
-          ),
-        ],
+      text: l10n?.shareTheAppButton ?? 'Share the App',
+      icon: const Icon(
+        Icons.share_rounded,
+        color: Colors.white,
+        size: 18.0,
       ),
+      width: double.infinity,
+      extrusionHeight: 5.0,
+      borderRadius: 16.0,
+      fontSize: 15.0,
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 13.0),
+      onPressed: () => _handleShareApp(l10n),
     );
   }
 
@@ -950,61 +794,6 @@ class _TactileCardState extends State<_TactileCard> {
             BoxShadow(
               color: const Color(0xFF030E08),
               offset: Offset(0, _isPressed ? 2.0 : 4.0),
-              blurRadius: 0,
-            ),
-          ],
-        ),
-        child: widget.child,
-      ),
-    );
-  }
-}
-
-/// Tactile Button with 3D bottom shelf and press animation.
-class _TactileButton extends StatefulWidget {
-  const _TactileButton({
-    super.key,
-    required this.child,
-    required this.onPressed,
-    required this.color,
-    required this.shadowColor,
-  });
-
-  final Widget child;
-  final VoidCallback onPressed;
-  final Color color;
-  final Color shadowColor;
-
-  @override
-  State<_TactileButton> createState() => _TactileButtonState();
-}
-
-class _TactileButtonState extends State<_TactileButton> {
-  bool _isPressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
-      onTapUp: (_) => setState(() => _isPressed = false),
-      onTapCancel: () => setState(() => _isPressed = false),
-      onTap: widget.onPressed,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 75),
-        transform: Matrix4.translationValues(0, _isPressed ? 2.0 : 0.0, 0),
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 16.0),
-        decoration: BoxDecoration(
-          color: widget.color,
-          borderRadius: BorderRadius.circular(16.0),
-          border: Border.all(
-            color: const Color(0xFFFFF7C2),
-            width: 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: widget.shadowColor,
-              offset: Offset(0, _isPressed ? 1.0 : 4.0),
               blurRadius: 0,
             ),
           ],

@@ -9,7 +9,8 @@ import 'package:pico/features/matches/domain/competition.dart';
 import 'package:pico/features/tournaments/data/tournament_repository.dart';
 import 'package:pico/features/tournaments/domain/private_league.dart';
 import 'package:pico/features/tournaments/presentation/private_league_controller.dart';
-import 'package:pico/shared/components/pico_button.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pico/shared/components/game_button.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/shared/components/pico_snackbar.dart';
@@ -30,15 +31,13 @@ class _CreatePrivateLeagueScreenState
     extends ConsumerState<CreatePrivateLeagueScreen> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
-  late String _selectedCompetitionId;
+  String? _selectedCompetitionId;
   bool _isLoading = false;
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    // Default to the first competition ID (Primera División / La Liga)
-    _selectedCompetitionId = '1';
     RevenueCatAdService.instance.preloadInterstitialAd(
       placement: 'private_league_creation',
     );
@@ -69,6 +68,13 @@ class _CreatePrivateLeagueScreenState
       return;
     }
 
+    if (_selectedCompetitionId == null || _selectedCompetitionId!.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please select a base competition for your league.';
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -80,7 +86,7 @@ class _CreatePrivateLeagueScreenState
           .read(privateLeagueControllerProvider.notifier)
           .createLeague(
             name: name,
-            competitionId: _selectedCompetitionId,
+            competitionId: _selectedCompetitionId!,
             description: _descriptionController.text.trim(),
           );
 
@@ -90,27 +96,8 @@ class _CreatePrivateLeagueScreenState
       // 2. Success Confirmation: Immediately display a success Snackbar.
       PicoSnackBar.showSuccess(context, l10n.leagueCreatedSuccessToast);
 
-      // 3. Yield to UI: Add a brief micro-delay so the Flutter framework renders the Snackbar.
-      await Future.delayed(const Duration(milliseconds: 300));
-      if (!mounted) return;
-
-      // 4. Show Ad & Transition: Call RevenueCatAdService and transition when ad closes or degrades.
-      var dialogShown = false;
-      void showLeagueSuccess() {
-        if (!dialogShown && mounted) {
-          dialogShown = true;
-          _showSuccessDialog(newLeague);
-        }
-      }
-
-      try {
-        await RevenueCatAdService.instance.showInterstitialAd(
-          placement: 'private_league_creation',
-          onDismissed: showLeagueSuccess,
-        );
-      } catch (_) {
-        showLeagueSuccess();
-      }
+      // 3. Immediately show the success confirmation dialog with the invite code
+      _showSuccessDialog(newLeague);
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -139,39 +126,34 @@ class _CreatePrivateLeagueScreenState
               child: Container(
                 padding: const EdgeInsets.fromLTRB(22.0, 26.0, 22.0, 26.0),
                 decoration: BoxDecoration(
-                  color: PicoColors.darkTray,
+                  color: const Color(0xFFF9F8F3), // #F9F8F3 cream background
                   borderRadius: BorderRadius.circular(24.0),
                   border: Border.all(
-                    color: PicoColors.gold.withValues(alpha: 0.35),
+                    color: const Color(0xFFE5DECE),
                     width: 1.5,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.65),
-                      blurRadius: 32.0,
+                      color: Colors.black.withValues(alpha: 0.25),
+                      blurRadius: 28.0,
                       offset: const Offset(0, 10),
-                    ),
-                    const BoxShadow(
-                      color: Color(0x3300E297),
-                      blurRadius: 24.0,
-                      offset: Offset(0, 2),
                     ),
                   ],
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Trophy token with golden glow
+                    // Trophy token with warm golden glow
                     Container(
                       width: 64.0,
                       height: 64.0,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF143322),
+                        color: const Color(0xFFFEF3C7),
                         shape: BoxShape.circle,
-                        border: Border.all(color: PicoColors.gold, width: 2.0),
+                        border: Border.all(color: const Color(0xFFD97706), width: 2.0),
                         boxShadow: const [
                           BoxShadow(
-                            color: Color(0x4DFFDFA0),
+                            color: Color(0x33D97706),
                             blurRadius: 16.0,
                             offset: Offset(0, 4),
                           ),
@@ -179,18 +161,18 @@ class _CreatePrivateLeagueScreenState
                       ),
                       child: const Icon(
                         Icons.emoji_events_rounded,
-                        color: PicoColors.gold,
+                        color: Color(0xFFD97706),
                         size: 34.0,
                       ),
                     ),
                     const SizedBox(height: 16.0),
 
-                    // Success Title
+                    // Success Title - high-contrast visible dark text
                     Text(
                       l10n.leagueCreatedSuccessTitle,
                       textAlign: TextAlign.center,
                       style: PicoTypography.headlineLgMobile.copyWith(
-                        color: PicoColors.textWhite,
+                        color: const Color(0xFF111827),
                         fontWeight: FontWeight.w800,
                         fontSize: 22.0,
                       ),
@@ -202,8 +184,8 @@ class _CreatePrivateLeagueScreenState
                       league.name,
                       textAlign: TextAlign.center,
                       style: PicoTypography.headlineMd.copyWith(
-                        color: PicoColors.gold,
-                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF15803D),
+                        fontWeight: FontWeight.w800,
                         fontSize: 17.0,
                       ),
                     ),
@@ -217,14 +199,18 @@ class _CreatePrivateLeagueScreenState
                           vertical: 4.0,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.08),
+                          color: const Color(0xFFEDE8D9),
                           borderRadius: BorderRadius.circular(999.0),
+                          border: Border.all(
+                            color: const Color(0xFFD8D1C3),
+                            width: 1.0,
+                          ),
                         ),
                         child: Text(
                           comp.name,
                           textAlign: TextAlign.center,
                           style: PicoTypography.bodySm.copyWith(
-                            color: PicoColors.textWhiteMuted,
+                            color: const Color(0xFF4B5563),
                             fontSize: 12.0,
                             fontWeight: FontWeight.w600,
                           ),
@@ -237,7 +223,7 @@ class _CreatePrivateLeagueScreenState
                     Text(
                       l10n.inviteCodeLabel,
                       style: PicoTypography.labelPillSm.copyWith(
-                        color: PicoColors.textWhiteMuted,
+                        color: const Color(0xFF6B7280),
                         letterSpacing: 1.2,
                         fontWeight: FontWeight.w700,
                       ),
@@ -246,16 +232,24 @@ class _CreatePrivateLeagueScreenState
                     _buildSegmentedCode(league.inviteCode),
                     const SizedBox(height: 24.0),
 
-                    // Actions
+                    // Actions using tactile GameButton widgets
                     Row(
                       children: [
                         // Copy Code Button
                         Expanded(
-                          child: PicoButton.dark(
+                          child: GameButton.cream(
                             text: l10n.copyCodeButton,
-                            icon: const Icon(Icons.copy_rounded, size: 18.0, color: Colors.white),
-                            height: 48.0,
-                            borderRadius: 14.0,
+                            icon: const Icon(
+                              Icons.copy_rounded,
+                              size: 16.0,
+                              color: Color(0xFF13211B),
+                            ),
+                            fontSize: 14.0,
+                            extrusionHeight: 4.0,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0,
+                              vertical: 12.0,
+                            ),
                             onPressed: () {
                               Clipboard.setData(ClipboardData(text: league.inviteCode));
                               PicoSnackBar.showSuccess(context, l10n.codeCopiedToast);
@@ -263,16 +257,40 @@ class _CreatePrivateLeagueScreenState
                           ),
                         ),
                         const SizedBox(width: 12.0),
-                        // Done Button
+                        // Done Button - dismisses dialog, shows interstitial ad, then navigates to created league
                         Expanded(
-                          child: PicoButton.gold(
+                          child: GameButton.green(
                             text: l10n.doneButton,
-                            height: 48.0,
-                            borderRadius: 14.0,
+                            fontSize: 14.0,
+                            extrusionHeight: 4.0,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0,
+                              vertical: 12.0,
+                            ),
                             onPressed: () {
                               Navigator.of(ctx).pop();
-                              if (Navigator.of(context).canPop()) {
-                                Navigator.of(context).pop();
+
+                              void navigateToLeague() {
+                                if (!context.mounted) return;
+                                try {
+                                  context.pushReplacement(
+                                    '/tournaments/private/${league.id}',
+                                    extra: league,
+                                  );
+                                } catch (_) {
+                                  if (Navigator.of(context).canPop()) {
+                                    Navigator.of(context).pop();
+                                  }
+                                }
+                              }
+
+                              try {
+                                RevenueCatAdService.instance.showInterstitialAd(
+                                  placement: 'private_league_creation',
+                                  onDismissed: navigateToLeague,
+                                );
+                              } catch (_) {
+                                navigateToLeague();
                               }
                             },
                           ),
@@ -308,22 +326,28 @@ class _CreatePrivateLeagueScreenState
                 width: itemWidth,
                 height: itemHeight,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0F1E16),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(10.0),
-                  border: Border.all(color: PicoColors.primary, width: 1.5),
+                  border: Border.all(color: const Color(0xFF2D8B55), width: 1.5),
                   boxShadow: const [
                     BoxShadow(
-                      color: Color(0xFF00522C),
-                      offset: Offset(0, 2),
+                      color: Color(0xFF1E603A),
+                      offset: Offset(0, 2.5),
                       blurRadius: 0,
+                    ),
+                    BoxShadow(
+                      color: Color(0x15000000),
+                      offset: Offset(0, 3),
+                      blurRadius: 4,
                     ),
                   ],
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   chars[i],
-                  style: PicoTypography.headlineLgMobile.copyWith(
-                    color: PicoColors.textWhite,
+                  style: TextStyle(
+                    fontFamily: PicoTypography.headlineFontFamily,
+                    color: const Color(0xFF13211B),
                     fontWeight: FontWeight.w800,
                     fontSize: fontSize,
                   ),
@@ -341,17 +365,9 @@ class _CreatePrivateLeagueScreenState
     final l10n = AppLocalizations.of(context)!;
     final compsAsync = ref.watch(supportedCompetitionsProvider);
     final comps = compsAsync.value ?? [];
-    final selectedComp = comps
-            .where((c) => c.id == _selectedCompetitionId)
-            .firstOrNull ??
-        (comps.isNotEmpty
-            ? comps.first
-            : const Competition(
-                id: '1',
-                name: 'Primera División (La Liga)',
-                emblemUrl:
-                    'https://t.resfu.com/img_data/competiciones/logo/1.png?size=120x&lossy=1',
-              ));
+    final selectedComp = _selectedCompetitionId != null
+        ? comps.where((c) => c.id == _selectedCompetitionId).firstOrNull
+        : null;
 
     return PicoPitchBackground(
       child: Scaffold(
@@ -801,7 +817,7 @@ class _CreatePrivateLeagueScreenState
   }
 
   Widget _buildCompetitionSelector(
-      Competition selectedComp, List<Competition> comps) {
+      Competition? selectedComp, List<Competition> comps) {
     return InkWell(
       onTap: () => _openCompetitionPicker(context, comps),
       borderRadius: BorderRadius.circular(14.0),
@@ -811,40 +827,73 @@ class _CreatePrivateLeagueScreenState
           color: const Color(0xFF0D1B13),
           borderRadius: BorderRadius.circular(14.0),
           border: Border.all(
-            color: PicoColors.primary.withValues(alpha: 0.5),
+            color: selectedComp != null
+                ? PicoColors.primary.withValues(alpha: 0.5)
+                : Colors.white.withValues(alpha: 0.15),
             width: 1.5,
           ),
         ),
         child: Row(
           children: [
-            // Competition emblem with solid white container
-            _buildEmblem(selectedComp),
+            if (selectedComp != null)
+              _buildEmblem(selectedComp)
+            else
+              Container(
+                width: 38.0,
+                height: 38.0,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.18),
+                    width: 1.0,
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.emoji_events_outlined,
+                  color: PicoColors.gold,
+                  size: 20.0,
+                ),
+              ),
             const SizedBox(width: 12.0),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    selectedComp.name,
+                    selectedComp != null
+                        ? selectedComp.name
+                        : 'Select Base Competition',
                     style: PicoTypography.bodyLg.copyWith(
-                      color: PicoColors.textWhite,
-                      fontWeight: FontWeight.w700,
+                      color: selectedComp != null
+                          ? PicoColors.textWhite
+                          : PicoColors.textWhiteMuted.withValues(alpha: 0.8),
+                      fontWeight: selectedComp != null
+                          ? FontWeight.w700
+                          : FontWeight.w600,
                       fontSize: 15.0,
                     ),
                   ),
                   Text(
-                    AppLocalizations.of(context)!.baseTournamentNote,
+                    selectedComp != null
+                        ? AppLocalizations.of(context)!.baseTournamentNote
+                        : (comps.isNotEmpty
+                            ? 'Tap to choose from ${comps.length} tournaments'
+                            : 'Loading available competitions...'),
                     style: PicoTypography.bodySm.copyWith(
-                      color: PicoColors.textWhiteMuted,
+                      color: PicoColors.textWhiteMuted.withValues(alpha: 0.7),
                       fontSize: 11.0,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.keyboard_arrow_down_rounded,
-              color: PicoColors.textWhite,
+              color: selectedComp != null
+                  ? PicoColors.textWhite
+                  : PicoColors.textWhiteMuted,
               size: 24.0,
             ),
           ],
@@ -974,7 +1023,10 @@ class _CreatePrivateLeagueScreenState
                       color: Colors.transparent,
                       child: InkWell(
                         onTap: () {
-                          setState(() => _selectedCompetitionId = comp.id);
+                          setState(() {
+                            _selectedCompetitionId = comp.id;
+                            _errorMessage = null;
+                          });
                           Navigator.of(ctx).pop();
                         },
                         borderRadius: BorderRadius.circular(14.0),

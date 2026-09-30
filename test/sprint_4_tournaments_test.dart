@@ -658,19 +658,19 @@ void main() {
       expect(find.text('BASE TOURNAMENT / COMPETITION'), findsOneWidget);
       expect(find.text('8 available'), findsOneWidget);
 
-      // Selected competition defaults to Primera División (La Liga)
-      expect(find.text('Primera División (La Liga)'), findsOneWidget);
+      // Initially prompts user to select a base competition
+      expect(find.text('Select Base Competition'), findsOneWidget);
 
       // Scroll until the competition picker is visible
       await tester.scrollUntilVisible(
-        find.text('Primera División (La Liga)'),
+        find.text('Select Base Competition'),
         50.0,
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
 
       // Open the competition picker modal
-      await tester.tap(find.text('Primera División (La Liga)'));
+      await tester.tap(find.text('Select Base Competition'));
       await tester.pumpAndSettle();
 
       // Verify the modal title
@@ -705,6 +705,18 @@ void main() {
 
       // Enter league name
       await tester.enterText(find.byKey(const Key('league_name_field')), 'Champions League of Friends');
+      await tester.pumpAndSettle();
+
+      // Select competition from dropdown
+      await tester.scrollUntilVisible(
+        find.text('Select Base Competition'),
+        50.0,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Select Base Competition'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Primera División (La Liga)').first);
       await tester.pumpAndSettle();
 
       // Drag ListView down to reveal the submit button
@@ -747,6 +759,18 @@ void main() {
       await tester.enterText(find.byKey(const Key('league_name_field')), 'Test SnackBar League');
       await tester.pumpAndSettle();
 
+      // Select competition from dropdown
+      await tester.scrollUntilVisible(
+        find.text('Select Base Competition'),
+        50.0,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Select Base Competition'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Primera División (La Liga)').first);
+      await tester.pumpAndSettle();
+
       await tester.drag(find.byType(ListView), const Offset(0, -500));
       await tester.pumpAndSettle();
 
@@ -759,8 +783,6 @@ void main() {
       expect(find.byType(SnackBar), findsOneWidget);
       expect(find.text('League created successfully!'), findsOneWidget);
 
-      // Now advance past the 300ms micro-delay to trigger ad transition and modal
-      await tester.pump(const Duration(milliseconds: 300));
       await tester.pumpAndSettle();
 
       // Verify the dialog modal is displayed upon ad transition

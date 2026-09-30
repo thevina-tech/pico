@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pico/features/auth/domain/auth_state.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
+import 'package:pico/features/predictions/domain/prediction.dart';
+import 'package:pico/features/predictions/presentation/prediction_controller.dart';
 import 'package:pico/features/profile/domain/user_profile.dart';
 import 'package:pico/features/profile/presentation/profile_screen.dart';
 import 'package:pico/features/profile/presentation/user_profile_provider.dart';
@@ -16,6 +18,14 @@ class _FakeProfileNotifier extends CurrentUserProfile {
 
   @override
   FutureOr<UserProfile> build() => _profile;
+}
+
+class _FakePredictionController extends PredictionController {
+  _FakePredictionController(this._predictions);
+  final Map<String, Prediction> _predictions;
+
+  @override
+  FutureOr<Map<String, Prediction>> build() => _predictions;
 }
 
 class _SpyAuthNotifier extends AuthNotifier {
@@ -61,6 +71,7 @@ void main() {
   Widget createSubject({
     UserProfile profile = mockProfile,
     _SpyAuthNotifier? authNotifier,
+    Map<String, Prediction>? predictions,
   }) {
     return ProviderScope(
       overrides: [
@@ -69,6 +80,10 @@ void main() {
         ),
         if (authNotifier != null)
           authProvider.overrideWith(() => authNotifier),
+        if (predictions != null)
+          predictionControllerProvider.overrideWith(
+            () => _FakePredictionController(predictions),
+          ),
       ],
       child: const MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -79,7 +94,7 @@ void main() {
   }
 
   group('ProfileScreen - Dark Stadium Gamer Hub Design & Authenticated User', () {
-    testWidgets('Renders dynamic profile identity: username, Division, and PP progress',
+    testWidgets('Renders dynamic profile identity: username kept and horizontal division container removed',
         (WidgetTester tester) async {
       await tester.pumpWidget(createSubject());
       await tester.pumpAndSettle();
@@ -88,31 +103,54 @@ void main() {
       expect(find.text('CR7_Predictor'), findsOneWidget);
       expect(find.text('Matchday Prophet'), findsNothing);
 
-      // Division badge & progress
-      expect(find.text('DIV 8'), findsWidgets);
-      expect(find.text('Division 8'), findsOneWidget);
-      expect(find.text('140 / 220 PP'), findsOneWidget);
+      // Horizontal division container with progress is removed
+      expect(find.text('140 / 220 PP'), findsNothing);
     });
 
-    testWidgets('Renders Quick Stats Grid (Hit Rate, Matches, Prediction Points)',
+    testWidgets('Renders Quick Stats Grid (Matches count and Division container 50% each, Accuracy removed)',
         (WidgetTester tester) async {
-      await tester.pumpWidget(createSubject());
+      final mockPredictions = {
+        'match_1': Prediction(
+          id: 'pred_1',
+          userId: 'user_456',
+          matchId: 'match_1',
+          homeScore: 2,
+          awayScore: 1,
+          predictedWinner: 'home',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+        'match_2': Prediction(
+          id: 'pred_2',
+          userId: 'user_456',
+          matchId: 'match_2',
+          homeScore: 1,
+          awayScore: 1,
+          predictedWinner: 'draw',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      };
+
+      await tester.pumpWidget(createSubject(predictions: mockPredictions));
       await tester.pumpAndSettle();
 
-      // Hit Rate
-      expect(find.text('70%'), findsOneWidget);
-      expect(find.text('Hit Rate'), findsOneWidget);
-      expect(find.text('↑ +4%'), findsOneWidget);
+      // Accuracy container is removed
+      expect(find.text('70%'), findsNothing);
+      expect(find.text('Hit Rate'), findsNothing);
+      expect(find.text('↑ +4%'), findsNothing);
 
-      // Matches
-      expect(find.text('84'), findsOneWidget);
+      // Matches card shows real predicted count
+      expect(find.byKey(const Key('profile_matches_card')), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
       expect(find.text('Matches'), findsOneWidget);
       expect(find.text('Total'), findsOneWidget);
 
-      // Prediction Points
-      expect(find.text('140'), findsOneWidget);
-      expect(find.text('PP'), findsOneWidget);
-      expect(find.text('DIV 8'), findsWidgets);
+      // Division card shows real division data
+      expect(find.byKey(const Key('profile_division_card')), findsOneWidget);
+      expect(find.text('DIV 8'), findsOneWidget);
+      expect(find.text('Division 8'), findsOneWidget);
+      expect(find.text('140 PP'), findsOneWidget);
     });
 
     testWidgets('Renders Spotlight Tournament Card and removes Following/History cards',

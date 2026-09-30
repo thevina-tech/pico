@@ -14,7 +14,7 @@ import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/match_card.dart';
 import 'package:pico/shared/components/prediction_controls.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
-import 'package:pico/shared/components/pico_button.dart';
+import 'package:pico/shared/components/game_button.dart';
 import 'package:pico/features/matches/presentation/matches_screen.dart';
 import 'package:pico/features/matches/presentation/matches_controller.dart';
 import 'package:pico/features/matches/presentation/matches_view_model.dart';
@@ -416,7 +416,7 @@ void main() {
       // MANDATORY GAME VOCABULARY:
       expect(find.text('Pick Winner'), findsOneWidget);
       expect(find.text('Exact Score Prediction'), findsOneWidget);
-      expect(find.text('Save Prediction (+10 XP)'), findsOneWidget);
+      expect(find.text('Save Prediction (+5 Points)'), findsOneWidget);
       expect(find.text('+5 Pts Max'), findsOneWidget);
     });
 
@@ -445,9 +445,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Tap Save Prediction (+10 XP)
-      await tester.ensureVisible(find.text('Save Prediction (+10 XP)'));
-      await tester.tap(find.text('Save Prediction (+10 XP)'));
+      // Tap Save Prediction (+5 Points)
+      await tester.ensureVisible(find.text('Save Prediction (+5 Points)'));
+      await tester.tap(find.text('Save Prediction (+5 Points)'));
       await tester.pump(); // Start async work
       await tester.pumpAndSettle(); // Settle animation and toast
 
@@ -629,8 +629,8 @@ void main() {
       // Item 6: Button taking user to the prediction page of that match
       expect(find.text('View Full Prediction Page →'), findsOneWidget);
 
-      // Scoring Potential Banner
-      expect(find.textContaining('Exact score = +5 Pico Points'), findsOneWidget);
+      // Scoring Potential Banner removed from prediction pop modal
+      expect(find.textContaining('Exact score = +5 Pico Points'), findsNothing);
     });
 
     test('Future match scheduled weeks ahead is not locked, but is teaser with window closed', () {
@@ -684,9 +684,9 @@ void main() {
       expect(find.text('1'), findsWidgets);
 
       // Step 3: CTA button shows Match Finished and is disabled
-      final matchFinishedBtn = find.widgetWithText(PicoButton, 'Match Finished');
+      final matchFinishedBtn = find.widgetWithText(GameButton, 'Match Finished');
       expect(matchFinishedBtn, findsOneWidget);
-      final btnWidget = tester.widget<PicoButton>(matchFinishedBtn);
+      final btnWidget = tester.widget<GameButton>(matchFinishedBtn);
       expect(btnWidget.onPressed, isNull);
 
       // Result banner indicates not predicted

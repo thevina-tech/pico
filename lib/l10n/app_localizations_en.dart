@@ -321,7 +321,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get awayOutcome => 'Away';
 
   @override
-  String get savePredictionCta => 'Save Prediction (+10 XP)';
+  String get savePredictionCta => 'Save Prediction (+5 Points)';
 
   @override
   String get modifyPrediction => 'Modify Prediction';
@@ -706,7 +706,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Exact score = +5 Pico Points · Correct winner = +3 Pico Points';
 
   @override
-  String get predictionLockedSuccessToast => 'Prediction locked in! (+10 XP) ⚽';
+  String get predictionLockedSuccessToast =>
+      'Prediction locked in! (+5 Points) ⚽';
 
   @override
   String get predictionSaveFailed =>

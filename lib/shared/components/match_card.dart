@@ -3,7 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
-import 'pico_button.dart';
+import 'game_button.dart';
 import 'prediction_controls.dart';
 
 /// The 4 distinct lifecycle states of a match card in Pico.
@@ -979,10 +979,15 @@ class MatchCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10.0),
-          PicoButton.gold(
+          GameButton.green(
             text: state == MatchCardState.predicted
                 ? 'Update Prediction ($homeScore - $awayScore)'
                 : 'Quick Predict ($homeScore - $awayScore)',
+            width: double.infinity,
+            extrusionHeight: 4.5,
+            borderRadius: 16.0,
+            fontSize: 14.5,
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             onPressed: onQuickPredict ?? onPredictPressed,
           ),
         ],
@@ -992,27 +997,48 @@ class MatchCard extends StatelessWidget {
     switch (state) {
       case MatchCardState.unpredicted:
         if (isTeaser) {
-          return PicoButton.gold(
+          return GameButton.cream(
             text: teaserLabel ?? 'Opens in 2d',
+            width: double.infinity,
+            extrusionHeight: 4.5,
+            borderRadius: 16.0,
+            fontSize: 14.5,
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            enabled: false,
             onPressed: null,
           );
         }
-        return PicoButton.gold(
+        return GameButton.green(
           text: 'Make Prediction →',
+          width: double.infinity,
+          extrusionHeight: 4.5,
+          borderRadius: 16.0,
+          fontSize: 14.5,
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           onPressed: onPredictPressed,
         );
 
       case MatchCardState.predicted:
-        return PicoButton.secondary(
+        return GameButton.cream(
           text: 'Modify Prediction ($predictedHomeScore-$predictedAwayScore)',
           icon: const Icon(Icons.edit_outlined, size: 18.0, color: Color(0xFF1B7543)),
+          width: double.infinity,
+          extrusionHeight: 4.5,
+          borderRadius: 16.0,
+          fontSize: 14.5,
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           onPressed: onModifyPressed,
         );
 
       case MatchCardState.locked:
-        return PicoButton.primary(
+        return GameButton.green(
           text: 'View Prediction',
           icon: const Icon(Icons.lock_rounded, size: 18.0, color: Colors.white),
+          width: double.infinity,
+          extrusionHeight: 4.5,
+          borderRadius: 16.0,
+          fontSize: 14.5,
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           onPressed: onViewPredictionPressed,
         );
 

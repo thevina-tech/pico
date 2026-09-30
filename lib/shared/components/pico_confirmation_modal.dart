@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:pico/shared/components/pico_button.dart';
+import 'package:pico/shared/components/game_button.dart';
 
 /// Style variants for 3D tactile buttons inside [PicoConfirmationModal].
 enum PicoDialogButtonStyle {
@@ -246,7 +246,7 @@ Future<bool?> showPicoConfirmationModal({
 }
 
 
-/// 3D tactile button with mechanical press feedback and thick bottom bevel.
+/// 3D tactile button using [GameButton] with mechanical press feedback and thick bottom bevel.
 class _TactileModalButton extends StatelessWidget {
   const _TactileModalButton({
     super.key,
@@ -261,32 +261,53 @@ class _TactileModalButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    PicoButtonVariant variant;
     switch (style) {
       case PicoDialogButtonStyle.red:
-        variant = PicoButtonVariant.red;
-        break;
-      case PicoDialogButtonStyle.blue:
-        variant = PicoButtonVariant.blue;
-        break;
+        return GameButton.red(
+          text: label,
+          onPressed: onPressed,
+          width: double.infinity,
+          fontSize: 15.0,
+          extrusionHeight: 4.0,
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 13.0),
+        );
       case PicoDialogButtonStyle.green:
-        variant = PicoButtonVariant.primary;
-        break;
+        return GameButton.green(
+          text: label,
+          onPressed: onPressed,
+          width: double.infinity,
+          fontSize: 15.0,
+          extrusionHeight: 4.0,
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 13.0),
+        );
       case PicoDialogButtonStyle.gold:
-        variant = PicoButtonVariant.gold;
-        break;
+        return GameButton.gold(
+          text: label,
+          onPressed: onPressed,
+          width: double.infinity,
+          fontSize: 15.0,
+          extrusionHeight: 4.0,
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 13.0),
+        );
+      case PicoDialogButtonStyle.blue:
+        return GameButton.blue(
+          text: label,
+          onPressed: onPressed,
+          width: double.infinity,
+          fontSize: 15.0,
+          extrusionHeight: 4.0,
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 13.0),
+        );
       case PicoDialogButtonStyle.neutral:
-        variant = PicoButtonVariant.secondary;
-        break;
+        return GameButton.cream(
+          text: label,
+          onPressed: onPressed,
+          width: double.infinity,
+          fontSize: 15.0,
+          extrusionHeight: 4.0,
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 13.0),
+        );
     }
-
-    return PicoButton(
-      text: label,
-      variant: variant,
-      height: 48.0,
-      borderRadius: 16.0,
-      onPressed: onPressed,
-    );
   }
 }
 

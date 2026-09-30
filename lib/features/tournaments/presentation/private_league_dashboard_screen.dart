@@ -238,49 +238,63 @@ class _PrivateLeagueDashboardScreenState
 
     const screenBackground = 'assets/images/main_background.png';
 
-    return PicoPitchBackground(
-      imageAsset: screenBackground,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        resizeToAvoidBottomInset: true,
-        appBar: _buildAppBar(
-          currentLeague: currentLeague,
-          competition: competition,
-          members: members,
-          isOwner: isOwner,
-          l10n: l10n,
-        ),
-        body: currentLeague == null
-            ? const Center(
-                child: CircularProgressIndicator(color: PicoColors.primary),
-              )
-            : SafeArea(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 500.0),
-                    child: Column(
-                      children: [
-                        // Top Segmented Tab Selector ("Chat" | "Matches" | "Standings")
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16.0, 6.0, 16.0, 8.0),
-                          child: _buildTopTabBar(l10n),
-                        ),
+    final canPopRoute = Navigator.of(context).canPop();
 
-                        // Active Tab Body
-                        Expanded(
-                          child: _buildActiveTabBody(
-                            currentLeague: currentLeague,
-                            competition: competition,
-                            isOwner: isOwner,
-                            currentUserId: currentUserId,
-                            l10n: l10n,
+    return PopScope(
+      canPop: canPopRoute,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          try {
+            context.go('/tournaments');
+          } catch (_) {
+            Navigator.of(context).maybePop();
+          }
+        }
+      },
+      child: PicoPitchBackground(
+        imageAsset: screenBackground,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          resizeToAvoidBottomInset: true,
+          appBar: _buildAppBar(
+            currentLeague: currentLeague,
+            competition: competition,
+            members: members,
+            isOwner: isOwner,
+            l10n: l10n,
+          ),
+          body: currentLeague == null
+              ? const Center(
+                  child: CircularProgressIndicator(color: PicoColors.primary),
+                )
+              : SafeArea(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 500.0),
+                      child: Column(
+                        children: [
+                          // Top Segmented Tab Selector ("Chat" | "Matches" | "Standings")
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16.0, 6.0, 16.0, 8.0),
+                            child: _buildTopTabBar(l10n),
                           ),
-                        ),
-                      ],
+
+                          // Active Tab Body
+                          Expanded(
+                            child: _buildActiveTabBody(
+                              currentLeague: currentLeague,
+                              competition: competition,
+                              isOwner: isOwner,
+                              currentUserId: currentUserId,
+                              l10n: l10n,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
+        ),
       ),
     );
   }
@@ -319,7 +333,15 @@ class _PrivateLeagueDashboardScreenState
     return PicoAppBar(
       isTransparent: true,
       showBackButton: true,
-      onBack: () => context.pop(),
+      onBack: () {
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        } else {
+          try {
+            context.go('/tournaments');
+          } catch (_) {}
+        }
+      },
       titleWidget: Material(
         color: Colors.transparent,
         child: InkWell(

@@ -7,7 +7,7 @@ import 'package:pico/features/matches/domain/pico_match.dart';
 import 'package:pico/features/matches/presentation/matches_controller.dart';
 import 'package:pico/features/predictions/presentation/prediction_controller.dart';
 import 'package:pico/l10n/app_localizations.dart';
-import 'package:pico/shared/components/pico_button.dart';
+import 'package:pico/shared/components/game_button.dart';
 import 'package:pico/shared/components/pico_snackbar.dart';
 import 'package:pico/shared/components/prediction_controls.dart';
 
@@ -283,39 +283,20 @@ Future<void> showPicoPredictionBottomSheet({
                     onAwayScoreChanged: (val) => onUpdateAwayScore(val, setModalState),
                     isDark: false,
                   ),
-                  const SizedBox(height: 16.0),
+                  const SizedBox(height: 20.0),
 
-                  // Scoring Potential Banner
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEDF7EE),
-                      borderRadius: BorderRadius.circular(12.0),
-                      border: Border.all(color: const Color(0xFFC8E6C9), width: 1.0),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.stars_rounded, color: PicoColors.primary, size: 18.0),
-                        const SizedBox(width: 8.0),
-                        Expanded(
-                          child: Text(
-                            l10n?.scoringRuleBanner ??
-                                'Exact score = +5 Pico Points · Correct winner = +3 Pico Points',
-                            style: PicoTypography.bodySm.copyWith(
-                              color: const Color(0xFF1B5E3A),
-                              fontWeight: FontWeight.w700,
-                              fontSize: 11.0,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 18.0),
-
-                  // Primary CTA: Save Prediction (+10 XP)
-                  PicoButton.primary(
-                    text: l10n?.savePredictionCta ?? 'Save Prediction (+10 XP)',
+                  // Primary CTA: Save Prediction (+5 Points)
+                  GameButton.green(
+                    text: (existing != null || currentPrediction != null)
+                        ? (l10n?.modifyPrediction != null
+                            ? '${l10n!.modifyPrediction} (+5 Points)'
+                            : 'Update Prediction (+5 Points)')
+                        : (l10n?.savePredictionCta ?? 'Save Prediction (+5 Points)'),
+                    width: double.infinity,
+                    extrusionHeight: 4.5,
+                    borderRadius: 16.0,
+                    fontSize: 14.5,
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                     onPressed: () async {
                       final winnerString = selectedWinner == MatchOutcome.home
                           ? 'home'
@@ -339,7 +320,7 @@ Future<void> showPicoPredictionBottomSheet({
                           PicoSnackBar.showSuccess(
                             context,
                             l10n?.predictionLockedSuccessToast ??
-                                'Prediction locked in! (+10 XP) ⚽',
+                                'Prediction locked in! (+5 Points) ⚽',
                           );
                           onPredictionSaved?.call();
                         } else {
@@ -358,8 +339,15 @@ Future<void> showPicoPredictionBottomSheet({
                   const SizedBox(height: 10.0),
 
                   // Secondary CTA: Detailed Prediction Screen
-                  PicoButton.secondary(
+                  GameButton.cream(
                     text: l10n?.viewFullPredictionPage ?? 'View Full Prediction Page →',
+                    faceColor: const Color(0xFFF9F8F3),
+                    textColor: const Color(0xFF13211B),
+                    width: double.infinity,
+                    extrusionHeight: 4.5,
+                    borderRadius: 16.0,
+                    fontSize: 14.5,
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                     onPressed: () {
                       Navigator.of(bottomSheetContext).pop();
                       context.push('/prediction/${match.id}', extra: match);

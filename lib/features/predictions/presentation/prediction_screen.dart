@@ -6,7 +6,7 @@ import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
 import 'package:pico/features/predictions/presentation/prediction_controller.dart';
 import 'package:pico/l10n/app_localizations.dart';
-import 'package:pico/shared/components/pico_button.dart';
+import 'package:pico/shared/components/game_button.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/shared/components/pico_snackbar.dart';
 import 'package:pico/shared/components/prediction_controls.dart';
@@ -1224,8 +1224,10 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
       ctaNote = l10n?.predictionLockNote ?? 'Predictions lock exactly 10 minutes before kickoff.';
     } else {
       ctaText = hasExistingPrediction
-          ? (l10n?.modifyPrediction ?? 'Modify Prediction')
-          : (l10n?.savePredictionCta ?? 'Save Prediction (+10 XP)');
+          ? (l10n?.modifyPrediction != null
+              ? '${l10n!.modifyPrediction} (+5 Points)'
+              : 'Update Prediction (+5 Points)')
+          : (l10n?.savePredictionCta ?? 'Save Prediction (+5 Points)');
       ctaIcon = Icons.arrow_forward_rounded;
       ctaNote = l10n?.predictionLockNote ?? 'Predictions lock exactly 10 minutes before kickoff.';
     }
@@ -1233,15 +1235,19 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        PicoButton.gold(
+        GameButton.green(
           text: _isSubmitting ? '...' : ctaText,
           icon: Icon(
             ctaIcon,
-            color: PicoColors.textPitchInk,
-            size: 19.0,
+            color: Colors.white,
+            size: 18.0,
           ),
-          height: 52.0,
+          width: double.infinity,
+          extrusionHeight: 4.5,
           borderRadius: 16.0,
+          fontSize: 15.0,
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 13.0),
+          enabled: !_isLocked && !_isSubmitting,
           onPressed: _isLocked || _isSubmitting ? null : _submitPrediction,
         ),
         const SizedBox(height: 8.0),

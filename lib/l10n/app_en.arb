@@ -436,7 +436,7 @@
   "@awayOutcome": {
     "description": "Away team outcome label"
   },
-  "savePredictionCta": "Save Prediction (+10 XP)",
+  "savePredictionCta": "Save Prediction (+5 Points)",
   "@savePredictionCta": {
     "description": "Primary button to submit prediction"
   },
@@ -954,7 +954,7 @@
   "@scoringRuleBanner": {
     "description": "Banner explaining scoring rule in prediction sheet"
   },
-  "predictionLockedSuccessToast": "Prediction locked in! (+10 XP) ⚽",
+  "predictionLockedSuccessToast": "Prediction locked in! (+5 Points) ⚽",
   "@predictionLockedSuccessToast": {
     "description": "Toast message after saving prediction from bottom sheet"
   },

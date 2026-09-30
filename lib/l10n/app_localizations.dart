@@ -659,7 +659,7 @@ abstract class AppLocalizations {
   /// Primary button to submit prediction
   ///
   /// In en, this message translates to:
-  /// **'Save Prediction (+10 XP)'**
+  /// **'Save Prediction (+5 Points)'**
   String get savePredictionCta;
 
   /// Button to edit an existing prediction
@@ -1337,7 +1337,7 @@ abstract class AppLocalizations {
   /// Toast message after saving prediction from bottom sheet
   ///
   /// In en, this message translates to:
-  /// **'Prediction locked in! (+10 XP) ⚽'**
+  /// **'Prediction locked in! (+5 Points) ⚽'**
   String get predictionLockedSuccessToast;
 
   /// Error toast when saving prediction fails
