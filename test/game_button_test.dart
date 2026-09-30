@@ -83,11 +83,13 @@ void main() {
       expect(outerAnimatedContainer.constraints?.maxWidth, 220.0);
     });
 
-    testWidgets('Named presets (green, blue, red) apply appropriate colors', (tester) async {
+    testWidgets('Named presets (gold, cream, green, blue, red) apply appropriate colors', (tester) async {
       await tester.pumpWidget(
         buildApp(
           Column(
             children: [
+              GameButton.gold(text: 'Gold Button', onPressed: () {}),
+              GameButton.cream(text: 'Cream Button', onPressed: () {}),
               GameButton.green(text: 'Green Button', onPressed: () {}),
               GameButton.blue(text: 'Blue Button', onPressed: () {}),
               GameButton.red(text: 'Red Button', onPressed: () {}),
@@ -97,6 +99,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      expect(find.text('Gold Button'), findsOneWidget);
+      expect(find.text('Cream Button'), findsOneWidget);
       expect(find.text('Green Button'), findsOneWidget);
       expect(find.text('Blue Button'), findsOneWidget);
       expect(find.text('Red Button'), findsOneWidget);

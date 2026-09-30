@@ -1,152 +1,249 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0";
 
-const BEROCCER_BASE_URL = "https://apiclient.besoccerapps.com/scripts/api/api.php";
+const API_FOOTBALL_BASE_URL = "https://v3.football.api-sports.io";
 
 // Initialize Supabase admin client using environment secrets
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-const besoccerApiKey = Deno.env.get("BESOCCER_API_KEY") ?? "";
+const footballApiKey =
+  Deno.env.get("FOOTBALL_API_KEY") ?? Deno.env.get("API_FOOTBALL_KEY") ?? "";
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 /**
- * Strictly limited top-tier competitions (Sprint 4 requirement):
- * 1. Primera División (La Liga) - BeSoccer ID: 1
- * 2. Premier League - BeSoccer ID: 10
- * 3. Serie A - BeSoccer ID: 7
- * 4. Bundesliga - BeSoccer ID: 8
- * 5. Ligue 1 - BeSoccer ID: 16
- * 6. Champions League - BeSoccer ID: 107
- * 7. Europa League - BeSoccer ID: 117
- * 8. Conference League - BeSoccer ID: 2492
+ * Strictly targeted top-tier competitions (Sprint 9 API-Football IDs):
+ * 1. Primera División (La Liga) - ID: 140
+ * 2. Premier League - ID: 39
+ * 3. Serie A - ID: 135
+ * 4. Bundesliga - ID: 78
+ * 5. Ligue 1 - ID: 61
+ * 6. Champions League - ID: 2
+ * 7. Europa League - ID: 3
+ * 8. Conference League - ID: 848
+ * 9. UEFA Nations League - ID: 5
  */
-const CORE_COMPETITIONS: Array<{ id: string; name: string; short_name: string; flag: string; emblem_url?: string | null }> = [
-  { id: "1", name: "Primera División (La Liga)", short_name: "La Liga", flag: "🇪🇸", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/1.png?size=120x&lossy=1" },
-  { id: "10", name: "Premier League", short_name: "Premier League", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/10.png?size=120x&lossy=1" },
-  { id: "7", name: "Serie A", short_name: "Serie A", flag: "🇮🇹", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/7.png?size=120x&lossy=1" },
-  { id: "8", name: "Bundesliga", short_name: "Bundesliga", flag: "🇩🇪", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/8.png?size=120x&lossy=1" },
-  { id: "16", name: "Ligue 1", short_name: "Ligue 1", flag: "🇫🇷", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/16.png?size=120x&lossy=1" },
-  { id: "107", name: "Champions League", short_name: "UCL", flag: "⭐", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/107.png?size=120x&lossy=1" },
-  { id: "117", name: "Europa League", short_name: "UEL", flag: "🟠", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/117.png?size=120x&lossy=1" },
-  { id: "2492", name: "Conference League", short_name: "UECL", flag: "🟢", emblem_url: "https://t.resfu.com/img_data/competiciones/logo/2492.png?size=120x&lossy=1" },
+const CORE_COMPETITIONS: Array<{
+  id: string;
+  name: string;
+  short_name: string;
+  flag: string;
+  emblem_url?: string | null;
+}> = [
+  {
+    id: "140",
+    name: "Primera División (La Liga)",
+    short_name: "La Liga",
+    flag: "🇪🇸",
+    emblem_url: "https://media.api-sports.io/flags/es.svg",
+  },
+  {
+    id: "39",
+    name: "Premier League",
+    short_name: "Premier League",
+    flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+    emblem_url: "https://media.api-sports.io/flags/gb.svg",
+  },
+  {
+    id: "135",
+    name: "Serie A",
+    short_name: "Serie A",
+    flag: "🇮🇹",
+    emblem_url: "https://media.api-sports.io/flags/it.svg",
+  },
+  {
+    id: "78",
+    name: "Bundesliga",
+    short_name: "Bundesliga",
+    flag: "🇩🇪",
+    emblem_url: "https://media.api-sports.io/flags/de.svg",
+  },
+  {
+    id: "61",
+    name: "Ligue 1",
+    short_name: "Ligue 1",
+    flag: "🇫🇷",
+    emblem_url: "https://media.api-sports.io/flags/fr.svg",
+  },
+  {
+    id: "2",
+    name: "Champions League",
+    short_name: "UCL",
+    flag: "⭐",
+    emblem_url: null,
+  },
+  {
+    id: "3",
+    name: "Europa League",
+    short_name: "UEL",
+    flag: "🟠",
+    emblem_url: null,
+  },
+  {
+    id: "848",
+    name: "Conference League",
+    short_name: "UECL",
+    flag: "🟢",
+    emblem_url: null,
+  },
+  {
+    id: "5",
+    name: "UEFA Nations League",
+    short_name: "Nations League",
+    flag: "🇪🇺",
+    emblem_url: null,
+  },
 ];
 
 const ALLOWED_COMPETITION_IDS = new Set(CORE_COMPETITIONS.map((c) => c.id));
 
 /**
- * Strips query parameters like '&v=...' or '?v=...' from BeSoccer image URLs.
+ * Safely parses numeric score values from API-Football fields (e.g., goals.home).
  */
-function cleanImageUrl(url?: string | null): string | null {
-  if (!url) return null;
-  try {
-    const parsed = new URL(url);
-    parsed.searchParams.delete("v");
-    return parsed.toString();
-  } catch {
-    return url.replace(/([?&])v=[^&#]*/g, "").replace(/[?&]$/, "");
-  }
-}
-
-/**
- * Safely parses score values from BeSoccer response fields (e.g., result1, local_goals, or "2-1").
- */
-function parseScore(val: any, fallbackStr?: any, resultStr?: string, partIndex = 0): number | null {
-  if (val !== undefined && val !== null && val !== "" && val !== "x") {
+function parseScore(val: any): number | null {
+  if (val !== undefined && val !== null && val !== "") {
     const num = Number(val);
     if (!isNaN(num)) return num;
-  }
-  if (fallbackStr !== undefined && fallbackStr !== null && fallbackStr !== "" && fallbackStr !== "x") {
-    const num = Number(fallbackStr);
-    if (!isNaN(num)) return num;
-  }
-  if (resultStr && typeof resultStr === "string" && resultStr.includes("-")) {
-    const parts = resultStr.split("-");
-    if (parts.length === 2) {
-      const num = Number(parts[partIndex].trim());
-      if (!isNaN(num)) return num;
-    }
   }
   return null;
 }
 
 /**
- * Maps BeSoccer status strings or status codes to our Postgres match_status enum:
+ * Maps API-Football fixture.status.short to our Postgres match_status enum:
  * 'upcoming' | 'live' | 'finished' | 'postponed' | 'cancelled'
+ *
+ * Mapping rules:
+ * - 'NS', 'TBD' -> "upcoming"
+ * - '1H', 'HT', '2H', 'ET', 'BT', 'P', 'SUSP', 'INT', 'LIVE' -> "live"
+ * - 'FT', 'AET', 'PEN' -> "finished"
+ * - 'PST' -> "postponed"
+ * - 'CANC', 'ABD', 'AWD', 'WO' -> "cancelled"
  */
-function mapMatchStatus(rawStatus?: string | number | null): "upcoming" | "live" | "finished" | "postponed" | "cancelled" {
-  if (rawStatus === null || rawStatus === undefined) return "upcoming";
+function mapMatchStatus(
+  rawStatus?: string | null
+): "upcoming" | "live" | "finished" | "postponed" | "cancelled" {
+  if (!rawStatus) return "upcoming";
 
-  const statusStr = String(rawStatus).toLowerCase().trim();
+  const s = String(rawStatus).trim().toUpperCase();
 
-  // Numeric BeSoccer status codes
-  if (statusStr === "-1") return "upcoming";
-  if (statusStr === "0") return "live";
-  if (statusStr === "1") return "finished";
-  if (statusStr === "2") return "postponed";
-  if (statusStr === "3") return "cancelled";
+  // Upcoming
+  if (s === "NS" || s === "TBD") return "upcoming";
 
-  // Textual representations
-  if (["upcoming", "not_started", "scheduled", "sched"].includes(statusStr)) return "upcoming";
-  if (["live", "playing", "in_play", "1t", "2t", "ht", "et", "pen"].includes(statusStr)) return "live";
-  if (["finished", "ft", "final", "ended"].includes(statusStr)) return "finished";
-  if (["postponed", "post"].includes(statusStr)) return "postponed";
-  if (["cancelled", "canceled", "suspended", "abd"].includes(statusStr)) return "cancelled";
+  // Live
+  if (
+    s === "1H" ||
+    s === "HT" ||
+    s === "2H" ||
+    s === "ET" ||
+    s === "BT" ||
+    s === "P" ||
+    s === "SUSP" ||
+    s === "INT" ||
+    s === "LIVE"
+  ) {
+    return "live";
+  }
+
+  // Finished
+  if (s === "FT" || s === "AET" || s === "PEN") return "finished";
+
+  // Postponed
+  if (s === "PST") return "postponed";
+
+  // Cancelled
+  if (s === "CANC" || s === "ABD" || s === "AWD" || s === "WO") return "cancelled";
+
+  // Fallback checks for string representations
+  const lower = s.toLowerCase();
+  if (["upcoming", "not_started", "scheduled"].includes(lower)) return "upcoming";
+  if (["live", "playing", "in_play"].includes(lower)) return "live";
+  if (["finished", "final", "ended"].includes(lower)) return "finished";
+  if (["postponed"].includes(lower)) return "postponed";
+  if (["cancelled", "canceled", "abandoned"].includes(lower)) return "cancelled";
 
   return "upcoming";
 }
 
 /**
- * Parses kickoff timestamp from BeSoccer date/hour/schedule fields.
+ * Parses kickoff timestamp from API-Football date/timestamp fields.
  */
-function parseKickoffAt(match: any): string {
-  if (match.schedule && typeof match.schedule === "string") {
-    const parsed = new Date(match.schedule);
+function parseKickoffAt(fixture: any): string {
+  if (fixture?.date) {
+    const parsed = new Date(fixture.date);
     if (!isNaN(parsed.getTime())) return parsed.toISOString();
   }
-
-  const dateStr = match.date || "";
-  const hourStr = match.hour || match.time || "00:00:00";
-
-  if (dateStr) {
-    const combined = new Date(`${dateStr}T${hourStr}Z`);
-    if (!isNaN(combined.getTime())) return combined.toISOString();
-
-    const fallback = new Date(`${dateStr} ${hourStr}`);
-    if (!isNaN(fallback.getTime())) return fallback.toISOString();
+  if (fixture?.timestamp) {
+    const parsed = new Date(Number(fixture.timestamp) * 1000);
+    if (!isNaN(parsed.getTime())) return parsed.toISOString();
   }
-
   return new Date().toISOString();
 }
 
 /**
- * Helper to fetch from BeSoccer Level 1 API.
+ * Helper to call API-Football with authentication headers.
  */
-async function callBeSoccer(params: Record<string, string>): Promise<any> {
-  const query = new URLSearchParams({
-    key: besoccerApiKey,
-    format: "json",
-    tz: "Europe/Madrid",
-    ...params,
-  });
-
-  const url = `${BEROCCER_BASE_URL}?${query.toString()}`;
-  console.log(`Calling BeSoccer API: req=${params.req}`);
-
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`BeSoccer API error [req=${params.req}]: ${res.status} ${res.statusText}`);
+async function callApiFootball(
+  endpoint: string,
+  params: Record<string, string | number> = {}
+): Promise<any> {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== "") {
+      query.set(key, String(value));
+    }
   }
 
-  return await res.json();
+  const queryString = query.toString();
+  const url = `${API_FOOTBALL_BASE_URL}${endpoint}${
+    queryString ? `?${queryString}` : ""
+  }`;
+  console.log(`Calling API-Football: ${endpoint}?${queryString}`);
+
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      "x-apisports-key": footballApiKey,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(
+      `API-Football error [${endpoint}]: ${res.status} ${res.statusText}`
+    );
+  }
+
+  const json = await res.json();
+  if (
+    json.errors &&
+    typeof json.errors === "object" &&
+    Object.keys(json.errors).length > 0 &&
+    !Array.isArray(json.errors)
+  ) {
+    console.error("API-Football errors:", json.errors);
+  }
+
+  return json;
 }
 
 /**
- * 1. Sync Top Competitions (Sprint 4: strictly limited to the curated 8 top-tier competitions)
- * Only processes and upserts these specific 8 competitions and ignores all other API data.
+ * Resolves the season year for querying API-Football.
+ * Defaults to current European season year (e.g. 2024 for 2024-2025).
+ */
+function resolveSeason(customSeason?: string | null): number {
+  if (customSeason) {
+    const parsed = parseInt(customSeason, 10);
+    if (!isNaN(parsed)) return parsed;
+  }
+  const now = new Date();
+  return now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1;
+}
+
+/**
+ * 1. Sync Top Competitions (Sprint 9: strictly limited to the curated 9 API-Football competitions)
+ * Uses flag emojis / country flags as emblem_url (never official league.logo).
  */
 async function syncCompetitions(): Promise<number> {
-  // First, guarantee core competitions exist with curated names and emblems
+  // First, guarantee core competitions exist with curated names and flag emblems
   const { error: upsertErr } = await supabase
     .from("competitions")
     .upsert(CORE_COMPETITIONS, { onConflict: "id" });
@@ -157,65 +254,63 @@ async function syncCompetitions(): Promise<number> {
   }
 
   try {
-    const data = await callBeSoccer({ req: "categories", filter: "competitions" });
-    const allComps: any[] = [];
-    if (data?.category?.competitions) {
-      for (const list of Object.values(data.category.competitions)) {
-        if (Array.isArray(list)) allComps.push(...list);
+    for (const comp of CORE_COMPETITIONS) {
+      const data = await callApiFootball("/leagues", { id: comp.id });
+      const item = data?.response?.[0];
+      if (item) {
+        // Map league.flag or country.flag to emblem_url instead of league.logo
+        // For international competitions (like Champions League), flag will be null
+        const flagUrl = item.country?.flag || item.league?.flag || null;
+        if (flagUrl) {
+          const { error } = await supabase
+            .from("competitions")
+            .update({ emblem_url: flagUrl })
+            .eq("id", comp.id);
+          if (error) {
+            console.warn(
+              `Supabase update competition emblem warning (${comp.id}):`,
+              error.message
+            );
+          }
+        }
       }
     }
-
-    // STRICT: Only process and upsert the 8 permitted competitions, ignore all other API data
-    const permittedOnly = allComps.filter((c: any) => 
-      ALLOWED_COMPETITION_IDS.has(String(c.id || c.category_id))
-    );
-
-    if (permittedOnly.length > 0) {
-      const records = permittedOnly.map((c: any) => {
-        const id = String(c.id || c.category_id);
-        const core = CORE_COMPETITIONS.find((item) => item.id === id);
-        return {
-          id,
-          name: core?.name || c.name || "Unknown Competition",
-          emblem_url: cleanImageUrl(c.logo || c.logo_png || c.shield) || core?.emblem_url,
-        };
-      });
-
-      const { error } = await supabase
-        .from("competitions")
-        .upsert(records, { onConflict: "id" });
-
-      if (error) console.warn("Supabase upsert competitions warning:", error.message);
-    }
   } catch (err: any) {
-    console.warn("BeSoccer fetch competitions error:", err.message);
+    console.warn("API-Football fetch leagues error:", err.message);
   }
 
   return CORE_COMPETITIONS.length;
 }
 
 /**
- * 2. Sync Teams for a Competition (Endpoint 10: req=teams)
+ * 2. Sync Teams for a Competition (/teams?league={id}&season={season})
+ * Strict Trademark Rule:
+ * - Do NOT include the crest_url property at all when upserting teams.
+ * - This defaults new teams to null and protects manually added logos.
  */
-async function syncTeams(leagueId: string): Promise<number> {
+async function syncTeams(
+  leagueId: string,
+  customSeason?: string | null
+): Promise<number> {
   if (!ALLOWED_COMPETITION_IDS.has(leagueId)) {
     console.warn(`Skipping syncTeams for disallowed competition: ${leagueId}`);
     return 0;
   }
 
-  const data = await callBeSoccer({ req: "teams", league: leagueId });
-  const rawList: any[] = Array.isArray(data)
-    ? data
-    : data.team || data.teams || data.data || [];
+  const season = resolveSeason(customSeason);
+  const data = await callApiFootball("/teams", { league: leagueId, season });
+  const rawList: any[] = Array.isArray(data?.response) ? data.response : [];
 
   if (!rawList.length) return 0;
 
-  const records = rawList.map((t: any) => ({
-    id: String(t.dteam || t.id || t.team_id),
-    name: t.name || t.fullName || "Unknown Team",
-    short_name: t.short_name || t.name_short || t.shortName || t.abbr || null,
-    crest_url: cleanImageUrl(t.shield || t.logo || t.image || t.badge),
-  }));
+  // Strict Rule 7: Do NOT include the crest_url property at all in the mapped objects
+  const records = rawList
+    .filter((item: any) => item?.team?.id)
+    .map((item: any) => ({
+      id: String(item.team.id),
+      name: item.team.name || `Team ${item.team.id}`,
+      short_name: item.team.code ?? null,
+    }));
 
   const { error } = await supabase
     .from("teams")
@@ -226,63 +321,71 @@ async function syncTeams(leagueId: string): Promise<number> {
 }
 
 /**
- * 3. Sync Matches for a Competition (Endpoint 13: req=matchs)
- * Strictly restricted to the 8 top-tier competitions.
- * Automatically ensures referenced competition and teams exist to avoid foreign key violations.
+ * 3. Sync Matches for a Competition (/fixtures?league={id}&season={season})
+ * Strict Rules:
+ * - Relational integrity: ensure competition exists without overwriting name or emblem_url.
+ * - Upsert teams without the crest_url property.
+ * - Map fixtures to provider_match_id, competition_id, home_team_id, away_team_id,
+ *   kickoff_at, status, home_score, away_score, and settled.
  */
-async function syncMatches(leagueId: string): Promise<number> {
+async function syncMatches(
+  leagueId: string,
+  customSeason?: string | null
+): Promise<number> {
   if (!ALLOWED_COMPETITION_IDS.has(leagueId)) {
     console.warn(`Skipping syncMatches for disallowed competition: ${leagueId}`);
     return 0;
   }
 
-  const data = await callBeSoccer({ req: "matchs", league: leagueId });
-  const rawList: any[] = Array.isArray(data)
-    ? data
-    : data.match || data.matches || data.data || [];
+  const season = resolveSeason(customSeason);
+  const data = await callApiFootball("/fixtures", { league: leagueId, season });
+  const rawList: any[] = Array.isArray(data?.response) ? data.response : [];
 
   if (!rawList.length) return 0;
 
   // 1. Relational Integrity: Ensure parent competition exists in public.competitions
+  // Rule 7: Do NOT include league.name or emblem_url in periodic upserts to protect manual edits!
   const coreComp = CORE_COMPETITIONS.find((c) => c.id === leagueId);
-  const compName = coreComp?.name || rawList[0]?.competition_name || rawList[0]?.category_name || `Competition ${leagueId}`;
-  const compEmblem = coreComp?.emblem_url || cleanImageUrl(rawList[0]?.cflag_local || rawList[0]?.logo || rawList[0]?.shield);
-
-  await supabase
+  const { data: existingComp } = await supabase
     .from("competitions")
-    .upsert([
-      {
-        id: leagueId,
-        name: compName,
-        short_name: coreComp?.short_name ?? compName,
-        flag: coreComp?.flag ?? "🏆",
-        emblem_url: compEmblem,
-      },
-    ], { onConflict: "id" });
+    .select("id")
+    .eq("id", leagueId)
+    .maybeSingle();
 
-  // 2. Relational Integrity: Extract and upsert all teams from the match payload
-  const teamsMap = new Map<string, { id: string; name: string; short_name: string | null; crest_url: string | null }>();
+  if (!existingComp) {
+    await supabase.from("competitions").insert({
+      id: leagueId,
+      name: coreComp?.name || `Competition ${leagueId}`,
+      short_name: coreComp?.short_name || coreComp?.name || `Comp ${leagueId}`,
+      flag: coreComp?.flag || "🏆",
+      emblem_url: coreComp?.emblem_url ?? null,
+    });
+  }
 
-  for (const m of rawList) {
-    // Home Team: prefer persistent direct team id (dteam1), fallback to id_local, id_home, team1
-    const homeTeamId = String(m.dteam1 || m.id_local || m.id_home || m.local_id || m.team1?.id || m.team1 || "");
-    if (homeTeamId && !teamsMap.has(homeTeamId)) {
-      teamsMap.set(homeTeamId, {
-        id: homeTeamId,
-        name: m.local || m.name_home || m.team1?.name || `Team ${homeTeamId}`,
-        short_name: m.local_abbr || m.team1?.short_name || null,
-        crest_url: cleanImageUrl(m.local_shield || m.local_shield_png || m.shield1 || m.team1?.shield || m.team1?.logo),
+  // 2. Relational Integrity: Extract and upsert all teams from the fixture payload
+  // Rule 7: Do NOT include the crest_url property at all when upserting teams
+  const teamsMap = new Map<
+    string,
+    { id: string; name: string; short_name: string | null }
+  >();
+
+  for (const f of rawList) {
+    const home = f.teams?.home;
+    const away = f.teams?.away;
+
+    if (home?.id && !teamsMap.has(String(home.id))) {
+      teamsMap.set(String(home.id), {
+        id: String(home.id),
+        name: home.name || `Team ${home.id}`,
+        short_name: home.code ?? null,
       });
     }
 
-    // Away Team: prefer persistent direct team id (dteam2), fallback to id_visitor, id_away, team2
-    const awayTeamId = String(m.dteam2 || m.id_visitor || m.id_away || m.visitor_id || m.team2?.id || m.team2 || "");
-    if (awayTeamId && !teamsMap.has(awayTeamId)) {
-      teamsMap.set(awayTeamId, {
-        id: awayTeamId,
-        name: m.visitor || m.name_away || m.team2?.name || `Team ${awayTeamId}`,
-        short_name: m.visitor_abbr || m.team2?.short_name || null,
-        crest_url: cleanImageUrl(m.visitor_shield || m.visitor_shield_png || m.shield2 || m.team2?.shield || m.team2?.logo),
+    if (away?.id && !teamsMap.has(String(away.id))) {
+      teamsMap.set(String(away.id), {
+        id: String(away.id),
+        name: away.name || `Team ${away.id}`,
+        short_name: away.code ?? null,
       });
     }
   }
@@ -296,22 +399,23 @@ async function syncMatches(leagueId: string): Promise<number> {
     }
   }
 
-  // 3. Map and upsert matches with proper persistent team IDs
+  // 3. Map and upsert matches with proper status translation
   const records = rawList
-    .filter((m: any) => m.id && (m.dteam1 || m.team1 || m.id_local || m.id_home) && (m.dteam2 || m.team2 || m.id_visitor || m.id_away))
-    .map((m: any) => {
-      const homeTeamId = String(m.dteam1 || m.id_local || m.id_home || m.local_id || m.team1?.id || m.team1);
-      const awayTeamId = String(m.dteam2 || m.id_visitor || m.id_away || m.visitor_id || m.team2?.id || m.team2);
-      const homeScore = parseScore(m.result1, m.local_goals, m.result, 0);
-      const awayScore = parseScore(m.result2, m.visitor_goals, m.result, 1);
-      const status = mapMatchStatus(m.status);
+    .filter(
+      (f: any) =>
+        f?.fixture?.id && f?.teams?.home?.id && f?.teams?.away?.id
+    )
+    .map((f: any) => {
+      const status = mapMatchStatus(f.fixture?.status?.short);
+      const homeScore = parseScore(f.goals?.home);
+      const awayScore = parseScore(f.goals?.away);
 
       return {
-        provider_match_id: String(m.id),
+        provider_match_id: String(f.fixture.id),
         competition_id: leagueId,
-        home_team_id: homeTeamId,
-        away_team_id: awayTeamId,
-        kickoff_at: parseKickoffAt(m),
+        home_team_id: String(f.teams.home.id),
+        away_team_id: String(f.teams.away.id),
+        kickoff_at: parseKickoffAt(f.fixture),
         status: status,
         home_score: homeScore,
         away_score: awayScore,
@@ -330,27 +434,49 @@ async function syncMatches(leagueId: string): Promise<number> {
 }
 
 /**
- * 4. Sync Matches of the Day / Live Settlement (Endpoint 12: req=matchsday)
+ * 4. Sync Matches of the Day / Live Settlement (/fixtures?date={date} & /fixtures?live=all)
+ * Updates match statuses, live/final scores, and sets settled = true for finished matches.
  */
 async function syncMatchesDay(targetDate?: string): Promise<number> {
-  const params: Record<string, string> = { req: "matchsday" };
-  if (targetDate) params.date = targetDate;
+  const dateStr = targetDate || new Date().toISOString().split("T")[0];
+  const allFixtures: any[] = [];
 
-  const data = await callBeSoccer(params);
-  const rawList: any[] = Array.isArray(data)
-    ? data
-    : data.match || data.matches || data.data || [];
+  try {
+    const dateData = await callApiFootball("/fixtures", { date: dateStr });
+    if (Array.isArray(dateData?.response)) {
+      allFixtures.push(...dateData.response);
+    }
+  } catch (e: any) {
+    console.warn(`Error fetching date fixtures (${dateStr}):`, e.message);
+  }
 
-  if (!rawList.length) return 0;
+  try {
+    const liveData = await callApiFootball("/fixtures", { live: "all" });
+    if (Array.isArray(liveData?.response)) {
+      allFixtures.push(...liveData.response);
+    }
+  } catch (e: any) {
+    console.warn("Error fetching live fixtures:", e.message);
+  }
+
+  // Filter to permitted core competitions only
+  const fixturesMap = new Map<string, any>();
+  for (const f of allFixtures) {
+    if (!f?.fixture?.id) continue;
+    const leagueId = String(f.league?.id || "");
+    if (ALLOWED_COMPETITION_IDS.has(leagueId)) {
+      fixturesMap.set(String(f.fixture.id), f);
+    }
+  }
+
+  if (fixturesMap.size === 0) return 0;
 
   let updatedCount = 0;
-
-  for (const m of rawList) {
-    if (!m.id) continue;
-    const providerMatchId = String(m.id);
-    const status = mapMatchStatus(m.status);
-    const homeScore = parseScore(m.result1, m.local_goals, m.result, 0);
-    const awayScore = parseScore(m.result2, m.visitor_goals, m.result, 1);
+  for (const f of fixturesMap.values()) {
+    const providerMatchId = String(f.fixture.id);
+    const status = mapMatchStatus(f.fixture?.status?.short);
+    const homeScore = parseScore(f.goals?.home);
+    const awayScore = parseScore(f.goals?.away);
 
     const { error } = await supabase
       .from("matches")
@@ -374,7 +500,8 @@ serve(async (req: Request) => {
   const headers = {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-pico-cron-secret",
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type, x-pico-cron-secret",
   };
 
   if (req.method === "OPTIONS") {
@@ -385,7 +512,11 @@ serve(async (req: Request) => {
   const cronSecretHeader = req.headers.get("x-pico-cron-secret");
   const expectedCronSecret = Deno.env.get("CRON_SECRET");
 
-  if (!cronSecretHeader || !expectedCronSecret || cronSecretHeader !== expectedCronSecret) {
+  if (
+    !cronSecretHeader ||
+    !expectedCronSecret ||
+    cronSecretHeader !== expectedCronSecret
+  ) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers,
@@ -395,10 +526,14 @@ serve(async (req: Request) => {
   try {
     const url = new URL(req.url);
     const action = url.searchParams.get("action") || "sync-live";
-    const league = url.searchParams.get("league") || "1"; // Default to La Liga / Top League
+    const league = url.searchParams.get("league") || "140"; // Default to La Liga
     const date = url.searchParams.get("date") || undefined;
+    const season = url.searchParams.get("season") || undefined;
 
-    const results: Record<string, any> = { action, timestamp: new Date().toISOString() };
+    const results: Record<string, any> = {
+      action,
+      timestamp: new Date().toISOString(),
+    };
 
     switch (action) {
       case "sync-competitions": {
@@ -410,14 +545,14 @@ serve(async (req: Request) => {
           let total = 0;
           for (const compId of ALLOWED_COMPETITION_IDS) {
             try {
-              total += await syncTeams(compId);
+              total += await syncTeams(compId, season);
             } catch (e: any) {
               console.warn(`Sync teams error for comp ${compId}:`, e.message);
             }
           }
           results.teamsSynced = total;
         } else {
-          results.teamsSynced = await syncTeams(league);
+          results.teamsSynced = await syncTeams(league, season);
         }
         break;
       }
@@ -426,14 +561,14 @@ serve(async (req: Request) => {
           let total = 0;
           for (const compId of ALLOWED_COMPETITION_IDS) {
             try {
-              total += await syncMatches(compId);
+              total += await syncMatches(compId, season);
             } catch (e: any) {
               console.warn(`Sync error for comp ${compId}:`, e.message);
             }
           }
           results.matchesSynced = total;
         } else {
-          results.matchesSynced = await syncMatches(league);
+          results.matchesSynced = await syncMatches(league, season);
         }
         break;
       }
@@ -441,9 +576,12 @@ serve(async (req: Request) => {
         let total = 0;
         for (const compId of ALLOWED_COMPETITION_IDS) {
           try {
-            total += await syncMatches(compId);
+            total += await syncMatches(compId, season);
           } catch (e: any) {
-            console.warn(`Sync upcoming matches error for comp ${compId}:`, e.message);
+            console.warn(
+              `Sync upcoming matches error for comp ${compId}:`,
+              e.message
+            );
           }
         }
         results.matchesSynced = total;
@@ -454,9 +592,12 @@ serve(async (req: Request) => {
         let totalTeams = 0;
         for (const compId of ALLOWED_COMPETITION_IDS) {
           try {
-            totalTeams += await syncTeams(compId);
+            totalTeams += await syncTeams(compId, season);
           } catch (e: any) {
-            console.warn(`Sync metadata teams error for comp ${compId}:`, e.message);
+            console.warn(
+              `Sync metadata teams error for comp ${compId}:`,
+              e.message
+            );
           }
         }
         results.teamsSynced = totalTeams;
@@ -472,7 +613,7 @@ serve(async (req: Request) => {
         let totalMatches = 0;
         for (const compId of ALLOWED_COMPETITION_IDS) {
           try {
-            totalMatches += await syncMatches(compId);
+            totalMatches += await syncMatches(compId, season);
           } catch (e: any) {
             console.warn(`Sync error for comp ${compId}:`, e.message);
           }

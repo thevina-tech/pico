@@ -1,10 +1,14 @@
+---
+trigger: always_on
+---
+
 # TASK: Rewrite Edge Function for API-Football Integration
 
 Our sports data provider has changed. Rewrite the current `sync-matches.ts` Edge Function to use the new API-Football provider while strictly maintaining our existing Supabase database schema (`matches`, `teams`, `competitions`).
 
 ## 1. API Configuration
 *   **Base URL:** Change the base URL to `https://v3.football.api-sports.io`[cite: 1].
-*   **Authentication:** Pass the API key in the headers using `x-apisports-key`[cite: 1].
+*   **Authentication:** Pass the API key in the headers using `x-apisports-key` via `Deno.env.get("FOOTBALL_API_KEY")`.
 
 ## 2. Core Mapping Rules (Adapter Pattern)
 When fetching from the `/fixtures` endpoint (e.g., `/fixtures?league=X&season=2023`), map the JSON response to our exact tables[cite: 1]:
@@ -51,6 +55,10 @@ Replace the old BeSoccer IDs in the `CORE_COMPETITIONS` array with the exact API
 *   `id: "2"` (Champions League)
 *   `id: "3"` (Europa League)
 *   `id: "848"` (Conference League)
+*   `id: "5"` (UEFA Nations League)
+
+For the new UEFA Nations League entry in the `CORE_COMPETITIONS` array, initialize it with this fallback data:
+`name: "UEFA Nations League"`, `short_name: "Nations League"`, `flag: "🇪🇺"`, and `emblem_url: null`.
 
 Ensure `ALLOWED_COMPETITION_IDS` correctly references these new string IDs so the script filters out and ignores all other global leagues returned by the API.
 
@@ -71,6 +79,7 @@ Update the mapping rules for the Edge Function as follows:
 Because this Edge Function runs on a cron schedule using `upsert`, it must not overwrite the custom logos we manually add later.
 
 *   **Teams Table:** Do NOT include the `crest_url` property at all in the mapped objects when upserting teams. By omitting it entirely, Supabase will default new teams to `null` and safely ignore the column for existing teams, protecting our manual updates.
+*   **Competitions Table:** During regular match syncs, do NOT map or include `league.name` or `emblem_url` in the upsert payload. Only rely on the fallback names and emojis defined in `CORE_COMPETITIONS` for the initial creation, and omit them entirely from the periodic upserts so our manual database edits are never overwritten
 *   **Competitions Table:** Do NOT include the `emblem_url` property in the mapped objects when upserting competitions during the regular match sync. Only rely on the fallback emojis defined in `CORE_COMPETITIONS`.
 
 ## 8. Frontend Fallback for Team Crests (Flutter)

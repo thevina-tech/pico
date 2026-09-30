@@ -60,6 +60,34 @@ class GameButton extends StatefulWidget {
     this.enabled = true,
   });
 
+  /// Cream / ivory mobile game button preset (#F9F8F3).
+  const GameButton.cream({
+    super.key,
+    this.text = '',
+    required this.onPressed,
+    this.onLongPress,
+    this.child,
+    this.faceColor = const Color(0xFFF9F8F3),
+    this.extrusionColor = const Color(0xFFD8D1C3),
+    this.outlineColor = const Color(0xFFC7BFB0),
+    this.glowColor = const Color(0x22FFFFFF),
+    this.textColor = const Color(0xFF13211B),
+    this.textShadowColor = Colors.transparent,
+    this.width,
+    this.height,
+    this.padding = const EdgeInsets.symmetric(horizontal: 26.0, vertical: 12.5),
+    this.borderRadius = 18.0,
+    this.outlineWidth = 1.5,
+    this.extrusionHeight = 5.5,
+    this.pressedExtrusionHeight = 1.5,
+    this.fontSize = 16.0,
+    this.fontWeight = FontWeight.w700,
+    this.textStyle,
+    this.icon,
+    this.showHighlights = true,
+    this.enabled = true,
+  });
+
   /// Meadow pitch green mobile game button preset.
   const GameButton.green({
     super.key,

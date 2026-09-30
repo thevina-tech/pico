@@ -80,14 +80,15 @@ bool isSameCompetition(String id1, String id2) {
   if (id1.isEmpty || id2.isEmpty) return false;
   if (id1 == id2) return true;
   const aliases = [
-    {'la_liga', 'laliga', '1', 'primera_division', 'primera division'},
-    {'premier_league', 'epl', '10'},
-    {'serie_a', '7'},
-    {'bundesliga', '8'},
-    {'ligue_1', '16'},
-    {'champions_league', 'ucl', '107', '70393'},
-    {'europa_league', 'uel', '117'},
-    {'conference_league', 'uecl', '2492'},
+    {'la_liga', 'laliga', '1', '140', 'primera_division', 'primera division'},
+    {'premier_league', 'epl', '10', '39'},
+    {'serie_a', '7', '135'},
+    {'bundesliga', '8', '78'},
+    {'ligue_1', '16', '61'},
+    {'champions_league', 'ucl', '107', '2', '70393'},
+    {'europa_league', 'uel', '117', '3'},
+    {'conference_league', 'uecl', '2492', '848'},
+    {'nations_league', 'uefa_nations_league', '5'},
     {'championship', '67799'},
   ];
 
@@ -116,6 +117,7 @@ bool isSameCompetitionName(String name1, String name2) {
     {'champions league', 'ucl', 'uefa champions league'},
     {'europa league', 'uel', 'uefa europa league'},
     {'conference league', 'uecl', 'uefa conference league', 'uefa europa conference league'},
+    {'nations league', 'uefa nations league'},
     {'championship', 'efl championship', 'english league championship'},
   ];
 

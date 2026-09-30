@@ -517,8 +517,8 @@ class _PrivateLeagueDashboardScreenState
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    const activeIconColor = Color(0xFF261700);
-    const activeTextColor = Color(0xFF261700);
+    const activeIconColor = Color(0xFF13211B);
+    const activeTextColor = Color(0xFF13211B);
 
     const inactiveFaceColor = Color(0xFF162534);
     const inactiveExtrusionColor = Color(0xFF090F16);
@@ -528,7 +528,7 @@ class _PrivateLeagueDashboardScreenState
 
     return Expanded(
       child: isSelected
-          ? GameButton.gold(
+          ? GameButton.cream(
               text: title,
               onPressed: onTap,
               width: double.infinity,

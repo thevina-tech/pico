@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:pico/services/revenuecat_ad_service.dart';
@@ -129,9 +130,11 @@ void main() {
   group('Sprint 5: Ad Widgets (Banner & Native)', () {
     testWidgets('BannerAdWidget builds and safely collapses on unsupported platform', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: BannerAdWidget(placement: 'dashboard_bottom'),
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: BannerAdWidget(placement: 'dashboard_bottom'),
+            ),
           ),
         ),
       );

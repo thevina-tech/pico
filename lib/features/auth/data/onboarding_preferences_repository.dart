@@ -50,9 +50,7 @@ class SharedPrefsOnboardingPreferencesRepository
     if (_prefs != null) return _prefs;
     if (_cachedPrefs != null) return _cachedPrefs;
     try {
-      _cachedPrefs = await SharedPreferences.getInstance().timeout(
-        const Duration(milliseconds: 300),
-      );
+      _cachedPrefs = await SharedPreferences.getInstance();
       return _cachedPrefs;
     } catch (e) {
       return null;

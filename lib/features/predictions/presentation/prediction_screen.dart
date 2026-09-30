@@ -548,14 +548,20 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
               ),
             )
           : Center(
-              child: Text(
-                code,
-                style: PicoTypography.headlineMd.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 16.0,
-                ),
-              ),
+              child: code.isNotEmpty
+                  ? Text(
+                      code,
+                      style: PicoTypography.headlineMd.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16.0,
+                      ),
+                    )
+                  : const Icon(
+                      Icons.shield_rounded,
+                      color: Colors.white70,
+                      size: 28.0,
+                    ),
             ),
     );
   }

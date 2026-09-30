@@ -1212,6 +1212,24 @@ class _TeamBlock extends StatelessWidget {
   }
 
   Widget _buildDefaultCrest(String code) {
+    if (code.trim().isEmpty) {
+      return Container(
+        width: 36.0,
+        height: 36.0,
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E3A2B),
+          shape: BoxShape.circle,
+          border: Border.all(color: PicoColors.cardBorder, width: 1.0),
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.shield_rounded,
+            color: Colors.white70,
+            size: 18.0,
+          ),
+        ),
+      );
+    }
     final colors = _teamColors(code);
     return Container(
       width: 36.0,

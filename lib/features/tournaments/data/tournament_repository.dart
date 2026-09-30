@@ -194,104 +194,116 @@ class SupabaseTournamentRepository implements TournamentRepository {
   // Fallback competitions when offline or uninitialized
   static final List<Competition> _fallbackCompetitions = [
     const Competition(
-      id: '1',
+      id: '140',
       name: 'Primera División (La Liga)',
       shortName: 'La Liga',
       flag: '🇪🇸',
-      emblemUrl: 'https://t.resfu.com/img_data/competiciones/logo/1.png?size=120x&lossy=1',
+      emblemUrl: 'https://media.api-sports.io/flags/es.svg',
     ),
     const Competition(
-      id: '10',
+      id: '39',
       name: 'Premier League',
       shortName: 'Premier League',
       flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
-      emblemUrl: 'https://t.resfu.com/img_data/competiciones/logo/10.png?size=120x&lossy=1',
+      emblemUrl: 'https://media.api-sports.io/flags/gb.svg',
     ),
     const Competition(
-      id: '7',
+      id: '135',
       name: 'Serie A',
       shortName: 'Serie A',
       flag: '🇮🇹',
-      emblemUrl: 'https://t.resfu.com/img_data/competiciones/logo/7.png?size=120x&lossy=1',
+      emblemUrl: 'https://media.api-sports.io/flags/it.svg',
     ),
     const Competition(
-      id: '8',
+      id: '78',
       name: 'Bundesliga',
       shortName: 'Bundesliga',
       flag: '🇩🇪',
-      emblemUrl: 'https://t.resfu.com/img_data/competiciones/logo/8.png?size=120x&lossy=1',
+      emblemUrl: 'https://media.api-sports.io/flags/de.svg',
     ),
     const Competition(
-      id: '16',
+      id: '61',
       name: 'Ligue 1',
       shortName: 'Ligue 1',
       flag: '🇫🇷',
-      emblemUrl: 'https://t.resfu.com/img_data/competiciones/logo/16.png?size=120x&lossy=1',
+      emblemUrl: 'https://media.api-sports.io/flags/fr.svg',
     ),
     const Competition(
-      id: '107',
+      id: '2',
       name: 'Champions League',
       shortName: 'UCL',
       flag: '⭐',
-      emblemUrl: 'https://t.resfu.com/img_data/competiciones/logo/107.png?size=120x&lossy=1',
+      emblemUrl: null,
     ),
     const Competition(
-      id: '117',
+      id: '3',
       name: 'Europa League',
       shortName: 'UEL',
       flag: '🟠',
-      emblemUrl: 'https://t.resfu.com/img_data/competiciones/logo/117.png?size=120x&lossy=1',
+      emblemUrl: null,
     ),
     const Competition(
-      id: '2492',
+      id: '848',
       name: 'Conference League',
       shortName: 'UECL',
       flag: '🟢',
-      emblemUrl: 'https://t.resfu.com/img_data/competiciones/logo/2492.png?size=120x&lossy=1',
+      emblemUrl: null,
+    ),
+    const Competition(
+      id: '5',
+      name: 'UEFA Nations League',
+      shortName: 'Nations League',
+      flag: '🇪🇺',
+      emblemUrl: null,
     ),
   ];
 
-  // Pre-configured default public tournaments for the 8 curated top-tier leagues
+  // Pre-configured default public tournaments for the 9 curated top-tier leagues
   static final Map<String, Tournament> _defaultPublicTournaments = {
-    '1': const Tournament(
-      id: '10000000-0000-0000-0000-000000000001',
+    '140': const Tournament(
+      id: '10000000-0000-0000-0000-000000000140',
       name: 'Primera División',
-      competitionId: '1',
+      competitionId: '140',
     ),
-    '10': const Tournament(
-      id: '10000000-0000-0000-0000-000000000010',
+    '39': const Tournament(
+      id: '10000000-0000-0000-0000-000000000039',
       name: 'Premier League',
-      competitionId: '10',
+      competitionId: '39',
     ),
-    '7': const Tournament(
-      id: '10000000-0000-0000-0000-000000000007',
+    '135': const Tournament(
+      id: '10000000-0000-0000-0000-000000000135',
       name: 'Serie A',
-      competitionId: '7',
+      competitionId: '135',
     ),
-    '8': const Tournament(
-      id: '10000000-0000-0000-0000-000000000008',
+    '78': const Tournament(
+      id: '10000000-0000-0000-0000-000000000078',
       name: 'Bundesliga',
-      competitionId: '8',
+      competitionId: '78',
     ),
-    '16': const Tournament(
-      id: '10000000-0000-0000-0000-000000000016',
+    '61': const Tournament(
+      id: '10000000-0000-0000-0000-000000000061',
       name: 'Ligue 1',
-      competitionId: '16',
+      competitionId: '61',
     ),
-    '107': const Tournament(
-      id: '10000000-0000-0000-0000-000000000107',
+    '2': const Tournament(
+      id: '10000000-0000-0000-0000-000000000002',
       name: 'Champions League',
-      competitionId: '107',
+      competitionId: '2',
     ),
-    '117': const Tournament(
-      id: '10000000-0000-0000-0000-000000000117',
+    '3': const Tournament(
+      id: '10000000-0000-0000-0000-000000000003',
       name: 'Europa League',
-      competitionId: '117',
+      competitionId: '3',
     ),
-    '2492': const Tournament(
-      id: '10000000-0000-0000-0000-000000002492',
+    '848': const Tournament(
+      id: '10000000-0000-0000-0000-000000000848',
       name: 'Conference League',
-      competitionId: '2492',
+      competitionId: '848',
+    ),
+    '5': const Tournament(
+      id: '10000000-0000-0000-0000-000000000005',
+      name: 'UEFA Nations League',
+      competitionId: '5',
     ),
   };
 
@@ -1126,29 +1138,40 @@ class SupabaseTournamentRepository implements TournamentRepository {
     final clean = rawId.trim().toLowerCase();
     switch (clean) {
       case 'la_liga':
+      case '140':
       case '1':
-        return '1';
+        return '140';
       case 'premier_league':
+      case '39':
       case '10':
-        return '10';
+        return '39';
       case 'serie_a':
+      case '135':
       case '7':
-        return '7';
+        return '135';
       case 'bundesliga':
+      case '78':
       case '8':
-        return '8';
+        return '78';
       case 'ligue_1':
+      case '61':
       case '16':
-        return '16';
+        return '61';
       case 'champions_league':
+      case '2':
       case '107':
-        return '107';
+        return '2';
       case 'europa_league':
+      case '3':
       case '117':
-        return '117';
+        return '3';
       case 'conference_league':
+      case '848':
       case '2492':
-        return '2492';
+        return '848';
+      case 'nations_league':
+      case '5':
+        return '5';
       default:
         return rawId;
     }
