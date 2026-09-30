@@ -434,7 +434,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Create a league for your friends or join one with an invite code.';
 
   @override
-  String get officialTournamentBadge => 'PICO TOURNAMENT';
+  String get publicTournamentBadge => 'PICO TOURNAMENT';
 
   @override
   String get leagueCreatedSuccessTitle => 'League Created! 🎉';
@@ -471,7 +471,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Only players with your invite code can join';
 
   @override
-  String get officialBaseTournamentNote => 'Official Base Tournament';
+  String get baseTournamentNote => 'Base Competition';
 
   @override
   String competitionsAvailableCount(int count) {

@@ -728,7 +728,7 @@ abstract class AppLocalizations {
   /// **'My Leagues'**
   String get myLeaguesTab;
 
-  /// Tab label for discovering official tournaments
+  /// Tab label for discovering public tournaments
   ///
   /// In en, this message translates to:
   /// **'Discover'**
@@ -860,11 +860,11 @@ abstract class AppLocalizations {
   /// **'Create a league for your friends or join one with an invite code.'**
   String get emptyPrivateLeaguesSubtitle;
 
-  /// Badge for official public tournaments
+  /// Badge for public tournaments
   ///
   /// In en, this message translates to:
   /// **'PICO TOURNAMENT'**
-  String get officialTournamentBadge;
+  String get publicTournamentBadge;
 
   /// Success modal title after creating private league
   ///
@@ -923,8 +923,8 @@ abstract class AppLocalizations {
   /// Note under selected base competition
   ///
   /// In en, this message translates to:
-  /// **'Official Base Tournament'**
-  String get officialBaseTournamentNote;
+  /// **'Base Competition'**
+  String get baseTournamentNote;
 
   /// Count of available competitions
   ///

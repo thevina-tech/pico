@@ -183,7 +183,7 @@ class TournamentsScreen extends ConsumerWidget {
             return Column(
               children: tournaments
                   .map(
-                    (t) => _buildOfficialTournamentCard(
+                    (t) => _buildPublicTournamentCard(
                       context,
                       t,
                       l10n,
@@ -467,7 +467,7 @@ class TournamentsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildOfficialTournamentCard(
+  Widget _buildPublicTournamentCard(
     BuildContext context,
     Tournament tournament,
     AppLocalizations l10n,
@@ -516,7 +516,7 @@ class TournamentsScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(4.0),
                       ),
                       child: Text(
-                        l10n.officialTournamentBadge,
+                        l10n.publicTournamentBadge,
                         style: PicoTypography.labelPillSm.copyWith(
                           color: PicoColors.primary,
                           fontWeight: FontWeight.w800,
@@ -686,7 +686,7 @@ class TournamentsScreen extends ConsumerWidget {
                     final confirmed = await showPicoConfirmationModal(
                       context: context,
                       title: 'Join ${tournament.name}?',
-                      message: 'Compete against other fans on the official leaderboard and earn Pico Points from every match!',
+                      message: 'Compete against other fans on the global leaderboard and earn Pico Points from every match!',
                       confirmText: 'Join Tournament',
                       cancelText: l10n.cancelButton,
                       confirmStyle: PicoDialogButtonStyle.green,

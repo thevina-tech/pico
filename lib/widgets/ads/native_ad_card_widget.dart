@@ -232,7 +232,7 @@ class _NativeAdCardWidgetState extends State<NativeAdCardWidget> {
                         height: 90.0,
                         alignment: Alignment.center,
                         child: Text(
-                          'Official Football Partner',
+                          'Featured Football Partner',
                           style: PicoTypography.bodySm.copyWith(
                             color: PicoColors.textTactileMuted,
                           ),

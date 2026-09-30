@@ -129,7 +129,7 @@ class PersonalizationController extends _$PersonalizationController {
         favoriteLeagueIds: state.selectedLeagueIds.toList(),
       );
 
-      // Auto-enroll user into official public tournaments corresponding to their selected leagues
+      // Auto-enroll user into public tournaments corresponding to their selected leagues
       final tournamentRepo = ref.read(tournamentRepositoryProvider);
       await tournamentRepo.enrollInDefaultTournaments(
         userId: authState.user!.id,

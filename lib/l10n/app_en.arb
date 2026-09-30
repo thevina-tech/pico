@@ -492,7 +492,7 @@
   },
   "discoverTab": "Discover",
   "@discoverTab": {
-    "description": "Tab label for discovering official tournaments"
+    "description": "Tab label for discovering public tournaments"
   },
   "createOrJoinAction": "+ Create / Join",
   "@createOrJoinAction": {
@@ -584,9 +584,9 @@
   "@emptyPrivateLeaguesSubtitle": {
     "description": "Empty state subtitle for private leagues"
   },
-  "officialTournamentBadge": "PICO TOURNAMENT",
-  "@officialTournamentBadge": {
-    "description": "Badge for official public tournaments"
+  "publicTournamentBadge": "PICO TOURNAMENT",
+  "@publicTournamentBadge": {
+    "description": "Badge for public tournaments"
   },
   "leagueCreatedSuccessTitle": "League Created! 🎉",
   "@leagueCreatedSuccessTitle": {
@@ -630,8 +630,8 @@
   "@privateLeagueSecurityNote": {
     "description": "Security note on private league creation"
   },
-  "officialBaseTournamentNote": "Official Base Tournament",
-  "@officialBaseTournamentNote": {
+  "baseTournamentNote": "Base Competition",
+  "@baseTournamentNote": {
     "description": "Note under selected base competition"
   },
   "competitionsAvailableCount": "{count} available",

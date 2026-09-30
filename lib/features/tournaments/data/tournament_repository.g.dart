@@ -154,12 +154,12 @@ final class CompetitionsMapProvider
 
 String _$competitionsMapHash() => r'4d32153b420f58d20c81ca996cd591fa7e0756f8';
 
-/// Provider exposing the list of official public tournaments.
+/// Provider exposing the list of public tournaments.
 
 @ProviderFor(publicTournaments)
 final publicTournamentsProvider = PublicTournamentsProvider._();
 
-/// Provider exposing the list of official public tournaments.
+/// Provider exposing the list of public tournaments.
 
 final class PublicTournamentsProvider
     extends
@@ -169,7 +169,7 @@ final class PublicTournamentsProvider
           FutureOr<List<Tournament>>
         >
     with $FutureModifier<List<Tournament>>, $FutureProvider<List<Tournament>> {
-  /// Provider exposing the list of official public tournaments.
+  /// Provider exposing the list of public tournaments.
   PublicTournamentsProvider._()
     : super(
         from: null,

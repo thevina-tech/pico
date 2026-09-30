@@ -833,7 +833,7 @@ class _CreatePrivateLeagueScreenState
                     ),
                   ),
                   Text(
-                    AppLocalizations.of(context)!.officialBaseTournamentNote,
+                    AppLocalizations.of(context)!.baseTournamentNote,
                     style: PicoTypography.bodySm.copyWith(
                       color: PicoColors.textWhiteMuted,
                       fontSize: 11.0,
@@ -1027,7 +1027,7 @@ class _CreatePrivateLeagueScreenState
                                     ),
                                     const SizedBox(height: 2.0),
                                     Text(
-                                      l10n.officialBaseTournamentNote,
+                                      l10n.baseTournamentNote,
                                       style: TextStyle(
                                         color: isSelected
                                             ? const Color(0xFF16A34A)

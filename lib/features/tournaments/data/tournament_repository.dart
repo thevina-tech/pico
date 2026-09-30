@@ -39,7 +39,7 @@ Future<Map<String, Competition>> competitionsMap(Ref ref) async {
   return {for (final c in list) c.id: c};
 }
 
-/// Provider exposing the list of official public tournaments.
+/// Provider exposing the list of public tournaments.
 @Riverpod(keepAlive: true)
 Future<List<Tournament>> publicTournaments(Ref ref) async {
   final repo = ref.watch(tournamentRepositoryProvider);
@@ -251,8 +251,8 @@ class SupabaseTournamentRepository implements TournamentRepository {
     ),
   ];
 
-  // Pre-configured default official tournaments for the 8 curated top-tier leagues
-  static final Map<String, Tournament> _defaultOfficialTournaments = {
+  // Pre-configured default public tournaments for the 8 curated top-tier leagues
+  static final Map<String, Tournament> _defaultPublicTournaments = {
     '1': const Tournament(
       id: '10000000-0000-0000-0000-000000000001',
       name: 'Primera División',
@@ -326,7 +326,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
   @override
   Future<List<Tournament>> getPublicTournaments() async {
     if (_supabase == null) {
-      return _defaultOfficialTournaments.values.toList();
+      return _defaultPublicTournaments.values.toList();
     }
 
     try {
@@ -338,10 +338,10 @@ class SupabaseTournamentRepository implements TournamentRepository {
           .map((row) => Tournament.fromJson(row as Map<String, dynamic>))
           .toList();
       if (list.isNotEmpty) return list;
-      return _defaultOfficialTournaments.values.toList();
+      return _defaultPublicTournaments.values.toList();
     } catch (e, st) {
       AppLogger.error('Failed to get public tournaments from Supabase', e, st);
-      return _defaultOfficialTournaments.values.toList();
+      return _defaultPublicTournaments.values.toList();
     }
   }
 
@@ -349,7 +349,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
   Future<List<Tournament>> getEnrolledTournaments(String userId) async {
     if (_supabase == null) {
       final enrolledIds = _mockParticipants[userId] ?? {};
-      return _defaultOfficialTournaments.values
+      return _defaultPublicTournaments.values
           .where((t) => enrolledIds.contains(t.id))
           .toList();
     }
@@ -372,7 +372,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
           return Tournament.fromJson(rowMap['tournament'] as Map<String, dynamic>);
         }
         final tId = rowMap['tournament_id']?.toString() ?? '';
-        return _defaultOfficialTournaments.values.firstWhere(
+        return _defaultPublicTournaments.values.firstWhere(
           (t) => t.id == tId,
           orElse: () => Tournament(id: tId, name: 'Tournament $tId', competitionId: tId),
         );
@@ -381,13 +381,13 @@ class SupabaseTournamentRepository implements TournamentRepository {
       if (list.isNotEmpty) return list;
 
       final enrolledIds = _mockParticipants[userId] ?? {};
-      return _defaultOfficialTournaments.values
+      return _defaultPublicTournaments.values
           .where((t) => enrolledIds.contains(t.id))
           .toList();
     } catch (e, st) {
       AppLogger.error('Failed to get enrolled tournaments for user $userId', e, st);
       final enrolledIds = _mockParticipants[userId] ?? {};
-      return _defaultOfficialTournaments.values
+      return _defaultPublicTournaments.values
           .where((t) => enrolledIds.contains(t.id))
           .toList();
     }
@@ -398,7 +398,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
     if (_supabase == null) {
       final enrolledIds = _mockParticipants[userId] ?? {};
       return enrolledIds.map((tId) {
-        final t = _defaultOfficialTournaments.values.firstWhere(
+        final t = _defaultPublicTournaments.values.firstWhere(
           (tourn) => tourn.id == tId,
           orElse: () => Tournament(id: tId, name: 'Tournament $tId', competitionId: tId),
         );
@@ -442,7 +442,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
 
     for (final leagueId in leagueIds) {
       final competitionId = _resolveCompetitionId(leagueId);
-      final targetId = _defaultOfficialTournaments[competitionId]?.id ?? 'tourn_$competitionId';
+      final targetId = _defaultPublicTournaments[competitionId]?.id ?? 'tourn_$competitionId';
       userEnrolled.add(targetId);
     }
 
@@ -465,7 +465,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
         if (existing != null && existing['id'] != null) {
           targetTournamentId = existing['id'].toString();
         } else {
-          targetTournamentId = _defaultOfficialTournaments[competitionId]?.id;
+          targetTournamentId = _defaultPublicTournaments[competitionId]?.id;
         }
 
         if (targetTournamentId == null) {
@@ -758,7 +758,7 @@ class SupabaseTournamentRepository implements TournamentRepository {
   @override
   Future<Tournament?> getTournamentById(String tournamentId) async {
     if (_supabase == null) {
-      return _defaultOfficialTournaments.values
+      return _defaultPublicTournaments.values
           .where((t) => t.id == tournamentId || t.competitionId == tournamentId)
           .firstOrNull;
     }
@@ -771,12 +771,12 @@ class SupabaseTournamentRepository implements TournamentRepository {
       if (response != null) {
         return Tournament.fromJson(response);
       }
-      return _defaultOfficialTournaments.values
+      return _defaultPublicTournaments.values
           .where((t) => t.id == tournamentId || t.competitionId == tournamentId)
           .firstOrNull;
     } catch (e, st) {
       AppLogger.error('Failed to get tournament by id $tournamentId', e, st);
-      return _defaultOfficialTournaments.values
+      return _defaultPublicTournaments.values
           .where((t) => t.id == tournamentId || t.competitionId == tournamentId)
           .firstOrNull;
     }

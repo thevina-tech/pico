@@ -614,12 +614,12 @@ void main() {
       expect(find.text('Join Private League'), findsOneWidget);
     });
 
-    testWidgets('TournamentsScreen renders official public tournaments BEFORE private leagues', (tester) async {
+    testWidgets('TournamentsScreen renders public tournaments BEFORE private leagues', (tester) async {
       final repo = _FakeTournamentRepository();
       repo.tournaments.add(
         const Tournament(
           id: 't-1',
-          name: 'Official La Liga 2025/26',
+          name: 'La Liga 2025/26',
           competitionId: '1',
         ),
       );
@@ -642,9 +642,9 @@ void main() {
       expect(find.text('PRIVATE LEAGUES'), findsOneWidget);
 
       // Verify vertical position: pico tournaments appear before private leagues
-      final officialPos = tester.getTopLeft(find.text('PICO TOURNAMENTS')).dy;
+      final publicPos = tester.getTopLeft(find.text('PICO TOURNAMENTS')).dy;
       final privatePos = tester.getTopLeft(find.text('PRIVATE LEAGUES')).dy;
-      expect(officialPos, lessThan(privatePos));
+      expect(publicPos, lessThan(privatePos));
     });
 
     testWidgets('CreatePrivateLeagueScreen strictly displays the 8 curated competitions', (tester) async {
@@ -849,7 +849,7 @@ void main() {
       final repo = _FakeTournamentRepository();
       const tournament = Tournament(
         id: 'tourn_la_liga',
-        name: 'La Liga Official Tournament',
+        name: 'La Liga Tournament',
         competitionId: '1',
       );
       repo.tournaments.add(tournament);
@@ -866,7 +866,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Tournament Details'), findsOneWidget);
-      expect(find.text('La Liga Official Tournament'), findsOneWidget);
+      expect(find.text('La Liga Tournament'), findsOneWidget);
       expect(find.text('Standings'), findsOneWidget);
       expect(find.text('Matches'), findsOneWidget);
 

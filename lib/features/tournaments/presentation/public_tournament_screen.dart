@@ -22,7 +22,7 @@ import 'package:pico/shared/components/pico_snackbar.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/features/tournaments/presentation/widgets/tactile_leaderboard_card.dart';
 
-/// Detail screen for official Public Tournaments.
+/// Detail screen for public tournaments.
 /// Displays tournament header, live leaderboard standings, and competition match feed.
 class PublicTournamentScreen extends ConsumerStatefulWidget {
   const PublicTournamentScreen({
@@ -55,7 +55,7 @@ class _PublicTournamentScreenState
     final confirmed = await showPicoConfirmationModal(
       context: context,
       title: 'Join ${tournament.name}?',
-      message: 'Compete against other fans on the official leaderboard and earn Pico Points from every match!',
+      message: 'Compete against other fans on the global leaderboard and earn Pico Points from every match!',
       confirmText: 'Join Tournament',
       cancelText: l10n.cancelButton,
       confirmStyle: PicoDialogButtonStyle.green,
