@@ -4,16 +4,17 @@ import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/l10n/app_localizations.dart';
 
 /// Navigation destinations in the order requested:
-/// 1. Home
+/// 1. Shop
 /// 2. Matches
-/// 3. Tournaments
-/// 4. Profile
-enum PicoNavDestination { home, matches, tournaments, profile }
+/// 3. Home
+/// 4. Tournaments
+/// 5. Profile
+enum PicoNavDestination { shop, matches, home, tournaments, profile }
 
 /// The docked bottom navigation bar directly matching the Stitch navbar style.
 ///
 /// Features:
-/// - 4 destinations: Home, Matches, Tournaments, Profile.
+/// - 5 destinations: Shop, Matches, Home, Tournaments, Profile.
 /// - 3D illustrated icons directly with tactile state changes.
 /// - Tactile Warm Game Gold pill indicator (`#FCCB2B`) beneath the active tab label.
 /// - Dark stadium pitch surface with elevated shadow and crisp edge border.
@@ -34,10 +35,10 @@ class PicoBottomNavBar extends StatelessWidget {
     final List<_NavItemData> navItems = [
       _NavItemData(
         index: 0,
-        label: l10n?.navHome ?? 'Home',
-        assetPath: 'assets/images/nav_home.png',
-        fallbackIcon: Icons.sports_soccer_rounded,
-        keyName: 'nav_home',
+        label: l10n?.navShop ?? 'Shop',
+        assetPath: 'assets/images/nav_shop.png',
+        fallbackIcon: Icons.storefront_rounded,
+        keyName: 'nav_shop',
       ),
       _NavItemData(
         index: 1,
@@ -48,13 +49,20 @@ class PicoBottomNavBar extends StatelessWidget {
       ),
       _NavItemData(
         index: 2,
+        label: l10n?.navHome ?? 'Home',
+        assetPath: 'assets/images/nav_home.png',
+        fallbackIcon: Icons.sports_soccer_rounded,
+        keyName: 'nav_home',
+      ),
+      _NavItemData(
+        index: 3,
         label: l10n?.navTournaments ?? 'Tournaments',
         assetPath: 'assets/images/nav_tournaments.png',
         fallbackIcon: Icons.emoji_events_rounded,
         keyName: 'nav_tournaments',
       ),
       _NavItemData(
-        index: 3,
+        index: 4,
         label: l10n?.navProfile ?? 'Profile',
         assetPath: 'assets/images/nav_profile.png',
         fallbackIcon: Icons.person_rounded,

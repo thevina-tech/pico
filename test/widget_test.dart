@@ -7,6 +7,7 @@ import 'package:pico/features/auth/presentation/onboarding_screen.dart';
 import 'package:pico/features/home/presentation/home_screen.dart';
 import 'package:pico/features/matches/presentation/matches_screen.dart';
 import 'package:pico/features/profile/presentation/profile_screen.dart';
+import 'package:pico/features/shop/presentation/shop_screen.dart';
 import 'package:pico/features/tournaments/presentation/tournaments_screen.dart';
 import 'package:pico/main.dart';
 import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
@@ -60,10 +61,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Verify bottom nav bar is present with its 4 tabs
+    // Verify bottom nav bar is present with its 5 tabs
     final navBar = find.byType(PicoBottomNavBar);
     expect(navBar, findsOneWidget);
-    expect(find.descendant(of: navBar, matching: find.text('Shop')), findsNothing);
+    expect(find.descendant(of: navBar, matching: find.text('Shop')), findsOneWidget);
     expect(find.descendant(of: navBar, matching: find.text('Matches')), findsOneWidget);
     expect(find.descendant(of: navBar, matching: find.text('Home')), findsOneWidget);
     expect(find.descendant(of: navBar, matching: find.text('Tournaments')), findsOneWidget);
@@ -106,7 +107,12 @@ void main() {
 
     final navBar = find.byType(PicoBottomNavBar);
 
-    // Tap Matches tab (far left)
+    // Tap Shop tab (far left)
+    await tester.tap(find.descendant(of: navBar, matching: find.text('Shop')));
+    await tester.pumpAndSettle();
+    expect(find.byType(ShopScreen), findsOneWidget);
+
+    // Tap Matches tab
     await tester.tap(find.descendant(of: navBar, matching: find.text('Matches')));
     await tester.pumpAndSettle();
     expect(find.byType(MatchesScreen), findsOneWidget);

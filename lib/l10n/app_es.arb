@@ -2,6 +2,7 @@
   "@@locale": "es",
   "appTitle": "Pico",
   "predictButton": "Predecir",
+  "navShop": "Tienda",
   "navHome": "Inicio",
   "navMatches": "Partidos",
   "navTournaments": "Torneos",

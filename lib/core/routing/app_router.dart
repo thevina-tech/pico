@@ -12,6 +12,7 @@ import 'package:pico/features/profile/presentation/help_support_screen.dart';
 import 'package:pico/features/profile/presentation/settings_screen.dart';
 import 'package:pico/features/profile/presentation/personalization_screen.dart';
 import 'package:pico/features/profile/presentation/profile_screen.dart';
+import 'package:pico/features/shop/presentation/shop_screen.dart';
 import 'package:pico/shared/components/in_app_web_browser_screen.dart';
 import 'package:pico/features/tournaments/domain/tournament.dart';
 import 'package:pico/features/tournaments/domain/private_league.dart';
@@ -286,13 +287,13 @@ class AppRouter {
             );
           },
           branches: [
-            // Branch 0: Home
+            // Branch 0: Shop
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                  path: '/home',
+                  path: '/shop',
                   pageBuilder: (context, state) => const NoTransitionPage(
-                    child: HomeScreen(
+                    child: ShopScreen(
                       showBottomNavBar: false,
                     ),
                   ),
@@ -314,7 +315,21 @@ class AppRouter {
               ],
             ),
 
-            // Branch 2: Tournaments
+            // Branch 2: Home
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/home',
+                  pageBuilder: (context, state) => const NoTransitionPage(
+                    child: HomeScreen(
+                      showBottomNavBar: false,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            // Branch 3: Tournaments
             StatefulShellBranch(
               routes: [
                 GoRoute(
@@ -326,7 +341,7 @@ class AppRouter {
               ],
             ),
 
-            // Branch 3: Profile
+            // Branch 4: Profile
             StatefulShellBranch(
               routes: [
                 GoRoute(

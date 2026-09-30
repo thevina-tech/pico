@@ -104,15 +104,18 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
                         widget.onNavTap?.call(idx);
                         switch (idx) {
                           case 0:
-                            context.go('/home');
+                            context.go('/shop');
                             break;
                           case 1:
                             // Already in Matches
                             break;
                           case 2:
-                            context.go('/tournaments');
+                            context.go('/home');
                             break;
                           case 3:
+                            context.go('/tournaments');
+                            break;
+                          case 4:
                             context.go('/profile');
                             break;
                         }

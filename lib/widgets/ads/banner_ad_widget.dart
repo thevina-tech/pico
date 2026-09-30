@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:pico/features/shop/presentation/ad_free_provider.dart';
 import 'package:pico/services/revenuecat_ad_service.dart';
 
 /// Sticky adaptive Banner Ad widget for dashboard/home.
 ///
 /// Features:
 /// - Fixed height constraint (50-60px) to eliminate Cumulative Layout Shift (CLS).
-/// - Seamlessly collapses to 0 height if loading fails or ad is unavailable.
+/// - Seamlessly collapses to 0 height if loading fails, ad is unavailable, or user is ad-free.
 /// - Automatically disposes [BannerAd] on unmount to prevent memory leaks.
 /// - Routed through [RevenueCatAdService] to capture Impression-Level Revenue Data (ILRD).
-class BannerAdWidget extends StatefulWidget {
+class BannerAdWidget extends ConsumerStatefulWidget {
   const BannerAdWidget({
     super.key,
     this.placement = 'dashboard_bottom',
@@ -21,10 +23,10 @@ class BannerAdWidget extends StatefulWidget {
   final String? adUnitId;
 
   @override
-  State<BannerAdWidget> createState() => _BannerAdWidgetState();
+  ConsumerState<BannerAdWidget> createState() => _BannerAdWidgetState();
 }
 
-class _BannerAdWidgetState extends State<BannerAdWidget> {
+class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
   BannerAd? _bannerAd;
   bool _isLoaded = false;
   bool _isFailed = false;
@@ -100,7 +102,8 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isFailed) {
+    final isAdFree = ref.watch(adFreeProvider);
+    if (isAdFree || _isFailed) {
       return const SizedBox.shrink();
     }
 

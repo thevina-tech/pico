@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pico/core/theme/pico_colors.dart';
+import 'package:pico/core/theme/pico_typography.dart';
+import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
 import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
 import 'package:pico/features/predictions/presentation/prediction_controller.dart';
@@ -10,6 +12,7 @@ import 'package:pico/features/profile/domain/user_profile.dart';
 import 'package:pico/features/profile/presentation/user_profile_provider.dart';
 import 'package:pico/features/profile/presentation/widgets/division_ladder_sheet.dart';
 import 'package:pico/l10n/app_localizations.dart';
+import 'package:pico/shared/components/game_button.dart';
 import 'package:pico/shared/components/game_exit_dialog.dart';
 import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
 import 'package:pico/widgets/ads/banner_ad_widget.dart';
@@ -33,7 +36,7 @@ class HomeScreen extends ConsumerStatefulWidget {
     super.key,
     this.heroMatch,
     this.showBottomNavBar = true,
-    this.currentNavIndex = 0,
+    this.currentNavIndex = 2,
     this.onNavTap,
     this.onNavigateMatches,
     this.onNavigateTournaments,
@@ -200,15 +203,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               widget.onNavTap?.call(idx);
                               switch (idx) {
                                 case 0:
-                                  // Already Home
+                                  context.go('/shop');
                                   break;
                                 case 1:
                                   _navigateToMatches();
                                   break;
                                 case 2:
-                                  _navigateToTournaments();
+                                  // Already Home
                                   break;
                                 case 3:
+                                  _navigateToTournaments();
+                                  break;
+                                case 4:
                                   _navigateToProfile();
                                   break;
                               }
@@ -388,109 +394,308 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   /// 1. Top Bar: Profile Section (50% width) & Division Section (50% width)
-  /// - Profile Section on Left: exact tactile design as create/join league button
-  /// - Division Section on Right: shield icon + translated division title
+  /// - Profile Section on Left: GameButton.gold with avatar icon, username, and level
+  /// - Division Section on Right: GameButton.green with shield icon and translated division title
   Widget _buildTopBar(BuildContext context, UserProfile profile) {
     final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
         children: [
-          // Left: User Profile Pill with same 3D design as create/join button
+          // Left: User Profile Game Button (50% of available width)
           Expanded(
-            child: _TactileProfilePill(
-              profile: profile,
-              onTap: _navigateToProfile,
-              onLongPress: () {
-                if (widget.onMenuTap != null) {
-                  widget.onMenuTap!();
-                } else {
-                  context.push('/settings');
-                }
-              },
-            ),
+            child: _buildProfileGameButton(context, profile),
           ),
 
           const SizedBox(width: 10.0),
 
-          // Right: Division Pill (50% of available width)
+          // Right: Division Game Button (50% of available width)
           Expanded(
-            child: _buildDivisionPill(profile, l10n),
+            child: _buildDivisionGameButton(context, profile, l10n),
           ),
         ],
       ),
     );
   }
 
-  /// Division Pill: shows only user's division with a shield icon in the division color
-  Widget _buildDivisionPill(UserProfile profile, AppLocalizations? l10n) {
+  /// Profile button using tactile 3D GameButton.gold with avatar, username, and level
+  Widget _buildProfileGameButton(BuildContext context, UserProfile profile) {
+    final username = profile.username != null && profile.username!.isNotEmpty
+        ? profile.username!
+        : 'Player';
+
+    return GameButton.gold(
+      key: const Key('home_screen_profile_pill'),
+      onPressed: _navigateToProfile,
+      onLongPress: () {
+        if (widget.onMenuTap != null) {
+          widget.onMenuTap!();
+        } else {
+          _showHomeMenuBottomSheet(context, profile);
+        }
+      },
+      width: double.infinity,
+      height: 52.0,
+      borderRadius: 16.0,
+      extrusionHeight: 4.5,
+      pressedExtrusionHeight: 1.5,
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+      child: Row(
+        children: [
+          Container(
+            width: 36.0,
+            height: 36.0,
+            decoration: BoxDecoration(
+              color: const Color(0xFF261700).withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            alignment: Alignment.center,
+            child: const Icon(
+              Icons.person_rounded,
+              size: 22.0,
+              color: Color(0xFF261700),
+            ),
+          ),
+          const SizedBox(width: 8.0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  username,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: 'Rubik',
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF261700),
+                    letterSpacing: 0.2,
+                    height: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 2.0),
+                Text(
+                  'LVL ${profile.level}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: 'Rubik',
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF261700).withValues(alpha: 0.75),
+                    letterSpacing: 0.2,
+                    height: 1.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Division button using tactile 3D GameButton.green with heraldic shield and translated division title
+  Widget _buildDivisionGameButton(
+    BuildContext context,
+    UserProfile profile,
+    AppLocalizations? l10n,
+  ) {
     final divisionTitle = l10n != null
         ? profile.division.localizedTitle(l10n)
         : profile.division.defaultTitle;
 
-    return GestureDetector(
+    return GameButton.green(
       key: const Key('home_screen_division_pill'),
-      onTap: () => DivisionLadderSheet.show(context, profile),
-      child: Container(
-        height: 56.0,
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-        decoration: BoxDecoration(
-          color: const Color(0xFF092013),
-          borderRadius: BorderRadius.circular(16.0),
-          border: Border.all(
-            color: profile.division.borderColor.withValues(alpha: 0.6),
-            width: 1.5,
+      onPressed: () => DivisionLadderSheet.show(context, profile),
+      width: double.infinity,
+      height: 52.0,
+      borderRadius: 16.0,
+      extrusionHeight: 4.5,
+      pressedExtrusionHeight: 1.5,
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+      child: Row(
+        children: [
+          Container(
+            width: 36.0,
+            height: 36.0,
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.24),
+              borderRadius: BorderRadius.circular(10.0),
+              border: Border.all(
+                color: profile.division.borderColor.withValues(alpha: 0.6),
+                width: 1.2,
+              ),
+            ),
+            alignment: Alignment.center,
+            child: Icon(
+              Icons.shield_rounded,
+              color: profile.division.primaryColor,
+              size: 22.0,
+            ),
           ),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0xFF040E08),
-              offset: Offset(0, 3.5),
-              blurRadius: 0,
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Shield showing the division level color
-            Container(
-              width: 38.0,
-              height: 38.0,
-              decoration: BoxDecoration(
-                color: const Color(0xFF13281C),
-                borderRadius: BorderRadius.circular(11.0),
-                border: Border.all(
-                  color: profile.division.borderColor.withValues(alpha: 0.5),
-                  width: 1.2,
-                ),
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.shield_rounded,
-                  color: profile.division.primaryColor,
-                  size: 24.0,
-                ),
+          const SizedBox(width: 8.0),
+          Expanded(
+            child: Text(
+              divisionTitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontFamily: 'Rubik',
+                fontSize: 13.5,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+                letterSpacing: 0.1,
+                shadows: [
+                  Shadow(
+                    color: Color(0x660B2416),
+                    offset: Offset(0, 1.2),
+                    blurRadius: 2.0,
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: 8.0),
-
-            // User's Division
-            Expanded(
-              child: Text(
-                divisionTitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontFamily: 'Rubik',
-                  fontSize: 14.0,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                  letterSpacing: 0.1,
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
+    );
+  }
+
+  /// Settings and options bottom sheet.
+  void _showHomeMenuBottomSheet(BuildContext context, UserProfile profile) {
+    final l10n = AppLocalizations.of(context);
+    final menuTitle = l10n?.homeMenuTitle ?? 'Settings & Menu';
+    final signOutText = l10n?.signOutButton ?? 'Sign Out';
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return Container(
+          padding: const EdgeInsets.fromLTRB(20.0, 14.0, 20.0, 28.0),
+          decoration: const BoxDecoration(
+            color: Color(0xFF0F2417),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+            border: Border(
+              top: BorderSide(color: Color(0xFF1E432F), width: 2.0),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black54,
+                offset: Offset(0, -4),
+                blurRadius: 16,
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36.0,
+                    height: 4.0,
+                    decoration: BoxDecoration(
+                      color: PicoColors.textWhiteMuted.withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(2.0),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18.0),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.tune_rounded,
+                      color: PicoColors.electricMint,
+                      size: 22.0,
+                    ),
+                    const SizedBox(width: 8.0),
+                    Text(
+                      menuTitle,
+                      style: PicoTypography.headlineMd.copyWith(
+                        color: PicoColors.textWhite,
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16.0),
+                Container(
+                  padding: const EdgeInsets.all(12.0),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF13281C),
+                    borderRadius: BorderRadius.circular(12.0),
+                    border: Border.all(color: const Color(0xFF224B33), width: 1.0),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 38.0,
+                        height: 38.0,
+                        decoration: BoxDecoration(
+                          color: PicoColors.primary,
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: const Center(
+                          child: Icon(Icons.person_rounded, color: Colors.white, size: 22.0),
+                        ),
+                      ),
+                      const SizedBox(width: 12.0),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              profile.username ?? 'Alex',
+                              style: PicoTypography.headlineMd.copyWith(
+                                color: PicoColors.textWhite,
+                                fontSize: 15.0,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Text(
+                              'LVL ${profile.level} · ${profile.formattedCoins} Coins · ${profile.streak} Streak',
+                              style: PicoTypography.labelPillSm.copyWith(
+                                color: PicoColors.primaryFixed,
+                                fontSize: 11.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14.0),
+                Material(
+                  color: Colors.transparent,
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+                    title: Text(
+                      signOutText,
+                      style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    onTap: () async {
+                      final authNotifier = ref.read(authProvider.notifier);
+                      Navigator.of(ctx).pop();
+                      await authNotifier.signOut();
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -1067,133 +1272,3 @@ class _ScoreTile extends StatelessWidget {
   }
 }
 
-/// Tactile 2.5D profile pill with the same physical design and press-down dynamics as the create/join button.
-class _TactileProfilePill extends StatefulWidget {
-  const _TactileProfilePill({
-    required this.profile,
-    required this.onTap,
-    this.onLongPress,
-  });
-
-  final UserProfile profile;
-  final VoidCallback onTap;
-  final VoidCallback? onLongPress;
-
-  @override
-  State<_TactileProfilePill> createState() => _TactileProfilePillState();
-}
-
-class _TactileProfilePillState extends State<_TactileProfilePill> {
-  bool _isPressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    const double bevel = 3.5;
-    final double translationY = _isPressed ? bevel : 0.0;
-    final double currentBevel = _isPressed ? 0.5 : bevel;
-
-    final username = widget.profile.username != null && widget.profile.username!.isNotEmpty
-        ? widget.profile.username!
-        : 'Player';
-
-    return Listener(
-      onPointerDown: (_) => setState(() => _isPressed = true),
-      onPointerUp: (_) => setState(() => _isPressed = false),
-      onPointerCancel: (_) => setState(() => _isPressed = false),
-      child: GestureDetector(
-        key: const Key('home_screen_profile_pill'),
-        onTap: widget.onTap,
-        onLongPress: widget.onLongPress,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 60),
-          curve: Curves.easeOut,
-          transform: Matrix4.translationValues(0.0, translationY, 0.0),
-          height: 56.0,
-          padding: const EdgeInsets.fromLTRB(10.0, 6.0, 12.0, 6.0),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFD41D),
-            borderRadius: BorderRadius.circular(16.0),
-            border: Border.all(
-              color: const Color(0xFFFFF7C2),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF9E6500),
-                offset: Offset(0, currentBevel),
-                blurRadius: 0,
-              ),
-              BoxShadow(
-                color: const Color(0x66FFD41D),
-                offset: Offset(0, currentBevel + 2),
-                blurRadius: 10,
-              ),
-              const BoxShadow(
-                color: Color(0x40000000),
-                offset: Offset(0, 5),
-                blurRadius: 12,
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              // Icon container with exact same translucent tint as create/join button
-              Container(
-                width: 36.0,
-                height: 36.0,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF261700).withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.person_rounded,
-                  size: 22.0,
-                  color: Color(0xFF261700),
-                ),
-              ),
-              const SizedBox(width: 10.0),
-
-              // Username + Level
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      username,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontFamily: 'Rubik',
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFF261700),
-                        letterSpacing: 0.2,
-                        height: 1.1,
-                      ),
-                    ),
-                    const SizedBox(height: 2.0),
-                    Text(
-                      'LVL ${widget.profile.level}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: 'Rubik',
-                        fontSize: 11.0,
-                        fontWeight: FontWeight.w800,
-                        color: const Color(0xFF261700).withValues(alpha: 0.7),
-                        letterSpacing: 0.2,
-                        height: 1.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

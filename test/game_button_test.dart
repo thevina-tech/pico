@@ -121,5 +121,37 @@ void main() {
 
       expect(tapped, isFalse);
     });
+
+    testWidgets('Renders custom child and triggers onLongPress callback', (tester) async {
+      bool longPressed = false;
+      bool tapped = false;
+
+      await tester.pumpWidget(
+        buildApp(
+          GameButton(
+            onPressed: () => tapped = true,
+            onLongPress: () => longPressed = true,
+            child: const Row(
+              children: [
+                Icon(Icons.person),
+                Text('Custom Player Child'),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Custom Player Child'), findsOneWidget);
+      expect(find.byIcon(Icons.person), findsOneWidget);
+
+      await tester.longPress(find.text('Custom Player Child'));
+      await tester.pumpAndSettle();
+      expect(longPressed, isTrue);
+
+      await tester.tap(find.text('Custom Player Child'));
+      await tester.pumpAndSettle();
+      expect(tapped, isTrue);
+    });
   });
 }

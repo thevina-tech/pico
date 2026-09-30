@@ -414,8 +414,8 @@ void main() {
       // Verify Members Leaderboard is displayed
       expect(find.text('PicoCaptain'), findsOneWidget);
       expect(find.text('GunnerMate'), findsOneWidget);
-      expect(find.text('85 PTS'), findsOneWidget);
-      expect(find.text('60 PTS'), findsOneWidget);
+      expect(find.text('85'), findsOneWidget);
+      expect(find.text('60'), findsOneWidget);
       expect(find.text('CREATOR'), findsWidgets);
     });
 

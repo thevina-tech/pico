@@ -24,6 +24,7 @@ import 'package:pico/features/tournaments/presentation/widgets/league_details_sh
 import 'package:pico/shared/components/match_card.dart';
 import 'package:pico/shared/components/prediction_bottom_sheet.dart';
 import 'package:pico/features/tournaments/presentation/widgets/tactile_leaderboard_card.dart';
+import 'package:pico/shared/components/game_button.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/shared/components/pico_confirmation_modal.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
@@ -516,85 +517,90 @@ class _PrivateLeagueDashboardScreenState
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    const activeColor = Color(0xFFF7F4EC);
-    const activeBorderBottom = Color(0xFFD8D1C3);
-    const activeBorder = Color(0xFFECE7DC);
-    const activeIconColor = Color(0xFF006A3A);
-    const activeTextColor = Color(0xFF13211B);
+    const activeIconColor = Color(0xFF261700);
+    const activeTextColor = Color(0xFF261700);
 
-    const inactiveColor = Color(0xFF162534);
-    const inactiveBorderBottom = Color(0xFF090F16);
+    const inactiveFaceColor = Color(0xFF162534);
+    const inactiveExtrusionColor = Color(0xFF090F16);
+    const inactiveOutlineColor = Color(0x26FFFFFF);
     const inactiveIconColor = Color(0xD9FAF9F4);
     const inactiveTextColor = Color(0xD9FAF9F4);
 
     return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          curve: Curves.easeInOut,
-          margin: EdgeInsets.only(top: isSelected ? 2.0 : 0.0),
-          decoration: BoxDecoration(
-            color: isSelected ? activeBorderBottom : inactiveBorderBottom,
-            borderRadius: BorderRadius.circular(16.0),
-            boxShadow: isSelected
-                ? const [
-                    BoxShadow(
-                      color: Color(0x33000000),
-                      blurRadius: 6.0,
-                      offset: Offset(0, 2),
+      child: isSelected
+          ? GameButton.gold(
+              text: title,
+              onPressed: onTap,
+              width: double.infinity,
+              height: 56.0,
+              borderRadius: 14.0,
+              extrusionHeight: 4.5,
+              pressedExtrusionHeight: 1.5,
+              padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    size: 22.0,
+                    color: activeIconColor,
+                  ),
+                  const SizedBox(height: 3.0),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontFamily: 'Rubik',
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w900,
+                      color: activeTextColor,
+                      letterSpacing: 0.1,
                     ),
-                    BoxShadow(
-                      color: Color(0x1A000000),
-                      blurRadius: 1.0,
-                      offset: Offset(0, 1),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            )
+          : GameButton(
+              text: title,
+              onPressed: onTap,
+              faceColor: inactiveFaceColor,
+              extrusionColor: inactiveExtrusionColor,
+              outlineColor: inactiveOutlineColor,
+              glowColor: null,
+              showHighlights: false,
+              extrusionHeight: 3.5,
+              pressedExtrusionHeight: 1.0,
+              width: double.infinity,
+              height: 56.0,
+              borderRadius: 14.0,
+              padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    size: 22.0,
+                    color: inactiveIconColor,
+                  ),
+                  const SizedBox(height: 3.0),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontFamily: 'Rubik',
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w700,
+                      color: inactiveTextColor,
+                      letterSpacing: 0.1,
                     ),
-                  ]
-                : const [
-                    BoxShadow(
-                      color: Color(0x33000000),
-                      blurRadius: 4.0,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-          ),
-          padding: EdgeInsets.only(bottom: isSelected ? 2.0 : 4.0),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 10.0),
-            decoration: BoxDecoration(
-              color: isSelected ? activeColor : inactiveColor,
-              borderRadius: BorderRadius.circular(14.0),
-              border: Border.all(
-                color: isSelected ? activeBorder : Colors.white.withValues(alpha: 0.08),
-                width: 1.0,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  icon,
-                  size: 24.0,
-                  color: isSelected ? activeIconColor : inactiveIconColor,
-                ),
-                const SizedBox(height: 6.0),
-                Text(
-                  title,
-                  style: PicoTypography.labelPillSm.copyWith(
-                    color: isSelected ? activeTextColor : inactiveTextColor,
-                    fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
-                    fontSize: 12.0,
-                    letterSpacing: 0.2,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 

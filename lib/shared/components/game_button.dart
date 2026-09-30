@@ -7,8 +7,10 @@ import 'package:pico/core/theme/pico_typography.dart';
 class GameButton extends StatefulWidget {
   const GameButton({
     super.key,
-    required this.text,
+    this.text = '',
     required this.onPressed,
+    this.onLongPress,
+    this.child,
     this.faceColor = const Color(0xFFFCCB2B),
     this.extrusionColor = const Color(0xFFB86000),
     this.outlineColor = const Color(0xFFB86600),
@@ -33,8 +35,10 @@ class GameButton extends StatefulWidget {
   /// Golden/yellow mobile game button preset.
   const GameButton.gold({
     super.key,
-    required this.text,
+    this.text = '',
     required this.onPressed,
+    this.onLongPress,
+    this.child,
     this.faceColor = const Color(0xFFFCCB2B),
     this.extrusionColor = const Color(0xFFB86000),
     this.outlineColor = const Color(0xFFB86600),
@@ -59,8 +63,10 @@ class GameButton extends StatefulWidget {
   /// Meadow pitch green mobile game button preset.
   const GameButton.green({
     super.key,
-    required this.text,
+    this.text = '',
     required this.onPressed,
+    this.onLongPress,
+    this.child,
     this.faceColor = const Color(0xFF2D8B55),
     this.extrusionColor = const Color(0xFF1E603A),
     this.outlineColor = const Color(0xFF174C2E),
@@ -85,8 +91,10 @@ class GameButton extends StatefulWidget {
   /// Royal blue mobile game button preset.
   const GameButton.blue({
     super.key,
-    required this.text,
+    this.text = '',
     required this.onPressed,
+    this.onLongPress,
+    this.child,
     this.faceColor = const Color(0xFF2563EB),
     this.extrusionColor = const Color(0xFF1D4ED8),
     this.outlineColor = const Color(0xFF1E40AF),
@@ -111,8 +119,10 @@ class GameButton extends StatefulWidget {
   /// Coral red mobile game button preset.
   const GameButton.red({
     super.key,
-    required this.text,
+    this.text = '',
     required this.onPressed,
+    this.onLongPress,
+    this.child,
     this.faceColor = const Color(0xFFEF4444),
     this.extrusionColor = const Color(0xFFB91C1C),
     this.outlineColor = const Color(0xFF991B1B),
@@ -136,6 +146,8 @@ class GameButton extends StatefulWidget {
 
   final String text;
   final VoidCallback? onPressed;
+  final VoidCallback? onLongPress;
+  final Widget? child;
 
   // Colors
   final Color faceColor;
@@ -209,6 +221,12 @@ class _GameButtonState extends State<GameButton> {
             widget.onPressed?.call();
           }
         },
+        onLongPress: () {
+          if (_isClickable && widget.onLongPress != null) {
+            HapticFeedback.mediumImpact();
+            widget.onLongPress?.call();
+          }
+        },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 60),
           curve: Curves.easeOutCubic,
@@ -246,6 +264,7 @@ class _GameButtonState extends State<GameButton> {
           ),
           padding: EdgeInsets.only(bottom: currentExtrusion),
           child: Container(
+            width: widget.width,
             height: widget.height,
             decoration: BoxDecoration(
               color: _isClickable
@@ -296,43 +315,48 @@ class _GameButtonState extends State<GameButton> {
                     ),
                   ),
 
-                // Button content (Text and optional icon)
+                // Button content (Custom child or Text and optional icon)
                 Padding(
                   padding: widget.padding,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (widget.icon != null) ...[
-                          widget.icon!,
-                          const SizedBox(width: 8.0),
-                        ],
-                        Text(
-                          widget.text,
-                          textAlign: TextAlign.center,
-                          style: widget.textStyle ??
-                              TextStyle(
-                                fontFamily: PicoTypography.headlineFontFamily,
-                                color: widget.textColor,
-                                fontWeight: widget.fontWeight,
-                                fontSize: widget.fontSize,
-                                letterSpacing: 0.2,
-                                shadows: widget.textShadowColor != null
-                                    ? [
-                                        Shadow(
-                                          color: widget.textShadowColor!,
-                                          offset: const Offset(0, 1.5),
-                                          blurRadius: 2.0,
-                                        ),
-                                      ]
-                                    : null,
+                  child: widget.child != null
+                      ? SizedBox(
+                          width: widget.width != null ? double.infinity : null,
+                          child: widget.child,
+                        )
+                      : FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (widget.icon != null) ...[
+                                widget.icon!,
+                                const SizedBox(width: 8.0),
+                              ],
+                              Text(
+                                widget.text,
+                                textAlign: TextAlign.center,
+                                style: widget.textStyle ??
+                                    TextStyle(
+                                      fontFamily: PicoTypography.headlineFontFamily,
+                                      color: widget.textColor,
+                                      fontWeight: widget.fontWeight,
+                                      fontSize: widget.fontSize,
+                                      letterSpacing: 0.2,
+                                      shadows: widget.textShadowColor != null
+                                          ? [
+                                              Shadow(
+                                                color: widget.textShadowColor!,
+                                                offset: const Offset(0, 1.5),
+                                                blurRadius: 2.0,
+                                              ),
+                                            ]
+                                          : null,
+                                    ),
                               ),
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
                 ),
               ],
             ),
