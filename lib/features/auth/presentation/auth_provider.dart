@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 import 'package:pico/core/logging/app_logger.dart';
 import 'package:pico/core/network/supabase_client_provider.dart';
+import 'package:pico/features/auth/data/onboarding_preferences_repository.dart';
 import 'package:pico/features/auth/domain/auth_state.dart';
 import 'package:pico/features/profile/data/profile_repository.dart';
 
@@ -265,6 +266,12 @@ class AuthNotifier extends _$AuthNotifier {
       await gSignIn.signOut().catchError((_) => null);
     } catch (e) {
       AppLogger.warning('GoogleSignIn signOut error: $e');
+    }
+
+    try {
+      await ref.read(onboardingPreferencesRepositoryProvider).clearProgress();
+    } catch (e) {
+      AppLogger.warning('Failed to clear onboarding progress on signOut: $e');
     }
 
     state = const PicoAuthUnauthenticated();

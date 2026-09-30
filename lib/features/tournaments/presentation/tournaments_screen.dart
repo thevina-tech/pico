@@ -14,6 +14,7 @@ import 'package:pico/features/tournaments/domain/private_league.dart';
 import 'package:pico/features/tournaments/domain/tournament.dart';
 import 'package:pico/features/tournaments/presentation/tournaments_controller.dart';
 import 'package:pico/l10n/app_localizations.dart';
+import 'package:pico/shared/components/game_button.dart';
 import 'package:pico/shared/components/game_exit_dialog.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_button.dart';
@@ -23,10 +24,7 @@ import 'package:pico/shared/components/pico_snackbar.dart';
 
 /// Central Tournaments Screen featuring "My Leagues" and "Discover" tabs.
 class TournamentsScreen extends ConsumerWidget {
-  const TournamentsScreen({
-    super.key,
-    this.onViewLeaderboard,
-  });
+  const TournamentsScreen({super.key, this.onViewLeaderboard});
 
   final ValueChanged<String>? onViewLeaderboard;
 
@@ -42,11 +40,9 @@ class TournamentsScreen extends ConsumerWidget {
         imageAsset: 'assets/images/main_background.png',
         child: Scaffold(
           backgroundColor: Colors.transparent,
-          appBar: PicoAppBar(
-            title: l10n.tournamentsTitle,
-            isTransparent: true,
-          ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+          appBar: PicoAppBar(title: l10n.tournamentsTitle, isTransparent: true),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerFloat,
           floatingActionButton: _buildFloatingCreateOrJoinButton(context, l10n),
           body: SafeArea(
             top: false,
@@ -57,8 +53,9 @@ class TournamentsScreen extends ConsumerWidget {
                 child: RefreshIndicator(
                   color: PicoColors.primary,
                   backgroundColor: PicoColors.darkTray,
-                  onRefresh: () =>
-                      ref.read(tournamentsControllerProvider.notifier).refresh(),
+                  onRefresh: () => ref
+                      .read(tournamentsControllerProvider.notifier)
+                      .refresh(),
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 84.0),
                     children: [
@@ -87,8 +84,10 @@ class TournamentsScreen extends ConsumerWidget {
   }
 
   Widget _buildFloatingCreateOrJoinButton(
-      BuildContext context, AppLocalizations l10n) {
-    return _TactileFloatingButton(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
+    return GameButton(
       text: l10n.createOrJoinAction,
       onPressed: () => _openCreateOrJoinModal(context, l10n),
     );
@@ -182,7 +181,16 @@ class TournamentsScreen extends ConsumerWidget {
               return _buildEmptyEnrolledTournamentsCard(context, ref, l10n);
             }
             return Column(
-              children: tournaments.map((t) => _buildOfficialTournamentCard(context, t, l10n, compsMap)).toList(),
+              children: tournaments
+                  .map(
+                    (t) => _buildOfficialTournamentCard(
+                      context,
+                      t,
+                      l10n,
+                      compsMap,
+                    ),
+                  )
+                  .toList(),
             );
           },
           loading: () => Center(
@@ -228,7 +236,11 @@ class TournamentsScreen extends ConsumerWidget {
               return _buildEmptyPrivateLeaguesCard(context, l10n);
             }
             return Column(
-              children: leagues.map((l) => _buildPrivateLeagueCard(context, l, l10n, compsMap)).toList(),
+              children: leagues
+                  .map(
+                    (l) => _buildPrivateLeagueCard(context, l, l10n, compsMap),
+                  )
+                  .toList(),
             );
           },
           loading: () => Center(
@@ -411,7 +423,10 @@ class TournamentsScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 3.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 3.0,
+                    ),
                     decoration: BoxDecoration(
                       color: PicoColors.primary.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6.0),
@@ -436,7 +451,10 @@ class TournamentsScreen extends ConsumerWidget {
                       if (onViewLeaderboard != null) {
                         onViewLeaderboard?.call(league.name);
                       } else {
-                        context.push('/tournaments/private/${league.id}', extra: league);
+                        context.push(
+                          '/tournaments/private/${league.id}',
+                          extra: league,
+                        );
                       }
                     },
                   ),
@@ -448,6 +466,7 @@ class TournamentsScreen extends ConsumerWidget {
       ),
     );
   }
+
   Widget _buildOfficialTournamentCard(
     BuildContext context,
     Tournament tournament,
@@ -464,7 +483,10 @@ class TournamentsScreen extends ConsumerWidget {
           if (onViewLeaderboard != null) {
             onViewLeaderboard?.call(tournament.name);
           } else {
-            context.push('/tournaments/public/${tournament.id}', extra: tournament);
+            context.push(
+              '/tournaments/public/${tournament.id}',
+              extra: tournament,
+            );
           }
         },
         child: Container(
@@ -485,7 +507,10 @@ class TournamentsScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6.0,
+                        vertical: 2.0,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF152B20),
                         borderRadius: BorderRadius.circular(4.0),
@@ -529,7 +554,10 @@ class TournamentsScreen extends ConsumerWidget {
                   if (onViewLeaderboard != null) {
                     onViewLeaderboard?.call(tournament.name);
                   } else {
-                    context.push('/tournaments/public/${tournament.id}', extra: tournament);
+                    context.push(
+                      '/tournaments/public/${tournament.id}',
+                      extra: tournament,
+                    );
                   }
                 },
               ),
@@ -558,7 +586,10 @@ class TournamentsScreen extends ConsumerWidget {
           if (onViewLeaderboard != null) {
             onViewLeaderboard?.call(tournament.name);
           } else {
-            context.push('/tournaments/public/${tournament.id}', extra: tournament);
+            context.push(
+              '/tournaments/public/${tournament.id}',
+              extra: tournament,
+            );
           }
         },
         child: Container(
@@ -584,7 +615,10 @@ class TournamentsScreen extends ConsumerWidget {
                   children: [
                     if (isEnrolled) ...[
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6.0,
+                          vertical: 2.0,
+                        ),
                         decoration: BoxDecoration(
                           color: PicoColors.primary.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4.0),
@@ -592,7 +626,11 @@ class TournamentsScreen extends ConsumerWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.check_rounded, size: 11.0, color: PicoColors.primary),
+                            const Icon(
+                              Icons.check_rounded,
+                              size: 11.0,
+                              color: PicoColors.primary,
+                            ),
                             const SizedBox(width: 3.0),
                             Text(
                               l10n.joinedBadge,
@@ -636,8 +674,12 @@ class TournamentsScreen extends ConsumerWidget {
                   fontSize: 12.0,
                   onPressed: () async {
                     final authState = ref.read(authProvider);
-                    if (authState is! PicoAuthAuthenticated || authState.user == null) {
-                      PicoSnackBar.showError(context, l10n.signInToJoinTournament);
+                    if (authState is! PicoAuthAuthenticated ||
+                        authState.user == null) {
+                      PicoSnackBar.showError(
+                        context,
+                        l10n.signInToJoinTournament,
+                      );
                       return;
                     }
 
@@ -656,7 +698,8 @@ class TournamentsScreen extends ConsumerWidget {
                           shape: BoxShape.circle,
                           color: const Color(0xFFE8F5E9),
                           border: Border.all(
-                            color: const Color(0xFF12944B).withValues(alpha: 0.25),
+                            color: const Color(0xFF12944B)
+                                .withValues(alpha: 0.25),
                             width: 2.0,
                           ),
                         ),
@@ -671,12 +714,16 @@ class TournamentsScreen extends ConsumerWidget {
                     if (confirmed != true || !context.mounted) return;
 
                     try {
-                      await ref.read(tournamentRepositoryProvider).enrollInTournament(
+                      await ref
+                          .read(tournamentRepositoryProvider)
+                          .enrollInTournament(
                             userId: authState.user!.id,
                             tournamentId: tournament.id,
                           );
                       ref.invalidate(enrolledTournamentsProvider);
-                      ref.invalidate(tournamentLeaderboardProvider(tournament.id));
+                      ref.invalidate(
+                        tournamentLeaderboardProvider(tournament.id),
+                      );
                       ref.invalidate(matchesFeedProvider);
                       if (context.mounted) {
                         PicoSnackBar.showSuccess(
@@ -703,7 +750,10 @@ class TournamentsScreen extends ConsumerWidget {
                     if (onViewLeaderboard != null) {
                       onViewLeaderboard?.call(tournament.name);
                     } else {
-                      context.push('/tournaments/public/${tournament.id}', extra: tournament);
+                      context.push(
+                        '/tournaments/public/${tournament.id}',
+                        extra: tournament,
+                      );
                     }
                   },
                 ),
@@ -732,7 +782,8 @@ class TournamentsScreen extends ConsumerWidget {
         ],
       ),
       alignment: Alignment.center,
-      child: comp != null && comp.emblemUrl != null && comp.emblemUrl!.isNotEmpty
+      child:
+          comp != null && comp.emblemUrl != null && comp.emblemUrl!.isNotEmpty
           ? ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: CachedNetworkImage(
@@ -740,16 +791,11 @@ class TournamentsScreen extends ConsumerWidget {
                 width: 32.0,
                 height: 32.0,
                 fit: BoxFit.contain,
-                errorWidget: (context, url, error) => Text(
-                  comp.flag,
-                  style: const TextStyle(fontSize: 20.0),
-                ),
+                errorWidget: (context, url, error) =>
+                    Text(comp.flag, style: const TextStyle(fontSize: 20.0)),
               ),
             )
-          : Text(
-              comp?.flag ?? '⚽',
-              style: const TextStyle(fontSize: 20.0),
-            ),
+          : Text(comp?.flag ?? '⚽', style: const TextStyle(fontSize: 20.0)),
     );
   }
 
@@ -800,7 +846,11 @@ class TournamentsScreen extends ConsumerWidget {
           const SizedBox(height: 16.0),
           PicoButton.gold(
             text: l10n.createPrivateLeagueTitle,
-            icon: const Icon(Icons.add_rounded, size: 18.0, color: Color(0xFF261700)),
+            icon: const Icon(
+              Icons.add_rounded,
+              size: 18.0,
+              color: Color(0xFF261700),
+            ),
             isFullWidth: false,
             height: 44.0,
             borderRadius: 14.0,
@@ -970,10 +1020,7 @@ class _TactileMenuButtonState extends State<_TactileMenuButton> {
         decoration: BoxDecoration(
           color: PicoColors.cardFace,
           borderRadius: BorderRadius.circular(16.0),
-          border: Border.all(
-            color: const Color(0xFFECE7DC),
-            width: 1.5,
-          ),
+          border: Border.all(color: const Color(0xFFECE7DC), width: 1.5),
           boxShadow: [
             BoxShadow(
               color: PicoColors.cardBevelDark,
@@ -1000,11 +1047,7 @@ class _TactileMenuButtonState extends State<_TactileMenuButton> {
                   width: 1.5,
                 ),
               ),
-              child: Icon(
-                widget.icon,
-                color: widget.accentColor,
-                size: 24.0,
-              ),
+              child: Icon(widget.icon, color: widget.accentColor, size: 24.0),
             ),
             const SizedBox(width: 14.0),
             Expanded(
@@ -1040,10 +1083,7 @@ class _TactileMenuButtonState extends State<_TactileMenuButton> {
               decoration: BoxDecoration(
                 color: const Color(0xFFF3EFE6),
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: const Color(0xFFE2DCD0),
-                  width: 1.0,
-                ),
+                border: Border.all(color: const Color(0xFFE2DCD0), width: 1.0),
               ),
               child: const Icon(
                 Icons.arrow_forward_ios_rounded,
@@ -1052,101 +1092,6 @@ class _TactileMenuButtonState extends State<_TactileMenuButton> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Tactile 2.5D floating pill button for creating or joining leagues.
-class _TactileFloatingButton extends StatefulWidget {
-  const _TactileFloatingButton({
-    required this.text,
-    required this.onPressed,
-  });
-
-  final String text;
-  final VoidCallback onPressed;
-
-  @override
-  State<_TactileFloatingButton> createState() => _TactileFloatingButtonState();
-}
-
-class _TactileFloatingButtonState extends State<_TactileFloatingButton> {
-  bool _isPressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    const double bevel = 3.5;
-    final double translationY = _isPressed ? bevel : 0.0;
-    final double currentBevel = _isPressed ? 0.5 : bevel;
-
-    return Listener(
-      onPointerDown: (_) => setState(() => _isPressed = true),
-      onPointerUp: (_) => setState(() => _isPressed = false),
-      onPointerCancel: (_) => setState(() => _isPressed = false),
-      child: GestureDetector(
-        onTap: widget.onPressed,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 60),
-          curve: Curves.easeOut,
-          transform: Matrix4.translationValues(0.0, translationY, 0.0),
-          padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 12.0),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFD41D),
-            borderRadius: BorderRadius.circular(16.0),
-            border: Border.all(
-              color: const Color(0xFFFFF7C2),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF9E6500),
-                offset: Offset(0, currentBevel),
-                blurRadius: 0,
-              ),
-              BoxShadow(
-                color: const Color(0x66FFD41D),
-                offset: Offset(0, currentBevel + 2),
-                blurRadius: 10,
-              ),
-              const BoxShadow(
-                color: Color(0x66000000),
-                offset: Offset(0, 6),
-                blurRadius: 16,
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 24.0,
-                height: 24.0,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF261700).withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.add_rounded,
-                  size: 18.0,
-                  color: Color(0xFF261700),
-                ),
-              ),
-              const SizedBox(width: 8.0),
-              Text(
-                widget.text,
-                style: const TextStyle(
-                  fontFamily: 'Rubik',
-                  color: Color(0xFF261700),
-                  fontWeight: FontWeight.w900,
-                  fontSize: 14.5,
-                  letterSpacing: 0.2,
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -1194,13 +1139,17 @@ class _TabButton extends StatelessWidget {
             Icon(
               icon,
               size: 17.0,
-              color: isSelected ? PicoColors.textWhite : PicoColors.textWhiteMuted,
+              color: isSelected
+                  ? PicoColors.textWhite
+                  : PicoColors.textWhiteMuted,
             ),
             const SizedBox(width: 6.0),
             Text(
               label,
               style: PicoTypography.titleCard.copyWith(
-                color: isSelected ? PicoColors.textWhite : PicoColors.textWhiteMuted,
+                color: isSelected
+                    ? PicoColors.textWhite
+                    : PicoColors.textWhiteMuted,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                 fontSize: 13.5,
               ),
@@ -1208,7 +1157,10 @@ class _TabButton extends StatelessWidget {
             if (badgeCount != null) ...[
               const SizedBox(width: 6.0),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5.5, vertical: 1.5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 5.5,
+                  vertical: 1.5,
+                ),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? PicoColors.gold
@@ -1218,7 +1170,9 @@ class _TabButton extends StatelessWidget {
                 child: Text(
                   badgeCount.toString(),
                   style: PicoTypography.labelPillSm.copyWith(
-                    color: isSelected ? const Color(0xFF261A00) : PicoColors.textWhite,
+                    color: isSelected
+                        ? const Color(0xFF261A00)
+                        : PicoColors.textWhite,
                     fontWeight: FontWeight.w800,
                     fontSize: 10.0,
                   ),
@@ -1279,10 +1233,7 @@ class _PicoBattleButtonState extends State<PicoBattleButton> {
         decoration: BoxDecoration(
           color: const Color(0xFFFFD41D),
           borderRadius: BorderRadius.circular(16.0),
-          border: Border.all(
-            color: const Color(0xFFFFF6B0),
-            width: 1.5,
-          ),
+          border: Border.all(color: const Color(0xFFFFF6B0), width: 1.5),
           boxShadow: [
             if (currentBevel > 0.0) ...[
               const BoxShadow(
@@ -1324,4 +1275,3 @@ class _PicoBattleButtonState extends State<PicoBattleButton> {
     );
   }
 }
-

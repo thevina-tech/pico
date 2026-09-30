@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 import 'package:pico/core/logging/app_logger.dart';
 import 'package:pico/core/network/supabase_client_provider.dart';
 import 'package:pico/core/theme/pico_colors.dart';
+import 'package:pico/features/auth/data/onboarding_preferences_repository.dart';
 import 'package:pico/features/auth/domain/auth_state.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/auth/presentation/onboarding_screen.dart';
@@ -102,8 +103,11 @@ class _AuthGateState extends ConsumerState<AuthGate> {
       final user = client.auth.currentUser;
 
       if (user == null) {
-        // User not logged in: Show the "Welcome" screen (Step 1 of Onboarding)
-        _routeToOnboarding(step: 0);
+        // User not logged in: Show the "Welcome" screen or saved initial step
+        final repo = ref.read(onboardingPreferencesRepositoryProvider);
+        final progress = await repo.getProgress();
+        final resumeStep = progress.step == 1 ? 1 : 0;
+        _routeToOnboarding(step: resumeStep);
         return;
       }
 
@@ -119,15 +123,24 @@ class _AuthGateState extends ConsumerState<AuthGate> {
 
         if (hasUsername) {
           // Returning User with completed profile: Route directly to Main Dashboard
+          try {
+            await ref.read(onboardingPreferencesRepositoryProvider).clearProgress();
+          } catch (_) {}
           ref.read(authProvider.notifier).markPersonalized();
           _routeToHome();
         } else {
-          // Incomplete profile: Route directly to Step B (Unique Username Selection)
-          _routeToOnboarding(step: 2);
+          // Incomplete profile: read saved progress to resume at exact step (2, 3, or 4)
+          final repo = ref.read(onboardingPreferencesRepositoryProvider);
+          final progress = await repo.getProgress();
+          final resumeStep = progress.step >= 2 ? progress.step.clamp(2, 4) : 2;
+          _routeToOnboarding(step: resumeStep);
         }
       } catch (e, st) {
         AppLogger.error('AuthGate: failed to fetch profile for onboarding check', e, st);
-        _routeToOnboarding(step: 2);
+        final repo = ref.read(onboardingPreferencesRepositoryProvider);
+        final progress = await repo.getProgress();
+        final resumeStep = progress.step >= 2 ? progress.step.clamp(2, 4) : 2;
+        _routeToOnboarding(step: resumeStep);
       }
       return;
     }
@@ -138,10 +151,16 @@ class _AuthGateState extends ConsumerState<AuthGate> {
       if (authState.isPersonalized) {
         _routeToHome();
       } else {
-        _routeToOnboarding(step: 2);
+        final repo = ref.read(onboardingPreferencesRepositoryProvider);
+        final progress = await repo.getProgress();
+        final resumeStep = progress.step >= 2 ? progress.step.clamp(2, 4) : 2;
+        _routeToOnboarding(step: resumeStep);
       }
     } else {
-      _routeToOnboarding(step: 0);
+      final repo = ref.read(onboardingPreferencesRepositoryProvider);
+      final progress = await repo.getProgress();
+      final resumeStep = progress.step == 1 ? 1 : 0;
+      _routeToOnboarding(step: resumeStep);
     }
   }
 

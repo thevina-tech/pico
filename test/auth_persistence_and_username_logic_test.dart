@@ -11,6 +11,7 @@ import 'package:pico/features/profile/data/profile_repository.dart';
 import 'package:pico/features/profile/domain/user_profile.dart';
 import 'package:pico/features/profile/presentation/user_profile_provider.dart';
 import 'package:pico/l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
 /// Mock repository for testing profile state variations
@@ -60,6 +61,10 @@ class _CustomAuthNotifier extends AuthNotifier {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
 
   group('HOTFIX 1: Enforce Custom Username (Ignore Google Name)', () {
     test('currentUserProfileProvider does not fall back to Google full_name or email prefix', () async {

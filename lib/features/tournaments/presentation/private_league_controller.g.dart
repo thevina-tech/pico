@@ -46,7 +46,7 @@ final class PrivateLeagueControllerProvider
 }
 
 String _$privateLeagueControllerHash() =>
-    r'f9695dea08671515b32aa88fe9a37c1cae3d55ca';
+    r'1eb5af2da8c45a3d046e46394a54efd6e225091a';
 
 /// Controller managing Private League creation and joining workflows.
 

@@ -7,6 +7,7 @@ import 'package:pico/core/logging/app_logger.dart';
 import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/core/utils/input_sanitizer.dart';
+import 'package:pico/features/auth/data/onboarding_preferences_repository.dart';
 import 'package:pico/features/auth/domain/auth_state.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/core/network/supabase_client_provider.dart';
@@ -56,10 +57,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void initState() {
     super.initState();
     final authState = ref.read(authProvider);
+    final client = _getSupabaseClient();
+    final hasAuthenticatedSession = (client?.auth.currentUser != null &&
+            client!.auth.currentUser!.email != null &&
+            client.auth.currentUser!.email!.isNotEmpty) ||
+        authState is PicoAuthAuthenticated;
 
     // If already authenticated from a previous session:
     // Never show Welcome (0) or How It Works (1) to an authenticated user
-    if (authState is PicoAuthAuthenticated) {
+    if (hasAuthenticatedSession) {
       final profile = ref.read(currentUserProfileProvider).value;
       if (profile != null &&
           profile.username != null &&
@@ -77,10 +83,58 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         _currentPage = widget.initialPage >= 2 ? widget.initialPage.clamp(2, 4) : 2;
       }
     } else {
-      // Unauthenticated user: show the requested initialPage (defaults to 1: How it works)
+      // Unauthenticated user: show the requested initialPage (defaults to 0 or 1)
       _currentPage = widget.initialPage.clamp(0, 4);
     }
     _pageController = PageController(initialPage: _currentPage);
+
+    // Restore any saved onboarding progress from persistent storage
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _restorePersistedProgress();
+    });
+  }
+
+  Future<void> _restorePersistedProgress() async {
+    try {
+      final repo = ref.read(onboardingPreferencesRepositoryProvider);
+      final progress = await repo.getProgress();
+      if (!mounted) return;
+
+      final client = _getSupabaseClient();
+      final hasAuthenticatedUser = (client?.auth.currentUser != null &&
+              client!.auth.currentUser!.email != null &&
+              client.auth.currentUser!.email!.isNotEmpty) ||
+          ref.read(authProvider) is PicoAuthAuthenticated;
+
+      int targetStep = progress.step;
+      if (hasAuthenticatedUser && targetStep < 2) {
+        targetStep = 2;
+      }
+      if (widget.initialPage >= 2 && widget.initialPage > targetStep) {
+        targetStep = widget.initialPage;
+      }
+
+      setState(() {
+        if (progress.username != null && progress.username!.isNotEmpty) {
+          _username = progress.username!;
+        }
+        if (progress.selectedTeamId != null && progress.selectedTeamId!.isNotEmpty) {
+          _selectedTeamId = progress.selectedTeamId;
+        }
+        if (progress.selectedLeagueIds.isNotEmpty) {
+          _selectedLeagueIds.clear();
+          _selectedLeagueIds.addAll(progress.selectedLeagueIds);
+        }
+        _currentPage = targetStep.clamp(0, 4);
+      });
+
+      if (_pageController.hasClients &&
+          _pageController.page?.round() != _currentPage) {
+        _pageController.jumpToPage(_currentPage);
+      }
+    } catch (e) {
+      AppLogger.warning('Failed to restore onboarding progress: $e');
+    }
   }
 
   @override
@@ -125,6 +179,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       }
     }
 
+    ref.read(onboardingPreferencesRepositoryProvider).saveStep(page);
+
     if (_pageController.hasClients) {
       _pageController.animateToPage(
         page,
@@ -155,7 +211,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     if (existingUser != null &&
         existingUser.email != null &&
         existingUser.email!.isNotEmpty) {
-      // User is already authenticated with Google; advance directly
+      // User is already authenticated with Google; record step 2 and advance directly
+      await ref.read(onboardingPreferencesRepositoryProvider).saveStep(2);
       _goToPage(2);
       return;
     }
@@ -179,8 +236,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             profile.username != null &&
             profile.username!.trim().isNotEmpty &&
             !profile.username!.startsWith('Guest_')) {
-          // Returning user: bypass onboarding and route directly to /home
+          // Returning user: clear draft and bypass onboarding to /home
+          try {
+            await ref.read(onboardingPreferencesRepositoryProvider).clearProgress();
+          } catch (_) {}
           ref.read(authProvider.notifier).markPersonalized();
+          if (!mounted) return;
           context.go('/home');
           return;
         }
@@ -188,7 +249,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         AppLogger.warning('Returning user profile check skipped: $profileError');
       }
 
-      // New user without established username: advance to Step 3 (index 2: Username)
+      // New user without established username: save step 2 immediately and advance to Step 3 (index 2: Username)
+      await ref.read(onboardingPreferencesRepositoryProvider).saveStep(2);
+
       if (mounted) {
         setState(() => _isGoogleAuthenticating = false);
         _goToPage(2);
@@ -247,11 +310,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       username: _username,
                       errorMessage: _step3ErrorMessage,
                       onBack: () => _goToPage(1),
+                      onUsernameChanged: (draft) {
+                        _username = draft;
+                        ref
+                            .read(onboardingPreferencesRepositoryProvider)
+                            .saveUsername(draft);
+                      },
                       onUsernameConfirmed: (username) {
                         setState(() {
                           _username = username;
                           _step3ErrorMessage = null;
                         });
+                        ref
+                            .read(onboardingPreferencesRepositoryProvider)
+                            .saveUsername(username);
                         _goToPage(3);
                       },
                     ),
@@ -261,8 +333,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       l10n: l10n,
                       selectedTeamId: _selectedTeamId,
                       onBack: () => _goToPage(2),
+                      onTeamSelected: (teamId) {
+                        setState(() => _selectedTeamId = teamId);
+                        ref
+                            .read(onboardingPreferencesRepositoryProvider)
+                            .saveTeamId(teamId);
+                      },
                       onContinue: (teamId) {
                         setState(() => _selectedTeamId = teamId);
+                        ref
+                            .read(onboardingPreferencesRepositoryProvider)
+                            .saveTeamId(teamId);
                         _goToPage(4);
                       },
                     ),
@@ -279,6 +360,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           _selectedLeagueIds.clear();
                           _selectedLeagueIds.addAll(leagues);
                         });
+                        ref
+                            .read(onboardingPreferencesRepositoryProvider)
+                            .saveLeagueIds(leagues.toList());
                       },
                       onUsernameConflict: (error) {
                         setState(() {
@@ -1330,6 +1414,7 @@ class _OnboardingAuthStep extends ConsumerStatefulWidget {
     required this.errorMessage,
     required this.onBack,
     required this.onUsernameConfirmed,
+    this.onUsernameChanged,
   });
 
   final AppLocalizations? l10n;
@@ -1337,6 +1422,7 @@ class _OnboardingAuthStep extends ConsumerStatefulWidget {
   final String? errorMessage;
   final VoidCallback onBack;
   final ValueChanged<String> onUsernameConfirmed;
+  final ValueChanged<String>? onUsernameChanged;
 
   @override
   ConsumerState<_OnboardingAuthStep> createState() => _OnboardingAuthStepState();
@@ -1587,6 +1673,9 @@ class _OnboardingAuthStepState extends ConsumerState<_OnboardingAuthStep> {
                                   border: InputBorder.none,
                                   isDense: true,
                                 ),
+                                onChanged: (val) {
+                                  widget.onUsernameChanged?.call(val);
+                                },
                                 textInputAction: TextInputAction.done,
                                 onSubmitted: (_) => _handleContinue(),
                               ),
@@ -1638,12 +1727,14 @@ class _OnboardingTeamSelectionStep extends ConsumerStatefulWidget {
     required this.selectedTeamId,
     required this.onBack,
     required this.onContinue,
+    this.onTeamSelected,
   });
 
   final AppLocalizations? l10n;
   final String? selectedTeamId;
   final VoidCallback onBack;
   final ValueChanged<String> onContinue;
+  final ValueChanged<String>? onTeamSelected;
 
   @override
   ConsumerState<_OnboardingTeamSelectionStep> createState() =>
@@ -1846,6 +1937,7 @@ class _OnboardingTeamSelectionStepState
                     return GestureDetector(
                       onTap: () {
                         setState(() => _selectedTeamId = team.id);
+                        widget.onTeamSelected?.call(team.id);
                       },
                       child: Container(
                         padding: const EdgeInsets.all(10.0),
@@ -2167,6 +2259,10 @@ class _OnboardingLeaguesSelectionStepState
       ref.invalidate(currentUserProfileProvider);
       ref.invalidate(enrolledTournamentsProvider);
       ref.invalidate(matchesFeedProvider);
+
+      try {
+        await ref.read(onboardingPreferencesRepositoryProvider).clearProgress();
+      } catch (_) {}
 
       if (mounted) {
         widget.onFinished();

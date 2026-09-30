@@ -560,6 +560,60 @@ void main() {
       expect(find.text('TOP-TIER PUBLIC TOURNAMENTS'), findsOneWidget);
     });
 
+    testWidgets('TournamentsScreen renders Clash-inspired 3D mobile-game Create/Join button with tactile physics', (tester) async {
+      final repo = _FakeTournamentRepository();
+      await tester.pumpWidget(buildHarness(child: const TournamentsScreen(), repo: repo));
+      await tester.pumpAndSettle();
+
+      final buttonFinder = find.text('+ Create / Join');
+      expect(buttonFinder, findsOneWidget);
+
+      // Verify the button text is styled with clean bold white typography with subtle shadow
+      final textWidget = tester.widget<Text>(buttonFinder);
+      expect(textWidget.style?.color, Colors.white);
+      expect(textWidget.style?.fontWeight, FontWeight.w700);
+      expect(textWidget.style?.shadows, isNotNull);
+      expect(textWidget.style!.shadows!.isNotEmpty, isTrue);
+
+      // Verify outer 3D extruded layer container has dark brown outline and amber base
+      final animatedContainer = tester.widget<AnimatedContainer>(
+        find.ancestor(of: buttonFinder, matching: find.byType(AnimatedContainer)).first,
+      );
+      final decoration = animatedContainer.decoration as BoxDecoration;
+      expect(decoration.color, const Color(0xFFB86000));
+      expect(decoration.borderRadius, BorderRadius.circular(22.0));
+      expect(decoration.border, isNotNull);
+      expect((decoration.border! as Border).top.color, const Color(0xFFB86600));
+
+      // Verify inner container has solid yellow/orange background and clean surface
+      final innerContainer = tester.widgetList<Container>(
+        find.descendant(
+          of: find.ancestor(of: buttonFinder, matching: find.byType(AnimatedContainer)).first,
+          matching: find.byType(Container),
+        ),
+      ).firstWhere((c) => c.decoration is BoxDecoration && (c.decoration as BoxDecoration).color == const Color(0xFFFCCB2B));
+      final innerDecoration = innerContainer.decoration as BoxDecoration;
+      expect(innerDecoration.color, const Color(0xFFFCCB2B));
+      expect(innerDecoration.gradient, isNull);
+      expect(innerDecoration.border, isNull);
+
+      // Verify glossy specular highlight is rendered
+      expect(
+        find.descendant(
+          of: find.ancestor(of: buttonFinder, matching: find.byType(AnimatedContainer)).first,
+          matching: find.byType(Transform),
+        ),
+        findsWidgets,
+      );
+
+      // Tap button and verify modal opens with options
+      await tester.tap(buttonFinder);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Create Private League'), findsWidgets);
+      expect(find.text('Join Private League'), findsOneWidget);
+    });
+
     testWidgets('TournamentsScreen renders official public tournaments BEFORE private leagues', (tester) async {
       final repo = _FakeTournamentRepository();
       repo.tournaments.add(
@@ -949,6 +1003,13 @@ void main() {
     });
 
     testWidgets('PublicTournamentScreen renders accented Primera División, standings, and Join CTA when not joined', (tester) async {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(800, 1400);
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
       final repo = _FakeTournamentRepository();
       const tournament = Tournament(
         id: '10000000-0000-0000-0000-000000000001',

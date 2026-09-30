@@ -42,7 +42,7 @@ final class PersonalizationControllerProvider
 }
 
 String _$personalizationControllerHash() =>
-    r'29119f9b64012bc3238cb91f5f902abfa01a12e7';
+    r'5ac95e5f97e74ef2367414ddb870149cca63197d';
 
 abstract class _$PersonalizationController
     extends $Notifier<PersonalizationState> {

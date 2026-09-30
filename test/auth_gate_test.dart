@@ -10,6 +10,7 @@ import 'package:pico/features/auth/presentation/onboarding_screen.dart';
 import 'package:pico/features/home/presentation/home_screen.dart';
 import 'package:pico/main.dart';
 import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
 class _TestAuthenticatedNotifier extends AuthNotifier {
@@ -40,6 +41,10 @@ class _TestUnauthenticatedNotifier extends AuthNotifier {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
 
   group('AuthGate - Startup Decision Maker & Anti-Flicker', () {
     test('resolveRedirect returns null for root path to allow AuthGate execution', () {
