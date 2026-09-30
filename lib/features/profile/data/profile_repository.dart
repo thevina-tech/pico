@@ -72,23 +72,12 @@ class SupabaseProfileRepository implements ProfileRepository {
     }
   }
 
-  static const List<Team> _fallbackTeams = [
-    Team(id: '429', name: 'FC Barcelona', shortName: 'FCB', crestUrl: 'https://t.resfu.com/img_data/equipos/429.png?size=60x&lossy=1'),
-    Team(id: '2107', name: 'Real Madrid', shortName: 'RMA', crestUrl: 'https://t.resfu.com/img_data/equipos/2107.png?size=60x&lossy=1'),
-    Team(id: '369', name: 'Atlético de Madrid', shortName: 'ATM', crestUrl: 'https://t.resfu.com/img_data/equipos/369.png?size=60x&lossy=1'),
-    Team(id: '486', name: 'Real Betis', shortName: 'BET', crestUrl: 'https://t.resfu.com/img_data/equipos/486.png?size=60x&lossy=1'),
-    Team(id: '2716', name: 'Villarreal', shortName: 'VIL', crestUrl: 'https://t.resfu.com/img_data/equipos/2716.png?size=60x&lossy=1'),
-    Team(id: '2120', name: 'Real Sociedad', shortName: 'RSO', crestUrl: 'https://t.resfu.com/img_data/equipos/2120.png?size=60x&lossy=1'),
-    Team(id: '297', name: 'Aston Villa', shortName: 'ASV', crestUrl: 'https://t.resfu.com/img_data/equipos/297.png?size=60x&lossy=1'),
-    Team(id: '1217', name: 'Getafe', shortName: 'GET', crestUrl: 'https://t.resfu.com/img_data/equipos/1217.png?size=60x&lossy=1'),
-    Team(id: '1617', name: 'Málaga', shortName: 'MAL', crestUrl: 'https://t.resfu.com/img_data/equipos/1617.png?size=60x&lossy=1'),
-    Team(id: '712', name: 'Celta', shortName: 'CEL', crestUrl: 'https://t.resfu.com/img_data/equipos/712.png?size=60x&lossy=1'),
-  ];
+
 
   @override
   Future<List<Team>> getTeams() async {
     if (_supabase == null) {
-      return _fallbackTeams;
+      return const [];
     }
     try {
       final response = await _supabase
@@ -98,11 +87,10 @@ class SupabaseProfileRepository implements ProfileRepository {
       final list = (response as List<dynamic>)
           .map((row) => Team.fromJson(row as Map<String, dynamic>))
           .toList();
-      if (list.isNotEmpty) return list;
-      return _fallbackTeams;
+      return list;
     } catch (e, st) {
-      AppLogger.error('Failed to fetch teams from Supabase, using fallback: $e', e, st);
-      return _fallbackTeams;
+      AppLogger.error('Failed to fetch teams from Supabase: $e', e, st);
+      return const [];
     }
   }
 

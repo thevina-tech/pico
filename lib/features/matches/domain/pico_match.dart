@@ -63,13 +63,15 @@ abstract class PicoMatch with _$PicoMatch {
       status == MatchStatus.finished;
 
   static String formatDateTimeWithContext(DateTime dateTime) {
+    // Always convert to device local time before displaying.
+    final local = dateTime.toLocal();
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final targetDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
+    final targetDate = DateTime(local.year, local.month, local.day);
     final differenceInDays = targetDate.difference(today).inDays;
 
     final timeString =
-        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+        '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
 
     if (differenceInDays == 0) {
       return 'Today $timeString';
@@ -79,15 +81,15 @@ abstract class PicoMatch with _$PicoMatch {
       return 'Yesterday $timeString';
     } else if (differenceInDays > 1 && differenceInDays < 7) {
       const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      final weekday = weekdays[dateTime.weekday - 1];
+      final weekday = weekdays[local.weekday - 1];
       return '$weekday $timeString';
     } else {
       const months = [
         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
       ];
-      final month = months[dateTime.month - 1];
-      return '$month ${dateTime.day}, $timeString';
+      final month = months[local.month - 1];
+      return '$month ${local.day}, $timeString';
     }
   }
 
@@ -95,11 +97,15 @@ abstract class PicoMatch with _$PicoMatch {
 
   String get closesAtTimeFormatted => formatDateTimeWithContext(effectiveLockAt);
 
-  String get kickoffTimeOnly =>
-      '${kickoffAt.hour.toString().padLeft(2, '0')}:${kickoffAt.minute.toString().padLeft(2, '0')}';
+  String get kickoffTimeOnly {
+    final local = kickoffAt.toLocal();
+    return '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+  }
 
-  String get closesAtTimeOnly =>
-      '${effectiveLockAt.hour.toString().padLeft(2, '0')}:${effectiveLockAt.minute.toString().padLeft(2, '0')}';
+  String get closesAtTimeOnly {
+    final local = effectiveLockAt.toLocal();
+    return '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+  }
 
   /// Whether this match is in the rolling teaser window (more than 3 days out).
   bool get isTeaser {
@@ -202,8 +208,13 @@ abstract class PicoMatch with _$PicoMatch {
       final compId = json['competition_id']?.toString();
       final hId = json['home_team_id']?.toString();
       final aId = json['away_team_id']?.toString();
-      final kickoff = DateTime.tryParse(json['kickoff_at']?.toString() ?? '') ??
-          DateTime.now().add(const Duration(hours: 2));
+      // Parse kickoff as UTC. Supabase returns timestamptz with offset (e.g. "+00:00"),
+      // which Dart parses correctly. If offset is missing, we treat as UTC explicitly.
+      final rawKickoff = json['kickoff_at']?.toString() ?? '';
+      final parsed = DateTime.tryParse(rawKickoff);
+      final kickoff = parsed != null
+          ? (parsed.isUtc ? parsed : parsed.toUtc())
+          : DateTime.now().toUtc().add(const Duration(hours: 2));
 
       // Joined relations
       Competition? comp;
