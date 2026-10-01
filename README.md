@@ -1,17 +1,56 @@
-# pico
+# Pico
 
-A new Flutter project.
+A gamified social football prediction game where players predict real match scores, earn Points & XP, compete on leaderboards, and challenge friends in private leagues—without betting money.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## How to Run Locally
 
-A few resources to get you started if this is your first Flutter project:
+Follow these quick steps to get the app running on an emulator or connected device in under a minute.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+### 1. Prerequisites
+- **Flutter SDK** (3.24+ recommended) installed and configured on your machine.
+- An active Android emulator, iOS simulator, or connected physical device.
+- Verify your environment setup:
+  ```bash
+  flutter doctor
+  ```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### 2. Environment Variables
+Create a `.env` file in the root directory (or use `.env.dev`) and supply your API keys for **Supabase**, **RevenueCat**, and **API-Football**:
+
+```env
+# Supabase Backend
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+
+# In-App Purchases (RevenueCat)
+REVENUECAT_API_KEY=your-revenuecat-public-key
+
+# Football Data Provider (API-Football / BeSoccer)
+FOOTBALL_API_KEY=your-football-api-key
+```
+
+### 3. Install Dependencies
+Fetch the project packages and dependencies:
+
+```bash
+flutter pub get
+```
+
+### 4. Run the App
+Launch the application on your target device:
+
+```bash
+flutter run
+```
+
+---
+
+## Tech Stack & Architecture
+- **Framework:** Flutter & Dart (Null-Safe, Feature-First Architecture)
+- **State Management:** Riverpod (`@riverpod` code generation)
+- **Navigation:** `go_router` with `StatefulShellRoute`
+- **Backend & Database:** Supabase (Auth, PostgreSQL, Realtime)
+- **Monetization:** RevenueCat (Subscriptions & Paywalls) + Google Mobile Ads
+- **Localization:** Flutter `gen-l10n` (English & Spanish)
