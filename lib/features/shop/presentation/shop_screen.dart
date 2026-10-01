@@ -51,6 +51,15 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
       await RevenueCatUI.presentPaywallIfNeeded("remove_ads");
     } catch (e) {
       AppLogger.warning('RevenueCat paywall presentation error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Could not load store offerings. Please check your connection and try again.',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -436,6 +445,8 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
             GameButton.gold(
               key: const Key('remove_ads_action_button'),
               text: 'Unlock Ad-Free • \$2.99',
+              textColor: const Color(0xFF3D1800),
+              textShadowColor: Colors.transparent,
               onPressed: _onRemoveAdsPressed,
               width: double.infinity,
               height: 52.0,

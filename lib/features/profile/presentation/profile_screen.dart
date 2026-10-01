@@ -607,9 +607,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       text: l10n?.shareTheAppButton ?? 'Share the App',
       icon: const Icon(
         Icons.share_rounded,
-        color: Colors.white,
+        color: Color(0xFF3D1800),
         size: 18.0,
       ),
+      textColor: const Color(0xFF3D1800),
+      textShadowColor: Colors.transparent,
       width: double.infinity,
       extrusionHeight: 5.0,
       borderRadius: 16.0,

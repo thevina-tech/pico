@@ -23,6 +23,9 @@ Future<void> main() async {
   final rcApiKey = dotenv.env['REVENUECAT_API_KEY'] ?? '';
   if (rcApiKey.isNotEmpty) {
     try {
+      if (kDebugMode) {
+        await Purchases.setLogLevel(LogLevel.debug);
+      }
       await Purchases.configure(PurchasesConfiguration(rcApiKey));
       AppLogger.info('RevenueCat configured successfully ($envFile)');
     } catch (e) {

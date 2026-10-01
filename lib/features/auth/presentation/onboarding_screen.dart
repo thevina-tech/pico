@@ -527,6 +527,8 @@ class _OnboardingWelcomeStep extends StatelessWidget {
           // Championship Warm Gold Action Button ("Get Started →")
           GameButton.gold(
             text: l10n?.getStartedButton ?? 'Get Started',
+            textColor: const Color(0xFF3D1800),
+            textShadowColor: Colors.transparent,
             onPressed: onGetStarted,
             width: double.infinity,
             height: 56.0,

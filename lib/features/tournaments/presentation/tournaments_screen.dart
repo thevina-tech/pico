@@ -89,6 +89,8 @@ class TournamentsScreen extends ConsumerWidget {
   ) {
     return GameButton(
       text: l10n.createOrJoinAction,
+      textColor: const Color(0xFF3D1800),
+      textShadowColor: Colors.transparent,
       onPressed: () => _openCreateOrJoinModal(context, l10n),
     );
   }
