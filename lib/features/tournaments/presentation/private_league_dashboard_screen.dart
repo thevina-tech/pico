@@ -136,16 +136,22 @@ class _PrivateLeagueDashboardScreenState
     if (_messages.any((m) => m.id == messageId)) return;
 
     final senderUserId = record['user_id']?.toString() ?? '';
-    final members = ref.read(privateLeagueMembersProvider(widget.leagueId)).value ?? [];
-    final matchingMember = members.where((m) => m.userId == senderUserId).firstOrNull;
+    final members =
+        ref.read(privateLeagueMembersProvider(widget.leagueId)).value ?? [];
+    final matchingMember = members
+        .where((m) => m.userId == senderUserId)
+        .firstOrNull;
 
     final authState = ref.read(authProvider);
-    final currentUserId = authState is PicoAuthAuthenticated ? authState.user?.id : null;
+    final currentUserId = authState is PicoAuthAuthenticated
+        ? authState.user?.id
+        : null;
 
     String? resolvedUsername = matchingMember?.username;
     String? resolvedAvatarUrl = matchingMember?.avatarUrl;
 
-    if (senderUserId == currentUserId && (resolvedUsername == null || resolvedUsername.isEmpty)) {
+    if (senderUserId == currentUserId &&
+        (resolvedUsername == null || resolvedUsername.isEmpty)) {
       final userProfile = ref.read(currentUserProfileProvider).value;
       resolvedUsername = userProfile?.username ?? 'You';
       resolvedAvatarUrl = userProfile?.avatarUrl;
@@ -175,7 +181,9 @@ class _PrivateLeagueDashboardScreenState
     if (text.isEmpty || _isSending) return;
 
     final authState = ref.read(authProvider);
-    final currentUserId = authState is PicoAuthAuthenticated ? authState.user?.id : null;
+    final currentUserId = authState is PicoAuthAuthenticated
+        ? authState.user?.id
+        : null;
     if (currentUserId == null) return;
 
     final userProfile = ref.read(currentUserProfileProvider).value;
@@ -206,7 +214,8 @@ class _PrivateLeagueDashboardScreenState
         final l10n = AppLocalizations.of(context);
         PicoSnackBar.showError(
           context,
-          l10n?.failedToSendMessage(e.toString()) ?? 'Failed to send message: $e',
+          l10n?.failedToSendMessage(e.toString()) ??
+              'Failed to send message: $e',
         );
       }
     } finally {
@@ -223,18 +232,29 @@ class _PrivateLeagueDashboardScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final leagueAsync = ref.watch(privateLeagueDetailsProvider(widget.leagueId));
+    final leagueAsync = ref.watch(
+      privateLeagueDetailsProvider(widget.leagueId),
+    );
     final currentLeague = leagueAsync.value ?? widget.initialLeague;
 
-    final membersAsync = ref.watch(privateLeagueMembersProvider(widget.leagueId));
+    final membersAsync = ref.watch(
+      privateLeagueMembersProvider(widget.leagueId),
+    );
     final members = membersAsync.value ?? const <PrivateLeagueMember>[];
 
     final compsMap = ref.watch(competitionsMapProvider).value ?? {};
-    final competition = currentLeague != null ? compsMap[currentLeague.competitionId] : null;
+    final competition = currentLeague != null
+        ? compsMap[currentLeague.competitionId]
+        : null;
 
     final authState = ref.watch(authProvider);
-    final currentUserId = authState is PicoAuthAuthenticated ? authState.user?.id : null;
-    final isOwner = currentLeague != null && currentUserId != null && currentLeague.ownerId == currentUserId;
+    final currentUserId = authState is PicoAuthAuthenticated
+        ? authState.user?.id
+        : null;
+    final isOwner =
+        currentLeague != null &&
+        currentUserId != null &&
+        currentLeague.ownerId == currentUserId;
 
     const screenBackground = 'assets/images/main_background.png';
 
@@ -275,7 +295,12 @@ class _PrivateLeagueDashboardScreenState
                         children: [
                           // Top Segmented Tab Selector ("Chat" | "Matches" | "Standings")
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(16.0, 6.0, 16.0, 8.0),
+                            padding: const EdgeInsets.fromLTRB(
+                              16.0,
+                              6.0,
+                              16.0,
+                              8.0,
+                            ),
                             child: _buildTopTabBar(l10n),
                           ),
 
@@ -313,7 +338,13 @@ class _PrivateLeagueDashboardScreenState
         return _buildMatchesView(currentLeague.competitionId ?? '', l10n);
       case 2:
       default:
-        return _buildLeaderboardView(currentLeague, competition, isOwner, currentUserId, l10n);
+        return _buildLeaderboardView(
+          currentLeague,
+          competition,
+          isOwner,
+          currentUserId,
+          l10n,
+        );
     }
   }
 
@@ -352,14 +383,14 @@ class _PrivateLeagueDashboardScreenState
             }
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6.5),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14.0,
+              vertical: 6.5,
+            ),
             decoration: BoxDecoration(
               color: const Color(0xDD0D2016),
               borderRadius: BorderRadius.circular(22.0),
-              border: Border.all(
-                color: const Color(0x4034D399),
-                width: 1.5,
-              ),
+              border: Border.all(color: const Color(0x4034D399), width: 1.5),
               boxShadow: const [
                 BoxShadow(
                   color: Color(0x66000000),
@@ -434,7 +465,11 @@ class _PrivateLeagueDashboardScreenState
             shape: BoxShape.circle,
           ),
           child: const Center(
-            child: Icon(Icons.shield_rounded, size: 16.0, color: PicoColors.primary),
+            child: Icon(
+              Icons.shield_rounded,
+              size: 16.0,
+              color: PicoColors.primary,
+            ),
           ),
         ),
         errorWidget: (context, url, error) => Container(
@@ -558,16 +593,15 @@ class _PrivateLeagueDashboardScreenState
               borderRadius: 14.0,
               extrusionHeight: 4.5,
               pressedExtrusionHeight: 1.5,
-              padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 4.0,
+                vertical: 4.0,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    icon,
-                    size: 22.0,
-                    color: activeIconColor,
-                  ),
+                  Icon(icon, size: 22.0, color: activeIconColor),
                   const SizedBox(height: 3.0),
                   Text(
                     title,
@@ -597,16 +631,15 @@ class _PrivateLeagueDashboardScreenState
               width: double.infinity,
               height: 56.0,
               borderRadius: 14.0,
-              padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 4.0,
+                vertical: 4.0,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    icon,
-                    size: 22.0,
-                    color: inactiveIconColor,
-                  ),
+                  Icon(icon, size: 22.0, color: inactiveIconColor),
                   const SizedBox(height: 3.0),
                   Text(
                     title,
@@ -639,22 +672,23 @@ class _PrivateLeagueDashboardScreenState
                   child: CircularProgressIndicator(color: PicoColors.primary),
                 )
               : _messages.isEmpty
-                  ? _buildEmptyChatState(league)
-                  : ListView.builder(
-                      controller: _scrollController,
-                      reverse: true,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 12.0,
-                      ),
-                      itemCount: _messages.length,
-                      itemBuilder: (context, index) {
-                        final message = _messages[index];
-                        final isCurrentUser =
-                            currentUserId != null && message.userId == currentUserId;
-                        return _buildChatBubble(message, isCurrentUser);
-                      },
-                    ),
+              ? _buildEmptyChatState(league)
+              : ListView.builder(
+                  controller: _scrollController,
+                  reverse: true,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 12.0,
+                  ),
+                  itemCount: _messages.length,
+                  itemBuilder: (context, index) {
+                    final message = _messages[index];
+                    final isCurrentUser =
+                        currentUserId != null &&
+                        message.userId == currentUserId;
+                    return _buildChatBubble(message, isCurrentUser);
+                  },
+                ),
         ),
         _buildMessageInputBar(),
       ],
@@ -673,7 +707,9 @@ class _PrivateLeagueDashboardScreenState
               decoration: BoxDecoration(
                 color: const Color(0xFF141F2C),
                 shape: BoxShape.circle,
-                border: Border.all(color: PicoColors.primary.withValues(alpha: 0.2)),
+                border: Border.all(
+                  color: PicoColors.primary.withValues(alpha: 0.2),
+                ),
               ),
               child: const Icon(
                 Icons.chat_bubble_outline_rounded,
@@ -711,8 +747,9 @@ class _PrivateLeagueDashboardScreenState
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
-        mainAxisAlignment:
-            isCurrentUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isCurrentUser
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isCurrentUser) ...[
@@ -721,8 +758,8 @@ class _PrivateLeagueDashboardScreenState
               backgroundColor: const Color(0xFF1E2D3D),
               backgroundImage:
                   message.avatarUrl != null && message.avatarUrl!.isNotEmpty
-                      ? CachedNetworkImageProvider(message.avatarUrl!)
-                      : null,
+                  ? CachedNetworkImageProvider(message.avatarUrl!)
+                  : null,
               child: (message.avatarUrl == null || message.avatarUrl!.isEmpty)
                   ? Text(
                       (message.username ?? 'P').characters.first.toUpperCase(),
@@ -815,16 +852,24 @@ class _PrivateLeagueDashboardScreenState
                     message.message,
                     style: TextStyle(
                       color: isCurrentUser
-                          ? const Color(0xFF064E3B) // High-contrast deep game green
+                          ? const Color(
+                              0xFF064E3B,
+                            ) // High-contrast deep game green
                           : const Color(0xFF0F172A), // High-contrast deep slate
-                      fontWeight: isCurrentUser ? FontWeight.w700 : FontWeight.w600,
+                      fontWeight: isCurrentUser
+                          ? FontWeight.w700
+                          : FontWeight.w600,
                       fontSize: 14.0,
                       height: 1.3,
                     ),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 4.0, left: 4.0, right: 4.0),
+                  padding: const EdgeInsets.only(
+                    top: 4.0,
+                    left: 4.0,
+                    right: 4.0,
+                  ),
                   child: Text(
                     timeStr,
                     style: TextStyle(
@@ -878,7 +923,10 @@ class _PrivateLeagueDashboardScreenState
                 child: TextField(
                   controller: _textController,
                   inputFormatters: InputSanitizer.chatMessageFormatters,
-                  style: const TextStyle(color: PicoColors.textWhite, fontSize: 14.0),
+                  style: const TextStyle(
+                    color: PicoColors.textWhite,
+                    fontSize: 14.0,
+                  ),
                   decoration: const InputDecoration(
                     hintText: 'Message league...',
                     hintStyle: TextStyle(
@@ -963,11 +1011,18 @@ class _PrivateLeagueDashboardScreenState
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.event_busy_rounded, size: 48.0, color: PicoColors.textWhiteMuted),
+                const Icon(
+                  Icons.event_busy_rounded,
+                  size: 48.0,
+                  color: PicoColors.textWhiteMuted,
+                ),
                 const SizedBox(height: 12.0),
                 Text(
-                  l10n?.noMatchesForCompetition ?? 'No matches scheduled for this competition yet.',
-                  style: PicoTypography.bodyLg.copyWith(color: PicoColors.textWhiteMuted),
+                  l10n?.noMatchesForCompetition ??
+                      'No matches scheduled for this competition yet.',
+                  style: PicoTypography.bodyLg.copyWith(
+                    color: PicoColors.textWhiteMuted,
+                  ),
                 ),
               ],
             ),
@@ -979,11 +1034,15 @@ class _PrivateLeagueDashboardScreenState
             .whereType<PicoMatch>()
             .where((m) => m.competitionId == competitionId)
             .toList();
-        final liveMatches = matches.where((m) => m.status == MatchStatus.live).toList();
-        final upcomingMatches = matches.where((m) => m.status == MatchStatus.upcoming).toList()
-          ..sort((a, b) => a.kickoffAt.compareTo(b.kickoffAt));
-        final finishedMatches = matches.where((m) => m.status == MatchStatus.finished).toList()
-          ..sort((a, b) => b.kickoffAt.compareTo(a.kickoffAt));
+        final liveMatches = matches
+            .where((m) => m.status == MatchStatus.live)
+            .toList();
+        final upcomingMatches =
+            matches.where((m) => m.status == MatchStatus.upcoming).toList()
+              ..sort((a, b) => a.kickoffAt.compareTo(b.kickoffAt));
+        final finishedMatches =
+            matches.where((m) => m.status == MatchStatus.finished).toList()
+              ..sort((a, b) => b.kickoffAt.compareTo(a.kickoffAt));
 
         final List<PicoMatch> currentCategoryMatches;
         if (_selectedMatchCategoryIndex == 0) {
@@ -998,7 +1057,10 @@ class _PrivateLeagueDashboardScreenState
           children: [
             // Sub-Chips: Upcoming | Live | Finished
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 4.0,
+              ),
               child: _buildMatchCategoryChips(
                 upcomingCount: upcomingMatches.length,
                 liveCount: liveMatches.length,
@@ -1011,7 +1073,10 @@ class _PrivateLeagueDashboardScreenState
             // Matches List
             Expanded(
               child: currentCategoryMatches.isEmpty
-                  ? _buildMatchEmptyCategoryState(_selectedMatchCategoryIndex, l10n)
+                  ? _buildMatchEmptyCategoryState(
+                      _selectedMatchCategoryIndex,
+                      l10n,
+                    )
                   : ListView.builder(
                       padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 24.0),
                       itemCount: currentCategoryMatches.length,
@@ -1030,14 +1095,20 @@ class _PrivateLeagueDashboardScreenState
                         if (match.status == MatchStatus.finished) {
                           if (userPred != null) {
                             if (points != null && points == 5) {
-                              outcomeLabel = l10n?.pointsOutcomeExact ?? 'Exact Score (+5)';
+                              outcomeLabel =
+                                  l10n?.pointsOutcomeExact ??
+                                  'Exact Score (+5)';
                             } else if (points != null && points == 3) {
-                              outcomeLabel = l10n?.pointsOutcomeWinner ?? 'Correct Winner (+3)';
+                              outcomeLabel =
+                                  l10n?.pointsOutcomeWinner ??
+                                  'Correct Winner (+3)';
                             } else {
-                              outcomeLabel = l10n?.pointsOutcomeIncorrect ?? 'Missed';
+                              outcomeLabel =
+                                  l10n?.pointsOutcomeIncorrect ?? 'Missed';
                             }
                           } else {
-                            outcomeLabel = l10n?.pointsOutcomeNone ?? 'No Prediction';
+                            outcomeLabel =
+                                l10n?.pointsOutcomeNone ?? 'No Prediction';
                           }
                         }
 
@@ -1045,11 +1116,19 @@ class _PrivateLeagueDashboardScreenState
                         if (match.isTeaser) {
                           final countdown = match.teaserCountdown;
                           if (countdown.inDays >= 1) {
-                            teaserLabel = l10n?.teaserOpensInDays(countdown.inDays) ?? 'Opens in ${countdown.inDays}d';
+                            teaserLabel =
+                                l10n?.teaserOpensInDays(countdown.inDays) ??
+                                'Opens in ${countdown.inDays}d';
                           } else if (countdown.inHours >= 1) {
-                            teaserLabel = l10n?.teaserOpensInHours(countdown.inHours) ?? 'Opens in ${countdown.inHours}h';
+                            teaserLabel =
+                                l10n?.teaserOpensInHours(countdown.inHours) ??
+                                'Opens in ${countdown.inHours}h';
                           } else {
-                            teaserLabel = l10n?.teaserOpensInMinutes(countdown.inMinutes.clamp(1, 60)) ?? 'Opens in ${countdown.inMinutes.clamp(1, 60)}m';
+                            teaserLabel =
+                                l10n?.teaserOpensInMinutes(
+                                  countdown.inMinutes.clamp(1, 60),
+                                ) ??
+                                'Opens in ${countdown.inMinutes.clamp(1, 60)}m';
                           }
                         }
 
@@ -1062,12 +1141,18 @@ class _PrivateLeagueDashboardScreenState
                             awardedPoints: points,
                             settlementOutcomeLabel: outcomeLabel,
                             teaserCountdownLabel: teaserLabel,
-                            teaserSubtext: l10n?.teaserCountdownSubtext ?? 'Prediction window opens 3 days before kickoff',
+                            teaserSubtext:
+                                l10n?.teaserCountdownSubtext ??
+                                'Prediction window opens 3 days before kickoff',
                             onCardTap: match.isTeaser
                                 ? null
                                 : () {
-                                    if (match.status == MatchStatus.finished || match.isLocked) {
-                                      context.push('/prediction/${match.id}', extra: match);
+                                    if (match.status == MatchStatus.finished ||
+                                        match.isLocked) {
+                                      context.push(
+                                        '/prediction/${match.id}',
+                                        extra: match,
+                                      );
                                     } else {
                                       showPicoPredictionBottomSheet(
                                         context: context,
@@ -1079,19 +1164,24 @@ class _PrivateLeagueDashboardScreenState
                             onPredictPressed: match.isTeaser
                                 ? null
                                 : () => showPicoPredictionBottomSheet(
-                                      context: context,
-                                      ref: ref,
-                                      match: match,
-                                    ),
-                            onModifyPressed: () => showPicoPredictionBottomSheet(
-                              context: context,
-                              ref: ref,
-                              match: match,
+                                    context: context,
+                                    ref: ref,
+                                    match: match,
+                                  ),
+                            onModifyPressed: () =>
+                                showPicoPredictionBottomSheet(
+                                  context: context,
+                                  ref: ref,
+                                  match: match,
+                                ),
+                            onViewPredictionPressed: () => context.push(
+                              '/prediction/${match.id}',
+                              extra: match,
                             ),
-                            onViewPredictionPressed: () =>
-                                context.push('/prediction/${match.id}', extra: match),
-                            onTapResult: () =>
-                                context.push('/prediction/${match.id}', extra: match),
+                            onTapResult: () => context.push(
+                              '/prediction/${match.id}',
+                              extra: match,
+                            ),
                           ),
                         );
                       },
@@ -1183,14 +1273,19 @@ class _PrivateLeagueDashboardScreenState
             Text(
               title,
               style: PicoTypography.labelPillSm.copyWith(
-                color: isSelected ? PicoColors.textWhite : PicoColors.textWhiteMuted,
+                color: isSelected
+                    ? PicoColors.textWhite
+                    : PicoColors.textWhiteMuted,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                 fontSize: 11.5,
               ),
             ),
             const SizedBox(width: 4.0),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 1.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 5.0,
+                vertical: 1.0,
+              ),
               decoration: BoxDecoration(
                 color: isSelected
                     ? Colors.white.withValues(alpha: 0.25)
@@ -1212,18 +1307,24 @@ class _PrivateLeagueDashboardScreenState
     );
   }
 
-  Widget _buildMatchEmptyCategoryState(int categoryIndex, AppLocalizations? l10n) {
+  Widget _buildMatchEmptyCategoryState(
+    int categoryIndex,
+    AppLocalizations? l10n,
+  ) {
     final String title;
     final String subtitle;
     final IconData icon;
 
     if (categoryIndex == 1) {
       title = l10n?.noLiveMatches ?? 'No Live Matches';
-      subtitle = l10n?.noLiveMatchesSub ?? 'There are no matches currently in play.';
+      subtitle =
+          l10n?.noLiveMatchesSub ?? 'There are no matches currently in play.';
       icon = Icons.sensors_off_rounded;
     } else if (categoryIndex == 0) {
       title = l10n?.feedNoUpcomingMatches ?? 'No Upcoming Matches';
-      subtitle = l10n?.noUpcomingMatchesSub ?? 'Check back later for newly scheduled matches.';
+      subtitle =
+          l10n?.noUpcomingMatchesSub ??
+          'Check back later for newly scheduled matches.';
       icon = Icons.event_busy_rounded;
     } else {
       title = l10n?.noFinishedMatches ?? 'No Finished Matches';
@@ -1237,7 +1338,11 @@ class _PrivateLeagueDashboardScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 44.0, color: PicoColors.textWhiteMuted.withValues(alpha: 0.6)),
+            Icon(
+              icon,
+              size: 44.0,
+              color: PicoColors.textWhiteMuted.withValues(alpha: 0.6),
+            ),
             const SizedBox(height: 12.0),
             Text(
               title,
@@ -1273,8 +1378,7 @@ class _PrivateLeagueDashboardScreenState
     bool isOwner,
     String? currentUserId,
     AppLocalizations? l10n,
-  ) =>
-      _buildStandingsTab(league, competition, isOwner, currentUserId, l10n);
+  ) => _buildStandingsTab(league, competition, isOwner, currentUserId, l10n);
 
   Widget _buildStandingsTab(
     PrivateLeague league,
@@ -1288,7 +1392,6 @@ class _PrivateLeagueDashboardScreenState
     return ListView(
       padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 24.0),
       children: [
-
         // 4. Standings Section Title
         Text(
           'STANDINGS',
@@ -1322,11 +1425,17 @@ class _PrivateLeagueDashboardScreenState
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.group_off_rounded, size: 48.0, color: PicoColors.textWhiteMuted),
+                      const Icon(
+                        Icons.group_off_rounded,
+                        size: 48.0,
+                        color: PicoColors.textWhiteMuted,
+                      ),
                       const SizedBox(height: 12.0),
                       Text(
                         l10n?.noParticipantsYet ?? 'No participants yet',
-                        style: PicoTypography.bodyLg.copyWith(color: PicoColors.textWhiteMuted),
+                        style: PicoTypography.bodyLg.copyWith(
+                          color: PicoColors.textWhiteMuted,
+                        ),
                       ),
                     ],
                   ),
@@ -1359,7 +1468,13 @@ class _PrivateLeagueDashboardScreenState
                             size: 18.0,
                           ),
                           tooltip: l10n?.removeMemberButton ?? 'Remove Member',
-                          onPressed: _isProcessing ? null : () => _confirmRemoveMember(league.id, member, l10n),
+                          onPressed: _isProcessing
+                              ? null
+                              : () => _confirmRemoveMember(
+                                  league.id,
+                                  member,
+                                  l10n,
+                                ),
                         )
                       : null,
                 );
@@ -1375,8 +1490,6 @@ class _PrivateLeagueDashboardScreenState
   // CONFIRMATION DIALOGS & ACTIONS
   // ==========================================
 
-
-
   Future<void> _confirmRemoveMember(
     String leagueId,
     PrivateLeagueMember member,
@@ -1385,7 +1498,8 @@ class _PrivateLeagueDashboardScreenState
     final confirmed = await showPicoConfirmationModal(
       context: context,
       title: l10n?.removeMemberConfirmTitle ?? 'Remove Member',
-      message: l10n?.removeMemberConfirmBody(member.username ?? 'Player') ??
+      message:
+          l10n?.removeMemberConfirmBody(member.username ?? 'Player') ??
           'Are you sure you want to remove ${member.username ?? "this member"}?',
       cancelText: l10n?.cancelButton ?? 'Cancel',
       confirmText: l10n?.removeMemberButton ?? 'Remove Member',
@@ -1397,10 +1511,9 @@ class _PrivateLeagueDashboardScreenState
 
     setState(() => _isProcessing = true);
     try {
-      await ref.read(privateLeagueControllerProvider.notifier).removeMember(
-        leagueId: leagueId,
-        targetUserId: member.userId,
-      );
+      await ref
+          .read(privateLeagueControllerProvider.notifier)
+          .removeMember(leagueId: leagueId, targetUserId: member.userId);
       if (!mounted) return;
       setState(() => _isProcessing = false);
       PicoSnackBar.showSuccess(
@@ -1416,6 +1529,4 @@ class _PrivateLeagueDashboardScreenState
       );
     }
   }
-
-
 }

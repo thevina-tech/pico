@@ -14,6 +14,7 @@ import 'package:pico/features/profile/presentation/widgets/division_ladder_sheet
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/game_button.dart';
 import 'package:pico/shared/components/game_exit_dialog.dart';
+import 'package:pico/shared/components/how_to_play_card.dart';
 import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
 import 'package:pico/widgets/ads/banner_ad_widget.dart';
 
@@ -263,8 +264,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 // Special Event Card (Cinematic Match Showcase)
                                 _buildSpecialEventCard(context, featuredMatch),
 
-                                // How to Play Section (Gamified 3-step loop)
-                                _buildHowToPlaySection(context),
+                                // How to Play Section
+                                const HowToPlayCard(),
                               ],
                             ),
                           ),
@@ -347,44 +348,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const SizedBox(width: 12.0),
 
           // Right: 3D Tactile Menu Button (leads to Settings)
-          GestureDetector(
+          GameButton.green(
             key: const Key('home_screen_menu_button'),
-            onTap: () {
+            width: 48.0,
+            height: 48.0,
+            borderRadius: 14.0,
+            extrusionHeight: 4.0,
+            pressedExtrusionHeight: 1.5,
+            padding: EdgeInsets.zero,
+            onPressed: () {
               if (widget.onMenuTap != null) {
                 widget.onMenuTap!();
               } else {
                 context.push('/settings');
               }
             },
-            child: Container(
-              width: 48.0,
-              height: 48.0,
-              decoration: BoxDecoration(
-                color: const Color(0xFF0F3E26),
-                borderRadius: BorderRadius.circular(14.0),
-                border: Border.all(
-                  color: const Color(0x334ADE80),
-                  width: 1.5,
-                ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0xFF061A0F),
-                    offset: Offset(0, 3.5),
-                    blurRadius: 0,
-                  ),
-                  BoxShadow(
-                    color: Color(0x26000000),
-                    offset: Offset(0, 4),
-                    blurRadius: 6,
-                  ),
-                ],
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.menu_rounded,
-                  color: Colors.white,
-                  size: 26.0,
-                ),
+            child: const Center(
+              child: Icon(
+                Icons.menu_rounded,
+                color: Colors.white,
+                size: 26.0,
               ),
             ),
           ),
@@ -1033,242 +1016,5 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// 3. How to Play Section modeled on Stitch "Pico home image.png"
-  /// - Left: "HOW TO" (neon mint), "PLAY" (golden yellow), "Predict. Compete. Earn."
-  /// - Right: 3 step cards (Choose a match -> Make your prediction -> Earn points)
-  Widget _buildHowToPlaySection(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 16.0),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
-        decoration: BoxDecoration(
-          color: const Color(0xFF092013),
-          borderRadius: BorderRadius.circular(18.0),
-          border: Border.all(color: const Color(0xFF1E432F), width: 1.5),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0xFF040E08),
-              offset: Offset(0, 3.5),
-              blurRadius: 0,
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Left Title Column
-            SizedBox(
-              width: 90.0,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'HOW TO',
-                    style: TextStyle(
-                      fontFamily: 'Rubik',
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF38EF7D),
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const Text(
-                    'PLAY',
-                    style: TextStyle(
-                      fontFamily: 'Rubik',
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFFE5B348),
-                      height: 1.0,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 4.0),
-                  const Text(
-                    'Predict. Compete. Earn.',
-                    style: TextStyle(
-                      fontFamily: 'Rubik',
-                      fontSize: 8.5,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF6E9E80),
-                      height: 1.15,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(width: 4.0),
-
-            // Right Row: 3 Step Cards connected with Chevrons
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  // Step 1: Choose a Match
-                  _buildHowToStepCard(
-                    stepNumber: '1',
-                    label: 'CHOOSE\nA MATCH',
-                    graphic: const Center(
-                      child: Text(
-                        '⚽',
-                        style: TextStyle(fontSize: 18.0),
-                      ),
-                    ),
-                  ),
-
-                  const Icon(
-                    Icons.chevron_right_rounded,
-                    size: 14.0,
-                    color: Color(0xFF285438),
-                  ),
-
-                  // Step 2: Make Your Prediction
-                  _buildHowToStepCard(
-                    stepNumber: '2',
-                    label: 'MAKE YOUR\nPREDICTION',
-                    graphic: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        _ScoreTile('2'),
-                        SizedBox(width: 2.0),
-                        _ScoreTile('1'),
-                      ],
-                    ),
-                  ),
-
-                  const Icon(
-                    Icons.chevron_right_rounded,
-                    size: 14.0,
-                    color: Color(0xFF285438),
-                  ),
-
-                  // Step 3: Earn Points
-                  _buildHowToStepCard(
-                    stepNumber: '3',
-                    label: 'EARN\nPOINTS',
-                    graphic: const Center(
-                      child: Text(
-                        '🏆',
-                        style: TextStyle(fontSize: 18.0),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Single step card inside "HOW TO PLAY"
-  Widget _buildHowToStepCard({
-    required String stepNumber,
-    required String label,
-    required Widget graphic,
-  }) {
-    return Container(
-      width: 60.0,
-      padding: const EdgeInsets.fromLTRB(3.0, 6.0, 3.0, 4.0),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0D2B1B),
-        borderRadius: BorderRadius.circular(10.0),
-        border: Border.all(color: const Color(0xFF1E4830), width: 1.0),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Graphic container
-          SizedBox(
-            height: 22.0,
-            child: Center(child: graphic),
-          ),
-
-          const SizedBox(height: 4.0),
-
-          // Number badge
-          Container(
-            width: 15.0,
-            height: 15.0,
-            decoration: BoxDecoration(
-              color: const Color(0xFF183B25),
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFF2E6B44), width: 1.0),
-            ),
-            child: Center(
-              child: Text(
-                stepNumber,
-                style: const TextStyle(
-                  fontFamily: 'Rubik',
-                  color: Colors.white,
-                  fontSize: 8.5,
-                  fontWeight: FontWeight.w900,
-                  height: 1.0,
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 4.0),
-
-          // Label pill
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 3.0),
-            decoration: BoxDecoration(
-              color: const Color(0xFFD6D3C8),
-              borderRadius: BorderRadius.circular(4.0),
-            ),
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'Rubik',
-                fontSize: 6.5,
-                fontWeight: FontWeight.w900,
-                color: Color(0xFF1A241E),
-                height: 1.05,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Tactile score digit card inside "HOW TO PLAY"
-class _ScoreTile extends StatelessWidget {
-  const _ScoreTile(this.digit);
-  final String digit;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 12.0,
-      height: 16.0,
-      decoration: BoxDecoration(
-        color: const Color(0xFFE8E5DC),
-        borderRadius: BorderRadius.circular(2.5),
-        border: Border.all(color: const Color(0xFFB0AC9F), width: 0.8),
-      ),
-      child: Center(
-        child: Text(
-          digit,
-          style: const TextStyle(
-            fontFamily: 'Rubik',
-            fontSize: 9.5,
-            fontWeight: FontWeight.w900,
-            color: Color(0xFF1E3A2B),
-            height: 1.0,
-          ),
-        ),
-      ),
-    );
-  }
 }
 

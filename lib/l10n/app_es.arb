@@ -128,7 +128,7 @@
   "shareCodeButton": "Compartir Invitación",
   "emptyPrivateLeaguesTitle": "Aún no tienes ligas privadas",
   "emptyPrivateLeaguesSubtitle": "Crea una liga para tus amigos o únete con un código de invitación.",
-  "publicTournamentBadge": "TORNEO PICO",
+  "publicTournamentBadge": "PUBLIC TOURNAMENT",
   "leagueCreatedSuccessTitle": "¡Liga Creada! 🎉",
   "leagueJoinedSuccessTitle": "¡Estás dentro! ⚽",
   "leagueJoinedSuccessSubtitle": "Te has unido a {leagueName}",

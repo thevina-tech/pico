@@ -19,7 +19,9 @@ class LeagueAlreadyMemberException extends PrivateLeagueException {
 
 /// Thrown when the user created the league and attempts to rejoin it.
 class LeagueCreatorCannotRejoinException extends PrivateLeagueException {
-  const LeagueCreatorCannotRejoinException([super.message = 'CREATOR_CANNOT_REJOIN']);
+  const LeagueCreatorCannotRejoinException([
+    super.message = 'CREATOR_CANNOT_REJOIN',
+  ]);
 }
 
 /// Thrown when a non-owner attempts an admin-only operation (delete, kick).
@@ -34,7 +36,9 @@ class LeagueOwnerCannotLeaveException extends PrivateLeagueException {
 
 /// Thrown when an owner attempts to remove themselves via member removal.
 class LeagueOwnerCannotBeRemovedException extends PrivateLeagueException {
-  const LeagueOwnerCannotBeRemovedException([super.message = 'OWNER_CANNOT_BE_REMOVED']);
+  const LeagueOwnerCannotBeRemovedException([
+    super.message = 'OWNER_CANNOT_BE_REMOVED',
+  ]);
 }
 
 /// Thrown when the private league has reached its maximum capacity (e.g. 25 members).
@@ -48,4 +52,3 @@ class LeagueCapacityReachedException extends PrivateLeagueException {
 class LeagueGenericException extends PrivateLeagueException {
   const LeagueGenericException(super.message);
 }
-

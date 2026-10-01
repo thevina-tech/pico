@@ -9,6 +9,7 @@ import 'package:pico/features/matches/domain/competition.dart';
 import 'package:pico/features/matches/data/match_repository.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
 import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
+
 import '../domain/league_message.dart';
 import '../domain/private_league.dart';
 import '../domain/private_league_exceptions.dart';
@@ -104,10 +105,7 @@ Future<List<PrivateLeagueMember>> privateLeagueMembers(
 
 /// Provider for a private league's message feed.
 @riverpod
-Future<List<LeagueMessage>> leagueMessages(
-  Ref ref,
-  String leagueId,
-) async {
+Future<List<LeagueMessage>> leagueMessages(Ref ref, String leagueId) async {
   final repo = ref.watch(tournamentRepositoryProvider);
   return await repo.getLeagueMessages(leagueId);
 }
@@ -144,7 +142,9 @@ abstract class TournamentRepository {
 
   // Tournament Details & Leaderboard
   Future<Tournament?> getTournamentById(String tournamentId);
-  Future<List<TournamentParticipant>> getTournamentLeaderboard(String tournamentId);
+  Future<List<TournamentParticipant>> getTournamentLeaderboard(
+    String tournamentId,
+  );
 
   // Private Leagues
   Future<List<PrivateLeague>> getUserPrivateLeagues(String userId);
@@ -175,7 +175,10 @@ abstract class TournamentRepository {
   });
 
   // League Chat
-  Future<List<LeagueMessage>> getLeagueMessages(String leagueId, {int limit = 50});
+  Future<List<LeagueMessage>> getLeagueMessages(
+    String leagueId, {
+    int limit = 50,
+  });
   Future<LeagueMessage> sendLeagueMessage({
     required String leagueId,
     required String userId,
@@ -330,7 +333,11 @@ class SupabaseTournamentRepository implements TournamentRepository {
       if (list.isNotEmpty) return list;
       return _fallbackCompetitions;
     } catch (e, st) {
-      AppLogger.error('Failed to fetch competitions from Supabase, using fallback: $e', e, st);
+      AppLogger.error(
+        'Failed to fetch competitions from Supabase, using fallback: $e',
+        e,
+        st,
+      );
       return _fallbackCompetitions;
     }
   }
@@ -381,12 +388,15 @@ class SupabaseTournamentRepository implements TournamentRepository {
       final list = (response as List<dynamic>).map((row) {
         final rowMap = row as Map<String, dynamic>;
         if (rowMap['tournament'] is Map<String, dynamic>) {
-          return Tournament.fromJson(rowMap['tournament'] as Map<String, dynamic>);
+          return Tournament.fromJson(
+            rowMap['tournament'] as Map<String, dynamic>,
+          );
         }
         final tId = rowMap['tournament_id']?.toString() ?? '';
         return _defaultPublicTournaments.values.firstWhere(
           (t) => t.id == tId,
-          orElse: () => Tournament(id: tId, name: 'Tournament $tId', competitionId: tId),
+          orElse: () =>
+              Tournament(id: tId, name: 'Tournament $tId', competitionId: tId),
         );
       }).toList();
 
@@ -397,7 +407,11 @@ class SupabaseTournamentRepository implements TournamentRepository {
           .where((t) => enrolledIds.contains(t.id))
           .toList();
     } catch (e, st) {
-      AppLogger.error('Failed to get enrolled tournaments for user $userId', e, st);
+      AppLogger.error(
+        'Failed to get enrolled tournaments for user $userId',
+        e,
+        st,
+      );
       final enrolledIds = _mockParticipants[userId] ?? {};
       return _defaultPublicTournaments.values
           .where((t) => enrolledIds.contains(t.id))
@@ -406,13 +420,16 @@ class SupabaseTournamentRepository implements TournamentRepository {
   }
 
   @override
-  Future<List<TournamentParticipant>> getParticipantsForUser(String userId) async {
+  Future<List<TournamentParticipant>> getParticipantsForUser(
+    String userId,
+  ) async {
     if (_supabase == null) {
       final enrolledIds = _mockParticipants[userId] ?? {};
       return enrolledIds.map((tId) {
         final t = _defaultPublicTournaments.values.firstWhere(
           (tourn) => tourn.id == tId,
-          orElse: () => Tournament(id: tId, name: 'Tournament $tId', competitionId: tId),
+          orElse: () =>
+              Tournament(id: tId, name: 'Tournament $tId', competitionId: tId),
         );
         return TournamentParticipant(
           tournamentId: tId,
@@ -437,7 +454,10 @@ class SupabaseTournamentRepository implements TournamentRepository {
           .eq('user_id', userId);
 
       return (response as List<dynamic>)
-          .map((row) => TournamentParticipant.fromJson(row as Map<String, dynamic>))
+          .map(
+            (row) =>
+                TournamentParticipant.fromJson(row as Map<String, dynamic>),
+          )
           .toList();
     } catch (e, st) {
       AppLogger.error('Failed to get participants for user $userId', e, st);
@@ -450,16 +470,23 @@ class SupabaseTournamentRepository implements TournamentRepository {
     required String userId,
     required List<String> leagueIds,
   }) async {
-    final userEnrolled = _mockParticipants.putIfAbsent(userId, () => <String>{});
+    final userEnrolled = _mockParticipants.putIfAbsent(
+      userId,
+      () => <String>{},
+    );
 
     for (final leagueId in leagueIds) {
       final competitionId = _resolveCompetitionId(leagueId);
-      final targetId = _defaultPublicTournaments[competitionId]?.id ?? 'tourn_$competitionId';
+      final targetId =
+          _defaultPublicTournaments[competitionId]?.id ??
+          'tourn_$competitionId';
       userEnrolled.add(targetId);
     }
 
     if (_supabase == null) {
-      AppLogger.info('Mock auto-enrollment in tournaments for user $userId: $leagueIds');
+      AppLogger.info(
+        'Mock auto-enrollment in tournaments for user $userId: $leagueIds',
+      );
       return;
     }
 
@@ -487,14 +514,11 @@ class SupabaseTournamentRepository implements TournamentRepository {
           continue;
         }
 
-        await _supabase.from('tournament_participants').upsert(
-          {
-            'tournament_id': targetTournamentId,
-            'user_id': userId,
-            'pico_points': 0,
-          },
-          onConflict: 'tournament_id,user_id',
-        );
+        await _supabase.from('tournament_participants').upsert({
+          'tournament_id': targetTournamentId,
+          'user_id': userId,
+          'pico_points': 0,
+        }, onConflict: 'tournament_id,user_id');
         AppLogger.info(
           'Enrolled user $userId in tournament $targetTournamentId for league $leagueId',
         );
@@ -516,22 +540,25 @@ class SupabaseTournamentRepository implements TournamentRepository {
     _mockParticipants.putIfAbsent(userId, () => <String>{}).add(tournamentId);
 
     if (_supabase == null) {
-      AppLogger.info('Mock enrollment of user $userId into tournament $tournamentId');
+      AppLogger.info(
+        'Mock enrollment of user $userId into tournament $tournamentId',
+      );
       return;
     }
 
     try {
-      await _supabase.from('tournament_participants').upsert(
-        {
-          'tournament_id': tournamentId,
-          'user_id': userId,
-          'pico_points': 0,
-        },
-        onConflict: 'tournament_id,user_id',
-      );
+      await _supabase.from('tournament_participants').upsert({
+        'tournament_id': tournamentId,
+        'user_id': userId,
+        'pico_points': 0,
+      }, onConflict: 'tournament_id,user_id');
       AppLogger.info('Enrolled user $userId into tournament $tournamentId');
     } catch (e, st) {
-      AppLogger.error('Failed to enroll user $userId into tournament $tournamentId', e, st);
+      AppLogger.error(
+        'Failed to enroll user $userId into tournament $tournamentId',
+        e,
+        st,
+      );
       rethrow;
     }
   }
@@ -577,7 +604,10 @@ class SupabaseTournamentRepository implements TournamentRepository {
 
       // Batch query member counts in ONE single call to eliminate N+1 API calls
       final leagueIds = leagueRows
-          .map((r) => (r['league'] as Map<String, dynamic>)['id']?.toString() ?? '')
+          .map(
+            (r) =>
+                (r['league'] as Map<String, dynamic>)['id']?.toString() ?? '',
+          )
           .where((id) => id.isNotEmpty)
           .toList();
 
@@ -589,7 +619,8 @@ class SupabaseTournamentRepository implements TournamentRepository {
             .inFilter('private_league_id', leagueIds);
 
         for (final m in allMembers as List<dynamic>) {
-          final lId = (m as Map<String, dynamic>)['private_league_id']?.toString();
+          final lId = (m as Map<String, dynamic>)['private_league_id']
+              ?.toString();
           if (lId != null) {
             memberCounts[lId] = (memberCounts[lId] ?? 0) + 1;
           }
@@ -597,7 +628,9 @@ class SupabaseTournamentRepository implements TournamentRepository {
       }
 
       for (final rowMap in leagueRows) {
-        final leagueData = Map<String, dynamic>.from(rowMap['league'] as Map<String, dynamic>);
+        final leagueData = Map<String, dynamic>.from(
+          rowMap['league'] as Map<String, dynamic>,
+        );
         final leagueId = leagueData['id']?.toString() ?? '';
         final ownerData = leagueData['owner'] as Map<String, dynamic>?;
         final compId = leagueData['competition_id']?.toString() ?? '';
@@ -606,12 +639,14 @@ class SupabaseTournamentRepository implements TournamentRepository {
           orElse: () => Competition(id: compId, name: compId),
         );
 
-        list.add(PrivateLeague.fromJson({
-          ...leagueData,
-          'ownerName': ownerData?['username'] ?? '',
-          'competitionName': comp.name,
-          'memberCount': memberCounts[leagueId] ?? 1,
-        }));
+        list.add(
+          PrivateLeague.fromJson({
+            ...leagueData,
+            'ownerName': ownerData?['username'] ?? '',
+            'competitionName': comp.name,
+            'memberCount': memberCounts[leagueId] ?? 1,
+          }),
+        );
       }
       return list;
     } catch (e, st) {
@@ -720,16 +755,18 @@ class SupabaseTournamentRepository implements TournamentRepository {
     }
 
     try {
-      final rpcResult = await _supabase.rpc('join_private_league', params: {
-        'p_invite_code': cleanCode,
-        'p_user_id': userId,
-      });
+      final rpcResult = await _supabase.rpc(
+        'join_private_league',
+        params: {'p_invite_code': cleanCode, 'p_user_id': userId},
+      );
 
       if (rpcResult == null) {
         throw const LeagueNotFoundException();
       }
 
-      final leagueMap = Map<String, dynamic>.from(rpcResult as Map<String, dynamic>);
+      final leagueMap = Map<String, dynamic>.from(
+        rpcResult as Map<String, dynamic>,
+      );
       final compId = leagueMap['competition_id']?.toString() ?? '';
       final comp = _fallbackCompetitions.firstWhere(
         (c) => c.id == compId,
@@ -762,7 +799,11 @@ class SupabaseTournamentRepository implements TournamentRepository {
       }
       throw LeagueGenericException(e.message);
     } catch (e, st) {
-      AppLogger.error('Failed to join private league with code $cleanCode', e, st);
+      AppLogger.error(
+        'Failed to join private league with code $cleanCode',
+        e,
+        st,
+      );
       rethrow;
     }
   }
@@ -795,17 +836,22 @@ class SupabaseTournamentRepository implements TournamentRepository {
   }
 
   @override
-  Future<List<TournamentParticipant>> getTournamentLeaderboard(String tournamentId) async {
+  Future<List<TournamentParticipant>> getTournamentLeaderboard(
+    String tournamentId,
+  ) async {
     if (_supabase == null) {
       final participants = <TournamentParticipant>[];
       for (final entry in _mockParticipants.entries) {
         if (entry.value.contains(tournamentId)) {
-          participants.add(TournamentParticipant(
-            tournamentId: tournamentId,
-            userId: entry.key,
-            picoPoints: 0,
-            username: 'Player ${entry.key.substring(0, entry.key.length.clamp(0, 5))}',
-          ));
+          participants.add(
+            TournamentParticipant(
+              tournamentId: tournamentId,
+              userId: entry.key,
+              picoPoints: 0,
+              username:
+                  'Player ${entry.key.substring(0, entry.key.length.clamp(0, 5))}',
+            ),
+          );
         }
       }
       return participants;
@@ -834,7 +880,11 @@ class SupabaseTournamentRepository implements TournamentRepository {
         });
       }).toList();
     } catch (e, st) {
-      AppLogger.error('Failed to get leaderboard for tournament $tournamentId', e, st);
+      AppLogger.error(
+        'Failed to get leaderboard for tournament $tournamentId',
+        e,
+        st,
+      );
       return [];
     }
   }
@@ -893,16 +943,22 @@ class SupabaseTournamentRepository implements TournamentRepository {
   }
 
   @override
-  Future<List<PrivateLeagueMember>> getPrivateLeagueMembers(String leagueId) async {
+  Future<List<PrivateLeagueMember>> getPrivateLeagueMembers(
+    String leagueId,
+  ) async {
     if (_supabase == null) {
       final memberIds = _mockLeagueMembers[leagueId] ?? {};
-      return memberIds.map((uId) => PrivateLeagueMember(
-        privateLeagueId: leagueId,
-        userId: uId,
-        picoPoints: 0,
-        username: uId == 'test_owner_123' ? 'PicoChamp' : 'Player $uId',
-        joinedAt: DateTime.now(),
-      )).toList();
+      return memberIds
+          .map(
+            (uId) => PrivateLeagueMember(
+              privateLeagueId: leagueId,
+              userId: uId,
+              picoPoints: 0,
+              username: uId == 'test_owner_123' ? 'PicoChamp' : 'Player $uId',
+              joinedAt: DateTime.now(),
+            ),
+          )
+          .toList();
     }
 
     try {
@@ -928,7 +984,11 @@ class SupabaseTournamentRepository implements TournamentRepository {
         });
       }).toList();
     } catch (e, st) {
-      AppLogger.error('Failed to get members for private league $leagueId', e, st);
+      AppLogger.error(
+        'Failed to get members for private league $leagueId',
+        e,
+        st,
+      );
       return [];
     }
   }
@@ -949,11 +1009,14 @@ class SupabaseTournamentRepository implements TournamentRepository {
     }
 
     try {
-      await _supabase.rpc('delete_private_league', params: {
-        'p_league_id': leagueId,
-      });
+      await _supabase.rpc(
+        'delete_private_league',
+        params: {'p_league_id': leagueId},
+      );
     } on PostgrestException catch (e) {
-      AppLogger.warning('Postgrest error deleting private league: ${e.message}');
+      AppLogger.warning(
+        'Postgrest error deleting private league: ${e.message}',
+      );
       final msg = e.message.toLowerCase();
       if (msg.contains('not_league_owner')) {
         throw const LeagueNotOwnerException();
@@ -987,10 +1050,10 @@ class SupabaseTournamentRepository implements TournamentRepository {
     }
 
     try {
-      await _supabase.rpc('remove_private_league_member', params: {
-        'p_league_id': leagueId,
-        'p_target_user_id': targetUserId,
-      });
+      await _supabase.rpc(
+        'remove_private_league_member',
+        params: {'p_league_id': leagueId, 'p_target_user_id': targetUserId},
+      );
     } on PostgrestException catch (e) {
       AppLogger.warning('Postgrest error removing member: ${e.message}');
       final msg = e.message.toLowerCase();
@@ -1002,7 +1065,11 @@ class SupabaseTournamentRepository implements TournamentRepository {
       }
       throw LeagueGenericException(e.message);
     } catch (e, st) {
-      AppLogger.error('Failed to remove member $targetUserId from league $leagueId', e, st);
+      AppLogger.error(
+        'Failed to remove member $targetUserId from league $leagueId',
+        e,
+        st,
+      );
       rethrow;
     }
   }
@@ -1015,9 +1082,14 @@ class SupabaseTournamentRepository implements TournamentRepository {
     if (_supabase == null) {
       final league = _mockPrivateLeagues[leagueId];
       if (league != null && league.ownerId == userId) {
-        final remaining = (_mockLeagueMembers[leagueId] ?? {}).where((id) => id != userId).toList();
+        final remaining = (_mockLeagueMembers[leagueId] ?? {})
+            .where((id) => id != userId)
+            .toList();
         if (remaining.isNotEmpty) {
-          _mockPrivateLeagues[leagueId] = league.copyWith(ownerId: remaining.first, adminId: remaining.first);
+          _mockPrivateLeagues[leagueId] = league.copyWith(
+            ownerId: remaining.first,
+            adminId: remaining.first,
+          );
         } else {
           _mockPrivateLeagues.remove(leagueId);
         }
@@ -1027,10 +1099,10 @@ class SupabaseTournamentRepository implements TournamentRepository {
     }
 
     try {
-      await _supabase.rpc('leave_private_league', params: {
-        'p_league_id': leagueId,
-        'p_user_id': userId,
-      });
+      await _supabase.rpc(
+        'leave_private_league',
+        params: {'p_league_id': leagueId, 'p_user_id': userId},
+      );
     } on PostgrestException catch (e) {
       AppLogger.warning('Postgrest error leaving league: ${e.message}');
       throw LeagueGenericException(e.message);
@@ -1041,7 +1113,10 @@ class SupabaseTournamentRepository implements TournamentRepository {
   }
 
   @override
-  Future<List<LeagueMessage>> getLeagueMessages(String leagueId, {int limit = 50}) async {
+  Future<List<LeagueMessage>> getLeagueMessages(
+    String leagueId, {
+    int limit = 50,
+  }) async {
     if (_supabase == null) {
       return List<LeagueMessage>.from(_mockLeagueMessages[leagueId] ?? []);
     }
@@ -1063,7 +1138,8 @@ class SupabaseTournamentRepository implements TournamentRepository {
 
       return (response as List<dynamic>).map((row) {
         final rowMap = Map<String, dynamic>.from(row as Map);
-        final profile = (rowMap['profile'] ?? rowMap['profiles']) as Map<String, dynamic>?;
+        final profile =
+            (rowMap['profile'] ?? rowMap['profiles']) as Map<String, dynamic>?;
         return LeagueMessage.fromJson({
           ...rowMap,
           'username': profile?['username'] ?? 'Player',
@@ -1122,7 +1198,8 @@ class SupabaseTournamentRepository implements TournamentRepository {
           .single();
 
       final rowMap = Map<String, dynamic>.from(response);
-      final profile = (rowMap['profile'] ?? rowMap['profiles']) as Map<String, dynamic>?;
+      final profile =
+          (rowMap['profile'] ?? rowMap['profiles']) as Map<String, dynamic>?;
       return LeagueMessage.fromJson({
         ...rowMap,
         'username': profile?['username'] ?? username ?? 'Player',

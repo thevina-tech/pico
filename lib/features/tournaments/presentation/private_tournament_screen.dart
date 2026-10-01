@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pico/features/tournaments/domain/private_league.dart';
+
 import 'private_league_dashboard_screen.dart';
 
 export 'private_league_dashboard_screen.dart';
@@ -22,7 +23,8 @@ class PrivateTournamentScreen extends StatelessWidget {
     return PrivateLeagueDashboardScreen(
       leagueId: leagueId,
       initialLeague: initialLeague,
-      initialTabIndex: 2, // Opens Standings tab where Admin Controls and leaderboard live
+      initialTabIndex:
+          2, // Opens Standings tab where Admin Controls and leaderboard live
     );
   }
 }

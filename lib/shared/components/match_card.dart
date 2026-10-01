@@ -713,13 +713,17 @@ class MatchCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 3.5),
               decoration: BoxDecoration(
-                color: PicoColors.cardTray,
+                color: isTeaser
+                    ? PicoColors.primaryTintContainer
+                    : PicoColors.cardTray,
                 borderRadius: BorderRadius.circular(6.0),
               ),
               child: Text(
                 isTeaser ? 'OPENS SOON' : 'NOT PREDICTED',
                 style: PicoTypography.labelPillSm.copyWith(
-                  color: PicoColors.textTactileMuted,
+                  color: isTeaser
+                      ? PicoColors.primaryBevel
+                      : PicoColors.textTactileMuted,
                   fontWeight: FontWeight.w800,
                   fontSize: 9.0,
                   letterSpacing: 0.4,
@@ -997,10 +1001,15 @@ class MatchCard extends StatelessWidget {
     switch (state) {
       case MatchCardState.unpredicted:
         if (isTeaser) {
-          return GameButton.cream(
+          return GameButton.green(
             text: teaserLabel ?? 'Opens in 2d',
+            icon: const Icon(
+              Icons.schedule_rounded,
+              size: 16.0,
+              color: Color(0xCCFFFFFF),
+            ),
             width: double.infinity,
-            extrusionHeight: 4.5,
+            extrusionHeight: 4.0,
             borderRadius: 16.0,
             fontSize: 14.5,
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),

@@ -444,7 +444,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Crea una liga para tus amigos o únete con un código de invitación.';
 
   @override
-  String get publicTournamentBadge => 'TORNEO PICO';
+  String get publicTournamentBadge => 'PUBLIC TOURNAMENT';
 
   @override
   String get leagueCreatedSuccessTitle => '¡Liga Creada! 🎉';

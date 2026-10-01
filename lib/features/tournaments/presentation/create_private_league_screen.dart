@@ -119,7 +119,10 @@ class _CreatePrivateLeagueScreenState
       builder: (ctx) {
         return Dialog(
           backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 20.0,
+            vertical: 24.0,
+          ),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 400.0),
@@ -150,7 +153,10 @@ class _CreatePrivateLeagueScreenState
                       decoration: BoxDecoration(
                         color: const Color(0xFFFEF3C7),
                         shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFFD97706), width: 2.0),
+                        border: Border.all(
+                          color: const Color(0xFFD97706),
+                          width: 2.0,
+                        ),
                         boxShadow: const [
                           BoxShadow(
                             color: Color(0x33D97706),
@@ -251,8 +257,13 @@ class _CreatePrivateLeagueScreenState
                               vertical: 12.0,
                             ),
                             onPressed: () {
-                              Clipboard.setData(ClipboardData(text: league.inviteCode));
-                              PicoSnackBar.showSuccess(context, l10n.codeCopiedToast);
+                              Clipboard.setData(
+                                ClipboardData(text: league.inviteCode),
+                              );
+                              PicoSnackBar.showSuccess(
+                                context,
+                                l10n.codeCopiedToast,
+                              );
                             },
                           ),
                         ),
@@ -312,8 +323,10 @@ class _CreatePrivateLeagueScreenState
     return LayoutBuilder(
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth;
-        final itemWidth =
-            ((availableWidth - (5 * 7.0)) / 6.0).clamp(32.0, 46.0);
+        final itemWidth = ((availableWidth - (5 * 7.0)) / 6.0).clamp(
+          32.0,
+          46.0,
+        );
         final itemHeight = (itemWidth * 1.18).clamp(38.0, 54.0);
         final fontSize = (itemWidth * 0.50).clamp(16.0, 22.0);
 
@@ -328,7 +341,10 @@ class _CreatePrivateLeagueScreenState
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10.0),
-                  border: Border.all(color: const Color(0xFF2D8B55), width: 1.5),
+                  border: Border.all(
+                    color: const Color(0xFF2D8B55),
+                    width: 1.5,
+                  ),
                   boxShadow: const [
                     BoxShadow(
                       color: Color(0xFF1E603A),
@@ -379,278 +395,315 @@ class _CreatePrivateLeagueScreenState
           onBack: () => Navigator.of(context).pop(),
           actions: [
             IconButton(
-              icon: const Icon(Icons.close_rounded, color: PicoColors.textWhiteMuted),
+              icon: const Icon(
+                Icons.close_rounded,
+                color: PicoColors.textWhiteMuted,
+              ),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],
         ),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 440.0),
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 24.0),
-              children: [
-                // Atmosphere Header Hero Card
-                _buildHeroHeader(l10n),
-                const SizedBox(height: 20.0),
+        body: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440.0),
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 24.0),
+                children: [
+                  // Atmosphere Header Hero Card
+                  _buildHeroHeader(l10n),
+                  const SizedBox(height: 20.0),
 
-                // Form Container
-                Container(
-                  padding: const EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: PicoColors.darkTray,
-                    borderRadius: BorderRadius.circular(20.0),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.08),
-                      width: 1.0,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // League Name Label
-                      Text(
-                        l10n.leagueNameLabel,
-                        style: PicoTypography.labelPillSm.copyWith(
-                          color: PicoColors.textWhiteMuted,
-                          letterSpacing: 1.1,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 8.0),
-
-                      // League Name Input Tray
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0D1B13),
-                          borderRadius: BorderRadius.circular(14.0),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.12),
-                            width: 1.0,
-                          ),
-                        ),
-                        child: TextField(
-                          key: const Key('league_name_field'),
-                          controller: _nameController,
-                          inputFormatters: InputSanitizer.leagueNameFormatters,
-                          style: PicoTypography.bodyLg.copyWith(
-                            color: PicoColors.textWhite,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: l10n.leagueNamePlaceholder,
-                            hintStyle: PicoTypography.bodyMd.copyWith(
-                              color: PicoColors.textWhiteMuted.withValues(alpha: 0.5),
-                            ),
-                            prefixIcon: const Icon(
-                              Icons.shield_rounded,
-                              color: PicoColors.gold,
-                              size: 22.0,
-                            ),
-                            suffixIcon: _nameController.text.isNotEmpty
-                                ? IconButton(
-                                    icon: const Icon(
-                                      Icons.cancel_rounded,
-                                      color: PicoColors.textWhiteMuted,
-                                      size: 18.0,
-                                    ),
-                                    onPressed: () {
-                                      _nameController.clear();
-                                      setState(() {});
-                                    },
-                                  )
-                                : null,
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14.0,
-                              vertical: 14.0,
-                            ),
-                          ),
-                          onChanged: (_) => setState(() {}),
-                        ),
-                      ),
-                      const SizedBox(height: 18.0),
-
-                      // League Description Label
-                      Text(
-                        'LEAGUE DESCRIPTION (OPTIONAL)',
-                        style: PicoTypography.labelPillSm.copyWith(
-                          color: PicoColors.textWhiteMuted,
-                          letterSpacing: 1.1,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 8.0),
-
-                      // League Description Input Tray
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0D1B13),
-                          borderRadius: BorderRadius.circular(14.0),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.12),
-                            width: 1.0,
-                          ),
-                        ),
-                        child: TextField(
-                          key: const Key('league_description_field'),
-                          controller: _descriptionController,
-                          maxLines: 3,
-                          minLines: 2,
-                          maxLength: 150,
-                          style: PicoTypography.bodyMd.copyWith(
-                            color: PicoColors.textWhite,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: 'e.g., Compete with friends and crown the champion',
-                            hintStyle: PicoTypography.bodyMd.copyWith(
-                              color: PicoColors.textWhiteMuted.withValues(alpha: 0.5),
-                            ),
-                            counterStyle: PicoTypography.bodySm.copyWith(
-                              fontSize: 11.0,
-                              color: PicoColors.textWhiteMuted.withValues(alpha: 0.5),
-                            ),
-                            prefixIcon: const Padding(
-                              padding: EdgeInsets.only(bottom: 24.0),
-                              child: Icon(
-                                Icons.notes_rounded,
-                                color: PicoColors.primary,
-                                size: 20.0,
-                              ),
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14.0,
-                              vertical: 12.0,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20.0),
-
-                      // Base Tournament / Competition Selector
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              l10n.baseTournamentLabel,
-                              style: PicoTypography.labelPillSm.copyWith(
-                                color: PicoColors.textWhiteMuted,
-                                letterSpacing: 1.1,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 8.0),
-                          Text(
-                            l10n.competitionsAvailableCount(comps.length),
-                            style: PicoTypography.bodySm.copyWith(
-                              color: PicoColors.primary,
-                              fontSize: 11.0,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8.0),
-
-                      // Competition Dropdown Display
-                      _buildCompetitionSelector(selectedComp, comps),
-                      const SizedBox(height: 8.0),
-
-                      // Helper microcopy
-                      Text(
-                        l10n.baseTournamentHelper,
-                        style: PicoTypography.bodySm.copyWith(
-                          color: PicoColors.textWhiteMuted.withValues(alpha: 0.7),
-                          fontSize: 11.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-
-                // Error Message if any
-                if (_errorMessage != null) ...[
+                  // Form Container
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14.0,
-                      vertical: 10.0,
-                    ),
+                    padding: const EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
-                      color: PicoColors.errorContainer,
-                      borderRadius: BorderRadius.circular(12.0),
+                      color: PicoColors.darkTray,
+                      borderRadius: BorderRadius.circular(20.0),
                       border: Border.all(
-                        color: PicoColors.errorBorder,
+                        color: Colors.white.withValues(alpha: 0.08),
                         width: 1.0,
                       ),
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
-                          Icons.error_outline_rounded,
-                          color: PicoColors.error,
-                          size: 18.0,
+                        // League Name Label
+                        Text(
+                          l10n.leagueNameLabel,
+                          style: PicoTypography.labelPillSm.copyWith(
+                            color: PicoColors.textWhiteMuted,
+                            letterSpacing: 1.1,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                        const SizedBox(width: 8.0),
-                        Expanded(
-                          child: Text(
-                            _errorMessage!,
-                            style: PicoTypography.bodySm.copyWith(
-                              color: PicoColors.errorText,
+                        const SizedBox(height: 8.0),
+
+                        // League Name Input Tray
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0D1B13),
+                            borderRadius: BorderRadius.circular(14.0),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.12),
+                              width: 1.0,
+                            ),
+                          ),
+                          child: TextField(
+                            key: const Key('league_name_field'),
+                            controller: _nameController,
+                            inputFormatters:
+                                InputSanitizer.leagueNameFormatters,
+                            style: PicoTypography.bodyLg.copyWith(
+                              color: PicoColors.textWhite,
                               fontWeight: FontWeight.w600,
                             ),
+                            decoration: InputDecoration(
+                              hintText: l10n.leagueNamePlaceholder,
+                              hintStyle: PicoTypography.bodyMd.copyWith(
+                                color: PicoColors.textWhiteMuted.withValues(
+                                  alpha: 0.5,
+                                ),
+                              ),
+                              prefixIcon: const Icon(
+                                Icons.shield_rounded,
+                                color: PicoColors.gold,
+                                size: 22.0,
+                              ),
+                              suffixIcon: _nameController.text.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(
+                                        Icons.cancel_rounded,
+                                        color: PicoColors.textWhiteMuted,
+                                        size: 18.0,
+                                      ),
+                                      onPressed: () {
+                                        _nameController.clear();
+                                        setState(() {});
+                                      },
+                                    )
+                                  : null,
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 14.0,
+                                vertical: 14.0,
+                              ),
+                            ),
+                            onChanged: (_) => setState(() {}),
+                          ),
+                        ),
+                        const SizedBox(height: 18.0),
+
+                        // League Description Label
+                        Text(
+                          'LEAGUE DESCRIPTION (OPTIONAL)',
+                          style: PicoTypography.labelPillSm.copyWith(
+                            color: PicoColors.textWhiteMuted,
+                            letterSpacing: 1.1,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 8.0),
+
+                        // League Description Input Tray
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0D1B13),
+                            borderRadius: BorderRadius.circular(14.0),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.12),
+                              width: 1.0,
+                            ),
+                          ),
+                          child: TextField(
+                            key: const Key('league_description_field'),
+                            controller: _descriptionController,
+                            maxLines: 3,
+                            minLines: 2,
+                            maxLength: 150,
+                            style: PicoTypography.bodyMd.copyWith(
+                              color: PicoColors.textWhite,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'e.g., Compete with friends and crown the champion',
+                              hintStyle: PicoTypography.bodyMd.copyWith(
+                                color: PicoColors.textWhiteMuted.withValues(
+                                  alpha: 0.5,
+                                ),
+                              ),
+                              counterStyle: PicoTypography.bodySm.copyWith(
+                                fontSize: 11.0,
+                                color: PicoColors.textWhiteMuted.withValues(
+                                  alpha: 0.5,
+                                ),
+                              ),
+                              prefixIcon: const Padding(
+                                padding: EdgeInsets.only(bottom: 24.0),
+                                child: Icon(
+                                  Icons.notes_rounded,
+                                  color: PicoColors.primary,
+                                  size: 20.0,
+                                ),
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 14.0,
+                                vertical: 12.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20.0),
+
+                        // Base Tournament / Competition Selector
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                l10n.baseTournamentLabel,
+                                style: PicoTypography.labelPillSm.copyWith(
+                                  color: PicoColors.textWhiteMuted,
+                                  letterSpacing: 1.1,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 8.0),
+                            Text(
+                              l10n.competitionsAvailableCount(comps.length),
+                              style: PicoTypography.bodySm.copyWith(
+                                color: PicoColors.primary,
+                                fontSize: 11.0,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8.0),
+
+                        // Competition Dropdown Display
+                        _buildCompetitionSelector(selectedComp, comps),
+                        const SizedBox(height: 8.0),
+
+                        // Helper microcopy
+                        Text(
+                          l10n.baseTournamentHelper,
+                          style: PicoTypography.bodySm.copyWith(
+                            color: PicoColors.textWhiteMuted.withValues(
+                              alpha: 0.7,
+                            ),
+                            fontSize: 11.5,
                           ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 16.0),
-                ],
 
-                // Submit CTA Button (2.5D Tactile Game Button)
-                _TactileSubmitButton(
-                  isLoading: _isLoading,
-                  label: l10n.createLeagueButton,
-                  onPressed: _handleCreate,
-                ),
-                const SizedBox(height: 12.0),
-
-                // Helper reassurance
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.lock_rounded,
-                      size: 14.0,
-                      color: PicoColors.primary,
-                    ),
-                    const SizedBox(width: 6.0),
-                    Flexible(
-                      child: Text(
-                        l10n.privateLeagueSecurityNote,
-                        textAlign: TextAlign.center,
-                        style: PicoTypography.bodySm.copyWith(
-                          color: PicoColors.textWhiteMuted,
-                          fontSize: 12.0,
+                  // Error Message if any
+                  if (_errorMessage != null) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14.0,
+                        vertical: 10.0,
+                      ),
+                      decoration: BoxDecoration(
+                        color: PicoColors.errorContainer,
+                        borderRadius: BorderRadius.circular(12.0),
+                        border: Border.all(
+                          color: PicoColors.errorBorder,
+                          width: 1.0,
                         ),
                       ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.error_outline_rounded,
+                            color: PicoColors.error,
+                            size: 18.0,
+                          ),
+                          const SizedBox(width: 8.0),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: PicoTypography.bodySm.copyWith(
+                                color: PicoColors.errorText,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(height: 16.0),
                   ],
-                ),
-              ],
+
+                  // Submit CTA Button (Tactile 3D GameButton)
+                  GameButton.gold(
+                    key: const Key('create_private_league_submit_button'),
+                    text: _isLoading ? '' : l10n.createLeagueButton,
+                    icon: _isLoading
+                        ? null
+                        : const Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Colors.white,
+                            size: 18.0,
+                          ),
+                    width: double.infinity,
+                    height: 52.0,
+                    extrusionHeight: 5.0,
+                    borderRadius: 16.0,
+                    fontSize: 15.5,
+                    enabled: !_isLoading,
+                    onPressed: _isLoading ? null : _handleCreate,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20.0,
+                            width: 20.0,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : null,
+                  ),
+                  const SizedBox(height: 12.0),
+
+                  // Helper reassurance
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.lock_rounded,
+                        size: 14.0,
+                        color: PicoColors.primary,
+                      ),
+                      const SizedBox(width: 6.0),
+                      Flexible(
+                        child: Text(
+                          l10n.privateLeagueSecurityNote,
+                          textAlign: TextAlign.center,
+                          style: PicoTypography.bodySm.copyWith(
+                            color: PicoColors.textWhiteMuted,
+                            fontSize: 12.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildHeroHeader(AppLocalizations l10n) {
     return Container(
@@ -696,16 +749,10 @@ class _CreatePrivateLeagueScreenState
                   gradient: const LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFF2B6B48),
-                      Color(0xFF1B4730),
-                    ],
+                    colors: [Color(0xFF2B6B48), Color(0xFF1B4730)],
                   ),
                   borderRadius: BorderRadius.circular(22.0),
-                  border: Border.all(
-                    color: PicoColors.gold,
-                    width: 2.0,
-                  ),
+                  border: Border.all(color: PicoColors.gold, width: 2.0),
                   boxShadow: const [
                     BoxShadow(
                       color: Color(0xFF0E281B),
@@ -734,10 +781,7 @@ class _CreatePrivateLeagueScreenState
                   decoration: BoxDecoration(
                     color: const Color(0xFF0A1F14),
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: PicoColors.gold,
-                      width: 2.0,
-                    ),
+                    border: Border.all(color: PicoColors.gold, width: 2.0),
                   ),
                   child: const Icon(
                     Icons.sports_soccer_rounded,
@@ -772,7 +816,10 @@ class _CreatePrivateLeagueScreenState
           ),
           const SizedBox(height: 14.0),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 5.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12.0,
+              vertical: 5.0,
+            ),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFF265A3C), Color(0xFF1B432C)],
@@ -817,7 +864,9 @@ class _CreatePrivateLeagueScreenState
   }
 
   Widget _buildCompetitionSelector(
-      Competition? selectedComp, List<Competition> comps) {
+    Competition? selectedComp,
+    List<Competition> comps,
+  ) {
     return InkWell(
       onTap: () => _openCompetitionPicker(context, comps),
       borderRadius: BorderRadius.circular(14.0),
@@ -879,8 +928,8 @@ class _CreatePrivateLeagueScreenState
                     selectedComp != null
                         ? AppLocalizations.of(context)!.baseTournamentNote
                         : (comps.isNotEmpty
-                            ? 'Tap to choose from ${comps.length} tournaments'
-                            : 'Loading available competitions...'),
+                              ? 'Tap to choose from ${comps.length} tournaments'
+                              : 'Loading available competitions...'),
                     style: PicoTypography.bodySm.copyWith(
                       color: PicoColors.textWhiteMuted.withValues(alpha: 0.7),
                       fontSize: 11.0,
@@ -907,7 +956,8 @@ class _CreatePrivateLeagueScreenState
       width: 38.0,
       height: 38.0,
       decoration: BoxDecoration(
-        color: Colors.white, // Solid white background so logos are clearly visible
+        color:
+            Colors.white, // Solid white background so logos are clearly visible
         borderRadius: BorderRadius.circular(10.0),
         border: Border.all(
           color: isLightBackground
@@ -933,21 +983,18 @@ class _CreatePrivateLeagueScreenState
                 width: 28.0,
                 height: 28.0,
                 fit: BoxFit.contain,
-                errorWidget: (context, url, error) => Text(
-                  comp.flag,
-                  style: const TextStyle(fontSize: 20.0),
-                ),
+                errorWidget: (context, url, error) =>
+                    Text(comp.flag, style: const TextStyle(fontSize: 20.0)),
               ),
             )
-          : Text(
-              comp.flag,
-              style: const TextStyle(fontSize: 20.0),
-            ),
+          : Text(comp.flag, style: const TextStyle(fontSize: 20.0)),
     );
   }
 
   void _openCompetitionPicker(
-      BuildContext context, List<Competition> competitions) {
+    BuildContext context,
+    List<Competition> competitions,
+  ) {
     final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
@@ -992,7 +1039,9 @@ class _CreatePrivateLeagueScreenState
                     const SizedBox(width: 10.0),
                     Expanded(
                       child: Text(
-                        l10n.selectBaseTournamentSheetTitle(competitions.length),
+                        l10n.selectBaseTournamentSheetTitle(
+                          competitions.length,
+                        ),
                         style: const TextStyle(
                           color: Color(0xFF0F172A),
                           fontWeight: FontWeight.w800,
@@ -1049,8 +1098,9 @@ class _CreatePrivateLeagueScreenState
                             boxShadow: isSelected
                                 ? [
                                     BoxShadow(
-                                      color: PicoColors.primary
-                                          .withValues(alpha: 0.12),
+                                      color: PicoColors.primary.withValues(
+                                        alpha: 0.12,
+                                      ),
                                       blurRadius: 6.0,
                                       offset: const Offset(0, 2),
                                     ),
@@ -1116,128 +1166,6 @@ class _CreatePrivateLeagueScreenState
           ),
         );
       },
-    );
-  }
-}
-
-/// Tactile 2.5D submit button with 4px physical bevel and responsive press dynamics.
-/// Wraps an [ElevatedButton] to satisfy test harness finders while rendering custom 3D game geometry.
-class _TactileSubmitButton extends StatefulWidget {
-  const _TactileSubmitButton({
-    required this.isLoading,
-    required this.label,
-    required this.onPressed,
-  });
-
-  final bool isLoading;
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  State<_TactileSubmitButton> createState() => _TactileSubmitButtonState();
-}
-
-class _TactileSubmitButtonState extends State<_TactileSubmitButton> {
-  bool _isPressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    const double bevel = 4.0;
-    final double translationY = _isPressed ? bevel : 0.0;
-    final double currentBevel = _isPressed ? 1.0 : bevel;
-
-    return Listener(
-      onPointerDown: (_) {
-        if (!widget.isLoading) {
-          setState(() => _isPressed = true);
-        }
-      },
-      onPointerUp: (_) {
-        if (_isPressed) {
-          setState(() => _isPressed = false);
-        }
-      },
-      onPointerCancel: (_) {
-        if (_isPressed) {
-          setState(() => _isPressed = false);
-        }
-      },
-      child: ElevatedButton(
-        onPressed: widget.isLoading ? null : widget.onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          elevation: 0,
-          padding: EdgeInsets.zero,
-          minimumSize: const Size(double.infinity, 54.0),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.0),
-          ),
-        ),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 60),
-          curve: Curves.easeOut,
-          transform: Matrix4.translationValues(0.0, translationY, 0.0),
-          width: double.infinity,
-          height: 54.0,
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFD41D),
-            borderRadius: BorderRadius.circular(16.0),
-            border: Border.all(
-              color: const Color(0xFFFFF7C2),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF9E6500),
-                offset: Offset(0, currentBevel),
-                blurRadius: 0,
-              ),
-              BoxShadow(
-                color: const Color(0x40FFD41D),
-                offset: Offset(0, currentBevel + 4),
-                blurRadius: 14,
-              ),
-            ],
-          ),
-          alignment: Alignment.center,
-          child: widget.isLoading
-              ? const SizedBox(
-                  height: 22.0,
-                  width: 22.0,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF261700)),
-                  ),
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        widget.label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontFamily: 'Rubik',
-                          color: Color(0xFF261700),
-                          fontWeight: FontWeight.w900,
-                          fontSize: 15.5,
-                          letterSpacing: 0.2,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8.0),
-                    const Icon(
-                      Icons.arrow_forward_rounded,
-                      size: 20.0,
-                      color: Color(0xFF261700),
-                    ),
-                  ],
-                ),
-        ),
-      ),
     );
   }
 }

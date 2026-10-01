@@ -264,25 +264,27 @@ class _GameButtonState extends State<GameButton> {
             // Extruded 3D base layer
             color: _isClickable
                 ? widget.extrusionColor
-                : widget.extrusionColor.withValues(alpha: 0.5),
+                : widget.extrusionColor.withValues(alpha: 0.55),
             borderRadius: BorderRadius.circular(outerRadius),
             border: Border.all(
               color: _isClickable
                   ? widget.outlineColor
-                  : widget.outlineColor.withValues(alpha: 0.5),
+                  : widget.outlineColor.withValues(alpha: 0.45),
               width: widget.outlineWidth,
             ),
             boxShadow: [
               // Ambient ground drop shadow
               BoxShadow(
                 color: Colors.black.withValues(
-                  alpha: _isPressed && _isClickable ? 0.25 : 0.40,
+                  alpha: _isClickable
+                      ? (_isPressed ? 0.25 : 0.40)
+                      : 0.12,
                 ),
-                offset: Offset(0, _isPressed && _isClickable ? 3.0 : 7.0),
-                blurRadius: _isPressed && _isClickable ? 5.0 : 12.0,
+                offset: Offset(0, _isPressed && _isClickable ? 3.0 : (_isClickable ? 7.0 : 3.0)),
+                blurRadius: _isPressed && _isClickable ? 5.0 : (_isClickable ? 12.0 : 6.0),
               ),
-              // Optional ambient color glow
-              if (widget.glowColor != null && (!_isPressed || !_isClickable))
+              // Optional ambient color glow (only when active and not pressed)
+              if (widget.glowColor != null && _isClickable && !_isPressed)
                 BoxShadow(
                   color: widget.glowColor!.withValues(alpha: 0.35),
                   offset: const Offset(0, 4.0),
@@ -297,7 +299,7 @@ class _GameButtonState extends State<GameButton> {
             decoration: BoxDecoration(
               color: _isClickable
                   ? widget.faceColor
-                  : widget.faceColor.withValues(alpha: 0.5),
+                  : widget.faceColor.withValues(alpha: 0.55),
               borderRadius: BorderRadius.circular(innerRadius),
             ),
             child: Stack(
@@ -313,14 +315,16 @@ class _GameButtonState extends State<GameButton> {
                     height: 2.0,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.45),
+                        color: Colors.white.withValues(
+                          alpha: _isClickable ? 0.45 : 0.15,
+                        ),
                         borderRadius: BorderRadius.circular(999.0),
                       ),
                     ),
                   ),
 
                 // Pill-shaped glare in the absolute top-right corner
-                if (widget.showHighlights)
+                if (widget.showHighlights && _isClickable)
                   Positioned(
                     top: 5.0,
                     right: 12.0,
@@ -371,7 +375,7 @@ class _GameButtonState extends State<GameButton> {
                                       fontWeight: widget.fontWeight,
                                       fontSize: widget.fontSize,
                                       letterSpacing: 0.2,
-                                      shadows: widget.textShadowColor != null
+                                      shadows: _isClickable && widget.textShadowColor != null
                                           ? [
                                               Shadow(
                                                 color: widget.textShadowColor!,

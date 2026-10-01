@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:pico/features/auth/domain/auth_state.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
+
 import '../data/tournament_repository.dart';
 import '../domain/private_league.dart';
 
@@ -24,7 +25,9 @@ class PrivateLeagueController extends _$PrivateLeagueController {
 
     try {
       final authState = ref.read(authProvider);
-      final userId = authState is PicoAuthAuthenticated ? authState.user?.id : null;
+      final userId = authState is PicoAuthAuthenticated
+          ? authState.user?.id
+          : null;
       if (userId == null) {
         throw Exception('Must be logged in to create a private league');
       }
@@ -61,14 +64,14 @@ class PrivateLeagueController extends _$PrivateLeagueController {
   }
 
   /// Joins an existing private league via a 6-character uppercase alphanumeric code.
-  Future<PrivateLeague> joinLeague({
-    required String inviteCode,
-  }) async {
+  Future<PrivateLeague> joinLeague({required String inviteCode}) async {
     state = const AsyncLoading();
 
     try {
       final authState = ref.read(authProvider);
-      final userId = authState is PicoAuthAuthenticated ? authState.user?.id : null;
+      final userId = authState is PicoAuthAuthenticated
+          ? authState.user?.id
+          : null;
       if (userId == null) {
         throw Exception('Must be logged in to join a private league');
       }
@@ -98,7 +101,9 @@ class PrivateLeagueController extends _$PrivateLeagueController {
   /// Deletes a private league (Admin / Owner only).
   Future<void> deleteLeague(String leagueId) async {
     final authState = ref.read(authProvider);
-    final userId = authState is PicoAuthAuthenticated ? authState.user?.id : null;
+    final userId = authState is PicoAuthAuthenticated
+        ? authState.user?.id
+        : null;
     if (userId == null) {
       throw Exception('Must be logged in to delete a private league');
     }
@@ -117,7 +122,9 @@ class PrivateLeagueController extends _$PrivateLeagueController {
     required String targetUserId,
   }) async {
     final authState = ref.read(authProvider);
-    final adminUserId = authState is PicoAuthAuthenticated ? authState.user?.id : null;
+    final adminUserId = authState is PicoAuthAuthenticated
+        ? authState.user?.id
+        : null;
     if (adminUserId == null) {
       throw Exception('Must be logged in to remove a member');
     }
@@ -137,7 +144,9 @@ class PrivateLeagueController extends _$PrivateLeagueController {
   /// Allows a member to leave a private league.
   Future<void> leaveLeague(String leagueId) async {
     final authState = ref.read(authProvider);
-    final userId = authState is PicoAuthAuthenticated ? authState.user?.id : null;
+    final userId = authState is PicoAuthAuthenticated
+        ? authState.user?.id
+        : null;
     if (userId == null) {
       throw Exception('Must be logged in to leave a private league');
     }

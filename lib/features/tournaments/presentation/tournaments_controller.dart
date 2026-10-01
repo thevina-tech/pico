@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import '../data/tournament_repository.dart';
 
 part 'tournaments_controller.g.dart';
@@ -8,15 +9,9 @@ class TournamentsState {
   final int activeTab; // 0 = My Leagues, 1 = Discover
   final bool isRefreshing;
 
-  const TournamentsState({
-    this.activeTab = 0,
-    this.isRefreshing = false,
-  });
+  const TournamentsState({this.activeTab = 0, this.isRefreshing = false});
 
-  TournamentsState copyWith({
-    int? activeTab,
-    bool? isRefreshing,
-  }) {
+  TournamentsState copyWith({int? activeTab, bool? isRefreshing}) {
     return TournamentsState(
       activeTab: activeTab ?? this.activeTab,
       isRefreshing: isRefreshing ?? this.isRefreshing,

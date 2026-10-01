@@ -239,11 +239,11 @@ void main() {
       expect(find.text('PREDICT NOW'), findsOneWidget);
 
       // 5. Verify How to Play Section
-      expect(find.text('HOW TO'), findsOneWidget);
-      expect(find.text('PLAY'), findsOneWidget);
-      expect(find.textContaining('CHOOSE'), findsOneWidget);
-      expect(find.textContaining('PREDICTION'), findsOneWidget);
-      expect(find.textContaining('POINTS'), findsOneWidget);
+      expect(find.byKey(const Key('how_to_play_card')), findsOneWidget);
+      expect(find.text('How to Play'), findsOneWidget);
+      expect(find.text('MANUAL'), findsOneWidget);
+      expect(find.text('Read Guide'), findsOneWidget);
+      expect(find.text('Official Rules & Scoring ...'), findsOneWidget);
     });
 
     testWidgets('Tapping predict on special event card triggers prediction flow',
@@ -337,8 +337,8 @@ void main() {
 
       // Verify Special Event Card and How to Play section are displayed
       expect(find.text('EL CLÁSICO'), findsOneWidget);
-      expect(find.text('HOW TO'), findsOneWidget);
-      expect(find.text('PLAY'), findsOneWidget);
+      expect(find.byKey(const Key('how_to_play_card')), findsOneWidget);
+      expect(find.text('How to Play'), findsOneWidget);
     });
 
     testWidgets('Android device back button triggers game exit options modal',

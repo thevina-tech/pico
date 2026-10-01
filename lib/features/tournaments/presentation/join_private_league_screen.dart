@@ -7,7 +7,7 @@ import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/core/utils/input_sanitizer.dart';
 import 'package:pico/features/tournaments/domain/private_league_exceptions.dart';
 import 'package:pico/features/tournaments/presentation/private_league_controller.dart';
-import 'package:pico/shared/components/pico_button.dart';
+import 'package:pico/shared/components/game_button.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/shared/components/pico_snackbar.dart';
@@ -98,10 +98,7 @@ class _JoinPrivateLeagueScreenState
           e.toString().toLowerCase().contains('league is full') ||
           e.toString().toLowerCase().contains('full')) {
         errorDisplay = l10n.leagueCapacityReachedError;
-        PicoSnackBar.showError(
-          context,
-          l10n.leagueCapacityReachedError,
-        );
+        PicoSnackBar.showError(context, l10n.leagueCapacityReachedError);
       } else if (e is LeagueNotFoundException) {
         errorDisplay = l10n.invalidLeagueCodeError;
       } else if (e is LeagueCreatorCannotRejoinException) {
@@ -148,164 +145,134 @@ class _JoinPrivateLeagueScreenState
           onBack: () => Navigator.of(context).pop(),
           actions: [
             IconButton(
-              icon: const Icon(Icons.close_rounded, color: PicoColors.textWhiteMuted),
+              icon: const Icon(
+                Icons.close_rounded,
+                color: PicoColors.textWhiteMuted,
+              ),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],
         ),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 440.0),
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 24.0),
-              children: [
-                // Atmosphere Hero Card
-                _buildHeroHeader(l10n),
-                const SizedBox(height: 20.0),
+        body: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440.0),
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 24.0),
+                children: [
+                  // Atmosphere Hero Card
+                  _buildHeroHeader(l10n),
+                  const SizedBox(height: 20.0),
 
-                // Code Input Card
-                Container(
-                  padding: const EdgeInsets.all(18.0),
-                  decoration: BoxDecoration(
-                    color: PicoColors.darkTray,
-                    borderRadius: BorderRadius.circular(20.0),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.08),
-                      width: 1.0,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header with Paste Button
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.pin_rounded,
-                                size: 16.0,
-                                color: PicoColors.primary,
-                              ),
-                              const SizedBox(width: 6.0),
-                              Text(
-                                l10n.enterLeagueCodeLabel,
-                                style: PicoTypography.labelPillSm.copyWith(
-                                  color: PicoColors.textWhiteMuted,
-                                  letterSpacing: 1.1,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                          // Paste button
-                          InkWell(
-                            onTap: _handlePaste,
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10.0,
-                                vertical: 4.0,
-                              ),
-                              decoration: BoxDecoration(
-                                color: PicoColors.primary.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(8.0),
-                                border: Border.all(
-                                  color: PicoColors.primary.withValues(alpha: 0.3),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.content_paste_rounded,
-                                    size: 13.0,
-                                    color: PicoColors.primary,
-                                  ),
-                                  const SizedBox(width: 4.0),
-                                  Text(
-                                    l10n.pasteCode,
-                                    style: PicoTypography.bodySm.copyWith(
-                                      color: PicoColors.primary,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 12.0,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16.0),
-
-                      // Segmented 6-Box Character Display (Tap to type)
-                      GestureDetector(
-                        onTap: () => _focusNode.requestFocus(),
-                        child: _buildSegmentedDisplay(currentCode),
-                      ),
-
-                      // Off-screen TextField capturing keyboard input
-                      Opacity(
-                        opacity: 0.0,
-                        child: SizedBox(
-                          height: 1.0,
-                          child: TextField(
-                            controller: _codeController,
-                            focusNode: _focusNode,
-                            maxLength: 6,
-                            textCapitalization: TextCapitalization.characters,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                RegExp(r'[a-zA-Z0-9]'),
-                              ),
-                              UpperCaseTextFormatter(),
-                            ],
-                            onChanged: (_) {
-                              setState(() {
-                                _errorMessage = null;
-                              });
-                            },
-                            onSubmitted: (_) => _handleJoin(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-
-                // Error Banner if any
-                if (_errorMessage != null) ...[
+                  // Code Input Card
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14.0,
-                      vertical: 10.0,
-                    ),
+                    padding: const EdgeInsets.all(18.0),
                     decoration: BoxDecoration(
-                      color: PicoColors.errorContainer,
-                      borderRadius: BorderRadius.circular(12.0),
+                      color: PicoColors.darkTray,
+                      borderRadius: BorderRadius.circular(20.0),
                       border: Border.all(
-                        color: PicoColors.errorBorder,
+                        color: Colors.white.withValues(alpha: 0.08),
                         width: 1.0,
                       ),
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
-                          Icons.error_outline_rounded,
-                          color: PicoColors.error,
-                          size: 18.0,
+                        // Header with Paste Button
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.pin_rounded,
+                                  size: 16.0,
+                                  color: PicoColors.primary,
+                                ),
+                                const SizedBox(width: 6.0),
+                                Text(
+                                  l10n.enterLeagueCodeLabel,
+                                  style: PicoTypography.labelPillSm.copyWith(
+                                    color: PicoColors.textWhiteMuted,
+                                    letterSpacing: 1.1,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            // Paste button
+                            InkWell(
+                              onTap: _handlePaste,
+                              borderRadius: BorderRadius.circular(8.0),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10.0,
+                                  vertical: 4.0,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: PicoColors.primary.withValues(
+                                    alpha: 0.2,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  border: Border.all(
+                                    color: PicoColors.primary.withValues(
+                                      alpha: 0.3,
+                                    ),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.content_paste_rounded,
+                                      size: 13.0,
+                                      color: PicoColors.primary,
+                                    ),
+                                    const SizedBox(width: 4.0),
+                                    Text(
+                                      l10n.pasteCode,
+                                      style: PicoTypography.bodySm.copyWith(
+                                        color: PicoColors.primary,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 12.0,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8.0),
-                        Expanded(
-                          child: Text(
-                            _errorMessage!,
-                            style: PicoTypography.bodySm.copyWith(
-                              color: PicoColors.errorText,
-                              fontWeight: FontWeight.w600,
+                        const SizedBox(height: 16.0),
+
+                        // Segmented 6-Box Character Display (Tap to type)
+                        GestureDetector(
+                          onTap: () => _focusNode.requestFocus(),
+                          child: _buildSegmentedDisplay(currentCode),
+                        ),
+
+                        // Off-screen TextField capturing keyboard input
+                        Opacity(
+                          opacity: 0.0,
+                          child: SizedBox(
+                            height: 1.0,
+                            child: TextField(
+                              controller: _codeController,
+                              focusNode: _focusNode,
+                              maxLength: 6,
+                              textCapitalization: TextCapitalization.characters,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'[a-zA-Z0-9]'),
+                                ),
+                                UpperCaseTextFormatter(),
+                              ],
+                              onChanged: (_) {
+                                setState(() {
+                                  _errorMessage = null;
+                                });
+                              },
+                              onSubmitted: (_) => _handleJoin(),
                             ),
                           ),
                         ),
@@ -313,42 +280,86 @@ class _JoinPrivateLeagueScreenState
                     ),
                   ),
                   const SizedBox(height: 16.0),
-                ],
 
-                // Join CTA Button (Tactile Gold Button)
-                ElevatedButton(
-                  onPressed: _isLoading || currentCode.length != 6
-                      ? null
-                      : _handleJoin,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    surfaceTintColor: Colors.transparent,
-                    elevation: 0,
-                    padding: EdgeInsets.zero,
-                    minimumSize: const Size(double.infinity, 52.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.0),
+                  // Error Banner if any
+                  if (_errorMessage != null) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14.0,
+                        vertical: 10.0,
+                      ),
+                      decoration: BoxDecoration(
+                        color: PicoColors.errorContainer,
+                        borderRadius: BorderRadius.circular(12.0),
+                        border: Border.all(
+                          color: PicoColors.errorBorder,
+                          width: 1.0,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.error_outline_rounded,
+                            color: PicoColors.error,
+                            size: 18.0,
+                          ),
+                          const SizedBox(width: 8.0),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: PicoTypography.bodySm.copyWith(
+                                color: PicoColors.errorText,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  child: PicoButton.gold(
-                    text: l10n.joinLeagueButton,
-                    isLoading: _isLoading,
-                    height: 52.0,
-                    borderRadius: 16.0,
-                    onPressed: _isLoading || currentCode.length != 6
+                    const SizedBox(height: 16.0),
+                  ],
+
+                  // Join CTA Button (Tactile 3D GameButton)
+                  GameButton.gold(
+                    key: const Key('join_private_league_submit_button'),
+                    text: _isLoading ? '' : l10n.joinLeagueButton,
+                    icon: _isLoading
                         ? null
-                        : _handleJoin,
+                        : const Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Colors.white,
+                            size: 18.0,
+                          ),
+                    width: double.infinity,
+                    height: 52.0,
+                    extrusionHeight: 5.0,
+                    borderRadius: 16.0,
+                    fontSize: 15.5,
+                    enabled: !_isLoading && currentCode.length == 6,
+                    onPressed: !_isLoading && currentCode.length == 6
+                        ? _handleJoin
+                        : null,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20.0,
+                            width: 20.0,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : null,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildHeroHeader(AppLocalizations l10n) {
     return Container(
@@ -357,11 +368,7 @@ class _JoinPrivateLeagueScreenState
         gradient: const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF0A1A12),
-            Color(0xFF0D2319),
-            Color(0xFF050D09),
-          ],
+          colors: [Color(0xFF0A1A12), Color(0xFF0D2319), Color(0xFF050D09)],
         ),
         borderRadius: BorderRadius.circular(22.0),
         border: Border.all(
@@ -474,8 +481,8 @@ class _JoinPrivateLeagueScreenState
                 color: isCurrent
                     ? PicoColors.primary
                     : (hasChar
-                        ? PicoColors.primary.withValues(alpha: 0.5)
-                        : Colors.white.withValues(alpha: 0.1)),
+                          ? PicoColors.primary.withValues(alpha: 0.5)
+                          : Colors.white.withValues(alpha: 0.1)),
                 width: isCurrent ? 2.0 : 1.0,
               ),
               boxShadow: [
@@ -499,15 +506,15 @@ class _JoinPrivateLeagueScreenState
                     ),
                   )
                 : (isCurrent
-                    ? Container(
-                        width: 2.0,
-                        height: 22.0,
-                        decoration: BoxDecoration(
-                          color: PicoColors.primary,
-                          borderRadius: BorderRadius.circular(2.0),
-                        ),
-                      )
-                    : null),
+                      ? Container(
+                          width: 2.0,
+                          height: 22.0,
+                          decoration: BoxDecoration(
+                            color: PicoColors.primary,
+                            borderRadius: BorderRadius.circular(2.0),
+                          ),
+                        )
+                      : null),
           );
         }),
       ),

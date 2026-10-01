@@ -11,6 +11,7 @@ import 'package:pico/features/predictions/presentation/prediction_controller.dar
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/game_button.dart';
 import 'package:pico/shared/components/game_exit_dialog.dart';
+import 'package:pico/shared/components/how_to_play_card.dart';
 import 'package:pico/shared/components/pico_button.dart';
 import 'package:pico/features/profile/presentation/help_support_screen.dart';
 import 'package:pico/features/profile/presentation/settings_screen.dart';
@@ -118,8 +119,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                         const SizedBox(height: 14.0),
 
-                        // 3. Spotlight Tournament Card (Navigation -> /tournaments)
-                        _buildSpotlightTournamentCard(l10n),
+                        // 3. How to Play Card (Navigation -> In-App Browser Guide)
+                        const HowToPlayCard(
+                          margin: EdgeInsets.zero,
+                        ),
                         const SizedBox(height: 14.0),
 
                         // 4. Quick Actions (Rate App, Help/Support & Settings)
@@ -355,119 +358,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // 3. SPOTLIGHT TOURNAMENT BANNER
-  // ---------------------------------------------------------------------------
-  Widget _buildSpotlightTournamentCard(AppLocalizations? l10n) {
-    final title = l10n?.tournamentsAccordionTitle ?? 'Tournaments';
-    final subtitle =
-        l10n?.tournamentsAccordionSubtitle ?? 'Active cups & weekly leagues';
-    final activePill = l10n?.tournamentsActiveCount(2) ?? '2 Active';
-
-    return _TactileCard(
-      key: const Key('profile_tournaments_card'),
-      onTap: () => context.go('/tournaments'),
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // Subtle soccer ball watermark on the right
-          Positioned(
-            right: 28.0,
-            bottom: -22.0,
-            child: Opacity(
-              opacity: 0.15,
-              child: Icon(
-                Icons.sports_soccer_rounded,
-                size: 96.0,
-                color: const Color(0xFF6EE7B7).withValues(alpha: 0.6),
-              ),
-            ),
-          ),
-
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Trophy Icon in emerald badge
-              Container(
-                width: 44.0,
-                height: 44.0,
-                decoration: BoxDecoration(
-                  color: const Color(0x2610B981),
-                  borderRadius: BorderRadius.circular(12.0),
-                  border: Border.all(
-                    color: const Color(0x4D34D399),
-                    width: 1.0,
-                  ),
-                ),
-                child: const Icon(
-                  Icons.emoji_events_rounded,
-                  color: Color(0xFF34D399),
-                  size: 24.0,
-                ),
-              ),
-              const SizedBox(width: 12.0),
-
-              // Title, Subtitle, Active Tag
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: PicoTypography.headlineMd.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15.0,
-                      ),
-                    ),
-                    const SizedBox(height: 2.0),
-                    Text(
-                      subtitle,
-                      style: PicoTypography.bodySm.copyWith(
-                        color: const Color(0xFFCBD5E1),
-                        fontSize: 11.5,
-                      ),
-                    ),
-                    const SizedBox(height: 6.0),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                        vertical: 2.5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0x3310B981),
-                        borderRadius: BorderRadius.circular(999.0),
-                        border: Border.all(
-                          color: const Color(0x4D34D399),
-                          width: 1.0,
-                        ),
-                      ),
-                      child: Text(
-                        activePill,
-                        style: PicoTypography.labelPillSm.copyWith(
-                          color: const Color(0xFF6EE7B7),
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10.0,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Navigation Arrow
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: Color(0xFF94A3B8),
-                size: 24.0,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
 
   // ---------------------------------------------------------------------------

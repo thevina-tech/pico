@@ -59,7 +59,9 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final membersAsync = ref.watch(privateLeagueMembersProvider(widget.league.id));
+    final membersAsync = ref.watch(
+      privateLeagueMembersProvider(widget.league.id),
+    );
     final members = membersAsync.value ?? widget.initialMembers;
 
     // Sort members by picoPoints descending
@@ -67,9 +69,13 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
       ..sort((a, b) => b.picoPoints.compareTo(a.picoPoints));
 
     final authState = ref.watch(authProvider);
-    final currentUserId = authState is PicoAuthAuthenticated ? authState.user?.id : null;
-    final isAdmin = currentUserId != null &&
-        (widget.league.effectiveAdminId == currentUserId || widget.league.ownerId == currentUserId);
+    final currentUserId = authState is PicoAuthAuthenticated
+        ? authState.user?.id
+        : null;
+    final isAdmin =
+        currentUserId != null &&
+        (widget.league.effectiveAdminId == currentUserId ||
+            widget.league.ownerId == currentUserId);
 
     final compsMap = ref.watch(competitionsMapProvider).value ?? {};
     final comp = widget.competition ?? compsMap[widget.league.competitionId];
@@ -163,8 +169,11 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
                   else
                     ...List.generate(sortedMembers.length, (index) {
                       final member = sortedMembers[index];
-                      final isCurrent = currentUserId != null && member.userId == currentUserId;
-                      final isMemberAdmin = member.userId == widget.league.effectiveAdminId;
+                      final isCurrent =
+                          currentUserId != null &&
+                          member.userId == currentUserId;
+                      final isMemberAdmin =
+                          member.userId == widget.league.effectiveAdminId;
 
                       return TactileLeaderboardCard(
                         rank: index + 1,
@@ -181,7 +190,8 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
                                   size: 18.0,
                                 ),
                                 tooltip: 'Kick from League',
-                                onPressed: () => _confirmKickMember(context, member),
+                                onPressed: () =>
+                                    _confirmKickMember(context, member),
                               )
                             : null,
                       );
@@ -212,7 +222,9 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
               decoration: BoxDecoration(
                 color: const Color(0xFF1E2D3D),
                 shape: BoxShape.circle,
-                border: Border.all(color: PicoColors.primary.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: PicoColors.primary.withValues(alpha: 0.3),
+                ),
               ),
               child: const Icon(
                 Icons.shield_rounded,
@@ -237,11 +249,17 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
             if (isAdmin) ...[
               const SizedBox(width: 8.0),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 3.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0,
+                  vertical: 3.0,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFD41D).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8.0),
-                  border: Border.all(color: const Color(0xFFFFD41D), width: 1.0),
+                  border: Border.all(
+                    color: const Color(0xFFFFD41D),
+                    width: 1.0,
+                  ),
                 ),
                 child: Text(
                   'ADMIN',
@@ -260,7 +278,7 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
           Text(
             widget.league.description.trim(),
             style: PicoTypography.bodySm.copyWith(
-              color: PicoColors.textWhiteMuted,
+              color: const Color(0xFFF9F8F3),
               fontSize: 13.0,
             ),
             textAlign: TextAlign.center,
@@ -270,7 +288,10 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
         if (comp != null || widget.league.competitionName.isNotEmpty) ...[
           const SizedBox(height: 8.0),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10.0,
+              vertical: 4.0,
+            ),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(999.0),
@@ -289,7 +310,7 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
                 Text(
                   'Base: ${comp?.name ?? widget.league.competitionName}',
                   style: PicoTypography.bodySm.copyWith(
-                    color: PicoColors.textWhiteMuted,
+                    color: const Color(0xFFF9F8F3),
                     fontSize: 12.0,
                     fontWeight: FontWeight.w600,
                   ),
@@ -342,7 +363,9 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
           // Copy button
           IconButton(
             onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: widget.league.inviteCode));
+              await Clipboard.setData(
+                ClipboardData(text: widget.league.inviteCode),
+              );
               if (!context.mounted) return;
               setState(() => _hasCopiedCode = true);
               final l10n = AppLocalizations.of(context);
@@ -367,7 +390,8 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
             onPressed: () {
               SharePlus.instance.share(
                 ShareParams(
-                  text: 'Join my prediction league "${widget.league.name}" on Pico! Use invite code: ${widget.league.inviteCode}',
+                  text:
+                      'Join my prediction league "${widget.league.name}" on Pico! Use invite code: ${widget.league.inviteCode}',
                 ),
               );
             },
@@ -390,7 +414,9 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
       decoration: BoxDecoration(
         color: const Color(0xFF1E1417),
         borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(color: PicoColors.accentCoral.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: PicoColors.accentCoral.withValues(alpha: 0.3),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -415,12 +441,19 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
             ],
           ),
           OutlinedButton.icon(
-            onPressed: _isProcessing ? null : () => _confirmDeleteLeague(context),
+            onPressed: _isProcessing
+                ? null
+                : () => _confirmDeleteLeague(context),
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Color(0x66EF4444), width: 1.2),
               backgroundColor: const Color(0x1AEF4444),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12.0,
+                vertical: 8.0,
+              ),
             ),
             icon: const Icon(
               Icons.delete_forever_rounded,
@@ -442,7 +475,11 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
   }
 
   /// Leave League button wired to RPC
-  Widget _buildLeaveLeagueButton(BuildContext context, String? currentUserId, bool isAdmin) {
+  Widget _buildLeaveLeagueButton(
+    BuildContext context,
+    String? currentUserId,
+    bool isAdmin,
+  ) {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
@@ -452,7 +489,9 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
         style: OutlinedButton.styleFrom(
           side: const BorderSide(color: Color(0x66EF4444), width: 1.2),
           backgroundColor: const Color(0x1AEF4444),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.0)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14.0),
+          ),
           padding: const EdgeInsets.symmetric(vertical: 12.0),
         ),
         icon: const Icon(
@@ -472,8 +511,6 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
     );
   }
 
-
-
   /// Confirmation dialog for Deleting League (Admin Only)
   Future<void> _confirmDeleteLeague(BuildContext context) async {
     final confirmed = await showPicoConfirmationModal(
@@ -491,7 +528,9 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
 
     setState(() => _isProcessing = true);
     try {
-      await ref.read(privateLeagueControllerProvider.notifier).deleteLeague(widget.league.id);
+      await ref
+          .read(privateLeagueControllerProvider.notifier)
+          .deleteLeague(widget.league.id);
       if (!mounted) return;
       Navigator.of(this.context).pop(); // Close bottom sheet
       this.context.go('/tournaments'); // Navigate back to Tournaments screen
@@ -501,7 +540,8 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
       final l10n = AppLocalizations.of(this.context);
       PicoSnackBar.showError(
         this.context,
-        l10n?.failedToDeleteLeague(e.toString()) ?? 'Failed to delete league: $e',
+        l10n?.failedToDeleteLeague(e.toString()) ??
+            'Failed to delete league: $e',
       );
     }
   }
@@ -566,7 +606,8 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
     final confirmed = await showPicoConfirmationModal(
       context: context,
       title: 'Kick $memberName?',
-      message: 'Are you sure you want to remove $memberName from "${widget.league.name}"?',
+      message:
+          'Are you sure you want to remove $memberName from "${widget.league.name}"?',
       cancelText: 'Cancel',
       confirmText: 'Kick',
       confirmStyle: PicoDialogButtonStyle.red,
@@ -577,7 +618,9 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
 
     try {
       final authState = ref.read(authProvider);
-      final adminUserId = authState is PicoAuthAuthenticated ? authState.user?.id : null;
+      final adminUserId = authState is PicoAuthAuthenticated
+          ? authState.user?.id
+          : null;
       if (adminUserId == null) return;
 
       final repo = ref.read(tournamentRepositoryProvider);
@@ -594,7 +637,8 @@ class _LeagueDetailsSheetState extends ConsumerState<LeagueDetailsSheet> {
       final l10n = AppLocalizations.of(this.context);
       PicoSnackBar.showSuccess(
         this.context,
-        l10n?.memberRemovedFromLeague(memberName) ?? '$memberName has been removed from the league.',
+        l10n?.memberRemovedFromLeague(memberName) ??
+            '$memberName has been removed from the league.',
       );
     } catch (e) {
       if (!mounted) return;

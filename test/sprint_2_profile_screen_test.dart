@@ -162,11 +162,12 @@ void main() {
       await tester.pumpWidget(createSubject());
       await tester.pumpAndSettle();
 
-      // Spotlight Tournament card
-      expect(find.text('Tournaments'), findsOneWidget);
-      expect(find.text('Active cups & weekly leagues'), findsOneWidget);
-      expect(find.text('2 Active'), findsOneWidget);
-      expect(find.byKey(const Key('profile_tournaments_card')), findsOneWidget);
+      // How to Play card replaces Spotlight Tournament card
+      expect(find.byKey(const Key('how_to_play_card')), findsOneWidget);
+      expect(find.text('How to Play'), findsOneWidget);
+      expect(find.text('MANUAL'), findsOneWidget);
+      expect(find.text('Read Guide'), findsOneWidget);
+      expect(find.byKey(const Key('profile_tournaments_card')), findsNothing);
 
       // Following and History Hub Cards are removed
       expect(find.byKey(const Key('profile_following_card')), findsNothing);

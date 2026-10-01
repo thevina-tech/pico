@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,6 +20,7 @@ import 'package:pico/features/tournaments/presentation/public_tournament_screen.
 import 'package:pico/features/tournaments/presentation/private_tournament_screen.dart';
 import 'package:pico/features/tournaments/domain/league_message.dart';
 import 'package:pico/features/tournaments/presentation/tournaments_screen.dart';
+import 'package:pico/shared/components/game_button.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
@@ -28,14 +30,54 @@ class _FakeTournamentRepository implements TournamentRepository {
   final Map<String, List<PrivateLeagueMember>> leagueMembers = {};
   final Map<String, List<LeagueMessage>> leagueMessagesMap = {};
   final List<Competition> competitions = [
-    const Competition(id: '1', name: 'Primera División (La Liga)', shortName: 'La Liga', flag: '🇪🇸'),
-    const Competition(id: '10', name: 'Premier League', shortName: 'Premier League', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿'),
-    const Competition(id: '7', name: 'Serie A', shortName: 'Serie A', flag: '🇮🇹'),
-    const Competition(id: '8', name: 'Bundesliga', shortName: 'Bundesliga', flag: '🇩🇪'),
-    const Competition(id: '16', name: 'Ligue 1', shortName: 'Ligue 1', flag: '🇫🇷'),
-    const Competition(id: '107', name: 'Champions League', shortName: 'UCL', flag: '⭐'),
-    const Competition(id: '117', name: 'Europa League', shortName: 'UEL', flag: '🟠'),
-    const Competition(id: '2492', name: 'Conference League', shortName: 'UECL', flag: '🟢'),
+    const Competition(
+      id: '1',
+      name: 'Primera División (La Liga)',
+      shortName: 'La Liga',
+      flag: '🇪🇸',
+    ),
+    const Competition(
+      id: '10',
+      name: 'Premier League',
+      shortName: 'Premier League',
+      flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+    ),
+    const Competition(
+      id: '7',
+      name: 'Serie A',
+      shortName: 'Serie A',
+      flag: '🇮🇹',
+    ),
+    const Competition(
+      id: '8',
+      name: 'Bundesliga',
+      shortName: 'Bundesliga',
+      flag: '🇩🇪',
+    ),
+    const Competition(
+      id: '16',
+      name: 'Ligue 1',
+      shortName: 'Ligue 1',
+      flag: '🇫🇷',
+    ),
+    const Competition(
+      id: '107',
+      name: 'Champions League',
+      shortName: 'UCL',
+      flag: '⭐',
+    ),
+    const Competition(
+      id: '117',
+      name: 'Europa League',
+      shortName: 'UEL',
+      flag: '🟠',
+    ),
+    const Competition(
+      id: '2492',
+      name: 'Conference League',
+      shortName: 'UECL',
+      flag: '🟢',
+    ),
   ];
 
   @override
@@ -74,10 +116,13 @@ class _FakeTournamentRepository implements TournamentRepository {
   }
 
   @override
-  Future<List<TournamentParticipant>> getParticipantsForUser(String userId) async => [];
+  Future<List<TournamentParticipant>> getParticipantsForUser(
+    String userId,
+  ) async => [];
 
   @override
-  Future<List<PrivateLeague>> getUserPrivateLeagues(String userId) async => privateLeagues;
+  Future<List<PrivateLeague>> getUserPrivateLeagues(String userId) async =>
+      privateLeagues;
 
   @override
   Future<PrivateLeague> createPrivateLeague({
@@ -88,7 +133,9 @@ class _FakeTournamentRepository implements TournamentRepository {
   }) async {
     final allowedIds = competitions.map((c) => c.id).toSet();
     if (!allowedIds.contains(competitionId)) {
-      throw ArgumentError('Competition $competitionId is not permitted for Sprint 4');
+      throw ArgumentError(
+        'Competition $competitionId is not permitted for Sprint 4',
+      );
     }
     final league = PrivateLeague(
       id: 'pl_${DateTime.now().millisecondsSinceEpoch}',
@@ -137,7 +184,9 @@ class _FakeTournamentRepository implements TournamentRepository {
   }
 
   @override
-  Future<List<PrivateLeagueMember>> getPrivateLeagueMembers(String leagueId) async {
+  Future<List<PrivateLeagueMember>> getPrivateLeagueMembers(
+    String leagueId,
+  ) async {
     return leagueMembers[leagueId] ?? [];
   }
 
@@ -147,7 +196,9 @@ class _FakeTournamentRepository implements TournamentRepository {
   }
 
   @override
-  Future<List<TournamentParticipant>> getTournamentLeaderboard(String tournamentId) async {
+  Future<List<TournamentParticipant>> getTournamentLeaderboard(
+    String tournamentId,
+  ) async {
     return [
       TournamentParticipant(
         tournamentId: tournamentId,
@@ -172,7 +223,10 @@ class _FakeTournamentRepository implements TournamentRepository {
   }
 
   @override
-  Future<void> deletePrivateLeague({required String leagueId, required String userId}) async {
+  Future<void> deletePrivateLeague({
+    required String leagueId,
+    required String userId,
+  }) async {
     final league = privateLeagues.firstWhere(
       (l) => l.id == leagueId,
       orElse: () => throw const LeagueNotFoundException(),
@@ -204,7 +258,10 @@ class _FakeTournamentRepository implements TournamentRepository {
   }
 
   @override
-  Future<void> leavePrivateLeague({required String leagueId, required String userId}) async {
+  Future<void> leavePrivateLeague({
+    required String leagueId,
+    required String userId,
+  }) async {
     final league = privateLeagues.firstWhere(
       (l) => l.id == leagueId,
       orElse: () => throw const LeagueNotFoundException(),
@@ -216,7 +273,10 @@ class _FakeTournamentRepository implements TournamentRepository {
   }
 
   @override
-  Future<List<LeagueMessage>> getLeagueMessages(String leagueId, {int limit = 50}) async {
+  Future<List<LeagueMessage>> getLeagueMessages(
+    String leagueId, {
+    int limit = 50,
+  }) async {
     return List<LeagueMessage>.from(leagueMessagesMap[leagueId] ?? []);
   }
 
@@ -419,32 +479,39 @@ void main() {
       );
     });
 
-    test('Join private league handles case-insensitive 6-character code', () async {
-      final repo = _FakeTournamentRepository();
-      await repo.createPrivateLeague(
-        name: 'La Liga Fans',
-        competitionId: '1',
-        userId: 'test_owner_123',
-      );
+    test(
+      'Join private league handles case-insensitive 6-character code',
+      () async {
+        final repo = _FakeTournamentRepository();
+        await repo.createPrivateLeague(
+          name: 'La Liga Fans',
+          competitionId: '1',
+          userId: 'test_owner_123',
+        );
 
-      // Join with lowercase version
-      final joined = await repo.joinPrivateLeagueByCode(
-        inviteCode: 'pico99',
-        userId: 'joiner_456',
-      );
-      expect(joined.name, equals('La Liga Fans'));
+        // Join with lowercase version
+        final joined = await repo.joinPrivateLeagueByCode(
+          inviteCode: 'pico99',
+          userId: 'joiner_456',
+        );
+        expect(joined.name, equals('La Liga Fans'));
 
-      // Reject invalid lengths
-      expect(
-        () => repo.joinPrivateLeagueByCode(inviteCode: '12345', userId: 'user'),
-        throwsArgumentError,
-      );
-    });
+        // Reject invalid lengths
+        expect(
+          () =>
+              repo.joinPrivateLeagueByCode(inviteCode: '12345', userId: 'user'),
+          throwsArgumentError,
+        );
+      },
+    );
 
     test('Join private league throws LeagueNotFoundException for non-existent code', () async {
       final repo = _FakeTournamentRepository();
       expect(
-        () => repo.joinPrivateLeagueByCode(inviteCode: 'ZZZZZZ', userId: 'user_456'),
+        () => repo.joinPrivateLeagueByCode(
+          inviteCode: 'ZZZZZZ',
+          userId: 'user_456',
+        ),
         throwsA(isA<LeagueNotFoundException>()),
       );
     });
@@ -458,7 +525,10 @@ void main() {
       );
 
       expect(
-        () => repo.joinPrivateLeagueByCode(inviteCode: 'PICO99', userId: 'test_owner_123'),
+        () => repo.joinPrivateLeagueByCode(
+          inviteCode: 'PICO99',
+          userId: 'test_owner_123',
+        ),
         throwsA(isA<LeagueCreatorCannotRejoinException>()),
       );
     });
@@ -481,7 +551,10 @@ void main() {
       );
 
       expect(
-        () => repo.joinPrivateLeagueByCode(inviteCode: 'PICO99', userId: 'already_member_456'),
+        () => repo.joinPrivateLeagueByCode(
+          inviteCode: 'PICO99',
+          userId: 'already_member_456',
+        ),
         throwsA(isA<LeagueAlreadyMemberException>()),
       );
     });
@@ -505,7 +578,10 @@ void main() {
       );
 
       expect(
-        () => repo.joinPrivateLeagueByCode(inviteCode: league.inviteCode, userId: 'user_26_attempt'),
+        () => repo.joinPrivateLeagueByCode(
+          inviteCode: league.inviteCode,
+          userId: 'user_26_attempt',
+        ),
         throwsA(isA<LeagueCapacityReachedException>()),
       );
     });
@@ -534,7 +610,9 @@ void main() {
       );
     }
 
-    testWidgets('TournamentsScreen renders tabs and switches between them', (tester) async {
+    testWidgets('TournamentsScreen renders tabs and switches between them', (
+      tester,
+    ) async {
       final repo = _FakeTournamentRepository();
       repo.tournaments.add(
         const Tournament(
@@ -544,7 +622,9 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(buildHarness(child: const TournamentsScreen(), repo: repo));
+      await tester.pumpWidget(
+        buildHarness(child: const TournamentsScreen(), repo: repo),
+      );
       await tester.pumpAndSettle();
 
       // Check header and tabs
@@ -560,262 +640,373 @@ void main() {
       expect(find.text('TOP-TIER PUBLIC TOURNAMENTS'), findsOneWidget);
     });
 
-    testWidgets('TournamentsScreen renders Clash-inspired 3D mobile-game Create/Join button with tactile physics', (tester) async {
-      final repo = _FakeTournamentRepository();
-      await tester.pumpWidget(buildHarness(child: const TournamentsScreen(), repo: repo));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'TournamentsScreen renders Clash-inspired 3D mobile-game Create/Join button with tactile physics',
+      (tester) async {
+        final repo = _FakeTournamentRepository();
+        await tester.pumpWidget(
+          buildHarness(child: const TournamentsScreen(), repo: repo),
+        );
+        await tester.pumpAndSettle();
 
-      final buttonFinder = find.text('+ Create / Join');
-      expect(buttonFinder, findsOneWidget);
+        final buttonFinder = find.text('+ Create / Join');
+        expect(buttonFinder, findsOneWidget);
 
-      // Verify the button text is styled with clean bold white typography with subtle shadow
-      final textWidget = tester.widget<Text>(buttonFinder);
-      expect(textWidget.style?.color, Colors.white);
-      expect(textWidget.style?.fontWeight, FontWeight.w700);
-      expect(textWidget.style?.shadows, isNotNull);
-      expect(textWidget.style!.shadows!.isNotEmpty, isTrue);
+        // Verify the button text is styled with clean bold white typography with subtle shadow
+        final textWidget = tester.widget<Text>(buttonFinder);
+        expect(textWidget.style?.color, Colors.white);
+        expect(textWidget.style?.fontWeight, FontWeight.w700);
+        expect(textWidget.style?.shadows, isNotNull);
+        expect(textWidget.style!.shadows!.isNotEmpty, isTrue);
 
-      // Verify outer 3D extruded layer container has dark brown outline and amber base
-      final animatedContainer = tester.widget<AnimatedContainer>(
-        find.ancestor(of: buttonFinder, matching: find.byType(AnimatedContainer)).first,
-      );
-      final decoration = animatedContainer.decoration as BoxDecoration;
-      expect(decoration.color, const Color(0xFFB86000));
-      expect(decoration.borderRadius, BorderRadius.circular(22.0));
-      expect(decoration.border, isNotNull);
-      expect((decoration.border! as Border).top.color, const Color(0xFFB86600));
+        // Verify outer 3D extruded layer container has dark brown outline and amber base
+        final animatedContainer = tester.widget<AnimatedContainer>(
+          find
+              .ancestor(
+                of: buttonFinder,
+                matching: find.byType(AnimatedContainer),
+              )
+              .first,
+        );
+        final decoration = animatedContainer.decoration as BoxDecoration;
+        expect(decoration.color, const Color(0xFFB86000));
+        expect(decoration.borderRadius, BorderRadius.circular(22.0));
+        expect(decoration.border, isNotNull);
+        expect(
+          (decoration.border! as Border).top.color,
+          const Color(0xFFB86600),
+        );
 
-      // Verify inner container has solid yellow/orange background and clean surface
-      final innerContainer = tester.widgetList<Container>(
-        find.descendant(
-          of: find.ancestor(of: buttonFinder, matching: find.byType(AnimatedContainer)).first,
-          matching: find.byType(Container),
-        ),
-      ).firstWhere((c) => c.decoration is BoxDecoration && (c.decoration as BoxDecoration).color == const Color(0xFFFCCB2B));
-      final innerDecoration = innerContainer.decoration as BoxDecoration;
-      expect(innerDecoration.color, const Color(0xFFFCCB2B));
-      expect(innerDecoration.gradient, isNull);
-      expect(innerDecoration.border, isNull);
+        // Verify inner container has solid yellow/orange background and clean surface
+        final innerContainer = tester
+            .widgetList<Container>(
+              find.descendant(
+                of: find
+                    .ancestor(
+                      of: buttonFinder,
+                      matching: find.byType(AnimatedContainer),
+                    )
+                    .first,
+                matching: find.byType(Container),
+              ),
+            )
+            .firstWhere(
+              (c) =>
+                  c.decoration is BoxDecoration &&
+                  (c.decoration as BoxDecoration).color ==
+                      const Color(0xFFFCCB2B),
+            );
+        final innerDecoration = innerContainer.decoration as BoxDecoration;
+        expect(innerDecoration.color, const Color(0xFFFCCB2B));
+        expect(innerDecoration.gradient, isNull);
+        expect(innerDecoration.border, isNull);
 
-      // Verify glossy specular highlight is rendered
-      expect(
-        find.descendant(
-          of: find.ancestor(of: buttonFinder, matching: find.byType(AnimatedContainer)).first,
-          matching: find.byType(Transform),
-        ),
-        findsWidgets,
-      );
+        // Verify glossy specular highlight is rendered
+        expect(
+          find.descendant(
+            of: find
+                .ancestor(
+                  of: buttonFinder,
+                  matching: find.byType(AnimatedContainer),
+                )
+                .first,
+            matching: find.byType(Transform),
+          ),
+          findsWidgets,
+        );
 
-      // Tap button and verify modal opens with options
-      await tester.tap(buttonFinder);
-      await tester.pumpAndSettle();
+        // Tap button and verify modal opens with options
+        await tester.tap(buttonFinder);
+        await tester.pumpAndSettle();
 
-      expect(find.text('Create Private League'), findsWidgets);
-      expect(find.text('Join Private League'), findsOneWidget);
-    });
+        expect(find.text('Create Private League'), findsWidgets);
+        expect(find.text('Join Private League'), findsOneWidget);
+      },
+    );
 
-    testWidgets('TournamentsScreen renders public tournaments BEFORE private leagues', (tester) async {
-      final repo = _FakeTournamentRepository();
-      repo.tournaments.add(
-        const Tournament(
-          id: 't-1',
-          name: 'La Liga 2025/26',
-          competitionId: '1',
-        ),
-      );
-      repo.privateLeagues.add(
-        PrivateLeague(
-          id: 'pl-1',
-          name: 'Friends Private League',
-          ownerId: 'test_owner_123',
-          competitionId: '10',
-          inviteCode: 'CODE12',
-          createdAt: DateTime.now(),
-        ),
-      );
+    testWidgets(
+      'TournamentsScreen renders public tournaments BEFORE private leagues',
+      (tester) async {
+        final repo = _FakeTournamentRepository();
+        repo.tournaments.add(
+          const Tournament(
+            id: 't-1',
+            name: 'La Liga 2025/26',
+            competitionId: '1',
+          ),
+        );
+        repo.privateLeagues.add(
+          PrivateLeague(
+            id: 'pl-1',
+            name: 'Friends Private League',
+            ownerId: 'test_owner_123',
+            competitionId: '10',
+            inviteCode: 'CODE12',
+            createdAt: DateTime.now(),
+          ),
+        );
 
-      await tester.pumpWidget(buildHarness(child: const TournamentsScreen(), repo: repo));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          buildHarness(child: const TournamentsScreen(), repo: repo),
+        );
+        await tester.pumpAndSettle();
 
-      // Check both are rendered in My Leagues
-      expect(find.text('PICO TOURNAMENTS'), findsOneWidget);
-      expect(find.text('PRIVATE LEAGUES'), findsOneWidget);
+        // Check both are rendered in My Leagues
+        expect(find.text('PUBLIC TOURNAMENTS'), findsOneWidget);
+        expect(find.text('PRIVATE LEAGUES'), findsOneWidget);
 
-      // Verify vertical position: pico tournaments appear before private leagues
-      final publicPos = tester.getTopLeft(find.text('PICO TOURNAMENTS')).dy;
-      final privatePos = tester.getTopLeft(find.text('PRIVATE LEAGUES')).dy;
-      expect(publicPos, lessThan(privatePos));
-    });
+        // Verify vertical position: public tournaments appear before private leagues
+        final publicPos = tester.getTopLeft(find.text('PUBLIC TOURNAMENTS')).dy;
+        final privatePos = tester.getTopLeft(find.text('PRIVATE LEAGUES')).dy;
+        expect(publicPos, lessThan(privatePos));
+      },
+    );
 
-    testWidgets('CreatePrivateLeagueScreen strictly displays the 8 curated competitions', (tester) async {
-      final repo = _FakeTournamentRepository();
-      await tester.pumpWidget(
-        buildHarness(child: const CreatePrivateLeagueScreen(), repo: repo),
-      );
-      await tester.pumpAndSettle();
+    testWidgets(
+      'CreatePrivateLeagueScreen strictly displays the 8 curated competitions',
+      (tester) async {
+        final repo = _FakeTournamentRepository();
+        await tester.pumpWidget(
+          buildHarness(child: const CreatePrivateLeagueScreen(), repo: repo),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Create Private League'), findsWidgets);
-      expect(find.text('BASE TOURNAMENT / COMPETITION'), findsOneWidget);
-      expect(find.text('8 available'), findsOneWidget);
+        expect(find.text('Create Private League'), findsWidgets);
+        expect(find.text('BASE TOURNAMENT / COMPETITION'), findsOneWidget);
+        expect(find.text('8 available'), findsOneWidget);
 
-      // Initially prompts user to select a base competition
-      expect(find.text('Select Base Competition'), findsOneWidget);
+        // Initially prompts user to select a base competition
+        expect(find.text('Select Base Competition'), findsOneWidget);
 
-      // Scroll until the competition picker is visible
-      await tester.scrollUntilVisible(
-        find.text('Select Base Competition'),
-        50.0,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pumpAndSettle();
+        // Scroll until the competition picker is visible
+        await tester.scrollUntilVisible(
+          find.text('Select Base Competition'),
+          50.0,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.pumpAndSettle();
 
-      // Open the competition picker modal
-      await tester.tap(find.text('Select Base Competition'));
-      await tester.pumpAndSettle();
+        // Open the competition picker modal
+        await tester.tap(find.text('Select Base Competition'));
+        await tester.pumpAndSettle();
 
-      // Verify the modal title
-      expect(find.text('Select Base Tournament (8 Available)'), findsOneWidget);
+        // Verify the modal title
+        expect(
+          find.text('Select Base Tournament (8 Available)'),
+          findsOneWidget,
+        );
 
-      // Verify visible competitions in modal
-      expect(find.text('Premier League'), findsOneWidget);
-      expect(find.text('Serie A'), findsOneWidget);
+        // Verify visible competitions in modal
+        expect(find.text('Premier League'), findsOneWidget);
+        expect(find.text('Serie A'), findsOneWidget);
 
-      // Scroll to verify the later items
-      await tester.scrollUntilVisible(
-        find.text('Ligue 1'),
-        50.0,
-        scrollable: find.byType(Scrollable).last,
-      );
-      expect(find.text('Ligue 1'), findsOneWidget);
+        // Scroll to verify the later items
+        await tester.scrollUntilVisible(
+          find.text('Ligue 1'),
+          50.0,
+          scrollable: find.byType(Scrollable).last,
+        );
+        expect(find.text('Ligue 1'), findsOneWidget);
 
-      await tester.scrollUntilVisible(
-        find.text('Conference League'),
-        50.0,
-        scrollable: find.byType(Scrollable).last,
-      );
-      expect(find.text('Conference League'), findsOneWidget);
-    });
+        await tester.scrollUntilVisible(
+          find.text('Conference League'),
+          50.0,
+          scrollable: find.byType(Scrollable).last,
+        );
+        expect(find.text('Conference League'), findsOneWidget);
+      },
+    );
 
-    testWidgets('CreatePrivateLeagueScreen creates league and displays centered notification dialog modal (not bottom sheet)', (tester) async {
-      final repo = _FakeTournamentRepository();
-      await tester.pumpWidget(
-        buildHarness(child: const CreatePrivateLeagueScreen(), repo: repo),
-      );
-      await tester.pumpAndSettle();
+    testWidgets(
+      'CreatePrivateLeagueScreen creates league and displays centered notification dialog modal (not bottom sheet)',
+      (tester) async {
+        final repo = _FakeTournamentRepository();
+        await tester.pumpWidget(
+          buildHarness(child: const CreatePrivateLeagueScreen(), repo: repo),
+        );
+        await tester.pumpAndSettle();
 
-      // Enter league name
-      await tester.enterText(find.byKey(const Key('league_name_field')), 'Champions League of Friends');
-      await tester.pumpAndSettle();
+        // Enter league name
+        await tester.enterText(
+          find.byKey(const Key('league_name_field')),
+          'Champions League of Friends',
+        );
+        await tester.pumpAndSettle();
 
-      // Select competition from dropdown
-      await tester.scrollUntilVisible(
-        find.text('Select Base Competition'),
-        50.0,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Select Base Competition'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Primera División (La Liga)').first);
-      await tester.pumpAndSettle();
+        // Select competition from dropdown
+        await tester.scrollUntilVisible(
+          find.text('Select Base Competition'),
+          50.0,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Select Base Competition'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Primera División (La Liga)').first);
+        await tester.pumpAndSettle();
 
-      // Drag ListView down to reveal the submit button
-      await tester.drag(find.byType(ListView), const Offset(0, -500));
-      await tester.pumpAndSettle();
+        // Drag ListView down to reveal the submit button
+        await tester.drag(find.byType(ListView), const Offset(0, -500));
+        await tester.pumpAndSettle();
 
-      // Tap Create League button
-      await tester.tap(find.byType(ElevatedButton));
-      await tester.pumpAndSettle();
+        // Tap Create League button
+        await tester.tap(find.byType(GameButton));
+        await tester.pumpAndSettle();
 
-      // Crucially verify it is a centered Dialog container and NOT a BottomSheet
-      expect(find.byType(Dialog), findsOneWidget);
-      expect(find.byType(BottomSheet), findsNothing);
+        // Crucially verify it is a centered Dialog container and NOT a BottomSheet
+        expect(find.byType(Dialog), findsOneWidget);
+        expect(find.byType(BottomSheet), findsNothing);
 
-      // Verify the dialog contents
-      expect(find.descendant(of: find.byType(Dialog), matching: find.text('League Created! 🎉')), findsOneWidget);
-      expect(find.descendant(of: find.byType(Dialog), matching: find.text('Champions League of Friends')), findsOneWidget);
-      expect(find.descendant(of: find.byType(Dialog), matching: find.text('INVITE CODE')), findsOneWidget);
-      expect(find.descendant(of: find.byType(Dialog), matching: find.text('P')), findsOneWidget);
-      expect(find.descendant(of: find.byType(Dialog), matching: find.text('I')), findsOneWidget);
-      expect(find.descendant(of: find.byType(Dialog), matching: find.text('C')), findsOneWidget);
-      expect(find.descendant(of: find.byType(Dialog), matching: find.text('O')), findsOneWidget);
-      expect(find.descendant(of: find.byType(Dialog), matching: find.text('9')), findsNWidgets(2)); // PICO99
-      expect(find.descendant(of: find.byType(Dialog), matching: find.text('Copy Code')), findsOneWidget);
-      expect(find.descendant(of: find.byType(Dialog), matching: find.text('Done')), findsOneWidget);
+        // Verify the dialog contents
+        expect(
+          find.descendant(
+            of: find.byType(Dialog),
+            matching: find.text('League Created! 🎉'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byType(Dialog),
+            matching: find.text('Champions League of Friends'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byType(Dialog),
+            matching: find.text('INVITE CODE'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: find.byType(Dialog), matching: find.text('P')),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: find.byType(Dialog), matching: find.text('I')),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: find.byType(Dialog), matching: find.text('C')),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: find.byType(Dialog), matching: find.text('O')),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: find.byType(Dialog), matching: find.text('9')),
+          findsNWidgets(2),
+        ); // PICO99
+        expect(
+          find.descendant(
+            of: find.byType(Dialog),
+            matching: find.text('Copy Code'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: find.byType(Dialog), matching: find.text('Done')),
+          findsOneWidget,
+        );
 
-      // Tap Done dismisses the modal dialog
-      await tester.tap(find.text('Done'));
-      await tester.pumpAndSettle();
-      expect(find.byType(Dialog), findsNothing);
-    });
+        // Tap Done dismisses the modal dialog
+        await tester.tap(find.text('Done'));
+        await tester.pumpAndSettle();
+        expect(find.byType(Dialog), findsNothing);
+      },
+    );
 
-    testWidgets('CreatePrivateLeagueScreen displays success SnackBar before ad transition and dialog modal', (tester) async {
-      final repo = _FakeTournamentRepository();
-      await tester.pumpWidget(
-        buildHarness(child: const CreatePrivateLeagueScreen(), repo: repo),
-      );
-      await tester.pumpAndSettle();
+    testWidgets(
+      'CreatePrivateLeagueScreen displays success SnackBar before ad transition and dialog modal',
+      (tester) async {
+        final repo = _FakeTournamentRepository();
+        await tester.pumpWidget(
+          buildHarness(child: const CreatePrivateLeagueScreen(), repo: repo),
+        );
+        await tester.pumpAndSettle();
 
-      await tester.enterText(find.byKey(const Key('league_name_field')), 'Test SnackBar League');
-      await tester.pumpAndSettle();
+        await tester.enterText(
+          find.byKey(const Key('league_name_field')),
+          'Test SnackBar League',
+        );
+        await tester.pumpAndSettle();
 
-      // Select competition from dropdown
-      await tester.scrollUntilVisible(
-        find.text('Select Base Competition'),
-        50.0,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Select Base Competition'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Primera División (La Liga)').first);
-      await tester.pumpAndSettle();
+        // Select competition from dropdown
+        await tester.scrollUntilVisible(
+          find.text('Select Base Competition'),
+          50.0,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Select Base Competition'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Primera División (La Liga)').first);
+        await tester.pumpAndSettle();
 
-      await tester.drag(find.byType(ListView), const Offset(0, -500));
-      await tester.pumpAndSettle();
+        await tester.drag(find.byType(ListView), const Offset(0, -500));
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.byType(ElevatedButton));
-      // Pump initial frame so backend execution completes and SnackBar is posted
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
+        await tester.tap(find.byType(GameButton));
+        // Pump initial frame so backend execution completes and SnackBar is posted
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
 
-      // Visibly verify the success SnackBar is rendered
-      expect(find.byType(SnackBar), findsOneWidget);
-      expect(find.text('League created successfully!'), findsOneWidget);
+        // Visibly verify the success SnackBar is rendered
+        expect(find.byType(SnackBar), findsOneWidget);
+        expect(find.text('League created successfully!'), findsOneWidget);
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      // Verify the dialog modal is displayed upon ad transition
-      expect(find.byType(Dialog), findsOneWidget);
-      expect(find.descendant(of: find.byType(Dialog), matching: find.text('Test SnackBar League')), findsOneWidget);
-    });
+        // Verify the dialog modal is displayed upon ad transition
+        expect(find.byType(Dialog), findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byType(Dialog),
+            matching: find.text('Test SnackBar League'),
+          ),
+          findsOneWidget,
+        );
+      },
+    );
 
-    testWidgets('CreatePrivateLeagueScreen security note does not overflow on narrow screen with Spanish locale', (tester) async {
-      tester.view.physicalSize = const Size(360 * 3, 700 * 3);
-      tester.view.devicePixelRatio = 3.0;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
+    testWidgets(
+      'CreatePrivateLeagueScreen security note does not overflow on narrow screen with Spanish locale',
+      (tester) async {
+        tester.view.physicalSize = const Size(360 * 3, 700 * 3);
+        tester.view.devicePixelRatio = 3.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
 
-      final repo = _FakeTournamentRepository();
-      await tester.pumpWidget(
-        buildHarness(
-          child: const CreatePrivateLeagueScreen(),
-          repo: repo,
-          locale: const Locale('es'),
-        ),
-      );
-      await tester.pumpAndSettle();
+        final repo = _FakeTournamentRepository();
+        await tester.pumpWidget(
+          buildHarness(
+            child: const CreatePrivateLeagueScreen(),
+            repo: repo,
+            locale: const Locale('es'),
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      await tester.drag(find.byType(ListView), const Offset(0, -400));
-      await tester.pumpAndSettle();
+        await tester.drag(find.byType(ListView), const Offset(0, -400));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Solo los jugadores con tu código de invitación podrán unirse'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
+        expect(
+          find.text(
+            'Solo los jugadores con tu código de invitación podrán unirse',
+          ),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
 
-    testWidgets('JoinPrivateLeagueScreen accepts 6-character code input', (tester) async {
+    testWidgets('JoinPrivateLeagueScreen accepts 6-character code input', (
+      tester,
+    ) async {
       final repo = _FakeTournamentRepository();
       await tester.pumpWidget(
         buildHarness(child: const JoinPrivateLeagueScreen(), repo: repo),
@@ -836,293 +1027,317 @@ void main() {
       expect(find.text('9'), findsWidgets);
     });
 
-    testWidgets('JoinPrivateLeagueScreen shows SnackBar when league has reached capacity', (tester) async {
-      final repo = _FakeTournamentRepository();
-      final fullLeague = await repo.createPrivateLeague(
-        name: 'Full Clan',
-        competitionId: '1',
-        userId: 'owner_user_id',
-      );
-      repo.leagueMembers[fullLeague.id] = List.generate(
-        25,
-        (i) => PrivateLeagueMember(
-          privateLeagueId: fullLeague.id,
-          userId: 'user_$i',
-          picoPoints: 0,
-          joinedAt: DateTime.now(),
-        ),
-      );
-
-      await tester.pumpWidget(
-        buildHarness(child: const JoinPrivateLeagueScreen(), repo: repo),
-      );
-      await tester.pumpAndSettle();
-
-      await tester.enterText(find.byType(TextField), fullLeague.inviteCode);
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byType(ElevatedButton));
-      await tester.pumpAndSettle();
-
-      expect(find.text('This league is full (Max 25 members).'), findsWidgets);
-    });
-
-    testWidgets('PublicTournamentScreen renders tournament header and switches tabs', (tester) async {
-      final repo = _FakeTournamentRepository();
-      const tournament = Tournament(
-        id: 'tourn_la_liga',
-        name: 'La Liga Tournament',
-        competitionId: '1',
-      );
-      repo.tournaments.add(tournament);
-
-      await tester.pumpWidget(
-        buildHarness(
-          child: const PublicTournamentScreen(
-            tournamentId: 'tourn_la_liga',
-            initialTournament: tournament,
+    testWidgets(
+      'JoinPrivateLeagueScreen shows SnackBar when league has reached capacity',
+      (tester) async {
+        final repo = _FakeTournamentRepository();
+        final fullLeague = await repo.createPrivateLeague(
+          name: 'Full Clan',
+          competitionId: '1',
+          userId: 'owner_user_id',
+        );
+        repo.leagueMembers[fullLeague.id] = List.generate(
+          25,
+          (i) => PrivateLeagueMember(
+            privateLeagueId: fullLeague.id,
+            userId: 'user_$i',
+            picoPoints: 0,
+            joinedAt: DateTime.now(),
           ),
-          repo: repo,
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
 
-      expect(find.text('Tournament Details'), findsOneWidget);
-      expect(find.text('La Liga Tournament'), findsOneWidget);
-      expect(find.text('Standings'), findsOneWidget);
-      expect(find.text('Matches'), findsOneWidget);
-
-      // Verify Leaderboard content
-      expect(find.text('PicoChamp'), findsOneWidget);
-      expect(find.text('FootballFan99'), findsOneWidget);
-
-      // Switch to Matches tab
-      await tester.tap(find.text('Matches'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Matches'), findsWidgets);
-    });
-
-    testWidgets('PrivateTournamentScreen renders Admin Controls when isOwner is true', (tester) async {
-      final repo = _FakeTournamentRepository();
-      final league = PrivateLeague(
-        id: 'pl_123',
-        name: 'Champs League',
-        ownerId: 'test_owner_123', // Matches _FakeAuthNotifier
-        competitionId: '107',
-        inviteCode: 'K9X2P1',
-        createdAt: DateTime.now(),
-        memberCount: 2,
-      );
-      repo.privateLeagues.add(league);
-      repo.leagueMembers[league.id] = [
-        PrivateLeagueMember(
-          privateLeagueId: league.id,
-          userId: 'test_owner_123',
-          username: 'PicoChamp (Creator)',
-          picoPoints: 50,
-          joinedAt: DateTime.now(),
-        ),
-        PrivateLeagueMember(
-          privateLeagueId: league.id,
-          userId: 'member_999',
-          username: 'RivalPlayer',
-          picoPoints: 30,
-          joinedAt: DateTime.now(),
-        ),
-      ];
-
-      await tester.pumpWidget(
-        buildHarness(
-          child: PrivateTournamentScreen(
-            leagueId: league.id,
-            initialLeague: league,
-          ),
-          repo: repo,
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      // Verify Standings tab strictly displays standings
-      expect(find.text('STANDINGS'), findsOneWidget);
-      expect(find.text('Delete League'), findsNothing);
-
-      // Verify Remove Member button is available for other members
-      expect(find.byIcon(Icons.remove_circle_outline_rounded), findsOneWidget);
-
-      // Verify Leave League is NOT shown in app bar
-      expect(find.byIcon(Icons.logout_rounded), findsNothing);
-
-      // Tap settings button to open LeagueDetailsSheet
-      await tester.tap(find.byKey(const Key('league_settings_button')));
-      await tester.pumpAndSettle();
-
-      // Inside LeagueDetailsSheet:
-      expect(find.text('INVITE CODE'), findsOneWidget);
-      expect(find.text('K9X2P1'), findsOneWidget);
-      expect(find.text('ADMIN CONTROLS'), findsOneWidget);
-      expect(find.text('Delete League'), findsOneWidget);
-    });
-
-    testWidgets('PrivateTournamentScreen hides Admin Controls when isOwner is false', (tester) async {
-      final repo = _FakeTournamentRepository();
-      final league = PrivateLeague(
-        id: 'pl_456',
-        name: 'Friends League',
-        ownerId: 'test_owner_123', // Does NOT match member_user_456
-        competitionId: '1',
-        inviteCode: 'ABCDEF',
-        createdAt: DateTime.now(),
-        memberCount: 2,
-      );
-      repo.privateLeagues.add(league);
-      repo.leagueMembers[league.id] = [
-        PrivateLeagueMember(
-          privateLeagueId: league.id,
-          userId: 'test_owner_123',
-          username: 'OwnerUser',
-          picoPoints: 40,
-          joinedAt: DateTime.now(),
-        ),
-        PrivateLeagueMember(
-          privateLeagueId: league.id,
-          userId: 'member_user_456',
-          username: 'MemberUser',
-          picoPoints: 20,
-          joinedAt: DateTime.now(),
-        ),
-      ];
-
-      await tester.pumpWidget(
-        buildHarness(
-          child: PrivateTournamentScreen(
-            leagueId: league.id,
-            initialLeague: league,
-          ),
-          repo: repo,
-          authOverride: () => _FakeMemberAuthNotifier(),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      // Verify Admin Controls are NOT rendered on standings
-      expect(find.text('ADMIN CONTROLS'), findsNothing);
-      expect(find.text('Delete League'), findsNothing);
-
-      // Verify Remove Member button is NOT rendered
-      expect(find.byIcon(Icons.remove_circle_outline_rounded), findsNothing);
-
-      // Verify logout icon is NOT in app bar
-      expect(find.byIcon(Icons.logout_rounded), findsNothing);
-
-      // Tap settings button to open LeagueDetailsSheet
-      await tester.tap(find.byKey(const Key('league_settings_button')));
-      await tester.pumpAndSettle();
-
-      // Verify Leave League button IS rendered in sheet for members
-      expect(find.text('Leave League'), findsOneWidget);
-      expect(find.text('ADMIN CONTROLS'), findsNothing);
-    });
-
-    testWidgets('PublicTournamentScreen renders accented Primera División, standings, and Join CTA when not joined', (tester) async {
-      tester.view.devicePixelRatio = 1.0;
-      tester.view.physicalSize = const Size(800, 1400);
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
-
-      final repo = _FakeTournamentRepository();
-      const tournament = Tournament(
-        id: '10000000-0000-0000-0000-000000000001',
-        name: 'Primera División',
-        competitionId: '1',
-      );
-      repo.tournaments.add(tournament);
-      repo.customEnrolledTournaments = []; // Not joined
-
-      await tester.pumpWidget(
-        buildHarness(
-          child: const PublicTournamentScreen(
-            tournamentId: '10000000-0000-0000-0000-000000000001',
-            initialTournament: tournament,
-          ),
-          repo: repo,
-          authOverride: () => _FakeAuthNotifier(),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      // Accented tournament name is properly rendered
-      expect(find.text('Primera División'), findsOneWidget);
-
-      // Standings/leaderboard are viewable even without being enrolled
-      expect(find.text('PicoChamp'), findsOneWidget);
-      expect(find.text('FootballFan99'), findsOneWidget);
-
-      // Attractive Join CTA banner is rendered
-      expect(find.text('JOIN THE COMPETITION'), findsOneWidget);
-      expect(find.text('Predict & Compete'), findsOneWidget);
-      expect(find.text('Join Tournament'), findsOneWidget);
-
-      // Tap Join Tournament CTA
-      await tester.tap(find.text('Join Tournament'));
-      await tester.pumpAndSettle();
-
-      // Confirm Join in Pico Confirmation Modal
-      if (find.text('Join ${tournament.name}?').evaluate().isNotEmpty) {
-        await tester.tap(find.text('Join Tournament').last);
+        await tester.pumpWidget(
+          buildHarness(child: const JoinPrivateLeagueScreen(), repo: repo),
+        );
         await tester.pumpAndSettle();
-      }
 
-      // Verify user enrolled
-      expect(repo.enrolledIds.contains(tournament.id), isTrue);
-    });
+        await tester.enterText(find.byType(TextField), fullLeague.inviteCode);
+        await tester.pumpAndSettle();
 
-    testWidgets('TournamentsScreen cards are clickable and Discover tab shows Join CTA for unjoined tournaments', (tester) async {
-      final repo = _FakeTournamentRepository();
-      const tournament = Tournament(
-        id: '10000000-0000-0000-0000-000000000001',
-        name: 'Primera División',
-        competitionId: '1',
-      );
-      repo.tournaments.add(tournament);
-      repo.customEnrolledTournaments = []; // User has not joined yet
+        await tester.tap(find.byType(GameButton));
+        await tester.pumpAndSettle();
 
-      await tester.pumpWidget(
-        buildHarness(
-          child: const TournamentsScreen(),
-          repo: repo,
-          authOverride: () => _FakeAuthNotifier(),
-        ),
-      );
-      await tester.pumpAndSettle();
+        expect(
+          find.text('This league is full (Max 25 members).'),
+          findsWidgets,
+        );
+      },
+    );
 
-      // Switch to Discover tab
-      await tester.tap(find.text('Discover'));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'PublicTournamentScreen renders tournament header and switches tabs',
+      (tester) async {
+        final repo = _FakeTournamentRepository();
+        const tournament = Tournament(
+          id: 'tourn_la_liga',
+          name: 'La Liga Tournament',
+          competitionId: '1',
+        );
+        repo.tournaments.add(tournament);
 
-      // Accented tournament name is rendered
-      expect(find.text('Primera División'), findsOneWidget);
+        await tester.pumpWidget(
+          buildHarness(
+            child: const PublicTournamentScreen(
+              tournamentId: 'tourn_la_liga',
+              initialTournament: tournament,
+            ),
+            repo: repo,
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      // Unjoined tournament displays a Join button
-      expect(find.text('Join'), findsOneWidget);
+        expect(find.text('Tournament Details'), findsOneWidget);
+        expect(find.text('La Liga Tournament'), findsOneWidget);
+        expect(find.text('Standings'), findsOneWidget);
+        expect(find.text('Matches'), findsOneWidget);
 
-      // Card is wrapped in an InkWell (clickable card container)
-      expect(find.byType(InkWell), findsWidgets);
+        // Verify Leaderboard content
+        expect(find.text('PicoChamp'), findsOneWidget);
+        expect(find.text('FootballFan99'), findsOneWidget);
 
-      // Tap Join button
-      await tester.tap(find.text('Join'));
-      await tester.pumpAndSettle();
+        // Switch to Matches tab
+        await tester.tap(find.text('Matches'));
+        await tester.pumpAndSettle();
 
-      // Confirm Join in Pico Confirmation Modal
-      if (find.text('Join ${tournament.name}?').evaluate().isNotEmpty) {
+        expect(find.text('Matches'), findsWidgets);
+      },
+    );
+
+    testWidgets(
+      'PrivateTournamentScreen renders Admin Controls when isOwner is true',
+      (tester) async {
+        final repo = _FakeTournamentRepository();
+        final league = PrivateLeague(
+          id: 'pl_123',
+          name: 'Champs League',
+          ownerId: 'test_owner_123', // Matches _FakeAuthNotifier
+          competitionId: '107',
+          inviteCode: 'K9X2P1',
+          createdAt: DateTime.now(),
+          memberCount: 2,
+        );
+        repo.privateLeagues.add(league);
+        repo.leagueMembers[league.id] = [
+          PrivateLeagueMember(
+            privateLeagueId: league.id,
+            userId: 'test_owner_123',
+            username: 'PicoChamp (Creator)',
+            picoPoints: 50,
+            joinedAt: DateTime.now(),
+          ),
+          PrivateLeagueMember(
+            privateLeagueId: league.id,
+            userId: 'member_999',
+            username: 'RivalPlayer',
+            picoPoints: 30,
+            joinedAt: DateTime.now(),
+          ),
+        ];
+
+        await tester.pumpWidget(
+          buildHarness(
+            child: PrivateTournamentScreen(
+              leagueId: league.id,
+              initialLeague: league,
+            ),
+            repo: repo,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Verify Standings tab strictly displays standings
+        expect(find.text('STANDINGS'), findsOneWidget);
+        expect(find.text('Delete League'), findsNothing);
+
+        // Verify Remove Member button is available for other members
+        expect(
+          find.byIcon(Icons.remove_circle_outline_rounded),
+          findsOneWidget,
+        );
+
+        // Verify Leave League is NOT shown in app bar
+        expect(find.byIcon(Icons.logout_rounded), findsNothing);
+
+        // Tap settings button to open LeagueDetailsSheet
+        await tester.tap(find.byKey(const Key('league_settings_button')));
+        await tester.pumpAndSettle();
+
+        // Inside LeagueDetailsSheet:
+        expect(find.text('INVITE CODE'), findsOneWidget);
+        expect(find.text('K9X2P1'), findsOneWidget);
+        expect(find.text('ADMIN CONTROLS'), findsOneWidget);
+        expect(find.text('Delete League'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'PrivateTournamentScreen hides Admin Controls when isOwner is false',
+      (tester) async {
+        final repo = _FakeTournamentRepository();
+        final league = PrivateLeague(
+          id: 'pl_456',
+          name: 'Friends League',
+          ownerId: 'test_owner_123', // Does NOT match member_user_456
+          competitionId: '1',
+          inviteCode: 'ABCDEF',
+          createdAt: DateTime.now(),
+          memberCount: 2,
+        );
+        repo.privateLeagues.add(league);
+        repo.leagueMembers[league.id] = [
+          PrivateLeagueMember(
+            privateLeagueId: league.id,
+            userId: 'test_owner_123',
+            username: 'OwnerUser',
+            picoPoints: 40,
+            joinedAt: DateTime.now(),
+          ),
+          PrivateLeagueMember(
+            privateLeagueId: league.id,
+            userId: 'member_user_456',
+            username: 'MemberUser',
+            picoPoints: 20,
+            joinedAt: DateTime.now(),
+          ),
+        ];
+
+        await tester.pumpWidget(
+          buildHarness(
+            child: PrivateTournamentScreen(
+              leagueId: league.id,
+              initialLeague: league,
+            ),
+            repo: repo,
+            authOverride: () => _FakeMemberAuthNotifier(),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Verify Admin Controls are NOT rendered on standings
+        expect(find.text('ADMIN CONTROLS'), findsNothing);
+        expect(find.text('Delete League'), findsNothing);
+
+        // Verify Remove Member button is NOT rendered
+        expect(find.byIcon(Icons.remove_circle_outline_rounded), findsNothing);
+
+        // Verify logout icon is NOT in app bar
+        expect(find.byIcon(Icons.logout_rounded), findsNothing);
+
+        // Tap settings button to open LeagueDetailsSheet
+        await tester.tap(find.byKey(const Key('league_settings_button')));
+        await tester.pumpAndSettle();
+
+        // Verify Leave League button IS rendered in sheet for members
+        expect(find.text('Leave League'), findsOneWidget);
+        expect(find.text('ADMIN CONTROLS'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'PublicTournamentScreen renders accented Primera División, standings, and Join CTA when not joined',
+      (tester) async {
+        tester.view.devicePixelRatio = 1.0;
+        tester.view.physicalSize = const Size(800, 1400);
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        final repo = _FakeTournamentRepository();
+        const tournament = Tournament(
+          id: '10000000-0000-0000-0000-000000000001',
+          name: 'Primera División',
+          competitionId: '1',
+        );
+        repo.tournaments.add(tournament);
+        repo.customEnrolledTournaments = []; // Not joined
+
+        await tester.pumpWidget(
+          buildHarness(
+            child: const PublicTournamentScreen(
+              tournamentId: '10000000-0000-0000-0000-000000000001',
+              initialTournament: tournament,
+            ),
+            repo: repo,
+            authOverride: () => _FakeAuthNotifier(),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Accented tournament name is properly rendered
+        expect(find.text('Primera División'), findsOneWidget);
+
+        // Standings/leaderboard are viewable even without being enrolled
+        expect(find.text('PicoChamp'), findsOneWidget);
+        expect(find.text('FootballFan99'), findsOneWidget);
+
+        // Attractive Join CTA banner is rendered
+        expect(find.text('JOIN THE COMPETITION'), findsOneWidget);
+        expect(find.text('Predict & Compete'), findsOneWidget);
+        expect(find.text('Join Tournament'), findsOneWidget);
+
+        // Tap Join Tournament CTA
         await tester.tap(find.text('Join Tournament'));
         await tester.pumpAndSettle();
-      }
 
-      // Verify user enrolled in repository
-      expect(repo.enrolledIds.contains(tournament.id), isTrue);
-    });
+        // Confirm Join in Pico Confirmation Modal
+        if (find.text('Join ${tournament.name}?').evaluate().isNotEmpty) {
+          await tester.tap(find.text('Join Tournament').last);
+          await tester.pumpAndSettle();
+        }
+
+        // Verify user enrolled
+        expect(repo.enrolledIds.contains(tournament.id), isTrue);
+      },
+    );
+
+    testWidgets(
+      'TournamentsScreen cards are clickable and Discover tab shows Join CTA for unjoined tournaments',
+      (tester) async {
+        final repo = _FakeTournamentRepository();
+        const tournament = Tournament(
+          id: '10000000-0000-0000-0000-000000000001',
+          name: 'Primera División',
+          competitionId: '1',
+        );
+        repo.tournaments.add(tournament);
+        repo.customEnrolledTournaments = []; // User has not joined yet
+
+        await tester.pumpWidget(
+          buildHarness(
+            child: const TournamentsScreen(),
+            repo: repo,
+            authOverride: () => _FakeAuthNotifier(),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Switch to Discover tab
+        await tester.tap(find.text('Discover'));
+        await tester.pumpAndSettle();
+
+        // Accented tournament name is rendered
+        expect(find.text('Primera División'), findsOneWidget);
+
+        // Unjoined tournament displays a Join button
+        expect(find.text('Join'), findsOneWidget);
+
+        // Card is wrapped in an InkWell (clickable card container)
+        expect(find.byType(InkWell), findsWidgets);
+
+        // Tap Join button
+        await tester.tap(find.text('Join'));
+        await tester.pumpAndSettle();
+
+        // Confirm Join in Pico Confirmation Modal
+        if (find.text('Join ${tournament.name}?').evaluate().isNotEmpty) {
+          await tester.tap(find.text('Join Tournament'));
+          await tester.pumpAndSettle();
+        }
+
+        // Verify user enrolled in repository
+        expect(repo.enrolledIds.contains(tournament.id), isTrue);
+      },
+    );
   });
 }

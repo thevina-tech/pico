@@ -52,8 +52,14 @@ class TactileLeaderboardCard extends StatelessWidget {
   // ==========================================
   // RANK 1: 2.5D GOLD TACTILE CARD (REDUCED HEIGHT)
   // ==========================================
-  Widget _buildGoldCard(BuildContext context, DivisionTier division, AppLocalizations? l10n) {
-    final divisionTitle = l10n != null ? division.localizedTitle(l10n) : division.defaultTitle;
+  Widget _buildGoldCard(
+    BuildContext context,
+    DivisionTier division,
+    AppLocalizations? l10n,
+  ) {
+    final divisionTitle = l10n != null
+        ? division.localizedTitle(l10n)
+        : division.defaultTitle;
     final pointsLabel = l10n?.picoPointsLabel ?? 'Pico Points';
     final creatorLabel = l10n?.creatorBadge ?? 'CREATOR';
 
@@ -69,10 +75,7 @@ class TactileLeaderboardCard extends StatelessWidget {
           ],
         ),
         borderRadius: BorderRadius.circular(14.0),
-        border: Border.all(
-          color: const Color(0xFFFCD34D),
-          width: 1.5,
-        ),
+        border: Border.all(color: const Color(0xFFFCD34D), width: 1.5),
         boxShadow: const [
           BoxShadow(
             color: Color(0xFFC98B00), // Tactile 3D bottom bevel
@@ -93,7 +96,10 @@ class TactileLeaderboardCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(14.0),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10.0,
+              vertical: 5.0,
+            ),
             child: Row(
               children: [
                 // 2.5D Embossed Gold Medal #1
@@ -107,7 +113,10 @@ class TactileLeaderboardCard extends StatelessWidget {
                       colors: [Color(0xFFFDE68A), Color(0xFFD97706)],
                     ),
                     borderRadius: BorderRadius.circular(9.0),
-                    border: Border.all(color: const Color(0xFFFFFBEB), width: 1.5),
+                    border: Border.all(
+                      color: const Color(0xFFFFFBEB),
+                      width: 1.5,
+                    ),
                     boxShadow: const [
                       BoxShadow(
                         color: Color(0xFFB45309),
@@ -191,12 +200,16 @@ class TactileLeaderboardCard extends StatelessWidget {
                       const SizedBox(height: 1.5),
                       // Division Pill
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 1.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 5.0,
+                          vertical: 1.0,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFEF3C7).withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(8.0),
                           border: Border.all(
-                            color: const Color(0xFFF59E0B).withValues(alpha: 0.6),
+                            color: const Color(0xFFF59E0B)
+                                .withValues(alpha: 0.6),
                             width: 1.0,
                           ),
                         ),
@@ -273,8 +286,14 @@ class TactileLeaderboardCard extends StatelessWidget {
   // ==========================================
   // RANK 2: 2.5D SILVER TACTILE CARD (REDUCED HEIGHT)
   // ==========================================
-  Widget _buildSilverCard(BuildContext context, DivisionTier division, AppLocalizations? l10n) {
-    final divisionTitle = l10n != null ? division.localizedTitle(l10n) : division.defaultTitle;
+  Widget _buildSilverCard(
+    BuildContext context,
+    DivisionTier division,
+    AppLocalizations? l10n,
+  ) {
+    final divisionTitle = l10n != null
+        ? division.localizedTitle(l10n)
+        : division.defaultTitle;
     final pointsLabel = l10n?.picoPointsLabel ?? 'Pico Points';
     final creatorLabel = l10n?.creatorBadge ?? 'CREATOR';
 
@@ -284,16 +303,10 @@ class TactileLeaderboardCard extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFFFFFFF),
-            Color(0xFFCBD5E1),
-          ],
+          colors: [Color(0xFFFFFFFF), Color(0xFFCBD5E1)],
         ),
         borderRadius: BorderRadius.circular(14.0),
-        border: Border.all(
-          color: const Color(0xFFCBD5E1),
-          width: 1.5,
-        ),
+        border: Border.all(color: const Color(0xFFCBD5E1), width: 1.5),
         boxShadow: const [
           BoxShadow(
             color: Color(0xFF8C9FB5), // Tactile 3D bottom bevel
@@ -314,7 +327,10 @@ class TactileLeaderboardCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(14.0),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10.0,
+              vertical: 5.0,
+            ),
             child: Row(
               children: [
                 // 2.5D Embossed Silver Medal #2
@@ -412,12 +428,16 @@ class TactileLeaderboardCard extends StatelessWidget {
                       const SizedBox(height: 1.5),
                       // Division Pill
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 1.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 5.0,
+                          vertical: 1.0,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFE2E8F0),
                           borderRadius: BorderRadius.circular(8.0),
                           border: Border.all(
-                            color: const Color(0xFF94A3B8).withValues(alpha: 0.6),
+                            color: const Color(0xFF94A3B8)
+                                .withValues(alpha: 0.6),
                             width: 1.0,
                           ),
                         ),
@@ -494,8 +514,14 @@ class TactileLeaderboardCard extends StatelessWidget {
   // ==========================================
   // RANK 3: 2.5D BRONZE TACTILE CARD (REDUCED HEIGHT)
   // ==========================================
-  Widget _buildBronzeCard(BuildContext context, DivisionTier division, AppLocalizations? l10n) {
-    final divisionTitle = l10n != null ? division.localizedTitle(l10n) : division.defaultTitle;
+  Widget _buildBronzeCard(
+    BuildContext context,
+    DivisionTier division,
+    AppLocalizations? l10n,
+  ) {
+    final divisionTitle = l10n != null
+        ? division.localizedTitle(l10n)
+        : division.defaultTitle;
     final pointsLabel = l10n?.picoPointsLabel ?? 'Pico Points';
     final creatorLabel = l10n?.creatorBadge ?? 'CREATOR';
 
@@ -511,10 +537,7 @@ class TactileLeaderboardCard extends StatelessWidget {
           ],
         ),
         borderRadius: BorderRadius.circular(14.0),
-        border: Border.all(
-          color: const Color(0xFFFDBA74),
-          width: 1.5,
-        ),
+        border: Border.all(color: const Color(0xFFFDBA74), width: 1.5),
         boxShadow: const [
           BoxShadow(
             color: Color(0xFFAF5F24), // Tactile 3D bottom bevel
@@ -535,7 +558,10 @@ class TactileLeaderboardCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(14.0),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10.0,
+              vertical: 5.0,
+            ),
             child: Row(
               children: [
                 // 2.5D Embossed Bronze Medal #3
@@ -549,7 +575,10 @@ class TactileLeaderboardCard extends StatelessWidget {
                       colors: [Color(0xFFFFEDD5), Color(0xFFEA580C)],
                     ),
                     borderRadius: BorderRadius.circular(9.0),
-                    border: Border.all(color: const Color(0xFFFFEDD5), width: 1.5),
+                    border: Border.all(
+                      color: const Color(0xFFFFEDD5),
+                      width: 1.5,
+                    ),
                     boxShadow: const [
                       BoxShadow(
                         color: Color(0xFF9A3412),
@@ -633,12 +662,16 @@ class TactileLeaderboardCard extends StatelessWidget {
                       const SizedBox(height: 1.5),
                       // Division Pill
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 1.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 5.0,
+                          vertical: 1.0,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFFEDD5),
                           borderRadius: BorderRadius.circular(8.0),
                           border: Border.all(
-                            color: const Color(0xFFFB923C).withValues(alpha: 0.6),
+                            color: const Color(0xFFFB923C)
+                                .withValues(alpha: 0.6),
                             width: 1.0,
                           ),
                         ),
@@ -715,8 +748,14 @@ class TactileLeaderboardCard extends StatelessWidget {
   // ==========================================
   // RANKS 4+: 2.5D EMERALD TACTILE CARD (REDUCED HEIGHT)
   // ==========================================
-  Widget _buildEmeraldCard(BuildContext context, DivisionTier division, AppLocalizations? l10n) {
-    final divisionTitle = l10n != null ? division.localizedTitle(l10n) : division.defaultTitle;
+  Widget _buildEmeraldCard(
+    BuildContext context,
+    DivisionTier division,
+    AppLocalizations? l10n,
+  ) {
+    final divisionTitle = l10n != null
+        ? division.localizedTitle(l10n)
+        : division.defaultTitle;
     final pointsLabel = l10n?.picoPointsLabel ?? 'Pico Points';
     final creatorLabel = l10n?.creatorBadge ?? 'CREATOR';
 
@@ -755,7 +794,10 @@ class TactileLeaderboardCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(12.0),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.5),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10.0,
+              vertical: 4.5,
+            ),
             child: Row(
               children: [
                 // Rank Number
@@ -833,7 +875,10 @@ class TactileLeaderboardCard extends StatelessWidget {
                       const SizedBox(height: 1.5),
                       // Division Pill
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 1.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 5.0,
+                          vertical: 1.0,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFF064E3B).withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(6.0),
