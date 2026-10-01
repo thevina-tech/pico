@@ -38,6 +38,10 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
   }
 
   void _loadAd() {
+    if (ref.read(isAdFreeProvider)) {
+      return;
+    }
+
     if (RevenueCatAdService.instance.isTestEnvironment) {
       if (mounted) {
         setState(() {
@@ -102,8 +106,13 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final isAdFree = ref.watch(adFreeProvider);
-    if (isAdFree || _isFailed) {
+    final isAdFree = ref.watch(isAdFreeProvider);
+    if (isAdFree) {
+      _bannerAd?.dispose();
+      _bannerAd = null;
+      return const SizedBox.shrink();
+    }
+    if (_isFailed) {
       return const SizedBox.shrink();
     }
 

@@ -1,43 +1,70 @@
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:pico/core/logging/app_logger.dart';
 
-/// Provider tracking whether the user has purchased the "Remove Ads" lifetime pass.
-final adFreeProvider = NotifierProvider<AdFreeNotifier, bool>(() {
+/// Primary state provider tracking whether the user has the "remove_ads" entitlement active.
+final isAdFreeProvider = NotifierProvider<AdFreeNotifier, bool>(() {
   return AdFreeNotifier();
 });
 
+/// Backwards compatibility alias for existing consumers and tests
+final adFreeProvider = isAdFreeProvider;
+
 class AdFreeNotifier extends Notifier<bool> {
-  static const _key = 'pico_ad_free_unlocked';
+  static const String entitlementId = 'remove_ads';
+  bool _listenerRegistered = false;
 
   @override
   bool build() {
-    _loadState();
+    Future.microtask(_initRevenueCat);
     return false;
   }
 
-  Future<void> _loadState() async {
+  Future<void> _initRevenueCat() async {
+    if (_isTestEnvironment) {
+      return;
+    }
+
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final isUnlocked = prefs.getBool(_key) ?? false;
-      if (isUnlocked != state) {
-        state = isUnlocked;
+      // 1. Listen to real-time entitlement updates from RevenueCat
+      if (!_listenerRegistered) {
+        Purchases.addCustomerInfoUpdateListener((customerInfo) {
+          _updateFromCustomerInfo(customerInfo);
+        });
+        _listenerRegistered = true;
       }
-    } catch (_) {}
+
+      // 2. Fetch current status on initialization
+      final customerInfo = await Purchases.getCustomerInfo();
+      _updateFromCustomerInfo(customerInfo);
+    } catch (e) {
+      AppLogger.warning('RevenueCat getCustomerInfo error: $e');
+    }
   }
 
+  void _updateFromCustomerInfo(CustomerInfo customerInfo) {
+    final bool isActive =
+        customerInfo.entitlements.all[entitlementId]?.isActive == true;
+    state = isActive;
+    AppLogger.info('isAdFree updated: $isActive');
+  }
+
+  /// Manually unlock for testing or offline simulations.
   Future<void> unlockAdFree() async {
     state = true;
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool(_key, true);
-    } catch (_) {}
   }
 
+  /// Manually reset for testing or offline simulations.
   Future<void> resetAdFree() async {
     state = false;
+  }
+
+  bool get _isTestEnvironment {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool(_key, false);
-    } catch (_) {}
+      return Platform.environment.containsKey('FLUTTER_TEST');
+    } catch (_) {
+      return false;
+    }
   }
 }

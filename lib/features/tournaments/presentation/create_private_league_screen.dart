@@ -15,6 +15,7 @@ import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/shared/components/pico_snackbar.dart';
 import 'package:pico/l10n/app_localizations.dart';
+import 'package:pico/features/shop/presentation/ad_free_provider.dart';
 import 'package:pico/services/revenuecat_ad_service.dart';
 
 /// Screen allowing users to create a new Private League.
@@ -295,12 +296,17 @@ class _CreatePrivateLeagueScreenState
                                 }
                               }
 
-                              try {
-                                RevenueCatAdService.instance.showInterstitialAd(
-                                  placement: 'private_league_creation',
-                                  onDismissed: navigateToLeague,
-                                );
-                              } catch (_) {
+                              final isAdFree = ref.read(isAdFreeProvider);
+                              if (!isAdFree) {
+                                try {
+                                  RevenueCatAdService.instance.showInterstitialAd(
+                                    placement: 'private_league_creation',
+                                    onDismissed: navigateToLeague,
+                                  );
+                                } catch (_) {
+                                  navigateToLeague();
+                                }
+                              } else {
                                 navigateToLeague();
                               }
                             },

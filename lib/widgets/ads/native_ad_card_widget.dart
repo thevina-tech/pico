@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:pico/core/theme/pico_colors.dart';
 import 'package:pico/core/theme/pico_typography.dart';
+import 'package:pico/features/shop/presentation/ad_free_provider.dart';
 import 'package:pico/services/revenuecat_ad_service.dart';
 
 /// Native Ad Card designed to seamlessly blend with Pico's [MatchCard] design language.
@@ -13,7 +15,7 @@ import 'package:pico/services/revenuecat_ad_service.dart';
 /// - Ethical standard: Does not spoof football data or fake match scores.
 /// - Automatic lifecycle disposal on widget unmount.
 /// - Routed through [RevenueCatAdService] to capture Impression-Level Revenue Data (ILRD).
-class NativeAdCardWidget extends StatefulWidget {
+class NativeAdCardWidget extends ConsumerStatefulWidget {
   const NativeAdCardWidget({
     super.key,
     this.placement = 'match_feed',
@@ -24,10 +26,10 @@ class NativeAdCardWidget extends StatefulWidget {
   final String? adUnitId;
 
   @override
-  State<NativeAdCardWidget> createState() => _NativeAdCardWidgetState();
+  ConsumerState<NativeAdCardWidget> createState() => _NativeAdCardWidgetState();
 }
 
-class _NativeAdCardWidgetState extends State<NativeAdCardWidget> {
+class _NativeAdCardWidgetState extends ConsumerState<NativeAdCardWidget> {
   NativeAd? _nativeAd;
   bool _isLoaded = false;
   bool _isFailed = false;
@@ -127,11 +129,8 @@ class _NativeAdCardWidgetState extends State<NativeAdCardWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isFailed) {
-      return const SizedBox.shrink();
-    }
-
-    if (!_isLoaded) {
+    final isAdFree = ref.watch(isAdFreeProvider);
+    if (isAdFree || _isFailed || !_isLoaded) {
       return const SizedBox.shrink();
     }
 

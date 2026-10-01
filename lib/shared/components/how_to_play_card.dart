@@ -121,38 +121,24 @@ class HowToPlayCard extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      // Left Squircle: Deep meadow green with rules.png
-                      Container(
-                        width: 52.0,
-                        height: 52.0,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF144D34),
-                          borderRadius: BorderRadius.circular(16.0),
-                          border: Border.all(
-                            color: const Color(0x334ADE80),
-                            width: 1.0,
-                          ),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0xFF0A2B1D),
-                              offset: Offset(0, 3.5),
-                              blurRadius: 0,
-                            ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(15.0),
-                          child: Padding(
-                            padding: const EdgeInsets.all(5.0),
+                      // Left: rules.png blended seamlessly with the #F9F8F3 card
+                      SizedBox(
+                        width: 50.0,
+                        height: 50.0,
+                        child: Center(
+                          child: Transform.scale(
+                            scale: 1.35,
                             child: Image.asset(
                               'assets/images/rules.png',
+                              color: const Color(0xFFF9F8F3),
+                              colorBlendMode: BlendMode.modulate,
                               fit: BoxFit.contain,
-                              alignment: Alignment.center,
                               filterQuality: FilterQuality.high,
-                              // Use scale to compensate for large transparent margins
-                              // The cards content spans ~55% of width and ~65% of height
-                              // so we scale up to fill the container
-                              scale: 0.38,
+                              errorBuilder: (context, error, stackTrace) => const Icon(
+                                Icons.menu_book_rounded,
+                                color: Color(0xFF144D34),
+                                size: 28.0,
+                              ),
                             ),
                           ),
                         ),

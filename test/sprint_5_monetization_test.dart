@@ -147,9 +147,11 @@ void main() {
 
     testWidgets('NativeAdCardWidget builds with compliance AD badge', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: NativeAdCardWidget(placement: 'match_feed'),
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: NativeAdCardWidget(placement: 'match_feed'),
+            ),
           ),
         ),
       );

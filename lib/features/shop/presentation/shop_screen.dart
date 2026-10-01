@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pico/core/theme/pico_colors.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
+import 'package:pico/core/logging/app_logger.dart';
 import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/features/shop/presentation/ad_free_provider.dart';
 import 'package:pico/l10n/app_localizations.dart';
@@ -14,10 +16,10 @@ import 'package:pico/shared/components/pico_pitch_background.dart';
 /// The official Pico Shop screen.
 ///
 /// Features:
-/// - Highlights the core "Remove Ads" lifetime pass item.
-/// - Tactile 3D button interactions using [GameButton].
-/// - Persistent ad-free state tracking via [adFreeProvider].
-/// - Restore purchases support.
+/// - Prominently highlights the core "Remove Ads" lifetime pass item.
+/// - Polished UI layout consistent with Pico's tactile game design system.
+/// - Strict reliance on [isAdFreeProvider] for ad-free state.
+/// - Clean action handlers ready for real RevenueCat in-app purchase and restore flows.
 class ShopScreen extends ConsumerStatefulWidget {
   const ShopScreen({
     super.key,
@@ -36,7 +38,6 @@ class ShopScreen extends ConsumerStatefulWidget {
 
 class _ShopScreenState extends ConsumerState<ShopScreen> {
   late int _currentNavIndex;
-  bool _isPurchasing = false;
 
   @override
   void initState() {
@@ -44,64 +45,48 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     _currentNavIndex = widget.currentNavIndex;
   }
 
-  Future<void> _handlePurchase() async {
-    if (_isPurchasing) return;
-    setState(() => _isPurchasing = true);
-
-    // Simulate purchase network call
-    await Future.delayed(const Duration(milliseconds: 600));
-
-    if (mounted) {
-      await ref.read(adFreeProvider.notifier).unlockAdFree();
-      if (!mounted) return;
-      setState(() => _isPurchasing = false);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Row(
-            children: [
-              Icon(Icons.check_circle_rounded, color: PicoColors.primaryFixed),
-              SizedBox(width: 8.0),
-              Expanded(
-                child: Text(
-                  'Ads successfully removed! Enjoy your uninterrupted Pico experience.',
-                  style: TextStyle(fontFamily: 'Rubik', fontWeight: FontWeight.w700),
-                ),
-              ),
-            ],
-          ),
-          backgroundColor: const Color(0xFF0F2F20),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-        ),
-      );
+  /// Triggers the RevenueCat paywall for the "remove_ads" entitlement if needed.
+  Future<void> _onRemoveAdsPressed() async {
+    try {
+      await RevenueCatUI.presentPaywallIfNeeded("remove_ads");
+    } catch (e) {
+      AppLogger.warning('RevenueCat paywall presentation error: $e');
     }
   }
 
-  Future<void> _handleRestore() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Row(
-          children: [
-            Icon(Icons.restore_rounded, color: PicoColors.gold),
-            SizedBox(width: 8.0),
-            Text(
-              'Checking purchase history... Purchases restored.',
-              style: TextStyle(fontFamily: 'Rubik', fontWeight: FontWeight.w600),
+  /// Clean handler triggering real RevenueCat purchase restoration.
+  Future<void> _onRestorePurchasesPressed() async {
+    try {
+      final customerInfo = await Purchases.restorePurchases();
+      final isUnlocked =
+          customerInfo.entitlements.all['remove_ads']?.isActive == true;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              isUnlocked
+                  ? 'Purchases restored successfully!'
+                  : 'No active purchases found to restore.',
             ),
-          ],
-        ),
-        backgroundColor: const Color(0xFF162534),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-      ),
-    );
+          ),
+        );
+      }
+    } catch (e) {
+      AppLogger.warning('Failed to restore purchases: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to restore purchases: $e'),
+          ),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final isAdFree = ref.watch(adFreeProvider);
+    final isAdFree = ref.watch(isAdFreeProvider);
 
     return PicoGameExitScope(
       child: PicoPitchBackground(
@@ -158,15 +143,15 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                     _buildShopHeader(),
                     const SizedBox(height: 20.0),
 
-                    // Primary Item: Remove Ads
+                    // Dedicated "Remove Ads" / Ad-Free Experience Card
                     _buildRemoveAdsCard(context, isAdFree),
-                    const SizedBox(height: 20.0),
+                    const SizedBox(height: 18.0),
 
-                    // Restore Purchases Action
+                    // Restore Purchases Action Link
                     Center(
                       child: TextButton.icon(
                         key: const Key('restore_purchases_button'),
-                        onPressed: _handleRestore,
+                        onPressed: _onRestorePurchasesPressed,
                         icon: const Icon(
                           Icons.restore_rounded,
                           size: 18.0,
@@ -334,6 +319,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                   ),
                 ),
               ),
+              // Dedicated Ad-Off / Shield Icon
               Container(
                 width: 44.0,
                 height: 44.0,
@@ -345,11 +331,27 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                     width: 1.5,
                   ),
                 ),
-                child: const Center(
-                  child: Icon(
-                    Icons.block_rounded,
-                    color: Color(0xFF34D399),
-                    size: 24.0,
+                child: Center(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Icon(
+                        isAdFree
+                            ? Icons.verified_user_rounded
+                            : Icons.shield_rounded,
+                        color: const Color(0xFF34D399),
+                        size: 24.0,
+                      ),
+                      Positioned(
+                        right: 2.0,
+                        top: 2.0,
+                        child: Icon(
+                          Icons.auto_awesome,
+                          color: const Color(0xFFFCCB2B),
+                          size: 11.0,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -372,10 +374,10 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
 
           // Description
           const Text(
-            'Enjoy a clean, uninterrupted football prediction experience. Never see banner ads or video interruptions ever again.',
+            'Enjoy an uninterrupted match-tracking experience with zero ads.',
             style: TextStyle(
               fontFamily: 'Rubik',
-              fontSize: 13.0,
+              fontSize: 13.5,
               height: 1.4,
               color: Color(0xFFCADED4),
               fontWeight: FontWeight.w500,
@@ -390,10 +392,10 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
           const SizedBox(height: 8.0),
           _buildPerkRow('Instant prediction screen transitions'),
           const SizedBox(height: 8.0),
-          _buildPerkRow('One-time purchase • Keep forever'),
+          _buildPerkRow('One-time unlock • Keep forever'),
           const SizedBox(height: 22.0),
 
-          // CTA Action
+          // Action Button
           if (isAdFree)
             Container(
               width: double.infinity,
@@ -432,9 +434,9 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
             )
           else
             GameButton.gold(
-              key: const Key('remove_ads_purchase_button'),
-              text: _isPurchasing ? 'Processing...' : 'REMOVE ADS • \$2.99',
-              onPressed: _isPurchasing ? null : _handlePurchase,
+              key: const Key('remove_ads_action_button'),
+              text: 'Unlock Ad-Free • \$2.99',
+              onPressed: _onRemoveAdsPressed,
               width: double.infinity,
               height: 52.0,
             ),

@@ -11,6 +11,7 @@ import 'package:pico/features/shop/presentation/shop_screen.dart';
 import 'package:pico/features/tournaments/presentation/tournaments_screen.dart';
 import 'package:pico/main.dart';
 import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
 class _FakeAuthenticatedNotifier extends AuthNotifier {
@@ -30,6 +31,11 @@ class _FakeAuthenticatedNotifier extends AuthNotifier {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
   testWidgets('PicoApp unauthenticated - boots to Welcome Step and navigates to How Pico Works',
       (WidgetTester tester) async {
     await tester.pumpWidget(const ProviderScope(child: PicoApp()));

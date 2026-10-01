@@ -49,6 +49,13 @@ Future<bool?> showGameExitDialog(BuildContext context) {
       final dialogLeaveText = dialogL10n?.exitDialogLeaveButton ?? leaveButtonText;
 
       return PicoConfirmationModal(
+        customIcon: Image.asset(
+          'assets/images/logo/logo.png',
+          width: 56.0,
+          height: 56.0,
+          fit: BoxFit.contain,
+          errorBuilder: (_, _, _) => const SizedBox.shrink(),
+        ),
         showLogo: false,
         showWatermark: false,
         title: dialogTitle,

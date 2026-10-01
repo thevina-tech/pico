@@ -12,6 +12,7 @@ import 'package:pico/features/profile/domain/user_profile.dart';
 import 'package:pico/features/profile/presentation/user_profile_provider.dart';
 import 'package:pico/features/profile/presentation/widgets/division_ladder_sheet.dart';
 import 'package:pico/l10n/app_localizations.dart';
+import 'package:pico/features/shop/presentation/ad_free_provider.dart';
 import 'package:pico/shared/components/game_button.dart';
 import 'package:pico/shared/components/game_exit_dialog.dart';
 import 'package:pico/shared/components/how_to_play_card.dart';
@@ -192,7 +193,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ? Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const BannerAdWidget(placement: 'dashboard_bottom'),
+                      Consumer(
+                        builder: (context, ref, _) {
+                          final isAdFree = ref.watch(isAdFreeProvider);
+                          if (isAdFree) return const SizedBox.shrink();
+                          return const BannerAdWidget(placement: 'dashboard_bottom');
+                        },
+                      ),
                       Center(
                         heightFactor: 1.0,
                         child: ConstrainedBox(
@@ -225,7 +232,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ],
                   )
-                : const BannerAdWidget(placement: 'dashboard_bottom'),
+                : Consumer(
+                    builder: (context, ref, _) {
+                      final isAdFree = ref.watch(isAdFreeProvider);
+                      if (isAdFree) return const SizedBox.shrink();
+                      return const BannerAdWidget(placement: 'dashboard_bottom');
+                    },
+                  ),
             body: SafeArea(
               bottom: false,
               child: Center(
@@ -348,7 +361,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const SizedBox(width: 12.0),
 
           // Right: 3D Tactile Menu Button (leads to Settings)
-          GameButton.green(
+          GameButton.cream(
             key: const Key('home_screen_menu_button'),
             width: 48.0,
             height: 48.0,
@@ -366,7 +379,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: const Center(
               child: Icon(
                 Icons.menu_rounded,
-                color: Colors.white,
+                color: Color(0xFF13211B),
                 size: 26.0,
               ),
             ),

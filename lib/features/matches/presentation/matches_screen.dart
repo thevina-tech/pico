@@ -16,6 +16,7 @@ import 'package:pico/shared/components/prediction_controls.dart';
 import 'package:pico/features/predictions/presentation/prediction_controller.dart';
 import 'package:pico/shared/components/prediction_bottom_sheet.dart';
 import 'package:pico/l10n/app_localizations.dart';
+import 'package:pico/features/shop/presentation/ad_free_provider.dart';
 import 'package:pico/widgets/ads/native_ad_card_widget.dart';
 
 /// The official "Pico — Matches" screen.
@@ -180,9 +181,10 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
                           return _buildEmptyState(context, state.selectedTab);
                         }
 
-                        // Dynamically calculate total items injecting NativeAdCardWidget every 6th item
-                        final adCount = matches.length ~/ 5;
-                        final totalCount = matches.length + adCount;
+                        // Dynamically calculate total items injecting NativeAdCardWidget every 6th item if ads enabled
+                        final isAdFree = ref.watch(isAdFreeProvider);
+                        final adCount = isAdFree ? 0 : (matches.length ~/ 5);
+                        final totalCount = isAdFree ? matches.length : (matches.length + adCount);
 
                         return ListView.builder(
                           padding: const EdgeInsets.fromLTRB(
@@ -194,13 +196,13 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
                           itemCount: totalCount,
                           itemBuilder: (context, index) {
                             // Inject Native Ad Card at every 6th index (index 5, 11, 17, ...)
-                            if ((index + 1) % 6 == 0) {
+                            if (!isAdFree && (index + 1) % 6 == 0) {
                               return const NativeAdCardWidget(
                                 placement: 'match_feed',
                               );
                             }
 
-                            final matchIndex = index - ((index + 1) ~/ 6);
+                            final matchIndex = isAdFree ? index : (index - ((index + 1) ~/ 6));
                             final match = matches[matchIndex];
                             final userPred = predictionsAsync.value?[match.id];
                             final localPred = state.getPrediction(match.id);

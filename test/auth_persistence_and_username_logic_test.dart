@@ -225,7 +225,7 @@ void main() {
       expect(find.text('How Pico Works'), findsNothing);
       expect(find.text('Predict Football.\nCompete with Friends.'), findsNothing);
       expect(find.text('What Should We Call You?'), findsOneWidget);
-      expect(find.text('3/5'), findsOneWidget);
+      expect(find.text('3/4'), findsOneWidget);
     });
 
     testWidgets('OnboardingScreen directly loaded for authenticated incomplete user skips How it works and starts at Step B', (WidgetTester tester) async {
@@ -271,7 +271,7 @@ void main() {
 
       expect(find.text('How Pico Works'), findsNothing);
       expect(find.text('What Should We Call You?'), findsOneWidget);
-      expect(find.text('3/5'), findsOneWidget);
+      expect(find.text('3/4'), findsOneWidget);
     });
 
     testWidgets('Completing username & leagues after reopen displays chosen username on Home, never Alex', (WidgetTester tester) async {
@@ -320,15 +320,7 @@ void main() {
       await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();
 
-      // Step 4: Pick club and advance
-      expect(find.text('Choose Favorite Team'), findsOneWidget);
-      await tester.tap(find.text('Real Madrid'));
-      await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Continue'));
-      await tester.tap(find.text('Continue'));
-      await tester.pumpAndSettle();
-
-      // Step 5: Pick league and finish
+      // Step 4: Pick league and finish
       expect(find.text('Choose Leagues'), findsOneWidget);
       await tester.tap(find.text('La Liga'));
       await tester.pumpAndSettle();

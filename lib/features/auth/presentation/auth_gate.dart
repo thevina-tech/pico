@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
@@ -25,11 +26,11 @@ enum _AuthDestination {
   onboarding,
 }
 
-/// Primary startup decision-maker widget.
+/// Primary startup decision-maker widget and Splash screen gateway.
 ///
 /// Holds the UI state while Supabase initializes and checks whether the user has
 /// completed onboarding/personalization, preventing any flash of the Onboarding screen
-/// for authenticated users.
+/// for authenticated users while displaying the branded Splash artwork.
 class AuthGate extends ConsumerStatefulWidget {
   const AuthGate({
     super.key,
@@ -129,17 +130,17 @@ class _AuthGateState extends ConsumerState<AuthGate> {
           ref.read(authProvider.notifier).markPersonalized();
           _routeToHome();
         } else {
-          // Incomplete profile: read saved progress to resume at exact step (2, 3, or 4)
+          // Incomplete profile: read saved progress to resume at exact step (2 or 3)
           final repo = ref.read(onboardingPreferencesRepositoryProvider);
           final progress = await repo.getProgress();
-          final resumeStep = progress.step >= 2 ? progress.step.clamp(2, 4) : 2;
+          final resumeStep = progress.step >= 2 ? progress.step.clamp(2, 3) : 2;
           _routeToOnboarding(step: resumeStep);
         }
       } catch (e, st) {
         AppLogger.error('AuthGate: failed to fetch profile for onboarding check', e, st);
         final repo = ref.read(onboardingPreferencesRepositoryProvider);
         final progress = await repo.getProgress();
-        final resumeStep = progress.step >= 2 ? progress.step.clamp(2, 4) : 2;
+        final resumeStep = progress.step >= 2 ? progress.step.clamp(2, 3) : 2;
         _routeToOnboarding(step: resumeStep);
       }
       return;
@@ -153,7 +154,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
       } else {
         final repo = ref.read(onboardingPreferencesRepositoryProvider);
         final progress = await repo.getProgress();
-        final resumeStep = progress.step >= 2 ? progress.step.clamp(2, 4) : 2;
+        final resumeStep = progress.step >= 2 ? progress.step.clamp(2, 3) : 2;
         _routeToOnboarding(step: resumeStep);
       }
     } else {
@@ -166,6 +167,10 @@ class _AuthGateState extends ConsumerState<AuthGate> {
 
   void _routeToHome() {
     if (!mounted) return;
+
+    try {
+      FlutterNativeSplash.remove();
+    } catch (_) {}
 
     setState(() {
       _isLoading = false;
@@ -180,6 +185,10 @@ class _AuthGateState extends ConsumerState<AuthGate> {
   void _routeToOnboarding({int step = 0}) {
     if (!mounted) return;
 
+    try {
+      FlutterNativeSplash.remove();
+    } catch (_) {}
+
     setState(() {
       _isLoading = false;
       _destination = _AuthDestination.onboarding;
@@ -193,8 +202,6 @@ class _AuthGateState extends ConsumerState<AuthGate> {
 
   @override
   Widget build(BuildContext context) {
-    // While the auth state is unknown/loading, return a blank pitch Scaffold
-    // containing a centered CircularProgressIndicator. Do not render any interactive screens.
     if (_isLoading) {
       return widget.loadingWidget ??
           const Scaffold(
@@ -218,7 +225,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     }
 
     // In GoRouter context, context.go('/home') or context.go('/onboarding')
-    // triggers navigation; maintain pitch Scaffold with loader during transition.
+    // triggers navigation; maintain clean pitch Scaffold with loader during transition.
     return widget.loadingWidget ??
         const Scaffold(
           backgroundColor: PicoColors.pitchBackground,

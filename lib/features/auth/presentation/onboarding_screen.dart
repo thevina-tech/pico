@@ -25,12 +25,11 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
 /// The official Pico Onboarding Funnel screen.
 ///
-/// Houses a smooth five-step linear onboarding sequence:
-/// - Step 1/5: Welcome Screen
-/// - Step 2/5: How Pico Works
-/// - Step 3/5: Authentication & Username
-/// - Step 4/5: Choose Favorite Team (Database Driven)
-/// - Step 5/5: Choose 2 Leagues (Database Driven)
+/// Houses a smooth four-step linear onboarding sequence:
+/// - Step 1/4: Welcome Screen
+/// - Step 2/4: How Pico Works
+/// - Step 3/4: Authentication & Username
+/// - Step 4/4: Choose 1 or 2 Leagues (Database Driven & Auto-Enrolls in Tournaments)
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({
     super.key,
@@ -72,19 +71,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           profile.username!.trim().isNotEmpty &&
           !profile.username!.startsWith('Guest_')) {
         _username = profile.username!;
-        if (profile.favoriteTeamId != null) {
-          _selectedTeamId = profile.favoriteTeamId;
-          _currentPage = 4; // Step 5: Leagues Selection
-        } else {
-          _currentPage = 3; // Step 4: Team Selection
-        }
+        _currentPage = 3; // Step 4: Leagues Selection
       } else {
-        // Incomplete profile missing username: start at Step B (Unique Username Selection)
-        _currentPage = widget.initialPage >= 2 ? widget.initialPage.clamp(2, 4) : 2;
+        // Incomplete profile missing username: start at Step 3 (Unique Username Selection)
+        _currentPage = widget.initialPage >= 2 ? widget.initialPage.clamp(2, 3) : 2;
       }
     } else {
       // Unauthenticated user: show the requested initialPage (defaults to 0 or 1)
-      _currentPage = widget.initialPage.clamp(0, 4);
+      _currentPage = widget.initialPage.clamp(0, 3);
     }
     _pageController = PageController(initialPage: _currentPage);
 
@@ -107,11 +101,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ref.read(authProvider) is PicoAuthAuthenticated;
 
       int targetStep = progress.step;
+      if (widget.initialPage > targetStep) {
+        targetStep = widget.initialPage;
+      }
       if (hasAuthenticatedUser && targetStep < 2) {
         targetStep = 2;
-      }
-      if (widget.initialPage >= 2 && widget.initialPage > targetStep) {
-        targetStep = widget.initialPage;
       }
 
       setState(() {
@@ -125,7 +119,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           _selectedLeagueIds.clear();
           _selectedLeagueIds.addAll(progress.selectedLeagueIds);
         }
-        _currentPage = targetStep.clamp(0, 4);
+        _currentPage = targetStep.clamp(0, 3);
       });
 
       if (_pageController.hasClients &&
@@ -304,7 +298,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       onContinue: _handleGoogleSignIn,
                     ),
 
-                    // Step 3/5: Authentication & Username
+                    // Step 3/4: Authentication & Username
                     _OnboardingAuthStep(
                       l10n: l10n,
                       username: _username,
@@ -328,33 +322,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       },
                     ),
 
-                    // Step 4/5: Choose Favorite Team (Database Driven)
-                    _OnboardingTeamSelectionStep(
-                      l10n: l10n,
-                      selectedTeamId: _selectedTeamId,
-                      onBack: () => _goToPage(2),
-                      onTeamSelected: (teamId) {
-                        setState(() => _selectedTeamId = teamId);
-                        ref
-                            .read(onboardingPreferencesRepositoryProvider)
-                            .saveTeamId(teamId);
-                      },
-                      onContinue: (teamId) {
-                        setState(() => _selectedTeamId = teamId);
-                        ref
-                            .read(onboardingPreferencesRepositoryProvider)
-                            .saveTeamId(teamId);
-                        _goToPage(4);
-                      },
-                    ),
-
-                    // Step 5/5: Choose 1 or 2 Leagues (Database Driven)
+                    // Step 4/4: Choose 1 or 2 Leagues (Database Driven)
                     _OnboardingLeaguesSelectionStep(
                       l10n: l10n,
                       username: _username,
                       selectedTeamId: _selectedTeamId,
                       selectedLeagueIds: _selectedLeagueIds,
-                      onBack: () => _goToPage(3),
+                      onBack: () => _goToPage(2),
                       onLeaguesChanged: (leagues) {
                         setState(() {
                           _selectedLeagueIds.clear();
@@ -476,8 +450,6 @@ class _OnboardingWelcomeStep extends StatelessWidget {
                 _buildDot(),
                 const SizedBox(width: 6.0),
                 _buildDot(),
-                const SizedBox(width: 6.0),
-                _buildDot(),
               ],
             ),
           ),
@@ -487,27 +459,30 @@ class _OnboardingWelcomeStep extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                width: 32.0,
-                height: 32.0,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0xFFFFDFA0), Color(0xFFE2C384)],
-                  ),
-                  borderRadius: BorderRadius.circular(8.0),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0xFF594311),
-                      offset: Offset(0, 2),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: Image.asset(
+                  'assets/images/logo/logo.png',
+                  width: 32.0,
+                  height: 32.0,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, _, _) => Container(
+                    width: 32.0,
+                    height: 32.0,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Color(0xFFFFDFA0), Color(0xFFE2C384)],
+                      ),
+                      borderRadius: BorderRadius.circular(8.0),
                     ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.emoji_events,
-                  size: 20.0,
-                  color: Color(0xFF261A00),
+                    child: const Icon(
+                      Icons.emoji_events,
+                      size: 20.0,
+                      color: Color(0xFF261A00),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 10.0),
@@ -590,8 +565,8 @@ class _OnboardingWelcomeStep extends StatelessWidget {
             ),
             child: ClipOval(
               child: Center(
-                child: Image.network(
-                  'https://lh3.googleusercontent.com/aida-public/AB6AXuA1IWeqmX9ae_kCOoMYPk0Vt7LeU5ZGWmErLX-WD3iCrGCGyMlrAiwFxnmtIkMmwZbvI06SZRpOkeJL8_9HZgXLgpqbNGSZkU_cvb1ejOYbOEQRRl9Rwz_vRDzY-sanVkVXaX8c6j5RUEf_sunT4E_N0yvSoGmaWHp0NiTQGeNCDm4yiYH24GzusZS9VyenW8lUsOmVEnlJolGidUPUXrpZeIhkVpXPeSZOg-JacfW4DZQLoSDNrogZPQ',
+                child: Image.asset(
+                  'assets/images/logo/logo.png',
                   fit: BoxFit.contain,
                   width: 175.0,
                   height: 175.0,
@@ -1287,7 +1262,7 @@ String? _cleanUrl(String? url) {
   return url.split('?').first;
 }
 
-/// Reusable top step header with back action, 5-dot segmented progress capsule, and step counter.
+/// Reusable top step header with back action, 4-dot segmented progress capsule, and step counter.
 class _OnboardingStepHeader extends StatelessWidget {
   const _OnboardingStepHeader({
     required this.currentStep,
@@ -1295,6 +1270,7 @@ class _OnboardingStepHeader extends StatelessWidget {
     this.isBackEnabled = true,
   });
 
+  static const int totalSteps = 4;
   final int currentStep;
   final VoidCallback onBack;
   final bool isBackEnabled;
@@ -1334,7 +1310,7 @@ class _OnboardingStepHeader extends StatelessWidget {
             ),
           ),
 
-          // 5-Step Segmented Capsule
+          // 4-Step Segmented Capsule
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6.0),
             decoration: BoxDecoration(
@@ -1347,7 +1323,7 @@ class _OnboardingStepHeader extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                for (int i = 1; i <= 5; i++) ...[
+                for (int i = 1; i <= totalSteps; i++) ...[
                   if (i == currentStep)
                     Container(
                       width: 24.0,
@@ -1381,11 +1357,11 @@ class _OnboardingStepHeader extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                     ),
-                  if (i < 5) const SizedBox(width: 6.0),
+                  if (i < totalSteps) const SizedBox(width: 6.0),
                 ],
                 const SizedBox(width: 8.0),
                 Text(
-                  '$currentStep/5',
+                  '$currentStep/$totalSteps',
                   style: const TextStyle(
                     fontFamily: 'Space Grotesk',
                     fontSize: 11.0,
@@ -1727,14 +1703,12 @@ class _OnboardingTeamSelectionStep extends ConsumerStatefulWidget {
     required this.selectedTeamId,
     required this.onBack,
     required this.onContinue,
-    this.onTeamSelected,
   });
 
   final AppLocalizations? l10n;
   final String? selectedTeamId;
   final VoidCallback onBack;
   final ValueChanged<String> onContinue;
-  final ValueChanged<String>? onTeamSelected;
 
   @override
   ConsumerState<_OnboardingTeamSelectionStep> createState() =>
@@ -1937,7 +1911,6 @@ class _OnboardingTeamSelectionStepState
                     return GestureDetector(
                       onTap: () {
                         setState(() => _selectedTeamId = team.id);
-                        widget.onTeamSelected?.call(team.id);
                       },
                       child: Container(
                         padding: const EdgeInsets.all(10.0),
@@ -2317,7 +2290,7 @@ class _OnboardingLeaguesSelectionStepState
         children: [
           // Header
           _OnboardingStepHeader(
-            currentStep: 5,
+            currentStep: 4,
             onBack: widget.onBack,
             isBackEnabled: !_isSubmitting,
           ),

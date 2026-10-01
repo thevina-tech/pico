@@ -6,6 +6,7 @@ import 'package:pico/features/auth/presentation/onboarding_screen.dart';
 import 'package:pico/features/profile/data/profile_repository.dart';
 import 'package:pico/features/profile/domain/user_profile.dart';
 import 'package:pico/l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
 class _MockReturningProfileRepository extends SupabaseProfileRepository {
@@ -43,6 +44,10 @@ class _MockCollisionProfileRepository extends SupabaseProfileRepository {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   group('Sprint 6 - Google Auth & Sequential Onboarding Funnel', () {
     testWidgets('Step 2 displays "Continue with Google" button with Google styling',
         (WidgetTester tester) async {
@@ -59,7 +64,7 @@ void main() {
 
       expect(find.text('How Pico Works'), findsOneWidget);
       expect(find.text('Continue with Google'), findsOneWidget);
-      expect(find.text('2/5'), findsOneWidget);
+      expect(find.text('2/4'), findsOneWidget);
     });
 
     testWidgets('Step 2: Google sign-in advances to Step 3 for new user',
@@ -81,7 +86,7 @@ void main() {
 
       // New user advances to Step 3: Username
       expect(find.text('What Should We Call You?'), findsOneWidget);
-      expect(find.text('3/5'), findsOneWidget);
+      expect(find.text('3/4'), findsOneWidget);
     });
 
     testWidgets('Step 2: Returning user with existing username bypasses onboarding to /home',
@@ -139,7 +144,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('What Should We Call You?'), findsOneWidget);
-      expect(find.text('3/5'), findsOneWidget);
+      expect(find.text('3/4'), findsOneWidget);
 
       // 1. Empty submission
       await tester.ensureVisible(find.text('Continue'));
@@ -165,15 +170,15 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Username must be alphanumeric with no spaces'), findsOneWidget);
 
-      // 5. Valid alphanumeric username with underscores advances to Step 4 (Team Selection)
+      // 5. Valid alphanumeric username with underscores advances to Step 4 (Leagues Selection)
       await tester.enterText(find.byType(TextField), 'valid_user99');
       await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();
-      expect(find.text('Choose Favorite Team'), findsOneWidget);
-      expect(find.text('4/5'), findsOneWidget);
+      expect(find.text('Choose Leagues'), findsOneWidget);
+      expect(find.text('4/4'), findsOneWidget);
     });
 
-    testWidgets('Step 3 & 5: Username pre-check identifies existing usernames',
+    testWidgets('Step 3 & 4: Username pre-check identifies existing usernames',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         const ProviderScope(
@@ -202,10 +207,10 @@ void main() {
 
       // Displays username taken error and stays on Step 3
       expect(find.text('This username is already taken. Please choose another one.'), findsOneWidget);
-      expect(find.text('3/5'), findsOneWidget);
+      expect(find.text('3/4'), findsOneWidget);
     });
 
-    testWidgets('Step 5: Database unique collision rolls back to Step 3 with error alert',
+    testWidgets('Step 4: Database unique collision rolls back to Step 3 with error alert',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -221,21 +226,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Step 3: Enter username and advance
+      // Step 3: Enter username and advance directly to Step 4 (Leagues)
       await tester.enterText(find.byType(TextField), 'striker_ace');
       await tester.ensureVisible(find.text('Continue'));
       await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();
 
-      // Step 4: Pick club and advance
-      expect(find.text('Choose Favorite Team'), findsOneWidget);
-      await tester.tap(find.text('Real Madrid'));
-      await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Continue'));
-      await tester.tap(find.text('Continue'));
-      await tester.pumpAndSettle();
-
-      // Step 5: Pick league and finish
+      // Step 4: Pick league and finish
       expect(find.text('Choose Leagues'), findsOneWidget);
       await tester.tap(find.text('La Liga'));
       await tester.pumpAndSettle();
@@ -246,7 +243,7 @@ void main() {
 
       // Rollback to Step 3: Username is displayed with collision alert
       expect(find.text('What Should We Call You?'), findsOneWidget);
-      expect(find.text('3/5'), findsOneWidget);
+      expect(find.text('3/4'), findsOneWidget);
       expect(find.text('This username is already taken. Please choose another one.'), findsWidgets);
     });
   });

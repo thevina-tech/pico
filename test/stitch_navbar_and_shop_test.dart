@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pico/features/shop/presentation/ad_free_provider.dart';
 import 'package:pico/features/shop/presentation/shop_screen.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/shared/components/pico_bottom_nav_bar.dart';
@@ -220,10 +221,15 @@ void main() {
 
       // Verify Primary Item: Remove Ads
       expect(find.text('Remove Ads'), findsOneWidget);
+      expect(
+        find.text('Enjoy an uninterrupted match-tracking experience with zero ads.'),
+        findsOneWidget,
+      );
       expect(find.text('LIFETIME PASS'), findsOneWidget);
       expect(find.text('Zero banner ads on Home & Matches'), findsOneWidget);
       expect(find.text('Zero interstitial video ads'), findsOneWidget);
-      expect(find.text('REMOVE ADS • \$2.99'), findsOneWidget);
+      expect(find.text('Unlock Ad-Free • \$2.99'), findsOneWidget);
+      expect(find.byKey(const Key('remove_ads_action_button')), findsOneWidget);
 
       // Verify Restore Purchases button
       expect(find.byKey(const Key('restore_purchases_button')), findsOneWidget);
@@ -232,13 +238,15 @@ void main() {
       expect(find.text('MORE REWARDS COMING SOON'), findsOneWidget);
     });
 
-    testWidgets('tapping Remove Ads button unlocks ad-free pass and updates UI state',
+    testWidgets(
+        'isAdFreeProvider dynamically switches UI between locked and unlocked state',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(800, 1200);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
+      // 1. Initial State: locked
       await tester.pumpWidget(
         const ProviderScope(
           child: MaterialApp(
@@ -255,23 +263,24 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final purchaseButton = find.byKey(const Key('remove_ads_purchase_button'));
-      expect(purchaseButton, findsOneWidget);
+      expect(find.text('LIFETIME PASS'), findsOneWidget);
+      expect(find.text('Unlock Ad-Free • \$2.99'), findsOneWidget);
 
-      // Tap purchase
-      await tester.tap(purchaseButton);
-      await tester.pump(); // Start processing
-
-      expect(find.text('Processing...'), findsOneWidget);
-
-      // Advance simulated timer
-      await tester.pump(const Duration(milliseconds: 700));
+      // Tap action button without crashes or fake timer delays
+      await tester.tap(find.byKey(const Key('remove_ads_action_button')));
       await tester.pumpAndSettle();
 
-      // Verify unlocked UI state
+      // Dynamically unlock adFreeProvider
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(ShopScreen)),
+      );
+      await container.read(adFreeProvider.notifier).unlockAdFree();
+      await tester.pumpAndSettle();
+
+      // Verify UI dynamically reflects unlocked state
       expect(find.text('ACTIVE • UNLOCKED'), findsOneWidget);
       expect(find.text('Ads Removed • Lifetime Unlocked'), findsOneWidget);
-      expect(find.text('Ads successfully removed! Enjoy your uninterrupted Pico experience.'), findsOneWidget);
+      expect(find.byKey(const Key('remove_ads_action_button')), findsNothing);
     });
   });
 }

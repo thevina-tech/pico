@@ -140,15 +140,15 @@ void main() {
       // Verified: Resumes directly on Step 3: What Should We Call You?
       expect(find.byType(OnboardingScreen), findsOneWidget);
       expect(find.text('What Should We Call You?'), findsOneWidget);
-      expect(find.text('3/5'), findsOneWidget);
+      expect(find.text('3/4'), findsOneWidget);
       expect(find.text('How Pico Works'), findsNothing);
       expect(find.text('Predict Football.\nCompete with Friends.'), findsNothing);
     });
 
     testWidgets(
-        'User entered username, reached Step 4 (Team Selection), closed app -> resumes at Step 4 with username restored',
+        'User entered username, reached Step 4 (Leagues Selection), closed app -> resumes at Step 4 with username restored',
         (WidgetTester tester) async {
-      // Simulate app was closed at step 3 (index 3 is Step 4/5: Team selection) with username 'ronaldo7'
+      // Simulate app was closed at step 3 (index 3 is Step 4/4: Leagues selection) with username 'ronaldo7'
       SharedPreferences.setMockInitialValues({
         'pico_onboarding_step': 3,
         'pico_onboarding_username': 'ronaldo7',
@@ -184,10 +184,10 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Verified: Resumes directly at Step 4: Choose Favorite Team
+      // Verified: Resumes directly at Step 4: Choose Leagues
       expect(find.byType(OnboardingScreen), findsOneWidget);
-      expect(find.text('Choose Favorite Team'), findsOneWidget);
-      expect(find.text('4/5'), findsOneWidget);
+      expect(find.text('Choose Leagues'), findsOneWidget);
+      expect(find.text('4/4'), findsOneWidget);
 
       // Verify going back retains the username
       await tester.tap(find.byIcon(Icons.arrow_back));
@@ -198,13 +198,13 @@ void main() {
     });
 
     testWidgets(
-        'User picked team, reached Step 5 (Leagues), closed app -> resumes at Step 5 with team preserved',
+        'User reached Step 4 (Leagues), closed app -> resumes at Step 4 with leagues preserved',
         (WidgetTester tester) async {
-      // Simulate app was closed at step 4 (index 4 is Step 5/5: Leagues selection)
+      // Simulate app was closed at step 3 (index 3 is Step 4/4: Leagues selection)
       SharedPreferences.setMockInitialValues({
-        'pico_onboarding_step': 4,
+        'pico_onboarding_step': 3,
         'pico_onboarding_username': 'ronaldo7',
-        'pico_onboarding_team_id': 'team_madrid',
+        'pico_onboarding_league_ids': ['140'],
       });
 
       final mockRepo = _TestMockProfileRepository(
@@ -237,10 +237,10 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Verified: Resumes directly at Step 5: Choose Leagues
+      // Verified: Resumes directly at Step 4: Choose Leagues
       expect(find.byType(OnboardingScreen), findsOneWidget);
       expect(find.text('Choose Leagues'), findsOneWidget);
-      expect(find.text('5/5'), findsOneWidget);
+      expect(find.text('4/4'), findsOneWidget);
     });
 
     testWidgets(

@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 import 'package:pico/core/logging/app_logger.dart';
@@ -45,6 +47,7 @@ class AuthNotifier extends _$AuthNotifier {
 
     final currentUser = supabase.auth.currentUser;
     if (currentUser != null) {
+      _syncRevenueCatUser(currentUser.id);
       _checkPersonalization(currentUser);
       return PicoAuthAuthenticated(user: currentUser);
     }
@@ -66,8 +69,10 @@ class AuthNotifier extends _$AuthNotifier {
   void _handleAuthChangeEvent(supa.AuthState data) {
     final user = data.session?.user;
     if (user != null) {
+      _syncRevenueCatUser(user.id);
       _checkPersonalization(user);
     } else {
+      _syncRevenueCatLogOut();
       state = const PicoAuthUnauthenticated();
     }
   }
@@ -113,6 +118,7 @@ class AuthNotifier extends _$AuthNotifier {
       final user = response.user;
       if (user != null) {
         AppLogger.info('Anonymous login successful for user ${user.id}');
+        await _syncRevenueCatUser(user.id);
         state = PicoAuthAuthenticated(user: user, isPersonalized: false);
       } else {
         state = const PicoAuthError('Failed to obtain user session.');
@@ -194,6 +200,7 @@ class AuthNotifier extends _$AuthNotifier {
       final user = response.user;
       if (user != null) {
         AppLogger.info('Google sign-in successful for user ${user.id}');
+        await _syncRevenueCatUser(user.id);
         await _ensureProfileExists(user);
         await _checkPersonalization(user);
         return user;
@@ -246,8 +253,10 @@ class AuthNotifier extends _$AuthNotifier {
     }
   }
 
-  /// Signs the user out from both Supabase and Google client.
+  /// Signs the user out from both Supabase, RevenueCat, and Google client.
   Future<void> signOut() async {
+    await _syncRevenueCatLogOut();
+
     final supabase = ref.read(supabaseClientProvider);
     if (supabase != null) {
       try {
@@ -275,5 +284,33 @@ class AuthNotifier extends _$AuthNotifier {
     }
 
     state = const PicoAuthUnauthenticated();
+  }
+
+  bool get _isTestEnvironment {
+    try {
+      return Platform.environment.containsKey('FLUTTER_TEST');
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _syncRevenueCatUser(String uid) async {
+    if (_isTestEnvironment) return;
+    try {
+      await Purchases.logIn(uid);
+      AppLogger.info('RevenueCat user logged in: $uid');
+    } catch (e) {
+      AppLogger.warning('RevenueCat logIn error for $uid: $e');
+    }
+  }
+
+  Future<void> _syncRevenueCatLogOut() async {
+    if (_isTestEnvironment) return;
+    try {
+      await Purchases.logOut();
+      AppLogger.info('RevenueCat user logged out');
+    } catch (e) {
+      AppLogger.warning('RevenueCat logOut error: $e');
+    }
   }
 }

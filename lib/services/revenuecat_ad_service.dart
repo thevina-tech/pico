@@ -68,11 +68,16 @@ class RevenueCatAdService {
     final rcKey = revenueCatApiKey ?? dotenv.env['REVENUECAT_API_KEY'];
     if (rcKey != null && rcKey.trim().isNotEmpty && !rcKey.contains('placeholder')) {
       try {
-        final config = PurchasesConfiguration(rcKey);
-        if (initialUserId != null && initialUserId.isNotEmpty) {
-          config.appUserID = initialUserId;
+        final isAlreadyConfigured = await Purchases.isConfigured;
+        if (!isAlreadyConfigured) {
+          final config = PurchasesConfiguration(rcKey);
+          if (initialUserId != null && initialUserId.isNotEmpty) {
+            config.appUserID = initialUserId;
+          }
+          await Purchases.configure(config);
+        } else if (initialUserId != null && initialUserId.isNotEmpty) {
+          await Purchases.logIn(initialUserId);
         }
-        await Purchases.configure(config);
         _isPurchasesConfigured = true;
         AppLogger.info('RevenueCat initialized successfully with AdTracker support');
       } catch (e) {
