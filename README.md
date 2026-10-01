@@ -1,4 +1,4 @@
-# Pico
+# Clash Eleven
 
 A gamified social football prediction game where players predict real match scores, earn Points & XP, compete on leaderboards, and challenge friends in private leagues—without betting money.
 
@@ -52,5 +52,5 @@ flutter run
 - **State Management:** Riverpod (`@riverpod` code generation)
 - **Navigation:** `go_router` with `StatefulShellRoute`
 - **Backend & Database:** Supabase (Auth, PostgreSQL, Realtime)
-- **Monetization:** RevenueCat (Subscriptions & Paywalls) + Google Mobile Ads
+- **Monetization:** RevenueCat (Subscriptions & Paywalls) + RevenueCat Ads integrated with Google Mobile Ads
 - **Localization:** Flutter `gen-l10n` (English & Spanish)
