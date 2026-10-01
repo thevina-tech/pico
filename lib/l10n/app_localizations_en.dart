@@ -53,7 +53,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setupSpeedHint => 'Takes less than 1 minute to set up.';
 
   @override
-  String get howPicoWorksTitle => 'How Pico Works';
+  String get howPicoWorksTitle => 'How does it work';
 
   @override
   String get howPicoWorksSubtitle => 'Simple, fast, and built for matchdays.';
@@ -68,7 +68,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get step2Title => 'Earn points & climb';
 
   @override
-  String get step2Description => 'Score accurate calls each week';
+  String get step2Description =>
+      'Score accurate calls each week and earn points';
 
   @override
   String get step3Title => 'Win tournament trophies';

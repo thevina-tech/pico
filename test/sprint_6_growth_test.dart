@@ -62,7 +62,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('How Pico Works'), findsOneWidget);
+      expect(find.text('How does it work'), findsOneWidget);
       expect(find.text('Continue with Google'), findsOneWidget);
       expect(find.text('2/4'), findsOneWidget);
     });

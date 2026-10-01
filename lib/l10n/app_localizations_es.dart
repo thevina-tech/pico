@@ -52,7 +52,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get setupSpeedHint => 'Se configura en menos de 1 minuto.';
 
   @override
-  String get howPicoWorksTitle => 'Cómo Funciona Pico';
+  String get howPicoWorksTitle => '¿Cómo funciona?';
 
   @override
   String get howPicoWorksSubtitle =>
@@ -69,8 +69,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get step2Title => 'Gana puntos y sube';
 
   @override
-  String get step2Description =>
-      'Acierta marcadores cada semana y suma Puntos Pico';
+  String get step2Description => 'Acierta marcadores cada semana y suma puntos';
 
   @override
   String get step3Title => 'Gana trofeos de torneo';

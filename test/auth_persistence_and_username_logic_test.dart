@@ -222,7 +222,7 @@ void main() {
       // Crucial test: must route to Step B (page index 2: Username Selection)
       // Never show "How it works" or "Welcome"
       expect(find.byType(OnboardingScreen), findsOneWidget);
-      expect(find.text('How Pico Works'), findsNothing);
+      expect(find.text('How does it work'), findsNothing);
       expect(find.text('Predict Football.\nCompete with Friends.'), findsNothing);
       expect(find.text('What Should We Call You?'), findsOneWidget);
       expect(find.text('3/4'), findsOneWidget);
@@ -269,7 +269,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('How Pico Works'), findsNothing);
+      expect(find.text('How does it work'), findsNothing);
       expect(find.text('What Should We Call You?'), findsOneWidget);
       expect(find.text('3/4'), findsOneWidget);
     });

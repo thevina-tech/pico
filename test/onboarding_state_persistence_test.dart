@@ -141,7 +141,7 @@ void main() {
       expect(find.byType(OnboardingScreen), findsOneWidget);
       expect(find.text('What Should We Call You?'), findsOneWidget);
       expect(find.text('3/4'), findsOneWidget);
-      expect(find.text('How Pico Works'), findsNothing);
+      expect(find.text('How does it work'), findsNothing);
       expect(find.text('Predict Football.\nCompete with Friends.'), findsNothing);
     });
 

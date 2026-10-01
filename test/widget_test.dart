@@ -51,7 +51,7 @@ void main() {
     await tester.tap(find.text('Get Started'));
     await tester.pumpAndSettle();
 
-    expect(find.text('How Pico Works'), findsOneWidget);
+    expect(find.text('How does it work'), findsOneWidget);
     expect(find.text('Continue with Google'), findsOneWidget);
   });
 

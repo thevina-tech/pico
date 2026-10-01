@@ -58,7 +58,7 @@
   "@setupSpeedHint": {
     "description": "Hint reassuring the user about setup speed"
   },
-  "howPicoWorksTitle": "How Pico Works",
+  "howPicoWorksTitle": "How does it work",
   "@howPicoWorksTitle": {
     "description": "Title for Onboarding Screen 2 explaining How Pico Works"
   },
@@ -78,7 +78,7 @@
   "@step2Title": {
     "description": "Title for concept 2 in How Pico Works"
   },
-  "step2Description": "Score accurate calls each week",
+  "step2Description": "Score accurate calls each week and earn points",
   "@step2Description": {
     "description": "Description for concept 2 in How Pico Works"
   },

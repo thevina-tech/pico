@@ -19,6 +19,7 @@ import 'package:pico/features/profile/presentation/personalization_controller.da
 import 'package:pico/features/profile/presentation/user_profile_provider.dart';
 import 'package:pico/features/tournaments/data/tournament_repository.dart';
 import 'package:pico/l10n/app_localizations.dart';
+import 'package:pico/shared/components/game_button.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/shared/components/pico_snackbar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
@@ -455,48 +456,17 @@ class _OnboardingWelcomeStep extends StatelessWidget {
           ),
           const SizedBox(height: 12.0),
 
-          // Brand Emblem + Title
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: Image.asset(
-                  'assets/images/logo/logo.png',
-                  width: 32.0,
-                  height: 32.0,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, _, _) => Container(
-                    width: 32.0,
-                    height: 32.0,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Color(0xFFFFDFA0), Color(0xFFE2C384)],
-                      ),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: const Icon(
-                      Icons.emoji_events,
-                      size: 20.0,
-                      color: Color(0xFF261A00),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10.0),
-              const Text(
-                'Pico Football',
-                style: TextStyle(
-                  fontFamily: 'Rubik',
-                  fontSize: 22.0,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFFFAF9F4),
-                  letterSpacing: -0.2,
-                ),
-              ),
-            ],
+          // Brand Title
+          const Text(
+            'Clash Eleven',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Rubik',
+              fontSize: 22.0,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFFFAF9F4),
+              letterSpacing: -0.2,
+            ),
           ),
         ],
       ),
@@ -516,144 +486,20 @@ class _OnboardingWelcomeStep extends StatelessWidget {
 
   Widget _buildMascotHero() {
     return SizedBox(
-      width: 250.0,
-      height: 250.0,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Outer Glowing Ring
-          Container(
-            width: 240.0,
-            height: 240.0,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  PicoColors.primary.withValues(alpha: 0.35),
-                  Colors.transparent,
-                ],
-              ),
-              border: Border.all(
-                color: const Color(0x4DE2C384),
-                width: 1.5,
-              ),
-            ),
+      width: 220.0,
+      height: 220.0,
+      child: Center(
+        child: Image.asset(
+          'assets/images/logo/logo.png',
+          width: 200.0,
+          height: 200.0,
+          fit: BoxFit.contain,
+          errorBuilder: (_, _, _) => const Icon(
+            Icons.sports_soccer,
+            size: 80.0,
+            color: PicoColors.gold,
           ),
-
-          // Inner Tactile Sunken Tray
-          Container(
-            width: 210.0,
-            height: 210.0,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0xFF103021), Color(0xFF0A1F15)],
-              ),
-              border: Border.all(
-                color: const Color(0x80FFDFA0),
-                width: 2.0,
-              ),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x80000000),
-                  blurRadius: 16.0,
-                  offset: Offset(0, 8),
-                ),
-              ],
-            ),
-            child: ClipOval(
-              child: Center(
-                child: Image.asset(
-                  'assets/images/logo/logo.png',
-                  fit: BoxFit.contain,
-                  width: 175.0,
-                  height: 175.0,
-                  errorBuilder: (_, _, _) => const Icon(
-                    Icons.sports_soccer,
-                    size: 80.0,
-                    color: PicoColors.gold,
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          // Floating Mini Badge Top-Right: "⚽ Kickoff"
-          Positioned(
-            top: 10.0,
-            right: 8.0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12.0),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0xFFDBDAD5),
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('⚽', style: TextStyle(fontSize: 13.0)),
-                  SizedBox(width: 4.0),
-                  Text(
-                    'KICKOFF',
-                    style: TextStyle(
-                      fontFamily: 'Space Grotesk',
-                      fontSize: 10.0,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF006A3A),
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Floating Mini Badge Bottom-Left: "⭐ Ready"
-          Positioned(
-            bottom: 12.0,
-            left: 6.0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFFFDFA0), Color(0xFFE2C384)],
-                ),
-                borderRadius: BorderRadius.circular(12.0),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0xFF775F2A),
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.star, size: 13.0, color: Color(0xFF261A00)),
-                  SizedBox(width: 4.0),
-                  Text(
-                    'READY',
-                    style: TextStyle(
-                      fontFamily: 'Space Grotesk',
-                      fontSize: 10.0,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF261A00),
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -676,25 +522,14 @@ class _OnboardingWelcomeStep extends StatelessWidget {
               height: 1.15,
             ),
           ),
-          const SizedBox(height: 10.0),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text(
-              l10n?.onboardingWelcomeSubtitle ??
-                  'Call match scores, bank Pico Points, and battle your friends on private & global leaderboards.',
-              textAlign: TextAlign.center,
-              style: PicoTypography.bodyMd.copyWith(
-                color: const Color(0xFFE9E8E3).withValues(alpha: 0.85),
-                height: 1.4,
-              ),
-            ),
-          ),
           const SizedBox(height: 24.0),
 
           // Championship Warm Gold Action Button ("Get Started →")
-          _TactileGoldButton(
+          GameButton.gold(
             text: l10n?.getStartedButton ?? 'Get Started',
             onPressed: onGetStarted,
+            width: double.infinity,
+            height: 56.0,
           ),
           const SizedBox(height: 12.0),
 
@@ -788,61 +623,26 @@ class _OnboardingHowItWorksStep extends StatelessWidget {
   Widget _buildExplainerContent() {
     return Column(
       children: [
-        // Mascot Emblem Hero with Radial Emerald Aura
-        SizedBox(
-          width: 80.0,
-          height: 80.0,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: 80.0,
-                height: 80.0,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [Color(0x334DFFB2), Colors.transparent],
-                  ),
-                ),
-              ),
-              Container(
-                width: 72.0,
-                height: 72.0,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFF0F2C1E),
-                  border: Border.all(
-                    color: const Color(0x80FFDFA0),
-                    width: 1.5,
-                  ),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black38,
-                      blurRadius: 10.0,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: ClipOval(
-                  child: Image.network(
-                    'https://lh3.googleusercontent.com/aida-public/AB6AXuA1IWeqmX9ae_kCOoMYPk0Vt7LeU5ZGWmErLX-WD3iCrGCGyMlrAiwFxnmtIkMmwZbvI06SZRpOkeJL8_9HZgXLgpqbNGSZkU_cvb1ejOYbOEQRRl9Rwz_vRDzY-sanVkVXaX8c6j5RUEf_sunT4E_N0yvSoGmaWHp0NiTQGeNCDm4yiYH24GzusZS9VyenW8lUsOmVEnlJolGidUPUXrpZeIhkVpXPeSZOg-JacfW4DZQLoSDNrogZPQ',
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, _, _) => const Icon(
-                      Icons.sports_soccer,
-                      size: 36.0,
-                      color: PicoColors.gold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+        // App Icon Hero
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16.0),
+          child: Image.asset(
+            'assets/images/logo/logo.png',
+            width: 72.0,
+            height: 72.0,
+            fit: BoxFit.contain,
+            errorBuilder: (_, _, _) => const Icon(
+              Icons.sports_soccer,
+              size: 40.0,
+              color: PicoColors.gold,
+            ),
           ),
         ),
         const SizedBox(height: 14.0),
 
         // Headline & Subtitle
         Text(
-          l10n?.howPicoWorksTitle ?? 'How Pico Works',
+          l10n?.howPicoWorksTitle ?? 'How does it work',
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontFamily: 'Rubik',
@@ -877,17 +677,17 @@ class _OnboardingHowItWorksStep extends StatelessWidget {
         const SizedBox(height: 12.0),
         _ExplainerCard(
           stepNumber: '2',
-          badgeColor: const Color(0xFFFFDFA0),
-          badgeShadowColor: const Color(0xFFD9B368),
-          textColor: const Color(0xFF261A00),
+          badgeColor: const Color(0xFFF9F8F3),
+          badgeShadowColor: const Color(0xFFD8D1C3),
+          textColor: const Color(0xFF13211B),
           title: l10n?.step2Title ?? 'Earn points & climb',
-          subtitle: l10n?.step2Description ?? 'Score accurate calls each week',
+          subtitle: l10n?.step2Description ?? 'Score accurate calls each week and earn points',
         ),
         const SizedBox(height: 12.0),
         _ExplainerCard(
           stepNumber: '3',
-          badgeColor: const Color(0xFF008557),
-          badgeShadowColor: const Color(0xFF00593B),
+          badgeColor: const Color(0xFF006A3A),
+          badgeShadowColor: const Color(0xFF004726),
           textColor: Colors.white,
           title: l10n?.step3Title ?? 'Win tournament trophies',
           subtitle: l10n?.step3Description ?? 'Top friends and global ranks',
@@ -987,6 +787,12 @@ class _ExplainerCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: badgeColor,
               borderRadius: BorderRadius.circular(12.0),
+              border: Border.all(
+                color: badgeColor == const Color(0xFFF9F8F3)
+                    ? const Color(0xFFC7BFB0)
+                    : Colors.transparent,
+                width: 1.0,
+              ),
               boxShadow: [
                 BoxShadow(
                   color: badgeShadowColor,
@@ -1051,8 +857,8 @@ const String _googleSvg = '''
   <path fill="none" d="M0 0h48v48H0z"/>
 </svg>''';
 
-/// 3D Tactile Google Sign-in Button with authentic Google logo and Stitch tactile styling.
-class _TactileGoogleButton extends StatefulWidget {
+/// 3D Tactile Google Sign-in Button using the GameButton tactile system.
+class _TactileGoogleButton extends StatelessWidget {
   const _TactileGoogleButton({
     required this.text,
     required this.onPressed,
@@ -1064,95 +870,61 @@ class _TactileGoogleButton extends StatefulWidget {
   final bool isLoading;
 
   @override
-  State<_TactileGoogleButton> createState() => _TactileGoogleButtonState();
-}
-
-class _TactileGoogleButtonState extends State<_TactileGoogleButton> {
-  bool _isPressed = false;
-
-  @override
   Widget build(BuildContext context) {
-    const double bevelHeight = 4.0;
-
-    return GestureDetector(
-      onTapDown: widget.onPressed == null
-          ? null
-          : (_) => setState(() => _isPressed = true),
-      onTapUp: widget.onPressed == null
-          ? null
-          : (_) {
-              setState(() => _isPressed = false);
-              widget.onPressed?.call();
-            },
-      onTapCancel: () => setState(() => _isPressed = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 75),
-        margin: EdgeInsets.only(
-          top: _isPressed ? bevelHeight : 0,
-          bottom: _isPressed ? 0 : bevelHeight,
-        ),
-        width: double.infinity,
-        height: 56.0,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.0),
-          border: Border.all(
-            color: const Color(0xFFE2E8F0),
-            width: 1.0,
-          ),
-          boxShadow: _isPressed
-              ? []
-              : const [
-                  BoxShadow(
-                    color: Color(0xFFCBD5E1),
-                    offset: Offset(0, bevelHeight),
+    return GameButton(
+      faceColor: Colors.white,
+      extrusionColor: const Color(0xFFCBD5E1),
+      outlineColor: const Color(0xFFE2E8F0),
+      glowColor: const Color(0x22FFFFFF),
+      textColor: const Color(0xFF1F2937),
+      textShadowColor: Colors.transparent,
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      width: double.infinity,
+      height: 56.0,
+      borderRadius: 18.0,
+      outlineWidth: 1.5,
+      extrusionHeight: 5.5,
+      onPressed: isLoading ? null : onPressed,
+      child: isLoading
+          ? const SizedBox(
+              width: 24.0,
+              height: 24.0,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4285F4)),
+              ),
+            )
+          : FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.string(
+                    _googleSvg,
+                    width: 22.0,
+                    height: 22.0,
                   ),
-                  BoxShadow(
-                    color: Color(0x33000000),
-                    offset: Offset(0, 8),
-                    blurRadius: 16,
+                  const SizedBox(width: 12.0),
+                  Text(
+                    text,
+                    style: const TextStyle(
+                      fontFamily: 'Rubik',
+                      fontSize: 16.5,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1F2937),
+                      letterSpacing: 0.1,
+                    ),
+                  ),
+                  const SizedBox(width: 8.0),
+                  const Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 18.0,
+                    color: Color(0xFF64748B),
                   ),
                 ],
-        ),
-        child: Center(
-          child: widget.isLoading
-              ? const SizedBox(
-                  width: 24.0,
-                  height: 24.0,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4285F4)),
-                  ),
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SvgPicture.string(
-                      _googleSvg,
-                      width: 22.0,
-                      height: 22.0,
-                    ),
-                    const SizedBox(width: 12.0),
-                    Text(
-                      widget.text,
-                      style: const TextStyle(
-                        fontFamily: 'Rubik',
-                        fontSize: 16.5,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1F2937),
-                        letterSpacing: 0.1,
-                      ),
-                    ),
-                    const SizedBox(width: 8.0),
-                    const Icon(
-                      Icons.arrow_forward_rounded,
-                      size: 18.0,
-                      color: Color(0xFF64748B),
-                    ),
-                  ],
-                ),
-        ),
-      ),
+              ),
+            ),
     );
   }
 }

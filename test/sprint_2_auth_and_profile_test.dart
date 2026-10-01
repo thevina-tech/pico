@@ -346,7 +346,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Pico Football'), findsOneWidget);
+      expect(find.textContaining('Clash Eleven'), findsOneWidget);
       expect(find.text('Predict Football.\nCompete with Friends.'), findsOneWidget);
       expect(find.text('Get Started'), findsOneWidget);
       expect(find.text('Takes less than 1 minute to set up.'), findsOneWidget);
@@ -356,8 +356,8 @@ void main() {
       await tester.tap(find.text('Get Started'));
       await tester.pumpAndSettle();
 
-      // Verify Step 2/4: How Pico Works is rendered
-      expect(find.text('How Pico Works'), findsOneWidget);
+      // Verify Step 2/4: How does it work is rendered
+      expect(find.text('How does it work'), findsOneWidget);
       expect(find.text('Simple, fast, and built for matchdays.'), findsOneWidget);
       expect(find.text('Predict the score'), findsOneWidget);
       expect(find.text('Earn points & climb'), findsOneWidget);
@@ -384,7 +384,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('How Pico Works'), findsOneWidget);
+      expect(find.text('How does it work'), findsOneWidget);
       await tester.tap(find.byIcon(Icons.arrow_back));
       await tester.pumpAndSettle();
 
@@ -485,7 +485,7 @@ void main() {
       // Back button takes user back to Step 2
       await tester.tap(find.byIcon(Icons.arrow_back));
       await tester.pumpAndSettle();
-      expect(find.text('How Pico Works'), findsOneWidget);
+      expect(find.text('How does it work'), findsOneWidget);
     });
 
     testWidgets(

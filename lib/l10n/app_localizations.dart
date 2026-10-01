@@ -179,7 +179,7 @@ abstract class AppLocalizations {
   /// Title for Onboarding Screen 2 explaining How Pico Works
   ///
   /// In en, this message translates to:
-  /// **'How Pico Works'**
+  /// **'How does it work'**
   String get howPicoWorksTitle;
 
   /// Subtitle for How Pico Works explainer screen
@@ -209,7 +209,7 @@ abstract class AppLocalizations {
   /// Description for concept 2 in How Pico Works
   ///
   /// In en, this message translates to:
-  /// **'Score accurate calls each week'**
+  /// **'Score accurate calls each week and earn points'**
   String get step2Description;
 
   /// Title for concept 3 in How Pico Works

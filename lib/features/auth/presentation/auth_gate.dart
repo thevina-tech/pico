@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
@@ -26,11 +25,11 @@ enum _AuthDestination {
   onboarding,
 }
 
-/// Primary startup decision-maker widget and Splash screen gateway.
+/// Primary startup decision-maker widget.
 ///
 /// Holds the UI state while Supabase initializes and checks whether the user has
 /// completed onboarding/personalization, preventing any flash of the Onboarding screen
-/// for authenticated users while displaying the branded Splash artwork.
+/// for authenticated users.
 class AuthGate extends ConsumerStatefulWidget {
   const AuthGate({
     super.key,
@@ -168,10 +167,6 @@ class _AuthGateState extends ConsumerState<AuthGate> {
   void _routeToHome() {
     if (!mounted) return;
 
-    try {
-      FlutterNativeSplash.remove();
-    } catch (_) {}
-
     setState(() {
       _isLoading = false;
       _destination = _AuthDestination.home;
@@ -184,10 +179,6 @@ class _AuthGateState extends ConsumerState<AuthGate> {
 
   void _routeToOnboarding({int step = 0}) {
     if (!mounted) return;
-
-    try {
-      FlutterNativeSplash.remove();
-    } catch (_) {}
 
     setState(() {
       _isLoading = false;
@@ -202,6 +193,8 @@ class _AuthGateState extends ConsumerState<AuthGate> {
 
   @override
   Widget build(BuildContext context) {
+    // While the auth state is unknown/loading, return a blank pitch Scaffold
+    // containing a centered CircularProgressIndicator. Do not render any interactive screens.
     if (_isLoading) {
       return widget.loadingWidget ??
           const Scaffold(
