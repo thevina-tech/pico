@@ -1,0 +1,1502 @@
+{
+  "@@locale": "en",
+  "appTitle": "Pico",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "predictButton": "Predict",
+  "@predictButton": {
+    "description": "Label for the predict CTA button"
+  },
+  "navShop": "Shop",
+  "@navShop": {
+    "description": "Bottom navigation Shop tab label"
+  },
+  "navHome": "Home",
+  "@navHome": {
+    "description": "Bottom navigation Home tab label"
+  },
+  "navMatches": "Matches",
+  "@navMatches": {
+    "description": "Bottom navigation Matches tab label"
+  },
+  "navTournaments": "Tournaments",
+  "@navTournaments": {
+    "description": "Bottom navigation Tournaments tab label"
+  },
+  "navProfile": "Profile",
+  "@navProfile": {
+    "description": "Bottom navigation Profile tab label"
+  },
+  "predictBy": "Predict by {time}",
+  "@predictBy": {
+    "description": "Kickoff deadline hint",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "19:50"
+      }
+    }
+  },
+  "onboardingWelcomeTitle": "Predict Football.\nCompete with Friends.",
+  "@onboardingWelcomeTitle": {
+    "description": "Headline for the onboarding welcome screen"
+  },
+  "onboardingWelcomeSubtitle": "Call match scores, bank Pico Points, and battle your friends on private & global leaderboards.",
+  "@onboardingWelcomeSubtitle": {
+    "description": "Subtitle describing the value proposition"
+  },
+  "getStartedButton": "Get Started",
+  "@getStartedButton": {
+    "description": "CTA button label to start guest mode"
+  },
+  "continueWithGoogle": "Continue with Google",
+  "@continueWithGoogle": {
+    "description": "Button label for Google Sign-In on onboarding screen 2"
+  },
+  "setupSpeedHint": "Takes less than 1 minute to set up.",
+  "@setupSpeedHint": {
+    "description": "Hint reassuring the user about setup speed"
+  },
+  "howPicoWorksTitle": "How does it work",
+  "@howPicoWorksTitle": {
+    "description": "Title for Onboarding Screen 2 explaining How Pico Works"
+  },
+  "howPicoWorksSubtitle": "Simple, fast, and built for matchdays.",
+  "@howPicoWorksSubtitle": {
+    "description": "Subtitle for How Pico Works explainer screen"
+  },
+  "step1Title": "Predict the score",
+  "@step1Title": {
+    "description": "Title for concept 1 in How Pico Works"
+  },
+  "step1Description": "Quick picks before kickoff",
+  "@step1Description": {
+    "description": "Description for concept 1 in How Pico Works"
+  },
+  "step2Title": "Earn points & climb",
+  "@step2Title": {
+    "description": "Title for concept 2 in How Pico Works"
+  },
+  "step2Description": "Score accurate calls each week and earn points",
+  "@step2Description": {
+    "description": "Description for concept 2 in How Pico Works"
+  },
+  "step3Title": "Win tournament trophies",
+  "@step3Title": {
+    "description": "Title for concept 3 in How Pico Works"
+  },
+  "step3Description": "Top friends and global ranks",
+  "@step3Description": {
+    "description": "Description for concept 3 in How Pico Works"
+  },
+  "nextStepHint": "Next: Pick your favorite starting team (15 sec)",
+  "@nextStepHint": {
+    "description": "Hint beneath CTA button indicating next step"
+  },
+  "stepIndicator": "STEP {current}/{total}",
+  "@stepIndicator": {
+    "description": "Segmented step counter in onboarding",
+    "placeholders": {
+      "current": { "type": "int", "example": "1" },
+      "total": { "type": "int", "example": "5" }
+    }
+  },
+  "personalizationTitle": "Pick Your Favorites",
+  "@personalizationTitle": {
+    "description": "Title of the personalization screen"
+  },
+  "personalizationSubtitle": "Choose your username and follow your favorite clubs & leagues.",
+  "@personalizationSubtitle": {
+    "description": "Subtitle of the personalization screen"
+  },
+  "customizeFeedKicker": "CUSTOMIZE YOUR FEED",
+  "@customizeFeedKicker": {
+    "description": "Small uppercase kicker above personalization title"
+  },
+  "usernameLabel": "Choose a Username",
+  "@usernameLabel": {
+    "description": "Label for the username text input"
+  },
+  "usernamePlaceholder": "e.g. joao_striker",
+  "@usernamePlaceholder": {
+    "description": "Placeholder hint for username text input"
+  },
+  "usernameErrorEmpty": "Please introduce a username to continue.",
+  "@usernameErrorEmpty": {
+    "description": "Error when username is blank"
+  },
+  "usernameErrorTooShort": "Username must be at least 3 characters",
+  "@usernameErrorTooShort": {
+    "description": "Error when username is fewer than 3 chars"
+  },
+  "topLeaguesTitle": "Top Leagues & Cups",
+  "@topLeaguesTitle": {
+    "description": "Section header for leagues selection"
+  },
+  "clubsFollowTitle": "Clubs You Follow",
+  "@clubsFollowTitle": {
+    "description": "Section header for clubs selection"
+  },
+  "personalizationHelperNote": "You can change your favorite team and join more tournaments anytime.",
+  "@personalizationHelperNote": {
+    "description": "Informational helper text below selectors in personalization screen"
+  },
+  "continueButton": "Continue",
+  "@continueButton": {
+    "description": "Primary continue action button label"
+  },
+  "skipButton": "Skip",
+  "@skipButton": {
+    "description": "Action label to skip step"
+  },
+  "preferencesSyncHint": "Preferences sync instantly across Pico League",
+  "@preferencesSyncHint": {
+    "description": "Small footer note under continue button"
+  },
+  "signInToContinue": "Sign in to Continue",
+  "@signInToContinue": {
+    "description": "Button label to perform authentication and proceed"
+  },
+  "step3AuthTitle": "What Should We Call You?",
+  "@step3AuthTitle": {
+    "description": "Headline for username and auth step"
+  },
+  "step3AuthSubtitle": "Pick a username for leaderboards and friend leagues.",
+  "@step3AuthSubtitle": {
+    "description": "Subtitle for username and auth step"
+  },
+  "chooseFavoriteTeamTitle": "Choose Favorite Team",
+  "@chooseFavoriteTeamTitle": {
+    "description": "Headline for team selection step"
+  },
+  "chooseFavoriteTeamSubtitle": "Select your club to personalize your feed and upcoming matches.",
+  "@chooseFavoriteTeamSubtitle": {
+    "description": "Subtitle for team selection step"
+  },
+  "searchTeamsPlaceholder": "Search clubs...",
+  "@searchTeamsPlaceholder": {
+    "description": "Placeholder for team search field"
+  },
+  "chooseLeaguesTitle": "Choose Leagues",
+  "@chooseLeaguesTitle": {
+    "description": "Headline for league selection step"
+  },
+  "chooseLeaguesSubtitle": "Select 1 or 2 competitions to follow and compete in.",
+  "@chooseLeaguesSubtitle": {
+    "description": "Subtitle for league selection step"
+  },
+  "finishButton": "Finish",
+  "@finishButton": {
+    "description": "Action button to finish onboarding"
+  },
+  "oneTeamRequired": "Please select 1 team to continue.",
+  "@oneTeamRequired": {
+    "description": "Validation message when no team is selected"
+  },
+  "twoLeaguesRequired": "Please select 1 or 2 leagues to continue.",
+  "@twoLeaguesRequired": {
+    "description": "Validation message when no leagues are selected"
+  },
+  "maxLeaguesReached": "You can select up to 2 leagues.",
+  "@maxLeaguesReached": {
+    "description": "Validation toast when attempting to select a 3rd league"
+  },
+  "usernameTakenError": "This username is already taken. Please choose another one.",
+  "@usernameTakenError": {
+    "description": "Error message when username already exists in database"
+  },
+  "selectedTeamBadge": "1/1 Selected",
+  "@selectedTeamBadge": {
+    "description": "Badge showing 1 team selected"
+  },
+  "leaguesSelectedBadge": "{count}/2 Selected",
+  "@leaguesSelectedBadge": {
+    "description": "Badge showing selected leagues count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "savingPreferences": "Saving your profile...",
+  "@savingPreferences": {
+    "description": "Loading indicator text when saving profile"
+  },
+  "mascotGreeting": "Big match tonight, {username}! ⚽",
+  "@mascotGreeting": {
+    "description": "Daily greeting from the Pico mascot",
+    "placeholders": {
+      "username": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
+  "upcomingMatchesTitle": "Upcoming Matches",
+  "@upcomingMatchesTitle": {
+    "description": "Header title for the upcoming matches list"
+  },
+  "noUpcomingMatches": "No upcoming matches right now. Check back soon!",
+  "@noUpcomingMatches": {
+    "description": "Empty state text for matches feed"
+  },
+  "retryButton": "Retry",
+  "@retryButton": {
+    "description": "Action label to retry a failed network request"
+  },
+  "homeMenuTitle": "Settings & Menu",
+  "@homeMenuTitle": {
+    "description": "Title of the home hamburger menu"
+  },
+  "signOutButton": "Sign Out",
+  "@signOutButton": {
+    "description": "Action label to sign out"
+  },
+  "exitDialogTitle": "Exit App?",
+  "@exitDialogTitle": {
+    "description": "Title of the exit confirmation dialog"
+  },
+  "exitDialogMessage": "Are you sure you want to exit?",
+  "@exitDialogMessage": {
+    "description": "Message explaining consequences of quitting Pico"
+  },
+  "exitDialogStayButton": "Stay",
+  "@exitDialogStayButton": {
+    "description": "Primary action to stay in the game and keep predicting"
+  },
+  "exitDialogLeaveButton": "Exit",
+  "@exitDialogLeaveButton": {
+    "description": "Secondary action to exit/quit the game"
+  },
+  "matchOfTheDayTitle": "Match of the Day",
+  "@matchOfTheDayTitle": {
+    "description": "Section header for the single featured match on Home"
+  },
+  "viewAllMatches": "View All",
+  "@viewAllMatches": {
+    "description": "Action label to view all matches on the Matches screen"
+  },
+  "moreMatchesAvailable": "+{count} more fixtures in Matches",
+  "@moreMatchesAvailable": {
+    "description": "Banner text indicating remaining fixtures in the Matches screen",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "hitRateLabel": "Hit Rate",
+  "@hitRateLabel": {
+    "description": "Label for accuracy stat in profile"
+  },
+  "matchesLabel": "Matches",
+  "@matchesLabel": {
+    "description": "Label for total matches stat in profile"
+  },
+  "podiumsLabel": "Podiums",
+  "@podiumsLabel": {
+    "description": "Label for podium finishes stat in profile"
+  },
+  "clubRankLabel": "Club Rank",
+  "@clubRankLabel": {
+    "description": "Label for club leaderboard rank in profile"
+  },
+  "xpProgressToLevel": "XP Progress to LVL {level}",
+  "@xpProgressToLevel": {
+    "description": "XP progress title showing next level",
+    "placeholders": {
+      "level": {
+        "type": "int",
+        "example": "8"
+      }
+    }
+  },
+  "tournamentsAccordionTitle": "Tournaments",
+  "@tournamentsAccordionTitle": {
+    "description": "Title of the Tournaments accordion section"
+  },
+  "tournamentsAccordionSubtitle": "Active cups & weekly leagues",
+  "@tournamentsAccordionSubtitle": {
+    "description": "Subtitle of the Tournaments accordion section"
+  },
+  "tournamentsActiveCount": "{count} Active",
+  "@tournamentsActiveCount": {
+    "description": "Badge showing active tournaments count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "settingsAccordionTitle": "Settings",
+  "@settingsAccordionTitle": {
+    "description": "Title of Settings accordion section"
+  },
+  "settingsAccordionSubtitle": "Preferences, sound & notifications",
+  "@settingsAccordionSubtitle": {
+    "description": "Subtitle of Settings accordion section"
+  },
+  "pushNotificationsTitle": "Push Notifications",
+  "@pushNotificationsTitle": {
+    "description": "Title of push notification setting"
+  },
+  "matchdayHapticsTitle": "Matchday Haptics",
+  "@matchdayHapticsTitle": {
+    "description": "Title of matchday haptics setting"
+  },
+  "enabledPill": "Enabled",
+  "@enabledPill": {
+    "description": "Enabled status pill"
+  },
+  "onPill": "On",
+  "@onPill": {
+    "description": "On status pill"
+  },
+  "standingsButton": "Standings",
+  "@standingsButton": {
+    "description": "Standings link button label"
+  },
+  "pointsEarnedBadge": "+{points} Pts",
+  "@pointsEarnedBadge": {
+    "description": "Points earned badge",
+    "placeholders": {
+      "points": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "streakPill": "{count} Streak",
+  "@streakPill": {
+    "description": "Streak indicator pill",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "coinsPill": "{count} Coins",
+  "@coinsPill": {
+    "description": "Coins indicator pill",
+    "placeholders": {
+      "count": {
+        "type": "String",
+        "example": "1,450"
+      }
+    }
+  },
+  "levelPill": "LVL {level}",
+  "@levelPill": {
+    "description": "Level badge text",
+    "placeholders": {
+      "level": {
+        "type": "int",
+        "example": "7"
+      }
+    }
+  },
+  "predictAction": "Predict",
+  "@predictAction": {
+    "description": "Action button text to make a prediction"
+  },
+  "exactScore": "Exact score",
+  "@exactScore": {
+    "description": "Label for exact score prediction"
+  },
+  "exactScoreTitle": "Exact Score Prediction",
+  "@exactScoreTitle": {
+    "description": "Headline for exact score prediction"
+  },
+  "pickWinner": "Pick Winner",
+  "@pickWinner": {
+    "description": "Label for choosing match winner"
+  },
+  "pickTheWinner": "Pick the Winner",
+  "@pickTheWinner": {
+    "description": "Label for step 1 header in prediction bottom sheet"
+  },
+  "whoWins": "Who wins?",
+  "@whoWins": {
+    "description": "Question asking which team wins"
+  },
+  "homeOutcome": "Home",
+  "@homeOutcome": {
+    "description": "Home team outcome label"
+  },
+  "drawOutcome": "Draw",
+  "@drawOutcome": {
+    "description": "Draw outcome label"
+  },
+  "awayOutcome": "Away",
+  "@awayOutcome": {
+    "description": "Away team outcome label"
+  },
+  "savePredictionCta": "Save Prediction (+5 Points)",
+  "@savePredictionCta": {
+    "description": "Primary button to submit prediction"
+  },
+  "modifyPrediction": "Modify Prediction",
+  "@modifyPrediction": {
+    "description": "Button to edit an existing prediction"
+  },
+  "predictionLockedTitle": "Prediction Locked! ⚽",
+  "@predictionLockedTitle": {
+    "description": "Title when a prediction is confirmed or locked"
+  },
+  "predictionLockedBanner": "Prediction locked · Kickoff at {time}",
+  "@predictionLockedBanner": {
+    "description": "Status text when match prediction is locked",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "19:50"
+      }
+    }
+  },
+  "predictionWindowClosed": "Predictions are closed for this match",
+  "@predictionWindowClosed": {
+    "description": "Error message when prediction window has closed"
+  },
+  "predictionLockNote": "Predictions lock exactly 10 minutes before kickoff.",
+  "@predictionLockNote": {
+    "description": "Helper text explaining 10-minute lock rule"
+  },
+  "potentialPointsHeader": "Potential Pico Points",
+  "@potentialPointsHeader": {
+    "description": "Header for points explanation"
+  },
+  "potentialPointsBreakdown": "+5 for exact score · +3 for correct winner",
+  "@potentialPointsBreakdown": {
+    "description": "Breakdown of potential Pico Points"
+  },
+  "quickPredict": "Quick Predict",
+  "@quickPredict": {
+    "description": "Inline prediction label"
+  },
+  "predictionSavedToast": "Prediction locked in! Good luck.",
+  "@predictionSavedToast": {
+    "description": "Confirmation toast after submitting prediction"
+  },
+  "tournamentsTitle": "Tournaments",
+  "@tournamentsTitle": {
+    "description": "Title for tournaments screen"
+  },
+  "tournamentsSubtitle": "Climb the leaderboards or compete with friends",
+  "@tournamentsSubtitle": {
+    "description": "Subtitle for tournaments screen"
+  },
+  "myLeaguesTab": "My Leagues",
+  "@myLeaguesTab": {
+    "description": "Tab label for user's joined and owned leagues"
+  },
+  "discoverTab": "Discover",
+  "@discoverTab": {
+    "description": "Tab label for discovering public tournaments"
+  },
+  "createOrJoinAction": "+ Create / Join",
+  "@createOrJoinAction": {
+    "description": "Action button in tournaments header"
+  },
+  "createPrivateLeagueTitle": "Create Private League",
+  "@createPrivateLeagueTitle": {
+    "description": "Title for Create Private League screen"
+  },
+  "createPrivateLeagueSubtitle": "Compete against friends, banter, and crown your group champion.",
+  "@createPrivateLeagueSubtitle": {
+    "description": "Subtitle for Create Private League screen"
+  },
+  "joinPrivateLeagueTitle": "Join Private League",
+  "@joinPrivateLeagueTitle": {
+    "description": "Title for Join Private League screen"
+  },
+  "joinPrivateLeagueSubtitle": "Enter the 6-character code shared by your friend.",
+  "@joinPrivateLeagueSubtitle": {
+    "description": "Subtitle for Join Private League screen"
+  },
+  "leagueNameLabel": "LEAGUE NAME",
+  "@leagueNameLabel": {
+    "description": "Label for league name input"
+  },
+  "leagueNamePlaceholder": "e.g., Friday Football Kings",
+  "@leagueNamePlaceholder": {
+    "description": "Placeholder for league name input"
+  },
+  "baseTournamentLabel": "BASE TOURNAMENT / COMPETITION",
+  "@baseTournamentLabel": {
+    "description": "Label for base competition dropdown selector"
+  },
+  "baseTournamentHelper": "Matches and standings are linked to this competition.",
+  "@baseTournamentHelper": {
+    "description": "Helper note explaining base competition linkage"
+  },
+  "freeSetupBadge": "Free Instant Setup",
+  "@freeSetupBadge": {
+    "description": "Badge in create league screen"
+  },
+  "createLeagueButton": "Create Private League",
+  "@createLeagueButton": {
+    "description": "CTA button to create private league"
+  },
+  "joinLeagueButton": "Join Private League",
+  "@joinLeagueButton": {
+    "description": "CTA button to join private league"
+  },
+  "enterLeagueCodeLabel": "ENTER 6-CHARACTER CODE",
+  "@enterLeagueCodeLabel": {
+    "description": "Label for invite code input"
+  },
+  "pasteCode": "Paste",
+  "@pasteCode": {
+    "description": "Button to paste from clipboard"
+  },
+  "codeCopiedToast": "Invite code copied to clipboard!",
+  "@codeCopiedToast": {
+    "description": "Toast confirming code copied"
+  },
+  "shareInviteMessage": "Join my private league on Pico! Use code: {code}",
+  "@shareInviteMessage": {
+    "description": "Message template to share invite code",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "K9X2P1"
+      }
+    }
+  },
+  "inviteCodeLabel": "INVITE CODE",
+  "@inviteCodeLabel": {
+    "description": "Label for invite code badge"
+  },
+  "copyCodeButton": "Copy Code",
+  "@copyCodeButton": {
+    "description": "Button to copy code"
+  },
+  "shareCodeButton": "Share Invite",
+  "@shareCodeButton": {
+    "description": "Button to share code"
+  },
+  "emptyPrivateLeaguesTitle": "No Private Leagues Yet",
+  "@emptyPrivateLeaguesTitle": {
+    "description": "Empty state title when user has no private leagues"
+  },
+  "emptyPrivateLeaguesSubtitle": "Create a league for your friends or join one with an invite code.",
+  "@emptyPrivateLeaguesSubtitle": {
+    "description": "Empty state subtitle for private leagues"
+  },
+  "publicTournamentBadge": "PICO TOURNAMENT",
+  "@publicTournamentBadge": {
+    "description": "Badge for public tournaments"
+  },
+  "leagueCreatedSuccessTitle": "League Created! 🎉",
+  "@leagueCreatedSuccessTitle": {
+    "description": "Success modal title after creating private league"
+  },
+  "leagueJoinedSuccessTitle": "You're In! ⚽",
+  "@leagueJoinedSuccessTitle": {
+    "description": "Success modal title after joining private league"
+  },
+  "leagueJoinedSuccessSubtitle": "You have joined {leagueName}",
+  "@leagueJoinedSuccessSubtitle": {
+    "description": "Success modal subtitle after joining private league",
+    "placeholders": {
+      "leagueName": {
+        "type": "String",
+        "example": "Champions Cup"
+      }
+    }
+  },
+  "invalidLeagueCodeError": "Invalid invite code. Please check the code and try again.",
+  "@invalidLeagueCodeError": {
+    "description": "Error displayed when invite code is not found"
+  },
+  "alreadyMemberOfLeagueError": "You are already a member of this league.",
+  "@alreadyMemberOfLeagueError": {
+    "description": "Error displayed when user is already in the league"
+  },
+  "creatorCannotRejoinError": "You created this league and are already its owner.",
+  "@creatorCannotRejoinError": {
+    "description": "Error displayed when creator tries to rejoin own league"
+  },
+  "leagueCodeFormatError": "Code must be exactly 6 characters (e.g., K9X2P1)",
+  "@leagueCodeFormatError": {
+    "description": "Validation error when invite code length is not 6"
+  },
+  "doneButton": "Done",
+  "@doneButton": {
+    "description": "Done action button"
+  },
+  "privateLeagueSecurityNote": "Only players with your invite code can join",
+  "@privateLeagueSecurityNote": {
+    "description": "Security note on private league creation"
+  },
+  "baseTournamentNote": "Base Competition",
+  "@baseTournamentNote": {
+    "description": "Note under selected base competition"
+  },
+  "competitionsAvailableCount": "{count} available",
+  "@competitionsAvailableCount": {
+    "description": "Count of available competitions",
+    "placeholders": {
+      "count": { "type": "int", "example": "8" }
+    }
+  },
+  "friendsAndColleaguesBadge": "FRIENDS & COLLEAGUES",
+  "@friendsAndColleaguesBadge": {
+    "description": "Badge in join league screen"
+  },
+  "privateCommunitySubtitle": "Private Community",
+  "@privateCommunitySubtitle": {
+    "description": "Subtitle in join league screen"
+  },
+  "selectBaseTournamentSheetTitle": "Select Base Tournament ({count} Available)",
+  "@selectBaseTournamentSheetTitle": {
+    "description": "Title of the base tournament selection bottom sheet",
+    "placeholders": {
+      "count": { "type": "int", "example": "8" }
+    }
+  },
+  "tournamentDetailsTitle": "Tournament Details",
+  "@tournamentDetailsTitle": {
+    "description": "App bar title for public tournament screen"
+  },
+  "privateLeagueDetailsTitle": "Private League",
+  "@privateLeagueDetailsTitle": {
+    "description": "App bar title for private tournament screen"
+  },
+  "inviteCodeBannerTitle": "LEAGUE INVITE CODE",
+  "@inviteCodeBannerTitle": {
+    "description": "Header for the invite code banner"
+  },
+  "inviteCodeBannerSubtitle": "Share with friends to compete together",
+  "@inviteCodeBannerSubtitle": {
+    "description": "Subtitle encouraging sharing the league code"
+  },
+  "shareInviteCodeMessage": "Join my private football prediction league \"{leagueName}\" on Pico! Use invite code: {code}",
+  "@shareInviteCodeMessage": {
+    "description": "Share message for native share sheet",
+    "placeholders": {
+      "leagueName": { "type": "String", "example": "Champions League" },
+      "code": { "type": "String", "example": "K9X2P1" }
+    }
+  },
+  "adminControlsTitle": "ADMIN CONTROLS",
+  "@adminControlsTitle": {
+    "description": "Section header for owner admin controls"
+  },
+  "deleteLeagueButton": "Delete League",
+  "@deleteLeagueButton": {
+    "description": "Button to delete a private league"
+  },
+  "deleteLeagueConfirmTitle": "Delete Private League?",
+  "@deleteLeagueConfirmTitle": {
+    "description": "Title of delete confirmation dialog"
+  },
+  "deleteLeagueConfirmBody": "This action is permanent. All members will be removed and standings will be erased.",
+  "@deleteLeagueConfirmBody": {
+    "description": "Body of delete confirmation dialog"
+  },
+  "deleteLeagueAction": "Delete",
+  "@deleteLeagueAction": {
+    "description": "Confirm button text for deleting league"
+  },
+  "removeMemberButton": "Remove",
+  "@removeMemberButton": {
+    "description": "Button to remove a member"
+  },
+  "removeMemberConfirmTitle": "Remove Member?",
+  "@removeMemberConfirmTitle": {
+    "description": "Title of member removal dialog"
+  },
+  "removeMemberConfirmBody": "Are you sure you want to remove {username} from this league?",
+  "@removeMemberConfirmBody": {
+    "description": "Body of member removal dialog",
+    "placeholders": {
+      "username": { "type": "String", "example": "Player 1" }
+    }
+  },
+  "leaveLeagueButton": "Leave League",
+  "@leaveLeagueButton": {
+    "description": "Button to leave a private league"
+  },
+  "leaveLeagueConfirmTitle": "Leave League?",
+  "@leaveLeagueConfirmTitle": {
+    "description": "Title of leave confirmation dialog"
+  },
+  "leaveLeagueConfirmBody": "Are you sure you want to leave {leagueName}? You will need the invite code to rejoin.",
+  "@leaveLeagueConfirmBody": {
+    "description": "Body of leave confirmation dialog",
+    "placeholders": {
+      "leagueName": { "type": "String", "example": "My League" }
+    }
+  },
+  "leaveLeagueAction": "Leave",
+  "@leaveLeagueAction": {
+    "description": "Confirm button text for leaving league"
+  },
+  "leaderboardTab": "Standings",
+  "@leaderboardTab": {
+    "description": "Tab for standings / leaderboard"
+  },
+  "matchesTab": "Matches",
+  "@matchesTab": {
+    "description": "Tab for tournament matches"
+  },
+  "upcomingMatchesSection": "Upcoming Matches",
+  "@upcomingMatchesSection": {
+    "description": "Section header for upcoming matches"
+  },
+  "finishedMatchesSection": "Completed Matches",
+  "@finishedMatchesSection": {
+    "description": "Section header for finished matches"
+  },
+  "noParticipantsYet": "No participants yet",
+  "@noParticipantsYet": {
+    "description": "Placeholder when leaderboard is empty"
+  },
+  "noMatchesForCompetition": "No matches found for this competition",
+  "@noMatchesForCompetition": {
+    "description": "Placeholder when competition has no matches"
+  },
+  "leagueDeletedToast": "League deleted successfully",
+  "@leagueDeletedToast": {
+    "description": "Toast when league is deleted"
+  },
+  "memberRemovedToast": "Member removed",
+  "@memberRemovedToast": {
+    "description": "Toast when member is removed"
+  },
+  "leftLeagueToast": "You left the league",
+  "@leftLeagueToast": {
+    "description": "Toast when user leaves league"
+  },
+  "creatorBadge": "CREATOR",
+  "@creatorBadge": {
+    "description": "Badge for league creator"
+  },
+  "memberBadge": "MEMBER",
+  "@memberBadge": {
+    "description": "Badge for league member"
+  },
+  "cancelButton": "Cancel",
+  "@cancelButton": {
+    "description": "General cancel button"
+  },
+  "pointsAbbreviation": "PTS",
+  "@pointsAbbreviation": {
+    "description": "Points abbreviation in leaderboard"
+  },
+  "top100LeaderboardHeader": "TOP 100 PLAYERS",
+  "@top100LeaderboardHeader": {
+    "description": "Header showing top 100 participants in public tournament leaderboard"
+  },
+  "picoPointsLabel": "Pico Points",
+  "@picoPointsLabel": {
+    "description": "Label for Pico Points currency in leaderboard"
+  },
+  "rankHeader": "RANK",
+  "@rankHeader": {
+    "description": "Header for rank column"
+  },
+  "playerHeader": "PLAYER",
+  "@playerHeader": {
+    "description": "Header for player column"
+  },
+  "predictAction": "PREDICT",
+  "@predictAction": {
+    "description": "Predict match CTA button"
+  },
+  "feedTabLive": "Live",
+  "@feedTabLive": {
+    "description": "Tab for matches currently in progress"
+  },
+  "feedTabUpcoming": "Upcoming",
+  "@feedTabUpcoming": {
+    "description": "Tab for upcoming matches within 14 days"
+  },
+  "feedTabFinished": "Finished",
+  "@feedTabFinished": {
+    "description": "Tab for finished matches within last 7 days"
+  },
+  "teaserOpensInDays": "Opens in {days}d",
+  "@teaserOpensInDays": {
+    "description": "Teaser countdown button label in days",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "teaserOpensInHours": "Opens in {hours}h",
+  "@teaserOpensInHours": {
+    "description": "Teaser countdown button label in hours",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "14"
+      }
+    }
+  },
+  "teaserOpensInMinutes": "Opens in {minutes}m",
+  "@teaserOpensInMinutes": {
+    "description": "Teaser countdown button label in minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "45"
+      }
+    }
+  },
+  "teaserCountdownSubtext": "Prediction window opens 3 days before kickoff",
+  "@teaserCountdownSubtext": {
+    "description": "Subtext explaining when prediction window opens for teaser cards"
+  },
+  "pointsOutcomeExact": "+5 Points",
+  "@pointsOutcomeExact": {
+    "description": "Pico Points badge for exact score settlement"
+  },
+  "pointsOutcomeWinner": "+3 Points",
+  "@pointsOutcomeWinner": {
+    "description": "Pico Points badge for correct winner settlement"
+  },
+  "pointsOutcomeIncorrect": "0 Points",
+  "@pointsOutcomeIncorrect": {
+    "description": "Pico Points badge for incorrect prediction settlement"
+  },
+  "pointsOutcomeNone": "No Prediction",
+  "@pointsOutcomeNone": {
+    "description": "Badge when match finished without user prediction"
+  },
+  "noLiveMatches": "No live matches right now",
+  "@noLiveMatches": {
+    "description": "Empty state title for live matches tab"
+  },
+  "noLiveMatchesSub": "Check back during matchdays for real-time fixtures.",
+  "@noLiveMatchesSub": {
+    "description": "Empty state subtitle for live matches tab"
+  },
+  "noUpcomingMatches": "No upcoming matches right now. Check back soon!",
+  "@noUpcomingMatches": {
+    "description": "Empty state title for upcoming matches"
+  },
+  "feedNoUpcomingMatches": "No upcoming matches in the next 14 days",
+  "@feedNoUpcomingMatches": {
+    "description": "Empty state title for upcoming matches tab"
+  },
+  "noUpcomingMatchesSub": "Upcoming fixtures will appear here once scheduled.",
+  "@noUpcomingMatchesSub": {
+    "description": "Empty state subtitle for upcoming matches tab"
+  },
+  "noFinishedMatches": "No finished matches in the last 7 days",
+  "@noFinishedMatches": {
+    "description": "Empty state title for finished matches tab"
+  },
+  "noFinishedMatchesSub": "Recently concluded matches and points will be shown here.",
+  "@noFinishedMatchesSub": {
+    "description": "Empty state subtitle for finished matches tab"
+  },
+  "joinTournamentBannerBadge": "JOIN THE COMPETITION",
+  "@joinTournamentBannerBadge": {
+    "description": "Eyebrow badge on the join tournament CTA banner"
+  },
+  "joinTournamentBannerTitle": "Predict & Compete",
+  "@joinTournamentBannerTitle": {
+    "description": "Title on the join tournament CTA banner"
+  },
+  "joinTournamentBannerSub": "Join this tournament to predict upcoming matches, score Pico Points, and climb the public standings.",
+  "@joinTournamentBannerSub": {
+    "description": "Subtitle on the join tournament CTA banner"
+  },
+  "joinTournamentAction": "Join Tournament",
+  "@joinTournamentAction": {
+    "description": "Action button text to enroll in tournament"
+  },
+  "joinTournamentSuccessToast": "You joined {tournamentName}! Predictions unlocked.",
+  "@joinTournamentSuccessToast": {
+    "description": "Success message after enrolling in tournament",
+    "placeholders": {
+      "tournamentName": {
+        "type": "String",
+        "example": "Premier League"
+      }
+    }
+  },
+  "joinedBadge": "Joined",
+  "@joinedBadge": {
+    "description": "Badge indicating user is already joined in tournament"
+  },
+  "joinAction": "Join",
+  "@joinAction": {
+    "description": "Short join action label"
+  },
+  "previewModeBanner": "Preview Mode · Join this tournament to unlock predictions",
+  "@previewModeBanner": {
+    "description": "Banner message on matches tab when user is in preview mode"
+  },
+  "joinAndPredictAction": "Join to Predict",
+  "@joinAndPredictAction": {
+    "description": "Button label when user needs to join to predict"
+  },
+  "signInToJoinTournament": "Sign in to join tournaments and submit predictions.",
+  "@signInToJoinTournament": {
+    "description": "Prompt when unauthenticated user tries to join tournament"
+  },
+  "viewFullPredictionPage": "View Full Prediction Page →",
+  "@viewFullPredictionPage": {
+    "description": "Secondary button label in prediction sheet to view full match page"
+  },
+  "scoringRuleBanner": "Exact score = +5 Pico Points · Correct winner = +3 Pico Points",
+  "@scoringRuleBanner": {
+    "description": "Banner explaining scoring rule in prediction sheet"
+  },
+  "predictionLockedSuccessToast": "Prediction locked in! (+5 Points) ⚽",
+  "@predictionLockedSuccessToast": {
+    "description": "Toast message after saving prediction from bottom sheet"
+  },
+  "predictionSaveFailed": "Failed to save prediction. Please try again.",
+  "@predictionSaveFailed": {
+    "description": "Error toast when saving prediction fails"
+  },
+  "matchFinishedLabel": "Match Finished",
+  "@matchFinishedLabel": {
+    "description": "Label for disabled button on finished matches"
+  },
+  "feedTabAll": "All",
+  "@feedTabAll": {
+    "description": "Tab or filter chip for all matches"
+  },
+  "matchLocksAt": "Locks {time}",
+  "@matchLocksAt": {
+    "description": "Text indicating kickoff lock time",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "19:50"
+      }
+    }
+  },
+  "matchesTotalSub": "Total",
+  "@matchesTotalSub": {
+    "description": "Sub-label for total matches card in profile"
+  },
+  "bestStreak": "Best: {count}",
+  "@bestStreak": {
+    "description": "Best streak indicator in profile",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "6"
+      }
+    }
+  },
+  "hitRateTrendUp": "↑ +{rate}%",
+  "@hitRateTrendUp": {
+    "description": "Positive hit rate trend",
+    "placeholders": {
+      "rate": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "achievementsTitle": "Achievements",
+  "@achievementsTitle": {
+    "description": "Section title for Achievements"
+  },
+  "seeAll": "See all",
+  "@seeAll": {
+    "description": "See all button label"
+  },
+  "achievementOnFireTitle": "On Fire",
+  "@achievementOnFireTitle": {
+    "description": "Title for on fire achievement badge"
+  },
+  "achievementOnFireDesc": "{count} streak",
+  "@achievementOnFireDesc": {
+    "description": "Description for on fire achievement badge",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "achievementSharpshooterTitle": "Sharpshooter",
+  "@achievementSharpshooterTitle": {
+    "description": "Title for sharpshooter achievement badge"
+  },
+  "achievementSharpshooterDesc": "{rate}% hit rate",
+  "@achievementSharpshooterDesc": {
+    "description": "Description for sharpshooter achievement badge",
+    "placeholders": {
+      "rate": {
+        "type": "int",
+        "example": "70"
+      }
+    }
+  },
+  "achievementPodiumTitle": "Podium",
+  "@achievementPodiumTitle": {
+    "description": "Title for podium finisher achievement badge"
+  },
+  "achievementPodiumDesc": "{count} podiums",
+  "@achievementPodiumDesc": {
+    "description": "Description for podium finisher achievement badge",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "achievementStreak10Title": "10 Streak",
+  "@achievementStreak10Title": {
+    "description": "Title for 10 streak achievement badge"
+  },
+  "achievementLockedLabel": "Locked",
+  "@achievementLockedLabel": {
+    "description": "Locked indicator for achievement badge"
+  },
+  "helpAndSupportTitle": "Help & Support",
+  "@helpAndSupportTitle": {
+    "description": "Title for Help & Support quick action"
+  },
+  "helpAndSupportSubtitle": "Rules, scoring guide & contact",
+  "@helpAndSupportSubtitle": {
+    "description": "Subtitle for Help & Support quick action"
+  },
+  "accountSettingsAria": "Account Settings",
+  "@accountSettingsAria": {
+    "description": "Aria label for account settings icon button"
+  },
+  "signOutButton": "Sign Out",
+  "@signOutButton": {
+    "description": "Button to sign out of user account"
+  },
+  "picoRulesTitle": "Game Rules & Scoring",
+  "@picoRulesTitle": {
+    "description": "Title for game rules dialog"
+  },
+  "picoRulesSubtitle": "Fair play, server-side locks & transparent scoring",
+  "@picoRulesSubtitle": {
+    "description": "Subtitle for game rules dialog"
+  },
+  "division10Title": "Division 10",
+  "@division10Title": {
+    "description": "Title for Division 10 (0-49 PP)"
+  },
+  "division9Title": "Division 9",
+  "@division9Title": {
+    "description": "Title for Division 9 (50-119 PP)"
+  },
+  "division8Title": "Division 8",
+  "@division8Title": {
+    "description": "Title for Division 8 (120-219 PP)"
+  },
+  "division7Title": "Division 7",
+  "@division7Title": {
+    "description": "Title for Division 7 (220-349 PP)"
+  },
+  "division6Title": "Division 6",
+  "@division6Title": {
+    "description": "Title for Division 6 (350-499 PP)"
+  },
+  "division5Title": "Division 5",
+  "@division5Title": {
+    "description": "Title for Division 5 (500-699 PP)"
+  },
+  "division4Title": "Division 4",
+  "@division4Title": {
+    "description": "Title for Division 4 (700-949 PP)"
+  },
+  "division3Title": "Division 3",
+  "@division3Title": {
+    "description": "Title for Division 3 (950-1249 PP)"
+  },
+  "division2Title": "Division 2",
+  "@division2Title": {
+    "description": "Title for Division 2 (1250-1599 PP)"
+  },
+  "division1Title": "Division 1",
+  "@division1Title": {
+    "description": "Title for Division 1 (1600-1999 PP)"
+  },
+  "divisionEliteTitle": "Elite Division",
+  "@divisionEliteTitle": {
+    "description": "Title for Elite Division (2000+ PP)"
+  },
+  "predictionPointsLabel": "Prediction Points",
+  "@predictionPointsLabel": {
+    "description": "Label for unified Prediction Points currency"
+  },
+  "predictionPointsAbbr": "PP",
+  "@predictionPointsAbbr": {
+    "description": "Abbreviation for Prediction Points"
+  },
+  "currentDivisionLabel": "Current Division",
+  "@currentDivisionLabel": {
+    "description": "Label for current division tier"
+  },
+  "divisionLadderTitle": "Division Ladder",
+  "@divisionLadderTitle": {
+    "description": "Title for division ladder section or view"
+  },
+  "divisionLadderSubtitle": "Climb tiers with accurate match predictions",
+  "@divisionLadderSubtitle": {
+    "description": "Subtitle describing the division ladder system"
+  },
+  "pointsToNextDivisionThreshold": "{current} / {target} pts to {nextDivision}",
+  "@pointsToNextDivisionThreshold": {
+    "description": "Progress towards the next division",
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      },
+      "nextDivision": {
+        "type": "String"
+      }
+    }
+  },
+  "pointsToNextDivision": "{points} pts to {nextDivision}",
+  "@pointsToNextDivision": {
+    "description": "Remaining points needed for next division",
+    "placeholders": {
+      "points": {
+        "type": "String"
+      },
+      "nextDivision": {
+        "type": "String"
+      }
+    }
+  },
+  "eliteDivisionStatus": "{points} pts (Elite Division)",
+  "@eliteDivisionStatus": {
+    "description": "Display text when user has achieved Elite Division",
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "pointsOutcomeGoalDiff": "+3 Points",
+  "@pointsOutcomeGoalDiff": {
+    "description": "Points outcome badge for correct winner and goal difference"
+  },
+  "pointsOutcomeOne": "+1 Point",
+  "@pointsOutcomeOne": {
+    "description": "Points outcome badge for correct winner only"
+  },
+  "scoringRuleBannerSprint7": "Exact = +5 PP · Outcome + Diff = +3 PP · Outcome = +1 PP",
+  "@scoringRuleBannerSprint7": {
+    "description": "Compact scoring rules explanation"
+  },
+  "signOutButton": "Sign Out",
+  "@signOutButton": {
+    "description": "Sign out button label"
+  },
+  "signOutSubtitle": "Log out of your Pico session",
+  "@signOutSubtitle": {
+    "description": "Subtitle describing the sign out option"
+  },
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Title for the settings screen and profile menu option"
+  },
+  "settingsSubtitle": "Account, sign out & preferences",
+  "@settingsSubtitle": {
+    "description": "Subtitle for the settings option on profile screen"
+  },
+  "shareTheAppButton": "Share the App",
+  "@shareTheAppButton": {
+    "description": "Label for the share the app button on profile screen"
+  },
+  "shareAppMessage": "Join me on Pico to predict football matches! https://play.google.com/store/apps/details?id=com.devdaumienebi.yonunca",
+  "@shareAppMessage": {
+    "description": "Default text shared when user taps Share the App"
+  },
+  "deleteAccountOption": "Delete Account",
+  "@deleteAccountOption": {
+    "description": "Menu title for deleting the user's account"
+  },
+  "deleteAccountSubtitle": "Permanently remove your account and data",
+  "@deleteAccountSubtitle": {
+    "description": "Subtitle describing the destructive nature of delete account"
+  },
+  "deleteAccountConfirmTitle": "Delete Account?",
+  "@deleteAccountConfirmTitle": {
+    "description": "Title for the destructive account deletion confirmation dialog"
+  },
+  "deleteAccountConfirmBody": "Are you sure? This will permanently delete your predictions, league memberships, and account data. This cannot be undone.",
+  "@deleteAccountConfirmBody": {
+    "description": "Body message for the destructive account deletion confirmation dialog"
+  },
+  "deleteAccountAction": "Delete Account",
+  "@deleteAccountAction": {
+    "description": "Button label to confirm account deletion"
+  },
+  "deleteAccountError": "Failed to delete account. Please try again.",
+  "@deleteAccountError": {
+    "description": "Error message when account deletion fails"
+  },
+  "accountDeletedToast": "Your account has been deleted.",
+  "@accountDeletedToast": {
+    "description": "Toast message confirming account deletion"
+  },
+  "cancelButton": "Cancel",
+  "@cancelButton": {
+    "description": "Generic cancel button text"
+  },
+  "adChoicesTitle": "Ad Choices & Privacy",
+  "@adChoicesTitle": {
+    "description": "Menu title for GDPR/CPRA ad choices and consent management"
+  },
+  "adChoicesSubtitle": "Review or change your ad personalization consent",
+  "@adChoicesSubtitle": {
+    "description": "Subtitle explaining the user can modify ad personalization preferences"
+  },
+  "picoScoringRules": "PICO SCORING RULES",
+  "@picoScoringRules": {
+    "description": "Header title for Pico scoring rules breakdown"
+  },
+  "scoringRuleExactTitle": "Exact Score",
+  "@scoringRuleExactTitle": {
+    "description": "Label for exact score prediction outcome"
+  },
+  "scoringRuleExactDesc": "Predict the exact final scoreline",
+  "@scoringRuleExactDesc": {
+    "description": "Description for exact score outcome"
+  },
+  "scoringRuleGoalDiffTitle": "Winner + Goal Diff",
+  "@scoringRuleGoalDiffTitle": {
+    "description": "Label for outcome plus goal difference prediction"
+  },
+  "scoringRuleGoalDiffDesc": "Correct winner and goal margin",
+  "@scoringRuleGoalDiffDesc": {
+    "description": "Description for outcome plus goal difference"
+  },
+  "scoringRuleWinnerOnlyTitle": "Correct Winner",
+  "@scoringRuleWinnerOnlyTitle": {
+    "description": "Label for correct winner outcome"
+  },
+  "scoringRuleWinnerOnlyDesc": "Correct winner, other scoreline",
+  "@scoringRuleWinnerOnlyDesc": {
+    "description": "Description for correct winner outcome"
+  },
+  "leagueCapacityReachedError": "This league is full (Max 25 members).",
+  "@leagueCapacityReachedError": {
+    "description": "Error message when private league has reached member limit"
+  },
+  "leagueNameLengthError": "League name must be between 3 and 30 characters.",
+  "@leagueNameLengthError": {
+    "description": "Error validation for private league name length"
+  },
+  "leagueCreatedSuccessToast": "League created successfully!",
+  "@leagueCreatedSuccessToast": {
+    "description": "Success snackbar message when private league is created"
+  },
+  "usernameAlphanumericError": "Username must be alphanumeric with no spaces",
+  "@usernameAlphanumericError": {
+    "description": "Validation message when username contains non-alphanumeric characters or spaces"
+  },
+  "couldNotOpenStoreLink": "Could not open store link.",
+  "@couldNotOpenStoreLink": {
+    "description": "Error when store link fails to open"
+  },
+  "couldNotOpenEmailClient": "Could not open email client. Contact: {email}",
+  "@couldNotOpenEmailClient": {
+    "description": "Error when email client cannot be opened",
+    "placeholders": {
+      "email": { "type": "String", "example": "support@pico.app" }
+    }
+  },
+  "signInWithGooglePrompt": "Please sign in with Google to continue.",
+  "@signInWithGooglePrompt": {
+    "description": "Snackbar prompt asking user to sign in with Google"
+  },
+  "signInWithGoogleSetupPrompt": "Please sign in with Google to complete your account setup.",
+  "@signInWithGoogleSetupPrompt": {
+    "description": "Snackbar prompt asking user to sign in with Google to finish setup"
+  },
+  "failedToLoadTeams": "Failed to load teams: {error}",
+  "@failedToLoadTeams": {
+    "description": "Error message when teams list cannot be loaded",
+    "placeholders": {
+      "error": { "type": "String", "example": "Connection error" }
+    }
+  },
+  "failedToLoadCompetitions": "Failed to load competitions: {error}",
+  "@failedToLoadCompetitions": {
+    "description": "Error message when competitions list cannot be loaded",
+    "placeholders": {
+      "error": { "type": "String", "example": "Connection error" }
+    }
+  },
+  "noClubsFound": "No clubs found matching \"{query}\"",
+  "@noClubsFound": {
+    "description": "Empty state search message for clubs",
+    "placeholders": {
+      "query": { "type": "String", "example": "Madrid" }
+    }
+  },
+  "failedToDeleteLeague": "Failed to delete league: {error}",
+  "@failedToDeleteLeague": {
+    "description": "Error when league deletion fails",
+    "placeholders": {
+      "error": { "type": "String", "example": "Permission denied" }
+    }
+  },
+  "failedToLeaveLeague": "Failed to leave league: {error}",
+  "@failedToLeaveLeague": {
+    "description": "Error when leaving league fails",
+    "placeholders": {
+      "error": { "type": "String", "example": "Network error" }
+    }
+  },
+  "memberRemovedFromLeague": "{username} has been removed from the league.",
+  "@memberRemovedFromLeague": {
+    "description": "Success message when an admin kicks a member",
+    "placeholders": {
+      "username": { "type": "String", "example": "Carlos" }
+    }
+  },
+  "failedToKickMember": "Failed to remove member: {error}",
+  "@failedToKickMember": {
+    "description": "Error when removing a member fails",
+    "placeholders": {
+      "error": { "type": "String", "example": "Permission denied" }
+    }
+  },
+  "failedToSendMessage": "Failed to send message: {error}",
+  "@failedToSendMessage": {
+    "description": "Error message when sending chat message fails",
+    "placeholders": {
+      "error": { "type": "String", "example": "Timeout" }
+    }
+  },
+  "signOutFailed": "Sign out failed: {error}",
+  "@signOutFailed": {
+    "description": "Error message when sign out fails",
+    "placeholders": {
+      "error": { "type": "String", "example": "Network error" }
+    }
+  },
+  "homeGreeting": "Hey {username}! 👋",
+  "@homeGreeting": {
+    "description": "Greeting message on home screen",
+    "placeholders": {
+      "username": { "type": "String", "example": "Alex" }
+    }
+  },
+  "homeReadyToPredict": "Ready to predict today's biggest clash?",
+  "@homeReadyToPredict": {
+    "description": "Call to action message under greeting on home screen"
+  },
+  "shopHeaderBadge": "CLASH ELEVEN STORE",
+  "@shopHeaderBadge": {
+    "description": "Eyebrow badge in the shop header"
+  },
+  "shopHeaderTagline": "Power up your prediction experience",
+  "@shopHeaderTagline": {
+    "description": "Subtitle in the shop header"
+  },
+  "shopAdFreeActiveBadge": "ACTIVE • UNLOCKED",
+  "@shopAdFreeActiveBadge": {
+    "description": "Badge shown when ad-free pass is already active"
+  },
+  "shopAdFreeLockedBadge": "LIFETIME PASS",
+  "@shopAdFreeLockedBadge": {
+    "description": "Badge shown when ad-free pass is available for purchase"
+  },
+  "shopRemoveAdsTitle": "Remove Ads",
+  "@shopRemoveAdsTitle": {
+    "description": "Title of the Remove Ads product card in the shop"
+  },
+  "shopRemoveAdsDescription": "Enjoy an uninterrupted match-tracking experience with zero ads.",
+  "@shopRemoveAdsDescription": {
+    "description": "Description of the Remove Ads product"
+  },
+  "shopPerkNoBannerAds": "Zero banner ads on Home & Matches",
+  "@shopPerkNoBannerAds": {
+    "description": "Perk row: no banner ads"
+  },
+  "shopPerkNoVideoAds": "Zero interstitial video ads",
+  "@shopPerkNoVideoAds": {
+    "description": "Perk row: no video ads"
+  },
+  "shopPerkFastTransitions": "Instant prediction screen transitions",
+  "@shopPerkFastTransitions": {
+    "description": "Perk row: fast transitions"
+  },
+  "shopPerkLifetime": "One-time unlock • Keep forever",
+  "@shopPerkLifetime": {
+    "description": "Perk row: one-time purchase"
+  },
+  "shopAdsRemovedConfirm": "Ads Removed • Lifetime Unlocked",
+  "@shopAdsRemovedConfirm": {
+    "description": "Confirmation text shown when user has already purchased the ad-free pass"
+  },
+  "shopUnlockAdFreeButton": "Unlock Ad-Free • $5.99",
+  "@shopUnlockAdFreeButton": {
+    "description": "CTA button to purchase the ad-free pass"
+  },
+  "shopRestorePurchases": "Restore Purchases",
+  "@shopRestorePurchases": {
+    "description": "Link to restore previous purchases"
+  },
+  "shopRestoreSuccess": "Purchases restored successfully!",
+  "@shopRestoreSuccess": {
+    "description": "Success message when purchases are restored"
+  },
+  "shopRestoreNothingFound": "No active purchases found to restore.",
+  "@shopRestoreNothingFound": {
+    "description": "Message when no purchases are found to restore"
+  },
+  "shopRestoreFailed": "Failed to restore purchases: {error}",
+  "@shopRestoreFailed": {
+    "description": "Error message when restore fails",
+    "placeholders": {
+      "error": { "type": "String", "example": "Network error" }
+    }
+  },
+  "shopPaywallLoadError": "Could not load store offerings. Please check your connection and try again.",
+  "@shopPaywallLoadError": {
+    "description": "Error when RevenueCat paywall cannot load"
+  },
+  "shopComingSoonBadge": "MORE REWARDS COMING SOON",
+  "@shopComingSoonBadge": {
+    "description": "Eyebrow badge in the coming soon teaser banner"
+  },
+  "shopComingSoonBody": "Exclusive mascot jerseys, division badges & league themes are currently in preparation.",
+  "@shopComingSoonBody": {
+    "description": "Body text of the coming soon teaser banner"
+  },
+  "trophyCabinet": "Trophy Cabinet",
+  "@trophyCabinet": {
+    "description": "Title for the Trophy Cabinet feature teaser and menu item"
+  },
+  "comingSoon": "Coming Soon!",
+  "@comingSoon": {
+    "description": "Coming soon teaser label on buttons and badges"
+  },
+  "trophy_cabinet": "Trophy Cabinet",
+  "@trophy_cabinet": {
+    "description": "Alias for trophyCabinet"
+  },
+  "coming_soon": "Coming Soon!",
+  "@coming_soon": {
+    "description": "Alias for comingSoon"
+  }
+}
+
+
+
+
+

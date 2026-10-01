@@ -1,0 +1,754 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pico/core/theme/pico_colors.dart';
+import 'package:pico/core/theme/pico_typography.dart';
+import 'package:pico/features/profile/domain/user_profile.dart';
+import 'package:pico/features/profile/presentation/user_profile_provider.dart';
+import 'package:pico/features/profile/presentation/widgets/division_ladder_sheet.dart';
+import 'package:pico/features/predictions/presentation/prediction_controller.dart';
+import 'package:pico/l10n/app_localizations.dart';
+import 'package:pico/shared/components/game_button.dart';
+import 'package:pico/shared/components/game_exit_dialog.dart';
+import 'package:pico/shared/components/how_to_play_card.dart';
+import 'package:pico/shared/components/pico_button.dart';
+import 'package:pico/features/profile/presentation/help_support_screen.dart';
+import 'package:pico/features/profile/presentation/settings_screen.dart';
+import 'package:pico/features/profile/presentation/trophy_cabinet_screen.dart';
+import 'package:pico/shared/components/pico_pitch_background.dart';
+import 'package:pico/shared/components/pico_snackbar.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+/// The official Profile screen displaying user stats, streak, level, XP progress,
+/// tournaments banner, following & history hubs, quick actions (Rate App & Help),
+/// and a tactile Share Matchday Card button.
+class ProfileScreen extends ConsumerStatefulWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final profileAsync = ref.watch(currentUserProfileProvider);
+    final predictionsAsync = ref.watch(predictionControllerProvider);
+    final predictedMatchesCount = predictionsAsync.value?.length ?? 0;
+
+    return PicoGameExitScope(
+      child: PicoPitchBackground(
+        imageAsset: 'assets/images/main_background.png',
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
+            bottom: false,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440.0),
+                child: profileAsync.when(
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(color: Color(0xFF10B981)),
+                  ),
+                  error: (error, _) => Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.error_outline_rounded,
+                            color: PicoColors.error,
+                            size: 48.0,
+                          ),
+                          const SizedBox(height: 12.0),
+                          Text(
+                            error.toString(),
+                            textAlign: TextAlign.center,
+                            style: PicoTypography.bodyMd.copyWith(
+                              color: PicoColors.textWhiteMuted,
+                            ),
+                          ),
+                          const SizedBox(height: 16.0),
+                          PicoButton.primary(
+                            text: l10n?.retryButton ?? 'Retry',
+                            isFullWidth: false,
+                            height: 42.0,
+                            borderRadius: 12.0,
+                            onPressed: () {
+                              ref
+                                  .read(currentUserProfileProvider.notifier)
+                                  .refresh();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  data: (profile) => RefreshIndicator(
+                    color: const Color(0xFF10B981),
+                    backgroundColor: const Color(0xFF0E271F),
+                    onRefresh: () async {
+                      await Future.wait([
+                        ref.read(currentUserProfileProvider.notifier).refresh(),
+                        ref.refresh(predictionControllerProvider.future),
+                      ]);
+                    },
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(
+                        16.0,
+                        14.0,
+                        16.0,
+                        32.0,
+                      ),
+                      children: [
+                        // 1. Header Section (Avatar & Name)
+                        _buildHeaderSection(profile, l10n),
+                        const SizedBox(height: 14.0),
+
+                        // 2. Quick Stats Grid (Matches & Division, 50% each)
+                        _buildQuickStatsGrid(
+                          profile,
+                          l10n,
+                          predictedMatchesCount,
+                        ),
+                        const SizedBox(height: 14.0),
+
+                        // 3. How to Play Card (Navigation -> In-App Browser Guide)
+                        const HowToPlayCard(margin: EdgeInsets.zero),
+                        const SizedBox(height: 14.0),
+
+                        // 4. Quick Actions (Rate App, Help/Support & Settings)
+                        _buildQuickActionsSection(profile, l10n),
+                        const SizedBox(height: 18.0),
+
+                        // 6. Tactile Gold Share Button (Share the App)
+                        _buildShareButton(profile, l10n),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // 1. HEADER SECTION
+  // ---------------------------------------------------------------------------
+  Widget _buildHeaderSection(UserProfile profile, AppLocalizations? l10n) {
+    final displayName =
+        (profile.username != null && profile.username!.isNotEmpty)
+        ? profile.username!
+        : 'Player';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 6.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Crest Avatar with Gear Level Indicator
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 64.0,
+                height: 64.0,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16.0),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFF059669),
+                      Color(0xFF0C2219),
+                      Color(0xFF05130D),
+                    ],
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0xFF020B06),
+                      offset: Offset(0, 4),
+                      blurRadius: 0,
+                    ),
+                  ],
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    width: 1.0,
+                  ),
+                ),
+                padding: const EdgeInsets.all(2.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF071D15),
+                    borderRadius: BorderRadius.circular(14.0),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Golden soccer ball icon
+                      const Icon(
+                        Icons.sports_soccer_rounded,
+                        color: Color(0xFFFBBF24),
+                        size: 34.0,
+                        shadows: [
+                          Shadow(
+                            color: Color(0x66FBBF24),
+                            offset: Offset(0, 2),
+                            blurRadius: 8.0,
+                          ),
+                        ],
+                      ),
+                      // Subtle internal shine
+                      Positioned(
+                        top: 2.0,
+                        right: 2.0,
+                        child: Container(
+                          width: 14.0,
+                          height: 14.0,
+                          decoration: const BoxDecoration(
+                            color: Color(0x2634D399),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 14.0),
+
+          // Name and Subtitle
+          Expanded(
+            child: Text(
+              displayName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: PicoTypography.headlineLgMobile.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+                fontSize: 22.0,
+                letterSpacing: -0.3,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // 2. QUICK STATS GRID (MATCHES & DIVISION - 50% EACH)
+  // ---------------------------------------------------------------------------
+  Widget _buildQuickStatsGrid(
+    UserProfile profile,
+    AppLocalizations? l10n,
+    int predictedMatchesCount,
+  ) {
+    final matchesLabel = l10n?.matchesLabel ?? 'Matches';
+    final totalSub = l10n?.matchesTotalSub ?? 'Total';
+    final divisionTitle = l10n != null
+        ? profile.division.localizedTitle(l10n)
+        : profile.division.defaultTitle;
+
+    return Row(
+      children: [
+        // Card 1: Matches Predicted (50% width)
+        Expanded(
+          child: _TactileCard(
+            key: const Key('profile_matches_card'),
+            onTap: () => context.go('/matches'),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Icon(
+                  Icons.sports_soccer_rounded,
+                  color: Color(0xFF22D3EE),
+                  size: 22.0,
+                ),
+                const SizedBox(height: 6.0),
+                Text(
+                  predictedMatchesCount.toString(),
+                  style: PicoTypography.headlineLg.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 19.0,
+                  ),
+                ),
+                Text(
+                  matchesLabel,
+                  style: PicoTypography.bodySm.copyWith(
+                    color: const Color(0xFFCBD5E1),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4.0),
+                Text(
+                  totalSub,
+                  style: PicoTypography.bodySm.copyWith(
+                    color: const Color(0xFF22D3EE),
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 10.0),
+
+        // Card 2: Division (50% width)
+        Expanded(
+          child: _TactileCard(
+            key: const Key('profile_division_card'),
+            onTap: () => DivisionLadderSheet.show(context, profile),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Icon(
+                  Icons.military_tech_rounded,
+                  color: profile.division.accentColor,
+                  size: 22.0,
+                ),
+                const SizedBox(height: 6.0),
+                Text(
+                  profile.division.badgeLabel,
+                  style: PicoTypography.headlineLg.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 19.0,
+                  ),
+                ),
+                Text(
+                  divisionTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: PicoTypography.bodySm.copyWith(
+                    color: const Color(0xFFCBD5E1),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4.0),
+                Text(
+                  '${profile.formattedTotalPoints} PP',
+                  style: PicoTypography.bodySm.copyWith(
+                    color: profile.division.accentColor,
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // 5. QUICK ACTIONS SECTION (RATE APP & HELP/SUPPORT)
+  // ---------------------------------------------------------------------------
+  Widget _buildQuickActionsSection(
+    UserProfile profile,
+    AppLocalizations? l10n,
+  ) {
+    return Column(
+      children: [
+        // Action: Trophy Cabinet (Navigates to TrophyCabinetScreen)
+        _TactileCard(
+          key: const Key('profile_trophy_cabinet_action'),
+          onTap: () {
+            HapticFeedback.lightImpact();
+            try {
+              context.push('/trophy-cabinet');
+            } catch (_) {
+              Navigator.of(context, rootNavigator: true).push(
+                MaterialPageRoute(builder: (_) => const TrophyCabinetScreen()),
+              );
+            }
+          },
+          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+          child: Row(
+            children: [
+              Container(
+                width: 38.0,
+                height: 38.0,
+                decoration: BoxDecoration(
+                  color: const Color(0x26F59E0B),
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(
+                    color: const Color(0x4DF59E0B),
+                    width: 1.0,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.emoji_events_rounded,
+                  color: Color(0xFFFBBF24),
+                  size: 22.0,
+                ),
+              ),
+              const SizedBox(width: 12.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n?.trophyCabinet ?? 'Trophy Cabinet',
+                      style: PicoTypography.headlineMd.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14.0,
+                      ),
+                    ),
+                    const SizedBox(height: 2.0),
+                    Text(
+                      l10n?.comingSoon ?? 'Coming Soon!',
+                      style: PicoTypography.bodySm.copyWith(
+                        color: const Color(0xFFCBD5E1),
+                        fontSize: 11.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: Color(0xFF94A3B8),
+                size: 22.0,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10.0),
+
+        // Action 1: Rate App
+        _TactileCard(
+          key: const Key('profile_rate_app_action'),
+          onTap: _handleRateApp,
+          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+          child: Row(
+            children: [
+              Container(
+                width: 38.0,
+                height: 38.0,
+                decoration: BoxDecoration(
+                  color: const Color(0x26F59E0B),
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(
+                    color: const Color(0x4DF59E0B),
+                    width: 1.0,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.star_rounded,
+                  color: Color(0xFFFBBF24),
+                  size: 22.0,
+                ),
+              ),
+              const SizedBox(width: 12.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Rate App',
+                      style: PicoTypography.headlineMd.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14.0,
+                      ),
+                    ),
+                    const SizedBox(height: 2.0),
+                    Text(
+                      'Enjoying Pico? Leave us a review on the store',
+                      style: PicoTypography.bodySm.copyWith(
+                        color: const Color(0xFFCBD5E1),
+                        fontSize: 11.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: Color(0xFF94A3B8),
+                size: 22.0,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10.0),
+
+        // Action 2: Help & Support (Navigates to HelpSupportScreen)
+        _TactileCard(
+          key: const Key('profile_help_action'),
+          onTap: () {
+            HapticFeedback.lightImpact();
+            try {
+              context.push('/help-support');
+            } catch (_) {
+              Navigator.of(context, rootNavigator: true).push(
+                MaterialPageRoute(builder: (_) => const HelpSupportScreen()),
+              );
+            }
+          },
+          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+          child: Row(
+            children: [
+              Container(
+                width: 38.0,
+                height: 38.0,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E293B),
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(
+                    color: const Color(0xFF334155),
+                    width: 1.0,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.help_outline_rounded,
+                  color: Color(0xFFCBD5E1),
+                  size: 20.0,
+                ),
+              ),
+              const SizedBox(width: 12.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n?.helpAndSupportTitle ?? 'Help & Support',
+                      style: PicoTypography.headlineMd.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14.0,
+                      ),
+                    ),
+                    const SizedBox(height: 2.0),
+                    Text(
+                      l10n?.helpAndSupportSubtitle ??
+                          'Rules, scoring guide & contact',
+                      style: PicoTypography.bodySm.copyWith(
+                        color: const Color(0xFFCBD5E1),
+                        fontSize: 11.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: Color(0xFF94A3B8),
+                size: 22.0,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10.0),
+
+        // Action 3: Settings (Navigates to SettingsScreen)
+        _TactileCard(
+          key: const Key('profile_settings_action'),
+          onTap: () {
+            HapticFeedback.lightImpact();
+            try {
+              context.push('/settings');
+            } catch (_) {
+              Navigator.of(
+                context,
+                rootNavigator: true,
+              ).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
+            }
+          },
+          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+          child: Row(
+            children: [
+              Container(
+                width: 38.0,
+                height: 38.0,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E293B),
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(
+                    color: const Color(0xFF334155),
+                    width: 1.0,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.settings_rounded,
+                  color: Color(0xFFCBD5E1),
+                  size: 20.0,
+                ),
+              ),
+              const SizedBox(width: 12.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n?.settingsTitle ?? 'Settings',
+                      style: PicoTypography.headlineMd.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14.0,
+                      ),
+                    ),
+                    const SizedBox(height: 2.0),
+                    Text(
+                      l10n?.settingsSubtitle ??
+                          'Account, sign out & preferences',
+                      style: PicoTypography.bodySm.copyWith(
+                        color: const Color(0xFFCBD5E1),
+                        fontSize: 11.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: Color(0xFF94A3B8),
+                size: 22.0,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleRateApp() async {
+    HapticFeedback.lightImpact();
+    // Hardcoded external store link for testing purposes right now.
+    // REMINDER: Change this to the official Pico package name before launch!
+    const String storeUrl =
+        'https://thevina-tech.github.io/website/clash-eleven/clash-eleven.html';
+
+    final uri = Uri.parse(storeUrl);
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched && mounted) {
+        final l10n = AppLocalizations.of(context);
+        PicoSnackBar.showError(
+          context,
+          l10n?.couldNotOpenStoreLink ?? 'Could not open store link.',
+        );
+      }
+    } catch (e) {
+      debugPrint('[ProfileScreen] Store link launch error: $e');
+      if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        PicoSnackBar.showError(
+          context,
+          l10n?.couldNotOpenStoreLink ?? 'Could not open store link.',
+        );
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // 6. SHARE THE APP BUTTON (TACTILE GOLD)
+  // ---------------------------------------------------------------------------
+  Widget _buildShareButton(UserProfile profile, AppLocalizations? l10n) {
+    return GameButton.gold(
+      key: const Key('profile_share_card_button'),
+      text: l10n?.shareTheAppButton ?? 'Share the App',
+      icon: const Icon(
+        Icons.share_rounded,
+        color: Color(0xFF3D1800),
+        size: 18.0,
+      ),
+      textColor: const Color(0xFF3D1800),
+      textShadowColor: Colors.transparent,
+      width: double.infinity,
+      extrusionHeight: 5.0,
+      borderRadius: 16.0,
+      fontSize: 15.0,
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 13.0),
+      onPressed: () => _handleShareApp(l10n),
+    );
+  }
+
+  Future<void> _handleShareApp(AppLocalizations? l10n) async {
+    HapticFeedback.lightImpact();
+    final message =
+        l10n?.shareAppMessage ??
+        'Join me on Pico to predict football matches! https://thevina-tech.github.io/website/clash-eleven/clash-eleven.html';
+    try {
+      await SharePlus.instance.share(ShareParams(text: message));
+    } catch (e) {
+      debugPrint('[ProfileScreen] Share error: $e');
+    }
+  }
+}
+
+// =============================================================================
+// REUSABLE HELPER WIDGETS
+// =============================================================================
+
+/// Tactile Card with 3D bottom bevel shadow and press depression feedback.
+class _TactileCard extends StatefulWidget {
+  const _TactileCard({
+    super.key,
+    required this.child,
+    this.onTap,
+    this.padding = const EdgeInsets.all(12.0),
+  });
+
+  final Widget child;
+  final VoidCallback? onTap;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  State<_TactileCard> createState() => _TactileCardState();
+}
+
+class _TactileCardState extends State<_TactileCard> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isClickable = widget.onTap != null;
+
+    return GestureDetector(
+      onTapDown: isClickable ? (_) => setState(() => _isPressed = true) : null,
+      onTapUp: isClickable ? (_) => setState(() => _isPressed = false) : null,
+      onTapCancel: isClickable
+          ? () => setState(() => _isPressed = false)
+          : null,
+      onTap: widget.onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 75),
+        transform: Matrix4.translationValues(0, _isPressed ? 2.0 : 0.0, 0),
+        padding: widget.padding,
+        decoration: BoxDecoration(
+          color: const Color(0xE60E271F),
+          borderRadius: BorderRadius.circular(16.0),
+          border: Border.all(color: const Color(0x4010B981), width: 1.0),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF030E08),
+              offset: Offset(0, _isPressed ? 2.0 : 4.0),
+              blurRadius: 0,
+            ),
+          ],
+        ),
+        child: widget.child,
+      ),
+    );
+  }
+}

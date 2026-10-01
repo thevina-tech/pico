@@ -1,0 +1,309 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:pico/features/matches/domain/pico_match.dart';
+import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
+import 'package:pico/features/profile/domain/user_profile.dart';
+import 'package:pico/features/profile/presentation/user_profile_provider.dart';
+import 'package:pico/features/home/presentation/home_screen.dart';
+import 'package:pico/features/profile/presentation/profile_screen.dart';
+import 'package:pico/features/profile/presentation/widgets/division_ladder_sheet.dart';
+import 'package:pico/shared/components/pico_pitch_background.dart';
+import 'package:pico/l10n/app_localizations.dart';
+import 'package:pico/shared/components/pico_app_bar.dart';
+
+class _FakeCurrentUserProfile extends CurrentUserProfile {
+  _FakeCurrentUserProfile(this._profile);
+  final UserProfile _profile;
+
+  @override
+  FutureOr<UserProfile> build() => _profile;
+}
+
+class _FakeMatchesFeed extends MatchesFeed {
+  _FakeMatchesFeed(this._matches);
+  final List<PicoMatch> _matches;
+
+  @override
+  Future<List<PicoMatch>> build() async => _matches;
+}
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  const testProfile = UserProfile(
+    id: 'user_123',
+    username: 'GoldenBoot',
+    level: 7,
+    xp: 720,
+    streak: 4,
+    coins: 2450,
+    totalPoints: 140,
+    currentDivisionKey: 'div_8',
+  );
+
+  final testMatch = PicoMatch(
+    id: 'match_1',
+    providerMatchId: 'besoccer_100',
+    homeTeamName: 'Real Madrid',
+    awayTeamName: 'Barcelona',
+    homeTeamCode: 'RMA',
+    awayTeamCode: 'BAR',
+    kickoffAt: DateTime.now().add(const Duration(hours: 3)),
+    status: MatchStatus.upcoming,
+    competitionName: 'La Liga',
+  );
+
+  group('Stitch Top Bar & Home Pitch Sky Background Tests', () {
+    testWidgets('PicoAppBar renders stylized centered title and hides back button by default',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            currentUserProfileProvider.overrideWith(
+              () => _FakeCurrentUserProfile(testProfile),
+            ),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              appBar: PicoAppBar(
+                title: 'TORNEOS',
+              ),
+              body: SizedBox.shrink(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // 1. Verify Centered Title
+      expect(find.text('TORNEOS'), findsOneWidget);
+      expect(find.byKey(const Key('pico_app_bar_title')), findsOneWidget);
+
+      // 2. Verify back button is hidden by default
+      expect(find.byKey(const Key('pico_app_bar_back_button')), findsNothing);
+    });
+
+    testWidgets('PicoAppBar renders tactile back button and triggers callback when showBackButton is true',
+        (WidgetTester tester) async {
+      bool backTapped = false;
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            currentUserProfileProvider.overrideWith(
+              () => _FakeCurrentUserProfile(testProfile),
+            ),
+          ],
+          child: MaterialApp(
+            home: Scaffold(
+              appBar: PicoAppBar(
+                showBackButton: true,
+                onBackPressed: () => backTapped = true,
+              ),
+              body: const SizedBox.shrink(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final backBtn = find.byKey(const Key('pico_app_bar_back_button'));
+      expect(backBtn, findsOneWidget);
+
+      await tester.tap(backBtn);
+      expect(backTapped, isTrue);
+    });
+
+    testWidgets('PicoAppBar does not overflow on narrow 320px viewport with back button',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(320.0, 640.0);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            currentUserProfileProvider.overrideWith(
+              () => _FakeCurrentUserProfile(testProfile),
+            ),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              appBar: PicoAppBar(
+                title: 'EVENTOS',
+                showBackButton: true,
+              ),
+              body: SizedBox.shrink(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // No overflow exception should be thrown
+      expect(tester.takeException(), isNull);
+      expect(find.text('EVENTOS'), findsOneWidget);
+      expect(find.byKey(const Key('pico_app_bar_back_button')), findsOneWidget);
+    });
+
+    testWidgets('HomeScreen renders full-bleed stadium pitch background asset with top alignment',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            currentUserProfileProvider.overrideWith(
+              () => _FakeCurrentUserProfile(testProfile),
+            ),
+            matchesFeedProvider.overrideWith(
+              () => _FakeMatchesFeed([testMatch]),
+            ),
+          ],
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: HomeScreen(showBottomNavBar: false),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // 1. Verify the background Image widget with main_background.png
+      final imageFinder = find.byWidgetPredicate(
+        (widget) =>
+            widget is Image &&
+            widget.image is AssetImage &&
+            (widget.image as AssetImage).assetName ==
+                'assets/images/main_background.png' &&
+            widget.fit == BoxFit.cover &&
+            widget.alignment == Alignment.topCenter,
+      );
+      expect(imageFinder, findsOneWidget);
+
+      // 2. Verify Scaffold has transparent background
+      final scaffoldFinder = find.byType(Scaffold);
+      expect(scaffoldFinder, findsOneWidget);
+      final scaffold = tester.widget<Scaffold>(scaffoldFinder);
+      expect(scaffold.backgroundColor, Colors.transparent);
+
+      // 3. Verify Stitch top bar with profile and division pills
+      expect(find.byKey(const Key('home_screen_profile_pill')), findsOneWidget);
+      expect(find.byKey(const Key('home_screen_division_pill')), findsOneWidget);
+
+      // 4. Verify subheader username badge and match feed
+      expect(find.text('GoldenBoot'), findsWidgets);
+      expect(find.text('Real Madrid'), findsOneWidget);
+      expect(find.text('Barcelona'), findsOneWidget);
+    });
+
+
+    testWidgets('ProfileScreen renders with PicoPitchBackground and transparent Scaffold',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            currentUserProfileProvider.overrideWith(
+              () => _FakeCurrentUserProfile(testProfile),
+            ),
+          ],
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: ProfileScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final pitchBackgroundFinder = find.byType(PicoPitchBackground);
+      expect(pitchBackgroundFinder, findsOneWidget);
+      final pitchBackground = tester.widget<PicoPitchBackground>(pitchBackgroundFinder);
+      expect(pitchBackground.imageAsset, 'assets/images/main_background.png');
+
+      final scaffoldFinder = find.byType(Scaffold);
+      expect(scaffoldFinder, findsOneWidget);
+      final scaffold = tester.widget<Scaffold>(scaffoldFinder);
+      expect(scaffold.backgroundColor, Colors.transparent);
+    });
+
+    testWidgets('HomeScreen division section shows brief details and opens DivisionLadderSheet on tap',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            currentUserProfileProvider.overrideWith(
+              () => _FakeCurrentUserProfile(testProfile),
+            ),
+            matchesFeedProvider.overrideWith(
+              () => _FakeMatchesFeed([testMatch]),
+            ),
+          ],
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: HomeScreen(showBottomNavBar: false),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // 1. Verify Division title and division shield icon within the division pill
+      final pillFinder = find.byKey(const Key('home_screen_division_pill'));
+      expect(find.descendant(of: pillFinder, matching: find.text('Division 8')), findsOneWidget);
+      expect(find.descendant(of: pillFinder, matching: find.byIcon(Icons.shield_rounded)), findsOneWidget);
+
+      // 2. Tap on division pill to open DivisionLadderSheet
+      await tester.tap(find.byKey(const Key('home_screen_division_pill')));
+      await tester.pumpAndSettle();
+
+      // 3. Verify DivisionLadderSheet is presented
+      expect(find.byType(DivisionLadderSheet), findsOneWidget);
+      expect(find.text('Division Ladder'), findsOneWidget);
+    });
+
+    testWidgets('HomeScreen renders greeting section with menu button and yellow game-like profile card',
+        (WidgetTester tester) async {
+      bool menuTapped = false;
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            currentUserProfileProvider.overrideWith(
+              () => _FakeCurrentUserProfile(testProfile),
+            ),
+            matchesFeedProvider.overrideWith(
+              () => _FakeMatchesFeed([testMatch]),
+            ),
+          ],
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: HomeScreen(
+              showBottomNavBar: false,
+              onMenuTap: () => menuTapped = true,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // 1. Verify greeting header and subtitle
+      expect(find.text('Hey GoldenBoot! 👋'), findsOneWidget);
+      expect(find.text('Ready to predict today\'s biggest clash?'), findsOneWidget);
+
+      // 2. Verify 3D tactile menu button and tapping it
+      final menuBtn = find.byKey(const Key('home_screen_menu_button'));
+      expect(menuBtn, findsOneWidget);
+      expect(find.descendant(of: menuBtn, matching: find.byIcon(Icons.menu_rounded)), findsOneWidget);
+      await tester.tap(menuBtn);
+      expect(menuTapped, isTrue);
+
+      // 3. Verify user profile card renders username and level
+      final profilePill = find.byKey(const Key('home_screen_profile_pill'));
+      expect(profilePill, findsOneWidget);
+      expect(find.descendant(of: profilePill, matching: find.text('GoldenBoot')), findsOneWidget);
+      expect(find.descendant(of: profilePill, matching: find.text('LVL 7')), findsOneWidget);
+    });
+  });
+}
