@@ -1177,15 +1177,16 @@ class _TeamBlock extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // Squircle Container for Crest
-        Container(
-          width: 58.0,
-          height: 58.0,
-          decoration: BoxDecoration(
-            color: PicoColors.cardTray,
-            borderRadius: BorderRadius.circular(16.0),
-            border: Border.all(color: PicoColors.cardBorder, width: 1.5),
-          ),
-          child: Center(
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16.0),
+          child: Container(
+            width: 58.0,
+            height: 58.0,
+            decoration: BoxDecoration(
+              color: PicoColors.cardTray,
+              borderRadius: BorderRadius.circular(16.0),
+              border: Border.all(color: PicoColors.cardBorder, width: 1.5),
+            ),
             child: _buildCrestWidget(),
           ),
         ),
@@ -1230,12 +1231,12 @@ class _TeamBlock extends StatelessWidget {
         WidgetsBinding.instance.runtimeType.toString().contains('Test');
     if (!isTest && badgeUrl != null && badgeUrl!.isNotEmpty) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(14.0),
         child: CachedNetworkImage(
           imageUrl: badgeUrl!,
-          width: 36.0,
-          height: 36.0,
-          fit: BoxFit.contain,
+          width: 58.0,
+          height: 58.0,
+          fit: BoxFit.cover,
           fadeInDuration: Duration.zero,
           fadeOutDuration: Duration.zero,
           placeholder: (context, url) => _buildDefaultCrest(code),

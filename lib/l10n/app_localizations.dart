@@ -1847,6 +1847,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ready to predict today\'s biggest clash?'**
   String get homeReadyToPredict;
+
+  /// Eyebrow badge in the shop header
+  ///
+  /// In en, this message translates to:
+  /// **'CLASH ELEVEN STORE'**
+  String get shopHeaderBadge;
+
+  /// Subtitle in the shop header
+  ///
+  /// In en, this message translates to:
+  /// **'Power up your prediction experience'**
+  String get shopHeaderTagline;
+
+  /// Badge shown when ad-free pass is already active
+  ///
+  /// In en, this message translates to:
+  /// **'ACTIVE • UNLOCKED'**
+  String get shopAdFreeActiveBadge;
+
+  /// Badge shown when ad-free pass is available for purchase
+  ///
+  /// In en, this message translates to:
+  /// **'LIFETIME PASS'**
+  String get shopAdFreeLockedBadge;
+
+  /// Title of the Remove Ads product card in the shop
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Ads'**
+  String get shopRemoveAdsTitle;
+
+  /// Description of the Remove Ads product
+  ///
+  /// In en, this message translates to:
+  /// **'Enjoy an uninterrupted match-tracking experience with zero ads.'**
+  String get shopRemoveAdsDescription;
+
+  /// Perk row: no banner ads
+  ///
+  /// In en, this message translates to:
+  /// **'Zero banner ads on Home & Matches'**
+  String get shopPerkNoBannerAds;
+
+  /// Perk row: no video ads
+  ///
+  /// In en, this message translates to:
+  /// **'Zero interstitial video ads'**
+  String get shopPerkNoVideoAds;
+
+  /// Perk row: fast transitions
+  ///
+  /// In en, this message translates to:
+  /// **'Instant prediction screen transitions'**
+  String get shopPerkFastTransitions;
+
+  /// Perk row: one-time purchase
+  ///
+  /// In en, this message translates to:
+  /// **'One-time unlock • Keep forever'**
+  String get shopPerkLifetime;
+
+  /// Confirmation text shown when user has already purchased the ad-free pass
+  ///
+  /// In en, this message translates to:
+  /// **'Ads Removed • Lifetime Unlocked'**
+  String get shopAdsRemovedConfirm;
+
+  /// CTA button to purchase the ad-free pass
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock Ad-Free • \$5.99'**
+  String get shopUnlockAdFreeButton;
+
+  /// Link to restore previous purchases
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Purchases'**
+  String get shopRestorePurchases;
+
+  /// Success message when purchases are restored
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases restored successfully!'**
+  String get shopRestoreSuccess;
+
+  /// Message when no purchases are found to restore
+  ///
+  /// In en, this message translates to:
+  /// **'No active purchases found to restore.'**
+  String get shopRestoreNothingFound;
+
+  /// Error message when restore fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to restore purchases: {error}'**
+  String shopRestoreFailed(String error);
+
+  /// Error when RevenueCat paywall cannot load
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load store offerings. Please check your connection and try again.'**
+  String get shopPaywallLoadError;
+
+  /// Eyebrow badge in the coming soon teaser banner
+  ///
+  /// In en, this message translates to:
+  /// **'MORE REWARDS COMING SOON'**
+  String get shopComingSoonBadge;
+
+  /// Body text of the coming soon teaser banner
+  ///
+  /// In en, this message translates to:
+  /// **'Exclusive mascot jerseys, division badges & league themes are currently in preparation.'**
+  String get shopComingSoonBody;
+
+  /// Title for the Trophy Cabinet feature teaser and menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Trophy Cabinet'**
+  String get trophyCabinet;
+
+  /// Coming soon teaser label on buttons and badges
+  ///
+  /// In en, this message translates to:
+  /// **'Coming Soon!'**
+  String get comingSoon;
+
+  /// Alias for trophyCabinet
+  ///
+  /// In en, this message translates to:
+  /// **'Trophy Cabinet'**
+  String get trophy_cabinet;
+
+  /// Alias for comingSoon
+  ///
+  /// In en, this message translates to:
+  /// **'Coming Soon!'**
+  String get coming_soon;
 }
 
 class _AppLocalizationsDelegate

@@ -22,9 +22,12 @@ class HelpSupportScreen extends StatefulWidget {
   static const String emailSubject = 'Pico App Support Request';
 
   // Placeholder URLs for in-app browser
-  static const String howToPlayUrl = 'https://example.com/how-to-play';
-  static const String termsUrl = 'https://example.com/terms';
-  static const String privacyUrl = 'https://example.com/privacy';
+  static const String howToPlayUrl =
+      'https://thevina-tech.github.io/website/clash-eleven/clash-eleven.html';
+  static const String termsUrl =
+      'https://thevina-tech.github.io/website/clash-eleven/termsandconditions.html';
+  static const String privacyUrl =
+      'https://thevina-tech.github.io/website/clash-eleven/privacy-policy.html';
 
   @override
   State<HelpSupportScreen> createState() => _HelpSupportScreenState();
@@ -40,7 +43,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
   }
 
   Future<void> _checkPrivacyOptionsStatus() async {
-    final isRequired = await AdConsentService.instance.isPrivacyOptionsRequired();
+    final isRequired = await AdConsentService.instance
+        .isPrivacyOptionsRequired();
     if (mounted) {
       setState(() => _isPrivacyOptionsRequired = isRequired);
     }
@@ -59,9 +63,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     final Uri emailUri = Uri(
       scheme: 'mailto',
       path: HelpSupportScreen.contactEmail,
-      queryParameters: {
-        'subject': HelpSupportScreen.emailSubject,
-      },
+      queryParameters: {'subject': HelpSupportScreen.emailSubject},
     );
 
     try {
@@ -181,7 +183,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                     _SupportOptionCard(
                       key: const Key('help_option_ad_choices'),
                       title: l10n?.adChoicesTitle ?? 'Ad Choices & Privacy',
-                      subtitle: l10n?.adChoicesSubtitle ??
+                      subtitle:
+                          l10n?.adChoicesSubtitle ??
                           'Review or change your ad personalization consent',
                       icon: Icons.tune_rounded,
                       iconColor: const Color(0xFFF43F5E),
@@ -196,7 +199,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                   _SupportOptionCard(
                     key: const Key('help_option_contact_us'),
                     title: 'Contact Us',
-                    subtitle: 'Email our team: ${HelpSupportScreen.contactEmail}',
+                    subtitle:
+                        'Email our team: ${HelpSupportScreen.contactEmail}',
                     icon: Icons.mail_rounded,
                     iconColor: const Color(0xFFFBBF24),
                     badgeBgColor: const Color(0x26D97706),
@@ -219,17 +223,10 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
         gradient: const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF0F3224),
-            Color(0xFF0A2218),
-            Color(0xFF06140E),
-          ],
+          colors: [Color(0xFF0F3224), Color(0xFF0A2218), Color(0xFF06140E)],
         ),
         borderRadius: BorderRadius.circular(20.0),
-        border: Border.all(
-          color: const Color(0x4D10B981),
-          width: 1.5,
-        ),
+        border: Border.all(color: const Color(0x4D10B981), width: 1.5),
         boxShadow: const [
           BoxShadow(
             color: Color(0xFF020906),
@@ -342,10 +339,7 @@ class _SupportOptionCardState extends State<_SupportOptionCard> {
         decoration: BoxDecoration(
           color: const Color(0xFF0D251C),
           borderRadius: BorderRadius.circular(16.0),
-          border: Border.all(
-            color: const Color(0x3310B981),
-            width: 1.2,
-          ),
+          border: Border.all(color: const Color(0x3310B981), width: 1.2),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF040F0B),
@@ -364,16 +358,9 @@ class _SupportOptionCardState extends State<_SupportOptionCard> {
               decoration: BoxDecoration(
                 color: widget.badgeBgColor,
                 borderRadius: BorderRadius.circular(12.0),
-                border: Border.all(
-                  color: widget.badgeBorderColor,
-                  width: 1.0,
-                ),
+                border: Border.all(color: widget.badgeBorderColor, width: 1.0),
               ),
-              child: Icon(
-                widget.icon,
-                color: widget.iconColor,
-                size: 22.0,
-              ),
+              child: Icon(widget.icon, color: widget.iconColor, size: 22.0),
             ),
             const SizedBox(width: 14.0),
 

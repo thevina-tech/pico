@@ -1398,8 +1398,104 @@
   "homeReadyToPredict": "Ready to predict today's biggest clash?",
   "@homeReadyToPredict": {
     "description": "Call to action message under greeting on home screen"
+  },
+  "shopHeaderBadge": "CLASH ELEVEN STORE",
+  "@shopHeaderBadge": {
+    "description": "Eyebrow badge in the shop header"
+  },
+  "shopHeaderTagline": "Power up your prediction experience",
+  "@shopHeaderTagline": {
+    "description": "Subtitle in the shop header"
+  },
+  "shopAdFreeActiveBadge": "ACTIVE • UNLOCKED",
+  "@shopAdFreeActiveBadge": {
+    "description": "Badge shown when ad-free pass is already active"
+  },
+  "shopAdFreeLockedBadge": "LIFETIME PASS",
+  "@shopAdFreeLockedBadge": {
+    "description": "Badge shown when ad-free pass is available for purchase"
+  },
+  "shopRemoveAdsTitle": "Remove Ads",
+  "@shopRemoveAdsTitle": {
+    "description": "Title of the Remove Ads product card in the shop"
+  },
+  "shopRemoveAdsDescription": "Enjoy an uninterrupted match-tracking experience with zero ads.",
+  "@shopRemoveAdsDescription": {
+    "description": "Description of the Remove Ads product"
+  },
+  "shopPerkNoBannerAds": "Zero banner ads on Home & Matches",
+  "@shopPerkNoBannerAds": {
+    "description": "Perk row: no banner ads"
+  },
+  "shopPerkNoVideoAds": "Zero interstitial video ads",
+  "@shopPerkNoVideoAds": {
+    "description": "Perk row: no video ads"
+  },
+  "shopPerkFastTransitions": "Instant prediction screen transitions",
+  "@shopPerkFastTransitions": {
+    "description": "Perk row: fast transitions"
+  },
+  "shopPerkLifetime": "One-time unlock • Keep forever",
+  "@shopPerkLifetime": {
+    "description": "Perk row: one-time purchase"
+  },
+  "shopAdsRemovedConfirm": "Ads Removed • Lifetime Unlocked",
+  "@shopAdsRemovedConfirm": {
+    "description": "Confirmation text shown when user has already purchased the ad-free pass"
+  },
+  "shopUnlockAdFreeButton": "Unlock Ad-Free • $5.99",
+  "@shopUnlockAdFreeButton": {
+    "description": "CTA button to purchase the ad-free pass"
+  },
+  "shopRestorePurchases": "Restore Purchases",
+  "@shopRestorePurchases": {
+    "description": "Link to restore previous purchases"
+  },
+  "shopRestoreSuccess": "Purchases restored successfully!",
+  "@shopRestoreSuccess": {
+    "description": "Success message when purchases are restored"
+  },
+  "shopRestoreNothingFound": "No active purchases found to restore.",
+  "@shopRestoreNothingFound": {
+    "description": "Message when no purchases are found to restore"
+  },
+  "shopRestoreFailed": "Failed to restore purchases: {error}",
+  "@shopRestoreFailed": {
+    "description": "Error message when restore fails",
+    "placeholders": {
+      "error": { "type": "String", "example": "Network error" }
+    }
+  },
+  "shopPaywallLoadError": "Could not load store offerings. Please check your connection and try again.",
+  "@shopPaywallLoadError": {
+    "description": "Error when RevenueCat paywall cannot load"
+  },
+  "shopComingSoonBadge": "MORE REWARDS COMING SOON",
+  "@shopComingSoonBadge": {
+    "description": "Eyebrow badge in the coming soon teaser banner"
+  },
+  "shopComingSoonBody": "Exclusive mascot jerseys, division badges & league themes are currently in preparation.",
+  "@shopComingSoonBody": {
+    "description": "Body text of the coming soon teaser banner"
+  },
+  "trophyCabinet": "Trophy Cabinet",
+  "@trophyCabinet": {
+    "description": "Title for the Trophy Cabinet feature teaser and menu item"
+  },
+  "comingSoon": "Coming Soon!",
+  "@comingSoon": {
+    "description": "Coming soon teaser label on buttons and badges"
+  },
+  "trophy_cabinet": "Trophy Cabinet",
+  "@trophy_cabinet": {
+    "description": "Alias for trophyCabinet"
+  },
+  "coming_soon": "Coming Soon!",
+  "@coming_soon": {
+    "description": "Alias for comingSoon"
   }
 }
+
 
 
 

@@ -1027,4 +1027,82 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get homeReadyToPredict => '¿Listo para predecir el partidazo de hoy?';
+
+  @override
+  String get shopHeaderBadge => 'TIENDA CLASH ELEVEN';
+
+  @override
+  String get shopHeaderTagline => 'Potencia tu experiencia de predicción';
+
+  @override
+  String get shopAdFreeActiveBadge => 'ACTIVO • DESBLOQUEADO';
+
+  @override
+  String get shopAdFreeLockedBadge => 'PASE VITALICIO';
+
+  @override
+  String get shopRemoveAdsTitle => 'Eliminar Anuncios';
+
+  @override
+  String get shopRemoveAdsDescription =>
+      'Disfruta una experiencia de seguimiento de partidos sin interrupciones y sin anuncios.';
+
+  @override
+  String get shopPerkNoBannerAds =>
+      'Sin banners de anuncios en Inicio y Partidos';
+
+  @override
+  String get shopPerkNoVideoAds => 'Sin anuncios de vídeo intersticiales';
+
+  @override
+  String get shopPerkFastTransitions =>
+      'Transiciones instantáneas en la pantalla de predicción';
+
+  @override
+  String get shopPerkLifetime => 'Compra única • Disfrútalo para siempre';
+
+  @override
+  String get shopAdsRemovedConfirm =>
+      'Anuncios Eliminados • Desbloqueado Vitalicio';
+
+  @override
+  String get shopUnlockAdFreeButton => 'Desbloquear Sin Anuncios • \$5.99';
+
+  @override
+  String get shopRestorePurchases => 'Restaurar Compras';
+
+  @override
+  String get shopRestoreSuccess => '¡Compras restauradas con éxito!';
+
+  @override
+  String get shopRestoreNothingFound =>
+      'No se encontraron compras activas para restaurar.';
+
+  @override
+  String shopRestoreFailed(String error) {
+    return 'Error al restaurar compras: $error';
+  }
+
+  @override
+  String get shopPaywallLoadError =>
+      'No se pudo cargar la tienda. Por favor, comprueba tu conexión e inténtalo de nuevo.';
+
+  @override
+  String get shopComingSoonBadge => 'MÁS RECOMPENSAS PRÓXIMAMENTE';
+
+  @override
+  String get shopComingSoonBody =>
+      'Camisetas exclusivas de mascota, insignias de división y temas de liga están en preparación.';
+
+  @override
+  String get trophyCabinet => 'Vitrina de Trofeos';
+
+  @override
+  String get comingSoon => '¡Próximamente!';
+
+  @override
+  String get trophy_cabinet => 'Vitrina de Trofeos';
+
+  @override
+  String get coming_soon => '¡Próximamente!';
 }

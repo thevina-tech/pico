@@ -15,6 +15,7 @@ import 'package:pico/shared/components/how_to_play_card.dart';
 import 'package:pico/shared/components/pico_button.dart';
 import 'package:pico/features/profile/presentation/help_support_screen.dart';
 import 'package:pico/features/profile/presentation/settings_screen.dart';
+import 'package:pico/features/profile/presentation/trophy_cabinet_screen.dart';
 import 'package:pico/shared/components/pico_pitch_background.dart';
 import 'package:pico/shared/components/pico_snackbar.dart';
 import 'package:share_plus/share_plus.dart';
@@ -31,7 +32,6 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -51,9 +51,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 constraints: const BoxConstraints(maxWidth: 440.0),
                 child: profileAsync.when(
                   loading: () => const Center(
-                    child: CircularProgressIndicator(
-                      color: Color(0xFF10B981),
-                    ),
+                    child: CircularProgressIndicator(color: Color(0xFF10B981)),
                   ),
                   error: (error, _) => Center(
                     child: Padding(
@@ -120,9 +118,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         const SizedBox(height: 14.0),
 
                         // 3. How to Play Card (Navigation -> In-App Browser Guide)
-                        const HowToPlayCard(
-                          margin: EdgeInsets.zero,
-                        ),
+                        const HowToPlayCard(margin: EdgeInsets.zero),
                         const SizedBox(height: 14.0),
 
                         // 4. Quick Actions (Rate App, Help/Support & Settings)
@@ -147,7 +143,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   // 1. HEADER SECTION
   // ---------------------------------------------------------------------------
   Widget _buildHeaderSection(UserProfile profile, AppLocalizations? l10n) {
-    final displayName = (profile.username != null && profile.username!.isNotEmpty)
+    final displayName =
+        (profile.username != null && profile.username!.isNotEmpty)
         ? profile.username!
         : 'Player';
 
@@ -358,14 +355,82 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-
-
   // ---------------------------------------------------------------------------
   // 5. QUICK ACTIONS SECTION (RATE APP & HELP/SUPPORT)
   // ---------------------------------------------------------------------------
-  Widget _buildQuickActionsSection(UserProfile profile, AppLocalizations? l10n) {
+  Widget _buildQuickActionsSection(
+    UserProfile profile,
+    AppLocalizations? l10n,
+  ) {
     return Column(
       children: [
+        // Action: Trophy Cabinet (Navigates to TrophyCabinetScreen)
+        _TactileCard(
+          key: const Key('profile_trophy_cabinet_action'),
+          onTap: () {
+            HapticFeedback.lightImpact();
+            try {
+              context.push('/trophy-cabinet');
+            } catch (_) {
+              Navigator.of(context, rootNavigator: true).push(
+                MaterialPageRoute(builder: (_) => const TrophyCabinetScreen()),
+              );
+            }
+          },
+          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+          child: Row(
+            children: [
+              Container(
+                width: 38.0,
+                height: 38.0,
+                decoration: BoxDecoration(
+                  color: const Color(0x26F59E0B),
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(
+                    color: const Color(0x4DF59E0B),
+                    width: 1.0,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.emoji_events_rounded,
+                  color: Color(0xFFFBBF24),
+                  size: 22.0,
+                ),
+              ),
+              const SizedBox(width: 12.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n?.trophyCabinet ?? 'Trophy Cabinet',
+                      style: PicoTypography.headlineMd.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14.0,
+                      ),
+                    ),
+                    const SizedBox(height: 2.0),
+                    Text(
+                      l10n?.comingSoon ?? 'Coming Soon!',
+                      style: PicoTypography.bodySm.copyWith(
+                        color: const Color(0xFFCBD5E1),
+                        fontSize: 11.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: Color(0xFF94A3B8),
+                size: 22.0,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10.0),
+
         // Action 1: Rate App
         _TactileCard(
           key: const Key('profile_rate_app_action'),
@@ -433,9 +498,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               context.push('/help-support');
             } catch (_) {
               Navigator.of(context, rootNavigator: true).push(
-                MaterialPageRoute(
-                  builder: (_) => const HelpSupportScreen(),
-                ),
+                MaterialPageRoute(builder: (_) => const HelpSupportScreen()),
               );
             }
           },
@@ -502,11 +565,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             try {
               context.push('/settings');
             } catch (_) {
-              Navigator.of(context, rootNavigator: true).push(
-                MaterialPageRoute(
-                  builder: (_) => const SettingsScreen(),
-                ),
-              );
+              Navigator.of(
+                context,
+                rootNavigator: true,
+              ).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
             }
           },
           padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
@@ -571,7 +633,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     // Hardcoded external store link for testing purposes right now.
     // REMINDER: Change this to the official Pico package name before launch!
     const String storeUrl =
-        'https://play.google.com/store/apps/details?id=com.devdaumienebi.yonunca';
+        'https://thevina-tech.github.io/website/clash-eleven/clash-eleven.html';
 
     final uri = Uri.parse(storeUrl);
     try {
@@ -623,24 +685,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Future<void> _handleShareApp(AppLocalizations? l10n) async {
     HapticFeedback.lightImpact();
-    final message = l10n?.shareAppMessage ??
-        'Join me on Pico to predict football matches! https://play.google.com/store/apps/details?id=com.devdaumienebi.yonunca';
+    final message =
+        l10n?.shareAppMessage ??
+        'Join me on Pico to predict football matches! https://thevina-tech.github.io/website/clash-eleven/clash-eleven.html';
     try {
-      await SharePlus.instance.share(
-        ShareParams(text: message),
-      );
+      await SharePlus.instance.share(ShareParams(text: message));
     } catch (e) {
       debugPrint('[ProfileScreen] Share error: $e');
     }
   }
-
-
 }
 
 // =============================================================================
 // REUSABLE HELPER WIDGETS
 // =============================================================================
-
 
 /// Tactile Card with 3D bottom bevel shadow and press depression feedback.
 class _TactileCard extends StatefulWidget {
@@ -669,7 +727,9 @@ class _TactileCardState extends State<_TactileCard> {
     return GestureDetector(
       onTapDown: isClickable ? (_) => setState(() => _isPressed = true) : null,
       onTapUp: isClickable ? (_) => setState(() => _isPressed = false) : null,
-      onTapCancel: isClickable ? () => setState(() => _isPressed = false) : null,
+      onTapCancel: isClickable
+          ? () => setState(() => _isPressed = false)
+          : null,
       onTap: widget.onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 75),
@@ -678,10 +738,7 @@ class _TactileCardState extends State<_TactileCard> {
         decoration: BoxDecoration(
           color: const Color(0xE60E271F),
           borderRadius: BorderRadius.circular(16.0),
-          border: Border.all(
-            color: const Color(0x4010B981),
-            width: 1.0,
-          ),
+          border: Border.all(color: const Color(0x4010B981), width: 1.0),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF030E08),

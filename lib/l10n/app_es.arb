@@ -294,8 +294,32 @@
   "failedToSendMessage": "Error al enviar el mensaje: {error}",
   "signOutFailed": "Error al cerrar sesión: {error}",
   "homeGreeting": "¡Hola {username}! 👋",
-  "homeReadyToPredict": "¿Listo para predecir el partidazo de hoy?"
+  "homeReadyToPredict": "¿Listo para predecir el partidazo de hoy?",
+  "shopHeaderBadge": "TIENDA CLASH ELEVEN",
+  "shopHeaderTagline": "Potencia tu experiencia de predicción",
+  "shopAdFreeActiveBadge": "ACTIVO • DESBLOQUEADO",
+  "shopAdFreeLockedBadge": "PASE VITALICIO",
+  "shopRemoveAdsTitle": "Eliminar Anuncios",
+  "shopRemoveAdsDescription": "Disfruta una experiencia de seguimiento de partidos sin interrupciones y sin anuncios.",
+  "shopPerkNoBannerAds": "Sin banners de anuncios en Inicio y Partidos",
+  "shopPerkNoVideoAds": "Sin anuncios de vídeo intersticiales",
+  "shopPerkFastTransitions": "Transiciones instantáneas en la pantalla de predicción",
+  "shopPerkLifetime": "Compra única • Disfrútalo para siempre",
+  "shopAdsRemovedConfirm": "Anuncios Eliminados • Desbloqueado Vitalicio",
+  "shopUnlockAdFreeButton": "Desbloquear Sin Anuncios • $5.99",
+  "shopRestorePurchases": "Restaurar Compras",
+  "shopRestoreSuccess": "¡Compras restauradas con éxito!",
+  "shopRestoreNothingFound": "No se encontraron compras activas para restaurar.",
+  "shopRestoreFailed": "Error al restaurar compras: {error}",
+  "shopPaywallLoadError": "No se pudo cargar la tienda. Por favor, comprueba tu conexión e inténtalo de nuevo.",
+  "shopComingSoonBadge": "MÁS RECOMPENSAS PRÓXIMAMENTE",
+  "shopComingSoonBody": "Camisetas exclusivas de mascota, insignias de división y temas de liga están en preparación.",
+  "trophyCabinet": "Vitrina de Trofeos",
+  "comingSoon": "¡Próximamente!",
+  "trophy_cabinet": "Vitrina de Trofeos",
+  "coming_soon": "¡Próximamente!"
 }
+
 
 
 

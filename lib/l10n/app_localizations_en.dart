@@ -1019,4 +1019,78 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeReadyToPredict => 'Ready to predict today\'s biggest clash?';
+
+  @override
+  String get shopHeaderBadge => 'CLASH ELEVEN STORE';
+
+  @override
+  String get shopHeaderTagline => 'Power up your prediction experience';
+
+  @override
+  String get shopAdFreeActiveBadge => 'ACTIVE • UNLOCKED';
+
+  @override
+  String get shopAdFreeLockedBadge => 'LIFETIME PASS';
+
+  @override
+  String get shopRemoveAdsTitle => 'Remove Ads';
+
+  @override
+  String get shopRemoveAdsDescription =>
+      'Enjoy an uninterrupted match-tracking experience with zero ads.';
+
+  @override
+  String get shopPerkNoBannerAds => 'Zero banner ads on Home & Matches';
+
+  @override
+  String get shopPerkNoVideoAds => 'Zero interstitial video ads';
+
+  @override
+  String get shopPerkFastTransitions => 'Instant prediction screen transitions';
+
+  @override
+  String get shopPerkLifetime => 'One-time unlock • Keep forever';
+
+  @override
+  String get shopAdsRemovedConfirm => 'Ads Removed • Lifetime Unlocked';
+
+  @override
+  String get shopUnlockAdFreeButton => 'Unlock Ad-Free • \$5.99';
+
+  @override
+  String get shopRestorePurchases => 'Restore Purchases';
+
+  @override
+  String get shopRestoreSuccess => 'Purchases restored successfully!';
+
+  @override
+  String get shopRestoreNothingFound => 'No active purchases found to restore.';
+
+  @override
+  String shopRestoreFailed(String error) {
+    return 'Failed to restore purchases: $error';
+  }
+
+  @override
+  String get shopPaywallLoadError =>
+      'Could not load store offerings. Please check your connection and try again.';
+
+  @override
+  String get shopComingSoonBadge => 'MORE REWARDS COMING SOON';
+
+  @override
+  String get shopComingSoonBody =>
+      'Exclusive mascot jerseys, division badges & league themes are currently in preparation.';
+
+  @override
+  String get trophyCabinet => 'Trophy Cabinet';
+
+  @override
+  String get comingSoon => 'Coming Soon!';
+
+  @override
+  String get trophy_cabinet => 'Trophy Cabinet';
+
+  @override
+  String get coming_soon => 'Coming Soon!';
 }

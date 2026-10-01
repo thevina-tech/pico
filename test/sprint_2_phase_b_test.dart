@@ -16,6 +16,7 @@ import 'package:pico/features/profile/presentation/user_profile_provider.dart';
 import 'package:pico/features/tournaments/presentation/tournaments_screen.dart';
 import 'package:pico/l10n/app_localizations.dart';
 import 'package:pico/main.dart';
+import 'package:pico/shared/components/game_button.dart';
 import 'package:pico/shared/components/game_exit_dialog.dart';
 import 'package:pico/shared/components/pico_app_bar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
@@ -232,11 +233,11 @@ void main() {
       expect(find.byKey(const Key('home_screen_profile_pill')), findsOneWidget);
       expect(find.byKey(const Key('home_screen_division_pill')), findsOneWidget);
 
-      // 4. Verify Special Event Card (El Clásico / featured match)
-      expect(find.text('EL CLÁSICO'), findsOneWidget);
+      // 4. Verify Special Event Card (El Clásico teaser)
+      expect(find.text('El Clásico'), findsOneWidget);
       expect(find.text('Real Madrid'), findsOneWidget);
       expect(find.text('Barcelona'), findsOneWidget);
-      expect(find.text('PREDICT NOW'), findsOneWidget);
+      expect(find.text('Coming Soon!'), findsOneWidget);
 
       // 5. Verify How to Play Section
       expect(find.byKey(const Key('how_to_play_card')), findsOneWidget);
@@ -246,10 +247,8 @@ void main() {
       expect(find.text('Official Rules & Scoring ...'), findsOneWidget);
     });
 
-    testWidgets('Tapping predict on special event card triggers prediction flow',
+    testWidgets('Special event card teaser button is disabled',
         (WidgetTester tester) async {
-      int makePredictionCalled = 0;
-
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -260,23 +259,21 @@ void main() {
               () => _FakeMatchesFeed(testMatches),
             ),
           ],
-          child: MaterialApp(
+          child: const MaterialApp(
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: HomeScreen(
               showBottomNavBar: false,
-              onMakePrediction: () => makePredictionCalled++,
             ),
           ),
         ),
       );
       await tester.pumpAndSettle();
 
-      final predictBtn = find.text('PREDICT NOW');
-      expect(predictBtn, findsOneWidget);
-      await tester.tap(predictBtn);
-      await tester.pumpAndSettle();
-      expect(makePredictionCalled, 1);
+      final buttonFinder = find.byKey(const Key('special_event_action_button'));
+      expect(buttonFinder, findsOneWidget);
+      final gameButton = tester.widget<GameButton>(buttonFinder);
+      expect(gameButton.onPressed, isNull);
     });
 
     testWidgets('Long pressing profile pill displays the settings bottom sheet',
@@ -336,7 +333,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify Special Event Card and How to Play section are displayed
-      expect(find.text('EL CLÁSICO'), findsOneWidget);
+      expect(find.text('El Clásico'), findsOneWidget);
       expect(find.byKey(const Key('how_to_play_card')), findsOneWidget);
       expect(find.text('How to Play'), findsOneWidget);
     });

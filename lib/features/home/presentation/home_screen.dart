@@ -7,7 +7,6 @@ import 'package:pico/core/theme/pico_typography.dart';
 import 'package:pico/features/auth/presentation/auth_provider.dart';
 import 'package:pico/features/matches/domain/pico_match.dart';
 import 'package:pico/features/matches/presentation/matches_feed_provider.dart';
-import 'package:pico/features/predictions/presentation/prediction_controller.dart';
 import 'package:pico/features/profile/domain/user_profile.dart';
 import 'package:pico/features/profile/presentation/user_profile_provider.dart';
 import 'package:pico/features/profile/presentation/widgets/division_ladder_sheet.dart';
@@ -104,14 +103,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  void _openDetailedPrediction(PicoMatch match) {
-    if (widget.onMakePrediction != null) {
-      widget.onMakePrediction!();
-    } else {
-      context.push('/prediction/${match.id}', extra: match);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(currentUserProfileProvider);
@@ -126,14 +117,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           totalPoints: 0,
         );
 
-    final matchesAsync = ref.watch(matchesFeedProvider);
-    final matches = matchesAsync.value ?? <PicoMatch>[];
-    final allMatches = <PicoMatch>[...matches];
-    if (widget.heroMatch != null &&
-        !allMatches.any((m) => m.id == widget.heroMatch!.id)) {
-      allMatches.insert(0, widget.heroMatch!);
-    }
-    final featuredMatch = allMatches.isNotEmpty ? allMatches.first : null;
+
 
     return PicoGameExitScope(
       child: Stack(
@@ -274,8 +258,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                // Special Event Card (Cinematic Match Showcase)
-                                _buildSpecialEventCard(context, featuredMatch),
+                                // Special Event Card (El Clásico Teaser)
+                                _buildSpecialEventCard(context),
 
                                 // How to Play Section
                                 const HowToPlayCard(),
@@ -695,24 +679,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// 2. Special Event Card modeled on Stitch "Pico home image.png"
-  /// - Upper half: Arena floodlights banner, red LALIGA badge, gold "EL CLÁSICO" title & kickoff.
-  /// - Lower half: White/cream card face, Real Madrid & Barcelona crests, VS circle, and tactile PREDICT NOW action.
-  Widget _buildSpecialEventCard(BuildContext context, PicoMatch? featuredMatch) {
-    final homeTeam = featuredMatch?.homeTeamName ?? 'Real Madrid';
-    final awayTeam = featuredMatch?.awayTeamName ?? 'Barcelona';
-    final competition = featuredMatch != null
-        ? featuredMatch.competitionName.toUpperCase()
-        : 'LALIGA';
-    final kickoff = featuredMatch != null
-        ? '📅 ${featuredMatch.kickoffTimeFormatted}'
-        : '📅 Sat, 26 Oct • 21:00';
-
-    final predictions = ref.watch(predictionControllerProvider);
-    final predictionMap = predictions.value;
-    final existing = (featuredMatch != null && predictionMap != null)
-        ? predictionMap[featuredMatch.id]
-        : null;
+  /// 2. Special Event Card: Static teaser for "El Clásico" prediction feature
+  /// - Upper half: assets/images/elclasico.png background (BoxFit.cover) with centered "El Clásico" and match date.
+  /// - Lower half: Cream card face, solid blue circle for Barcelona, solid white circle for Real Madrid, and disabled "Coming soon" button.
+  Widget _buildSpecialEventCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final comingSoonText = l10n?.comingSoon ?? 'Coming soon';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 10.0),
@@ -733,15 +705,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Upper Half: Stadium Banner with Title & Kickoff
+              // Upper Half: Stadium Banner with Centered Title & Match Date
               SizedBox(
                 height: 140.0,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // Banner Image
+                    // Background Image: assets/images/elclasico.png with BoxFit.cover
                     Image.asset(
-                      'assets/images/el_clasico_banner.png',
+                      'assets/images/elclasico.png',
                       fit: BoxFit.cover,
                       errorBuilder: (ctx, err, stack) => Container(
                         decoration: const BoxDecoration(
@@ -758,7 +730,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
 
-                    // Atmospheric Gradient Overlay
+                    // Atmospheric Gradient Overlay for text readability
                     DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -772,105 +744,99 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
 
-                    // Text & Badges Overlay
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 12.0,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // League Badge (Red LALIGA badge)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8.0,
-                              vertical: 2.5,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE52535),
-                              borderRadius: BorderRadius.circular(6.0),
-                            ),
-                            child: Text(
-                              competition,
-                              style: const TextStyle(
+                    // Horizontally and vertically centered texts: "El Clásico" & match date
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Text(
+                              'El Clásico',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
                                 fontFamily: 'Rubik',
-                                fontSize: 10.0,
+                                fontSize: 26.0,
                                 fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                                letterSpacing: 0.8,
+                                color: Color(0xFFF7C85C),
+                                letterSpacing: 1.2,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black,
+                                    offset: Offset(0, 2.0),
+                                    blurRadius: 6.0,
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-
-                          const Spacer(),
-
-                          // Match Title ("EL CLÁSICO")
-                          const Text(
-                            'EL CLÁSICO',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: 'Rubik',
-                              fontSize: 25.0,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFFF7C85C),
-                              letterSpacing: 1.2,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black,
-                                  offset: Offset(0, 2.0),
-                                  blurRadius: 6.0,
-                                ),
-                              ],
+                            const SizedBox(height: 4.0),
+                            Text(
+                              '📅 Sat, 26 Oct • 21:00',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: 'Rubik',
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white.withValues(alpha: 0.95),
+                                shadows: const [
+                                  Shadow(
+                                    color: Colors.black,
+                                    offset: Offset(0, 1.5),
+                                    blurRadius: 4.0,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-
-                          const SizedBox(height: 3.0),
-
-                          // Kickoff / Time Label
-                          Text(
-                            kickoff,
-                            style: TextStyle(
-                              fontFamily: 'Rubik',
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white.withValues(alpha: 0.95),
-                            ),
-                          ),
-
-                          const SizedBox(height: 2.0),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
 
-              // Lower Half: Cream Surface with Teams & Predict Button
+              // Lower Half: Cream Surface with Teams & Disabled Action Button
               Container(
                 color: const Color(0xFFF5F3EC),
                 padding: const EdgeInsets.fromLTRB(16.0, 14.0, 16.0, 14.0),
                 child: Column(
                   children: [
-                    // Teams Matchup Row
+                    // Teams Matchup Row (Barcelona vs Real Madrid with solid colored circles)
                     Row(
                       children: [
-                        // Home Team
+                        // Home Team: Barcelona (Solid Blue circle)
                         Expanded(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              _buildTeamCrest(
-                                badgeUrl: featuredMatch?.homeTeamBadgeUrl,
-                                isRealMadrid: homeTeam.contains('Real Madrid'),
+                              Container(
+                                width: 46.0,
+                                height: 46.0,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF004D98), // Solid Blue
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: const Color(0xFFDDD9CF),
+                                    width: 1.5,
+                                  ),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0x18000000),
+                                      offset: Offset(0, 2),
+                                      blurRadius: 3,
+                                    ),
+                                  ],
+                                ),
                               ),
                               const SizedBox(height: 6.0),
-                              Text(
-                                homeTeam,
+                              const Text(
+                                'Barcelona',
                                 textAlign: TextAlign.center,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontFamily: 'Rubik',
                                   fontSize: 13.5,
                                   fontWeight: FontWeight.w800,
@@ -902,22 +868,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                         ),
 
-                        // Away Team
+                        // Away Team: Real Madrid (Solid White circle)
                         Expanded(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              _buildTeamCrest(
-                                badgeUrl: featuredMatch?.awayTeamBadgeUrl,
-                                isBarcelona: awayTeam.contains('Barcelona'),
+                              Container(
+                                width: 46.0,
+                                height: 46.0,
+                                decoration: BoxDecoration(
+                                  color: Colors.white, // Solid White
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: const Color(0xFFDDD9CF),
+                                    width: 1.5,
+                                  ),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0x18000000),
+                                      offset: Offset(0, 2),
+                                      blurRadius: 3,
+                                    ),
+                                  ],
+                                ),
                               ),
                               const SizedBox(height: 6.0),
-                              Text(
-                                awayTeam,
+                              const Text(
+                                'Real Madrid',
                                 textAlign: TextAlign.center,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontFamily: 'Rubik',
                                   fontSize: 13.5,
                                   fontWeight: FontWeight.w800,
@@ -930,100 +911,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 12.0),
+                    const SizedBox(height: 14.0),
 
-                    // Prediction Action Button
-                    GestureDetector(
-                      onTap: () {
-                        if (featuredMatch != null) {
-                          _openDetailedPrediction(featuredMatch);
-                        } else {
-                          _navigateToMatches();
-                        }
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        height: 42.0,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF16A34A),
-                          borderRadius: BorderRadius.circular(12.0),
-                          border: Border.all(
-                            color: const Color(0xFF14532D),
-                            width: 1.5,
-                          ),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0xFF0F3D1F),
-                              offset: Offset(0, 3.0),
-                              blurRadius: 0,
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.sports_soccer_rounded,
-                                size: 18.0,
-                                color: Colors.white,
-                              ),
-                              const SizedBox(width: 8.0),
-                              Text(
-                                existing != null
-                                    ? 'PREDICTED: ${existing.homeScore} - ${existing.awayScore}'
-                                    : 'PREDICT NOW',
-                                style: const TextStyle(
-                                  fontFamily: 'Rubik',
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.white,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                    // Main Action Button: Inactive/disabled "Coming soon" button
+                    GameButton.green(
+                      key: const Key('special_event_action_button'),
+                      text: comingSoonText,
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.w800,
+                      icon: const Icon(
+                        Icons.sports_soccer_rounded,
+                        size: 20.0,
+                        color: Colors.white70,
                       ),
+                      onPressed: null, // Inactive/disabled
+                      width: double.infinity,
+                      height: 48.0,
+                      borderRadius: 14.0,
                     ),
                   ],
                 ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  /// Team crest icon container
-  Widget _buildTeamCrest({
-    String? badgeUrl,
-    bool isRealMadrid = false,
-    bool isBarcelona = false,
-  }) {
-    return Container(
-      width: 46.0,
-      height: 46.0,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(color: const Color(0xFFDDD9CF), width: 1.5),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x18000000),
-            offset: Offset(0, 2),
-            blurRadius: 3,
-          ),
-        ],
-      ),
-      child: Center(
-        child: Icon(
-          Icons.shield_rounded,
-          color: isRealMadrid
-              ? const Color(0xFF0C2340)
-              : (isBarcelona ? const Color(0xFFA50044) : const Color(0xFF1E3A2B)),
-          size: 26.0,
         ),
       ),
     );

@@ -47,15 +47,16 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
 
   /// Triggers the RevenueCat paywall for the "remove_ads" entitlement if needed.
   Future<void> _onRemoveAdsPressed() async {
+    final l10n = AppLocalizations.of(context);
     try {
       await RevenueCatUI.presentPaywallIfNeeded("remove_ads");
     } catch (e) {
       AppLogger.warning('RevenueCat paywall presentation error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Could not load store offerings. Please check your connection and try again.',
+              l10n?.shopPaywallLoadError ?? 'Could not load store offerings. Please check your connection and try again.',
             ),
           ),
         );
@@ -65,6 +66,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
 
   /// Clean handler triggering real RevenueCat purchase restoration.
   Future<void> _onRestorePurchasesPressed() async {
+    final l10n = AppLocalizations.of(context);
     try {
       final customerInfo = await Purchases.restorePurchases();
       final isUnlocked =
@@ -74,8 +76,8 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
           SnackBar(
             content: Text(
               isUnlocked
-                  ? 'Purchases restored successfully!'
-                  : 'No active purchases found to restore.',
+                  ? (l10n?.shopRestoreSuccess ?? 'Purchases restored successfully!')
+                  : (l10n?.shopRestoreNothingFound ?? 'No active purchases found to restore.'),
             ),
           ),
         );
@@ -84,9 +86,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
       AppLogger.warning('Failed to restore purchases: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to restore purchases: $e'),
-          ),
+          SnackBar(content: Text(l10n?.shopRestoreFailed(e.toString()) ?? 'Failed to restore purchases: $e')),
         );
       }
     }
@@ -149,11 +149,11 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                   padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 32.0),
                   children: [
                     // Header Tagline
-                    _buildShopHeader(),
+                    _buildShopHeader(l10n),
                     const SizedBox(height: 20.0),
 
                     // Dedicated "Remove Ads" / Ad-Free Experience Card
-                    _buildRemoveAdsCard(context, isAdFree),
+                    _buildRemoveAdsCard(context, isAdFree, l10n),
                     const SizedBox(height: 18.0),
 
                     // Restore Purchases Action Link
@@ -166,9 +166,9 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                           size: 18.0,
                           color: Color(0xFFA7D1BC),
                         ),
-                        label: const Text(
-                          'Restore Purchases',
-                          style: TextStyle(
+                        label: Text(
+                          l10n?.shopRestorePurchases ?? 'Restore Purchases',
+                          style: const TextStyle(
                             fontFamily: 'Rubik',
                             fontSize: 13.0,
                             fontWeight: FontWeight.w700,
@@ -180,7 +180,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                     const SizedBox(height: 24.0),
 
                     // Coming Soon Teaser
-                    _buildComingSoonBanner(),
+                    _buildComingSoonBanner(l10n),
                   ],
                 ),
               ),
@@ -191,16 +191,13 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     );
   }
 
-  Widget _buildShopHeader() {
+  Widget _buildShopHeader(AppLocalizations? l10n) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 14.0),
       decoration: BoxDecoration(
         color: const Color(0xCC0F1E17),
         borderRadius: BorderRadius.circular(18.0),
-        border: Border.all(
-          color: const Color(0x3334D399),
-          width: 1.2,
-        ),
+        border: Border.all(color: const Color(0x3334D399), width: 1.2),
         boxShadow: const [
           BoxShadow(
             color: Color(0x55000000),
@@ -243,7 +240,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'PICO STORE',
+                  l10n?.shopHeaderBadge ?? 'CLASH ELEVEN STORE',
                   style: PicoTypography.labelPillSm.copyWith(
                     color: const Color(0xFFFCCB2B),
                     fontWeight: FontWeight.w900,
@@ -251,9 +248,9 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                   ),
                 ),
                 const SizedBox(height: 2.0),
-                const Text(
-                  'Power up your prediction experience',
-                  style: TextStyle(
+                Text(
+                  l10n?.shopHeaderTagline ?? 'Power up your prediction experience',
+                  style: const TextStyle(
                     fontFamily: 'Rubik',
                     fontSize: 13.0,
                     color: Colors.white,
@@ -268,22 +265,16 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     );
   }
 
-  Widget _buildRemoveAdsCard(BuildContext context, bool isAdFree) {
+  Widget _buildRemoveAdsCard(BuildContext context, bool isAdFree, AppLocalizations? l10n) {
     return Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF132B20),
-            Color(0xFF0B1913),
-          ],
+          colors: [Color(0xFF132B20), Color(0xFF0B1913)],
         ),
         borderRadius: BorderRadius.circular(22.0),
-        border: Border.all(
-          color: const Color(0x4D34D399),
-          width: 1.5,
-        ),
+        border: Border.all(color: const Color(0x4D34D399), width: 1.5),
         boxShadow: const [
           BoxShadow(
             color: Color(0x80000000),
@@ -306,25 +297,34 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10.0,
+                  vertical: 4.0,
+                ),
                 decoration: BoxDecoration(
                   color: isAdFree
                       ? const Color(0xFF10B981).withValues(alpha: 0.2)
                       : const Color(0xFFF59E0B).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10.0),
                   border: Border.all(
-                    color: isAdFree ? const Color(0xFF10B981) : const Color(0xFFF59E0B),
+                    color: isAdFree
+                        ? const Color(0xFF10B981)
+                        : const Color(0xFFF59E0B),
                     width: 1.2,
                   ),
                 ),
                 child: Text(
-                  isAdFree ? 'ACTIVE • UNLOCKED' : 'LIFETIME PASS',
+                  isAdFree
+                      ? (l10n?.shopAdFreeActiveBadge ?? 'ACTIVE • UNLOCKED')
+                      : (l10n?.shopAdFreeLockedBadge ?? 'LIFETIME PASS'),
                   style: TextStyle(
                     fontFamily: 'Rubik',
                     fontSize: 10.5,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.6,
-                    color: isAdFree ? const Color(0xFF34D399) : const Color(0xFFFCD34D),
+                    color: isAdFree
+                        ? const Color(0xFF34D399)
+                        : const Color(0xFFFCD34D),
                   ),
                 ),
               ),
@@ -369,9 +369,9 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
           const SizedBox(height: 14.0),
 
           // Title
-          const Text(
-            'Remove Ads',
-            style: TextStyle(
+          Text(
+            l10n?.shopRemoveAdsTitle ?? 'Remove Ads',
+            style: const TextStyle(
               fontFamily: 'Rubik',
               fontSize: 22.0,
               fontWeight: FontWeight.w900,
@@ -382,9 +382,9 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
           const SizedBox(height: 6.0),
 
           // Description
-          const Text(
-            'Enjoy an uninterrupted match-tracking experience with zero ads.',
-            style: TextStyle(
+          Text(
+            l10n?.shopRemoveAdsDescription ?? 'Enjoy an uninterrupted match-tracking experience with zero ads.',
+            style: const TextStyle(
               fontFamily: 'Rubik',
               fontSize: 13.5,
               height: 1.4,
@@ -395,13 +395,13 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
           const SizedBox(height: 18.0),
 
           // Perks list
-          _buildPerkRow('Zero banner ads on Home & Matches'),
+          _buildPerkRow(l10n?.shopPerkNoBannerAds ?? 'Zero banner ads on Home & Matches'),
           const SizedBox(height: 8.0),
-          _buildPerkRow('Zero interstitial video ads'),
+          _buildPerkRow(l10n?.shopPerkNoVideoAds ?? 'Zero interstitial video ads'),
           const SizedBox(height: 8.0),
-          _buildPerkRow('Instant prediction screen transitions'),
+          _buildPerkRow(l10n?.shopPerkFastTransitions ?? 'Instant prediction screen transitions'),
           const SizedBox(height: 8.0),
-          _buildPerkRow('One-time unlock • Keep forever'),
+          _buildPerkRow(l10n?.shopPerkLifetime ?? 'One-time unlock • Keep forever'),
           const SizedBox(height: 22.0),
 
           // Action Button
@@ -412,24 +412,21 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
               decoration: BoxDecoration(
                 color: const Color(0xFF0F3D27),
                 borderRadius: BorderRadius.circular(14.0),
-                border: Border.all(
-                  color: const Color(0xFF34D399),
-                  width: 1.5,
-                ),
+                border: Border.all(color: const Color(0xFF34D399), width: 1.5),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.check_circle_rounded,
                     color: Color(0xFF34D399),
                     size: 20.0,
                   ),
-                  SizedBox(width: 8.0),
+                  const SizedBox(width: 8.0),
                   Flexible(
                     child: Text(
-                      'Ads Removed • Lifetime Unlocked',
-                      style: TextStyle(
+                      l10n?.shopAdsRemovedConfirm ?? 'Ads Removed • Lifetime Unlocked',
+                      style: const TextStyle(
                         fontFamily: 'Rubik',
                         fontSize: 13.5,
                         fontWeight: FontWeight.w900,
@@ -444,7 +441,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
           else
             GameButton.gold(
               key: const Key('remove_ads_action_button'),
-              text: 'Unlock Ad-Free • \$2.99',
+              text: l10n?.shopUnlockAdFreeButton ?? 'Unlock Ad-Free • \$5.99',
               textColor: const Color(0xFF3D1800),
               textShadowColor: Colors.transparent,
               onPressed: _onRemoveAdsPressed,
@@ -480,7 +477,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
     );
   }
 
-  Widget _buildComingSoonBanner() {
+  Widget _buildComingSoonBanner(AppLocalizations? l10n) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
       decoration: BoxDecoration(
@@ -506,13 +503,13 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
             ),
           ),
           const SizedBox(width: 12.0),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'MORE REWARDS COMING SOON',
-                  style: TextStyle(
+                  l10n?.shopComingSoonBadge ?? 'MORE REWARDS COMING SOON',
+                  style: const TextStyle(
                     fontFamily: 'Rubik',
                     fontSize: 11.0,
                     fontWeight: FontWeight.w800,
@@ -520,10 +517,10 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                     letterSpacing: 0.5,
                   ),
                 ),
-                SizedBox(height: 2.0),
+                const SizedBox(height: 2.0),
                 Text(
-                  'Exclusive mascot jerseys, division badges & league themes are currently in preparation.',
-                  style: TextStyle(
+                  l10n?.shopComingSoonBody ?? 'Exclusive mascot jerseys, division badges & league themes are currently in preparation.',
+                  style: const TextStyle(
                     fontFamily: 'Rubik',
                     fontSize: 11.5,
                     color: Color(0xFF94A3B8),

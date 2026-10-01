@@ -525,7 +525,9 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
       child: cleanUrl != null
           ? CachedNetworkImage(
               imageUrl: cleanUrl,
-              fit: BoxFit.contain,
+              fit: BoxFit.cover,
+              width: 56.0,
+              height: 56.0,
               placeholder: (context, url) => Center(
                 child: Text(
                   code,
